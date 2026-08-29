@@ -12,7 +12,6 @@
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
         }
-
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +19,6 @@
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
         }
-
         :root {
             --snow-white: #FFFFFF;
             --tech-blue: #2288ff;
@@ -37,7 +35,6 @@
             --normal-slow: 30s;
             --fast-speed: 10s;
         }
-
         @media (prefers-color-scheme: dark) {
             :root {
                 --card-bg: rgba(12, 16, 24, 0.92);
@@ -46,7 +43,6 @@
                 --card-shadow: 0 6px 24px rgba(34, 136, 255, 0.3);
             }
         }
-
         body {
             min-height: 100vh;
             min-height: 100dvh;
@@ -66,22 +62,19 @@
             user-select: none;
             -webkit-touch-callout: none;
         }
-
         @media (prefers-color-scheme: dark) {
             body {
                 background: linear-gradient(180deg, #02050a 0%, #081a36 40%, #102b4d 80%, #06101c 100%);
             }
         }
-
         @keyframes bodyFadeIn {
             to { opacity: 1; }
         }
-
         .outer-su7-title {
             font-size: 28px;
             font-weight: 900;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             background: linear-gradient(90deg, #ff0000,#ff8800,#ffff00,#00ff66,#00ccff,#9933ff,#ff0000);
             background-size: 700% 100%;
             -webkit-background-clip: text;
@@ -92,9 +85,27 @@
             z-index: 10;
             -webkit-font-smoothing: antialiased;
         }
-
         @keyframes logoRainbow {
             to { background-position: 700% 0; }
+        }
+
+        /* ========== 外链视频容器，宽度放大，不再和下方卡片同宽 ========== */
+        .external-video-wrap {
+            width: 100%;
+            max-width: 420px;
+            z-index:10;
+            margin-bottom:16px;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 4px 16px rgba(0,0,0,0.25);
+            animation: cardIn 0.8s ease-out forwards;
+            opacity:0;
+        }
+        .external-video-wrap video {
+            width:100%;
+            display:block;
+            object-fit:cover;
+            aspect-ratio: 16 / 9;
         }
 
         .bg-decoration {
@@ -107,7 +118,6 @@
             overflow: hidden;
             z-index: 1;
         }
-
         .tech-grid {
             position: absolute;
             inset: 0;
@@ -118,12 +128,10 @@
             opacity: 0.6;
             animation: gridPulse var(--normal-slow) ease-in-out infinite;
         }
-
         @keyframes gridPulse {
             0%,100% { opacity: 0.3; }
             50% { opacity: 0.7; }
         }
-
         .circuit-texture {
             position: absolute;
             inset: 0;
@@ -134,11 +142,9 @@
             opacity: 0.4;
             animation: circuitFlow var(--slow-speed) linear infinite;
         }
-
         @keyframes circuitFlow {
             to { background-position: 100px 100px; }
         }
-
         .hologram-scan {
             position: absolute;
             top: 0;
@@ -149,21 +155,18 @@
             animation: hologramScan var(--fast-speed) linear infinite;
             box-shadow: 0 0 6px rgba(34,136,255,0.4);
         }
-
         @keyframes hologramScan {
             0% { top: 0; opacity: 0; }
             10% { opacity: 1; }
             90% { opacity: 1; }
             100% { top: 100%; opacity: 0; }
         }
-
         .particle-layer {
             position: fixed;
             inset: 0;
             pointer-events: none;
             z-index: 999;
         }
-
         .text-particle {
             position: absolute;
             font-weight: 900;
@@ -172,7 +175,6 @@
             will-change: transform, opacity;
             -webkit-font-smoothing: antialiased;
         }
-
         .data-particle {
             position: absolute;
             width: 1.5px;
@@ -183,14 +185,12 @@
             animation: dataFlow var(--normal-slow) linear infinite;
             box-shadow: 0 0 3px var(--tech-blue);
         }
-
         @keyframes dataFlow {
             0% { transform: translateY(100vh) translateX(0); opacity: 0; }
             10% { opacity: 0.6; }
             90% { opacity: 0.6; }
             100% { transform: translateY(-100vh) translateX(15px); opacity: 0; }
         }
-
         @keyframes particleFloatUp {
             0% {
                 transform: translateY(0) rotate(0deg) scale(1);
@@ -201,7 +201,6 @@
                 opacity: 0;
             }
         }
-
         .tech-track {
             position: absolute;
             height: 1px;
@@ -210,17 +209,14 @@
             opacity: 0.4;
             will-change: transform;
         }
-
         .tech-track:nth-child(1) { top: 15%; width: 25%; animation-delay: 0s; }
         .tech-track:nth-child(2) { top: 32%; width: 40%; animation-delay: 2s; }
         .tech-track:nth-child(3) { top: 55%; width: 30%; animation-delay: 4s; }
         .tech-track:nth-child(4) { top: 72%; width: 45%; animation-delay: 6s; }
-
         @keyframes trackRun {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100vw); }
         }
-
         .snow-hill {
             position: absolute;
             bottom: 0;
@@ -230,11 +226,9 @@
             background: linear-gradient(180deg, transparent 0%, #FFFFFF 100%);
             opacity: 0.8;
         }
-
         @media (prefers-color-scheme: dark) {
             .snow-hill { opacity: 0.12; }
         }
-
         .snow-hill-2, .snow-hill-3 {
             position: absolute;
             bottom: 0;
@@ -242,14 +236,12 @@
             animation: hillSlowFloat var(--slow-speed) ease-in-out infinite alternate;
             opacity: 0.6;
         }
-
         .snow-hill-2 {
             left: -10%;
             width: 60%;
             height: 28%;
             background: #F8FAFF;
         }
-
         .snow-hill-3 {
             right: -5%;
             width: 50%;
@@ -258,16 +250,13 @@
             animation-direction: alternate-reverse;
             animation-duration: calc(var(--slow-speed) + 5s);
         }
-
         @media (prefers-color-scheme: dark) {
             .snow-hill-2, .snow-hill-3 { opacity: 0.1; }
         }
-
         @keyframes hillSlowFloat {
             from { transform: translateY(0); }
             to { transform: translateY(-8px); }
         }
-
         .moon {
             position: absolute;
             top: 8%;
@@ -280,7 +269,6 @@
             animation: moonGlow var(--normal-slow) ease-in-out infinite alternate, moonSlightMove var(--slow-speed) ease infinite;
             will-change: transform, box-shadow;
         }
-
         .moon::before {
             content: "";
             position: absolute;
@@ -290,11 +278,9 @@
             border-radius: 50%;
             will-change: transform;
         }
-
         @keyframes moonRaySpin {
             to { transform: rotate(360deg); }
         }
-
         @keyframes moonGlow {
             from {
                 box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
@@ -305,12 +291,10 @@
                 transform: scale(1.03);
             }
         }
-
         @keyframes moonSlightMove {
             0%,100% { transform: translate(0,0); }
             50% { transform: translate(-5px,4px); }
         }
-
         .star {
             position: absolute;
             width: 2.5px;
@@ -320,19 +304,16 @@
             animation: starTwinkle 5s ease-in-out infinite;
             will-change: opacity, transform;
         }
-
         .star:nth-child(1) { top: 12%; left: 18%; animation-delay: 0s; }
         .star:nth-child(2) { top: 22%; left: 38%; animation-delay: 1s; }
         .star:nth-child(3) { top: 8%; left: 58%; animation-delay: 2s; }
         .star:nth-child(4) { top: 28%; left: 78%; animation-delay: 3s; }
         .star:nth-child(5) { top: 18%; left: 8%; animation-delay: 4s; }
         .star:nth-child(6) { top: 32%; left: 28%; animation-delay: 5s; }
-
         @keyframes starTwinkle {
             0%, 100% { opacity: 0.2; transform: scale(0.8); }
             50% { opacity: 1; transform: scale(1.3); }
         }
-
         .snowflake {
             position: absolute;
             top: -10%;
@@ -343,13 +324,11 @@
             box-shadow: 0 0 3px rgba(255, 255, 255, 0.6);
             will-change: transform, opacity;
         }
-
         @keyframes snowfall {
             0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
             10%,90% { opacity: 0.7; }
             100% { transform: translateY(110vh) translateX(30px) rotate(360deg); opacity: 0; }
         }
-
         .sakura {
             position: absolute;
             top: -10%;
@@ -362,13 +341,11 @@
             box-shadow: 0 0 3px rgba(255, 183, 197, 0.6);
             will-change: transform, opacity;
         }
-
         @keyframes sakuraFall {
             0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
             10%,90% { opacity: 0.6; }
             100% { transform: translateY(110vh) translateX(-40px) rotate(360deg); opacity: 0; }
         }
-
         .su7-silhouette {
             position: absolute;
             bottom: 4%;
@@ -383,7 +360,6 @@
             overflow: hidden;
             will-change: transform, filter;
         }
-
         .su7-silhouette::after {
             content: "";
             position: absolute;
@@ -395,21 +371,17 @@
             animation: carScanLight var(--slow-speed) linear infinite 3s;
             will-change: left;
         }
-
         @keyframes carScanLight {
             to { left: 100%; }
         }
-
         @keyframes silhouetteFloat {
             from { transform: translateX(-50%) translateY(0); }
             to { transform: translateX(-50%) translateY(-6px); }
         }
-
         @keyframes carBreathLight {
             0%,100% { filter: drop-shadow(0 0 2px rgba(204,0,0,0.2)); }
             50% { filter: drop-shadow(0 0 8px rgba(204,0,0,0.4)); }
         }
-
         .ambient-light {
             position: absolute;
             bottom: 15px;
@@ -423,16 +395,13 @@
             box-shadow: 0 0 10px rgba(204, 0, 0, 0.5);
             will-change: background-position, box-shadow;
         }
-
         @keyframes ambientFlow {
             to { background-position: 200% 0; }
         }
-
         @keyframes lightPulse {
             0%,100% { box-shadow: 0 0 8px rgba(204, 0, 0, 0.3); }
             50% { box-shadow: 0 0 18px rgba(204, 0, 0, 0.6); }
         }
-
         .app-jump-container {
             background: var(--card-bg-solid);
             backdrop-filter: blur(12px);
@@ -451,7 +420,6 @@
             will-change: transform, opacity;
             animation: cardIn 0.8s ease-out forwards, cardFloat var(--normal-slow) ease-in-out infinite 1s;
         }
-
         .app-jump-container::before {
             content: '';
             position: absolute;
@@ -469,17 +437,14 @@
             animation: borderMarquee var(--slow-speed) linear infinite, borderPulse 3s ease-in-out infinite;
             z-index: -1;
         }
-
         @keyframes borderMarquee {
             0% { background-position: 0% 50%; }
             100% { background-position: 400% 50%; }
         }
-
         @keyframes borderPulse {
             0%,100% { opacity: 0.7; }
             50% { opacity: 1; }
         }
-
         .app-jump-container::after {
             content: "";
             position: absolute;
@@ -492,28 +457,23 @@
             will-change: left;
             z-index: -1;
         }
-
         @keyframes cardShine {
             to { left: 150%; }
         }
-
         @keyframes cardIn {
             0% { opacity: 0; transform: translateY(30px) scale(0.95); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-
         @keyframes cardFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
-
         .plate-wrap {
             width: 100%;
             display: flex;
             justify-content: center;
             margin-bottom: 18px;
         }
-
         .car-plate {
             background: linear-gradient(180deg, #0077FF 0%, #0055CC 100%);
             border: 3px solid #C8A951;
@@ -525,7 +485,6 @@
             max-width: 180px;
             padding: 6px 10px;
         }
-
         .car-plate::before {
             content: '';
             position: absolute;
@@ -533,7 +492,6 @@
             border: 1px solid rgba(255,255,255,0.25);
             border-radius: 3px;
         }
-
         .plate-text {
             font-size: 14px;
             font-weight: bold;
@@ -541,7 +499,6 @@
             letter-spacing: 0.8px;
             -webkit-font-smoothing: antialiased;
         }
-
         .title {
             font-size: 20px;
             font-weight: 700;
@@ -556,7 +513,6 @@
             text-shadow: 0 0 6px rgba(204,0,0,0.25);
             -webkit-font-smoothing: antialiased;
         }
-
         .title i {
             font-size: 18px;
             line-height: 1;
@@ -564,37 +520,31 @@
             display: inline-flex;
             align-items: center;
         }
-
         .title-text-wrap {
             display: inline-flex;
             overflow: hidden;
             align-items: center;
             line-height: 1;
         }
-
         .title-text-wrap span {
             opacity: 0;
             animation: wordFadeUp 0.5s ease-out forwards;
             line-height: 1;
         }
-
         @keyframes wordFadeUp {
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes carIconDrive {
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(3px); }
         }
-
         .btn-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-bottom: 20px;
         }
-
         .app-jump-btn {
             position: relative;
             width: 100%;
@@ -621,7 +571,6 @@
             will-change: transform, box-shadow;
             -webkit-font-smoothing: antialiased;
         }
-
         .app-jump-btn i {
             font-size: 15px;
             display: inline-flex;
@@ -632,11 +581,9 @@
             width: 20px;
             text-align: center;
         }
-
         @keyframes rainbowRun {
             to { background-position: 600% 0; }
         }
-
         .app-jump-btn:nth-child(1) { animation-delay: 0.4s, 0s; }
         .app-jump-btn:nth-child(2) { animation-delay: 0.5s, 0s; }
         .app-jump-btn:nth-child(3) { animation-delay: 0.6s, 0s; }
@@ -644,12 +591,10 @@
         .app-jump-btn:nth-child(5) { animation-delay: 0.8s, 0s; }
         .app-jump-btn:nth-child(6) { animation-delay: 0.9s, 0s; }
         .app-jump-btn:nth-child(7) { animation-delay: 1.0s, 0s; }
-
         @keyframes btnSlide {
             0% { opacity: 0; transform: translateX(-20px); }
             100% { opacity: 1; transform: translateX(0); }
         }
-
         .app-jump-btn::before {
             content: '';
             position: absolute;
@@ -661,7 +606,6 @@
             transition: left 0.4s ease;
             will-change: left;
         }
-
         .app-jump-btn::after {
             content: '';
             position: absolute;
@@ -672,28 +616,23 @@
             opacity: 0;
             will-change: transform, opacity;
         }
-
         .app-jump-btn:active:not(:disabled)::after {
             animation: energyBurst 0.5s ease-out;
         }
-
         @keyframes energyBurst {
             0% { transform: scale(0); opacity: 1; }
             50% { transform: scale(2); opacity: 0.4; }
             100% { transform: scale(2.5); opacity: 0; }
         }
-
         .app-jump-btn:hover:not(:disabled)::before { left: 100%; }
         .app-jump-btn:hover:not(:disabled) {
             transform: translateY(-2px) scale(1.01);
             box-shadow: 0 6px 20px rgba(255, 80, 140, 0.35), 0 0 25px rgba(0, 180, 255, 0.2);
         }
-
         .app-jump-btn:active:not(:disabled) {
             transform: scale(0.98) translateY(0);
             box-shadow: 0 2px 8px rgba(255, 60, 120, 0.2);
         }
-
         .app-jump-btn:disabled {
             background: #777 !important;
             animation: none !important;
@@ -701,7 +640,6 @@
             transform: none !important;
             box-shadow: none !important;
         }
-
         .tips {
             font-size: 11px;
             color: var(--deep-red);
@@ -712,11 +650,9 @@
             animation: fadeText 0.8s ease-out 0.8s forwards;
             -webkit-font-smoothing: antialiased;
         }
-
         @keyframes fadeText {
             to { opacity: 1; }
         }
-
         /* 弱动效适配（无障碍/低配设备） */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -728,7 +664,6 @@
                 display: none !important;
             }
         }
-
         @media (max-width: 360px) {
             .outer-su7-title { font-size: 22px; margin-bottom: 12px; }
             .app-jump-container { padding: 14px 10px; max-width: 220px; }
@@ -739,40 +674,42 @@
             .car-plate { max-width: 160px; }
             .plate-text { font-size: 13px; }
             .su7-silhouette { height: 120px; }
+            .external-video-wrap { max-width:100%; }
         }
     </style>
 </head>
 <body>
     <div class="particle-layer" id="particleLayer"></div>
-
     <div class="bg-decoration">
         <div class="tech-grid"></div>
         <div class="circuit-texture"></div>
         <div class="hologram-scan"></div>
-
         <div class="tech-track"></div>
         <div class="tech-track"></div>
         <div class="tech-track"></div>
         <div class="tech-track"></div>
-
         <div class="snow-hill"></div>
         <div class="snow-hill-2"></div>
         <div class="snow-hill-3"></div>
-
         <div class="moon"></div>
-
         <div class="star"></div>
         <div class="star"></div>
         <div class="star"></div>
         <div class="star"></div>
         <div class="star"></div>
         <div class="star"></div>
-
         <div class="su7-silhouette"></div>
         <div class="ambient-light"></div>
     </div>
 
     <div class="outer-su7-title">Xiaomi SU7 Pro</div>
+
+    <!-- ====== 视频容器，修改video的src填你的外链mp4地址 ====== -->
+    <div class="external-video-wrap">
+        <video src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4" autoplay loop playsinline>
+            你的浏览器不支持视频
+        </video>
+    </div>
 
     <div class="app-jump-container">
         <div class="plate-wrap">
@@ -780,7 +717,6 @@
                 <div class="plate-text">苏FA36165</div>
             </div>
         </div>
-
         <h2 class="title">
             <i class="fa-solid fa-car-side"></i>
             <div class="title-text-wrap">
@@ -794,7 +730,6 @@
                 <span style="animation-delay:1.1s">用</span>
             </div>
         </h2>
-
         <div class="btn-group">
             <button class="app-jump-btn" data-app="custom2" aria-label="打开A➕系统">
                 <i class="fa-solid fa-plus"></i>打开A➕系统
@@ -820,19 +755,17 @@
         </div>
         <p class="tips" id="tips">苏FA36165 · 私人应用快速跳转工具</p>
     </div>
-
     <script>
         // ========== 配置区（新增APP只在这里加，不用改其他逻辑） ==========
         const APP_CONFIG_MAP = {
             custom1: { scheme: 'anywhere://open?sid=0444', timeout: 1800, name: 'LX Music', icon: 'fa-music' },
             custom2: { scheme: 'anywhere://open?sid=2848', timeout: 1800, name: 'A+', icon: 'fa-plus' },
-            custom7: { scheme: 'anywhere://open?sid=5395', timeout: 1800, name: '汽水音乐', icon: 'fa-plus' },
+            custom7: { scheme: 'anywhere://open?sid=5395', timeout: 1800, name: '汽水音乐', icon: 'fa-music' },
             custom3: { scheme: 'anywhere://open?sid=0451', timeout: 1800, name: 'YouTube', icon: 'fa-youtube' },
             custom4: { scheme: 'anywhere://open?sid=2305', timeout: 1800, name: 'FlClash', icon: 'fa-globe' },
             custom5: { scheme: 'anywhere://open?sid=7535', timeout: 1800, name: '高德地图', icon: 'fa-map-location-dot' },
             custom6: { scheme: 'anywhere://open?sid=5181', timeout: 1800, name: '抖音', icon: 'fa-tiktok' }
         };
-
         // 粒子常量
         const CONFIG = {
             PARTICLE_TEXT_LIST: ["XIAOMI SU7 Pro", "苏FA36165"],
@@ -842,35 +775,29 @@
             SAKURA_COUNT: 12,
             DATA_PARTICLE_COUNT: 10
         };
-
         const particleLayer = document.getElementById('particleLayer');
         const bgDecoration = document.querySelector('.bg-decoration');
-
         // 点击文字粒子
         function createSu7Particle(x, y) {
             for (let i = 0; i < CONFIG.PARTICLE_COUNT_PER_CLICK; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'text-particle';
                 particle.innerText = CONFIG.PARTICLE_TEXT_LIST[Math.floor(Math.random() * CONFIG.PARTICLE_TEXT_LIST.length)];
-
                 const randomSize = Math.floor(Math.random() * 8) + 12;
                 const colorArr = ['#cc0000','#ff3366','#2288ff','#ffdd00','#ffffff'];
                 const randomColor = colorArr[Math.floor(Math.random() * colorArr.length)];
                 const randomDuration = (Math.random() * 3 + CONFIG.PARTICLE_ANIM_DURATION).toFixed(2);
                 const offsetX = (Math.random() - 0.5) * 100;
-
                 particle.style.fontSize = `${randomSize}px`;
                 particle.style.color = randomColor;
                 particle.style.textShadow = `0 0 5px ${randomColor}`;
                 particle.style.left = `${x + offsetX}px`;
                 particle.style.top = `${y}px`;
                 particle.style.animation = `particleFloatUp ${randomDuration}s ease-out forwards`;
-
                 particleLayer.appendChild(particle);
                 setTimeout(() => particleLayer.removeChild(particle), randomDuration * 1000);
             }
         }
-
         // 生成雪花
         function createSnowflakes() {
             for (let i = 0; i < CONFIG.SNOWFLAKE_COUNT; i++) {
@@ -884,7 +811,6 @@
                 bgDecoration.appendChild(el);
             }
         }
-
         // 樱花花瓣
         function createSakura() {
             for (let i = 0; i < CONFIG.SAKURA_COUNT; i++) {
@@ -899,7 +825,6 @@
                 bgDecoration.appendChild(el);
             }
         }
-
         // 数据流粒子
         function createDataParticles() {
             for (let i = 0; i < CONFIG.DATA_PARTICLE_COUNT; i++) {
@@ -911,26 +836,21 @@
                 bgDecoration.appendChild(el);
             }
         }
-
         // 应用跳转逻辑
         function jumpToApp(appKey) {
             const cfg = APP_CONFIG_MAP[appKey];
             if (!cfg) return;
-
             const btn = document.querySelector(`[data-app="${appKey}"]`);
             const tips = document.getElementById('tips');
             if (!btn || btn.disabled) return;
-
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>正在打开${cfg.name}...`;
             tips.textContent = `若长时间未跳转，请检查是否安装${cfg.name}`;
-
             const resetTimer = setTimeout(() => {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-brands ${cfg.icon}"></i>打开${cfg.name}`;
                 tips.textContent = '苏FA36165 · 私人应用快速跳转工具';
             }, cfg.timeout);
-
             try {
                 location.href = cfg.scheme;
             } catch (e) {
@@ -942,19 +862,16 @@
                 setTimeout(() => iframe.remove(), 100);
             }
         }
-
         // 页面载入初始化
         window.addEventListener('load', () => {
             createSnowflakes();
             createSakura();
             createDataParticles();
         });
-
         // 全局点击粒子效果
         document.addEventListener('click', e => {
             createSu7Particle(e.clientX, e.clientY);
         });
-
         // 绑定按钮事件
         document.querySelectorAll('.app-jump-btn').forEach(btn => {
             btn.addEventListener('click', e => {
@@ -962,7 +879,6 @@
                 jumpToApp(btn.dataset.app);
             });
         });
-
         // 可选：如果你需要禁止长按菜单再打开下面这行，默认注释
         // document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
