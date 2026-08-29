@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <!-- 手机浏览器核心适配meta，禁止缩放、适配刘海屏 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0f2847">
     <meta name="format-detection" content="telephone=no">
@@ -54,7 +55,8 @@
             padding: 16px;
             background: linear-gradient(180deg, #061428 0%, #184075 35%, #74b8ff 75%, #ffffff 100%);
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden; /* 禁止横向滚动 */
+            overflow-y: auto;
             animation: bodyFadeIn 0.8s ease-out forwards;
             opacity: 0;
             will-change: opacity;
@@ -71,7 +73,7 @@
             to { opacity: 1; }
         }
         .outer-su7-title {
-            font-size: 28px;
+            font-size: clamp(22px,6vw,28px);
             font-weight: 900;
             text-align: center;
             margin-bottom: 12px;
@@ -89,10 +91,10 @@
             to { background-position: 700% 0; }
         }
 
-        /* ========== 外链视频容器，宽度放大，不再和下方卡片同宽 ========== */
+        /* ========== 视频容器：手机适配，大屏最大420px，小屏自适应100% ========== */
         .external-video-wrap {
             width: 100%;
-            max-width: 420px;
+            max-width: min(420px, calc(100vw - 32px));
             z-index:10;
             margin-bottom:16px;
             border-radius:16px;
@@ -106,6 +108,8 @@
             display:block;
             object-fit:cover;
             aspect-ratio: 16 / 9;
+            /* 手机浏览器关键：不自动全屏 */
+            -webkit-playsinline: true;
         }
 
         .bg-decoration {
@@ -410,7 +414,7 @@
                 background: var(--card-bg);
             }
             width: 100%;
-            max-width: 250px;
+            max-width: min(250px, calc(100vw - 32px));
             padding: 16px 12px;
             border-radius: 24px;
             box-shadow: var(--card-shadow);
@@ -563,7 +567,7 @@
             cursor: pointer;
             overflow: hidden;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* 消除手机点击高亮 */
             box-shadow: 0 3px 12px rgba(255, 60, 120, 0.25);
             animation: btnSlide 0.6s ease-out forwards, rainbowRun var(--slow-speed) linear infinite;
             opacity: 0;
@@ -653,6 +657,21 @@
         @keyframes fadeText {
             to { opacity: 1; }
         }
+        /* ========== 小手机屏幕适配 ========== */
+        @media (max-width: 360px) {
+            body {
+                padding:12px;
+            }
+            .outer-su7-title { font-size: 22px; margin-bottom: 12px; }
+            .app-jump-container { padding: 14px 10px; }
+            .title { font-size: 18px; }
+            .app-jump-btn { height: 44px; font-size: 12px; gap: 5px; }
+            .app-jump-btn i { font-size: 13px; }
+            .text-particle { font-size: 9px !important; }
+            .car-plate { max-width: 160px; }
+            .plate-text { font-size: 13px; }
+            .su7-silhouette { height: 120px; }
+        }
         /* 弱动效适配（无障碍/低配设备） */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -663,18 +682,6 @@
             .circuit-texture, .hologram-scan, .data-particle, .snowflake, .sakura, .text-particle {
                 display: none !important;
             }
-        }
-        @media (max-width: 360px) {
-            .outer-su7-title { font-size: 22px; margin-bottom: 12px; }
-            .app-jump-container { padding: 14px 10px; max-width: 220px; }
-            .title { font-size: 18px; }
-            .app-jump-btn { height: 44px; font-size: 12px; gap: 5px; }
-            .app-jump-btn i { font-size: 13px; }
-            .text-particle { font-size: 9px !important; }
-            .car-plate { max-width: 160px; }
-            .plate-text { font-size: 13px; }
-            .su7-silhouette { height: 120px; }
-            .external-video-wrap { max-width:100%; }
         }
     </style>
 </head>
@@ -704,9 +711,9 @@
 
     <div class="outer-su7-title">Xiaomi SU7 Pro</div>
 
-    <!-- ====== 视频容器，修改video的src填你的外链mp4地址 ====== -->
+    <!-- ====== 视频容器：自动播放，无静音，playsinline手机不跳全屏 ====== -->
     <div class="external-video-wrap">
-        <video src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4" autoplay loop playsinline>
+        <video src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4" autoplay loop playsinline webkit-playsinline>
             你的浏览器不支持视频
         </video>
     </div>
@@ -879,8 +886,6 @@
                 jumpToApp(btn.dataset.app);
             });
         });
-        // 可选：如果你需要禁止长按菜单再打开下面这行，默认注释
-        // document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
