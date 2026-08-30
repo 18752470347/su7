@@ -265,8 +265,8 @@ body {
     animation: gradientShift 6s ease-in-out infinite;
 }
 .avatar-subtitle {
-    font-weight: 700;
     font-size: 12px;
+    font-weight: 900;
     background: linear-gradient(90deg,#ff6b9d,#c44569,#54a0ff);
     -webkit-background-clip: text;
     background-clip: text;
@@ -274,6 +274,7 @@ body {
     white-space: nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    letter-spacing: 0.7px;
 }
 /* ========== 右侧旧图片车牌保留原样 ========== */
 .car-plate {
@@ -551,6 +552,10 @@ body {
         font-size: 11px;
         letter-spacing: 0.5px;
     }
+    .avatar-subtitle {
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
     .new-energy-plate{
         font-size:15px;
         padding:4px 10px;
@@ -567,6 +572,10 @@ body {
         height: 50px;
     }
     .avatar-name-bg {
+        font-size: 10px;
+        letter-spacing: 0.4px;
+    }
+    .avatar-subtitle {
         font-size: 10px;
         letter-spacing: 0.4px;
     }
@@ -800,4 +809,27 @@ document.addEventListener("click", e => {
 document.querySelectorAll(".app-jump-btn").forEach(btn => {
     btn.addEventListener("click", e => {
         e.stopPropagation();
-        jumpToApp(
+        jumpToApp(btn.dataset.app);
+    });
+});
+const mainVideo = document.getElementById("mainVideo");
+const videoWrap = document.getElementById("videoWrap");
+const videoState = document.getElementById("videoState");
+function toggleVideo() {
+    if (mainVideo.paused) {
+        mainVideo.play().catch(() => {});
+        videoWrap.classList.add("playing");
+    } else {
+        mainVideo.pause();
+        videoWrap.classList.remove("playing");
+    }
+}
+videoWrap.addEventListener("click", e => {
+    e.stopPropagation();
+    toggleVideo();
+});
+mainVideo.addEventListener("play", () => videoWrap.classList.add("playing"));
+mainVideo.addEventListener("pause", () => videoWrap.classList.remove("playing"));
+</script>
+</body>
+</html>
