@@ -6,9 +6,6 @@
 <meta name="theme-color" content="#EFF2FA">
 <meta name="format-detection" content="telephone=no">
 <title>苏FA36165 | 应用快速启动</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 html {
@@ -26,11 +23,22 @@ html {
     --acc-h: #3395FF;
     --red: #FF3B30;
     --sakura: #FFAFC2;
-    --glass: rgba(255,255,255,0.55);
-    --glass-line: rgba(255,255,255,0.75);
+
+    /* 液态玻璃主变量 */
+    --glass-bg: rgba(255,255,255,0.34);
+    --glass-bg-strong: rgba(255,255,255,0.46);
+    --glass-border: rgba(255,255,255,0.72);
+    --glass-border-soft: rgba(255,255,255,0.38);
+    --glass-highlight: rgba(255,255,255,0.85);
+    --glass-inner-shine: rgba(255,255,255,0.22);
+    --glass-edge-glow: rgba(120,145,255,0.35);
+    --glass-shadow-out: 0 18px 45px rgba(40,55,90,0.14), 0 2px 10px rgba(40,55,90,0.06);
+    --glass-shadow-in: inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(255,255,255,0.15);
+    --blur-strong: blur(32px) saturate(200%) contrast(105%);
     --hairline: rgba(60,70,100,0.10);
-    --shadow: 0 24px 60px rgba(40,55,90,0.16), 0 2px 10px rgba(40,55,90,0.06);
-    --blur: blur(28px) saturate(180%);
+    --shadow: var(--glass-shadow-out);
+    --blur: var(--blur-strong);
+
     --slow-speed: 45s;
     --normal-slow: 30s;
     --disp: -apple-system, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
@@ -68,7 +76,24 @@ body {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
-/* ================= 舞台布局 ================= */
+
+.toast{
+    position: fixed;
+    left:50%;
+    bottom:calc(40px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index:9999;
+    background:rgba(0,0,0,0.72);
+    color:#fff;
+    padding:10px 20px;
+    border-radius:12px;
+    font-size:14px;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.24s ease;
+}
+.toast.show{opacity:1;}
+
 .stage {
     position: relative;
     z-index: 2;
@@ -80,16 +105,19 @@ body {
     flex-direction: column;
     align-items: center;
 }
-/* ================= 视频容器 ================= */
+
 .external-video-wrap {
     position: relative;
     width: 100%;
     max-width: min(460px, calc(100vw - 32px));
     margin-bottom: 24px;
     border-radius: 26px;
-    padding: 2px;
-    background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(255,255,255,0.35));
-    box-shadow: var(--shadow), inset 0 0 0 1px var(--hairline);
+    padding: 3px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.28));
+    box-shadow:
+        var(--glass-shadow-out),
+        inset 0 0 0 1px var(--hairline),
+        0 0 0 1px rgba(255,255,255,0.6);
     cursor: pointer;
     animation: cardIn 0.8s ease-out forwards;
     opacity: 0;
@@ -132,18 +160,18 @@ body {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.72);
 }
-/* ================= 应用玻璃卡片 ================= */
+
 .app-jump-container {
     position: relative;
     width: 100%;
     max-width: min(430px, calc(100vw - 32px));
     padding: 26px 20px 22px;
     border-radius: 30px;
-    background: var(--glass);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-line);
-    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-strong);
+    -webkit-backdrop-filter: var(--blur-strong);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow-out), var(--glass-shadow-in);
     overflow: hidden;
     animation: cardIn 0.8s ease-out 0.15s forwards;
     opacity: 0;
@@ -152,22 +180,35 @@ body {
     content: "";
     position: absolute;
     top: 0;
-    left: 8%;
-    right: 8%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
-    z-index: 1;
+    left: 6%;
+    right: 6%;
+    height: 1.2px;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+    z-index: 2;
 }
-@keyframes cardIn { 0% { opacity: 0; transform: translateY(24px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-/* 头像+车牌区域：头像左对齐，车牌右对齐 */
+.app-jump-container .noise{
+    position:absolute;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    opacity:0.35;
+    pointer-events:none;
+    z-index:1;
+}
+@keyframes cardIn {
+    0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .plate-wrap {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
     margin-bottom: 18px;
+    z-index:2;
 }
-/* 头像容器：正圆形，宽高相等 */
+
 .avatar-box {
     position: relative;
     width: 64px;
@@ -177,6 +218,7 @@ body {
     flex-shrink: 0;
     border-radius: 50%;
     overflow: visible;
+    z-index:2;
 }
 .avatar-img {
     width: 100%;
@@ -194,8 +236,9 @@ body {
     color: #FFD700;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
     z-index: 3;
+    transform: rotate(-35deg);
 }
-/* 头像后方右侧渐变文字：刘茜美子 · 去有风的地方遇见你【已缩小字号】 */
+
 .avatar-name-bg {
     position: absolute;
     left: 72px;
@@ -213,7 +256,7 @@ body {
     z-index: 2;
     animation: gradientShift 6s ease-in-out infinite;
 }
-/* 头像下方渐变文字 */
+
 .avatar-subtitle {
     width: 100%;
     text-align: center;
@@ -226,8 +269,10 @@ body {
     background-clip: text;
     color: transparent;
     white-space: nowrap;
+    position:relative;
+    z-index:2;
 }
-/* 新能源绿色车牌【已缩小优化】 */
+
 .car-plate {
     position: relative;
     width: auto;
@@ -240,6 +285,16 @@ body {
     text-align: center;
     flex-shrink: 0;
     margin-left: auto;
+    cursor: pointer;
+    transition:transform 0.18s ease,box-shadow 0.18s ease;
+    z-index:2;
+}
+.car-plate:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,120,80,0.32);
+}
+.car-plate:active{
+    transform: scale(0.97);
 }
 .car-plate::before {
     content: "";
@@ -258,12 +313,14 @@ body {
     text-shadow: none;
     -webkit-font-smoothing: antialiased;
 }
-/* ================= 按钮组 ================= */
+
 .btn-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-bottom: 20px;
+    position:relative;
+    z-index:2;
 }
 .app-jump-btn {
     position: relative;
@@ -273,12 +330,14 @@ body {
     display: flex;
     align-items: center;
     gap: 13px;
-    background: rgba(255,255,255,0.50);
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border: 1px solid rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.24);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.56);
     border-radius: 18px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.82),
+        0 4px 14px rgba(40,55,90,0.08);
     color: var(--t1);
     font-family: var(--body);
     font-size: 14.5px;
@@ -309,27 +368,30 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
-    background: color-mix(in srgb, var(--ic) 16%, #FFFFFF);
+    font-size: 18px;
+    background: color-mix(in srgb, var(--ic) 18%, #FFFFFF);
     color: var(--ic);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 2px 6px rgba(40,55,90,0.10);
-    transition: transform 0.22s, background 0.22s;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 8px rgba(40,55,90,0.12);
+    transition: transform 0.22s, background 0.22s, filter 0.22s;
+}
+.app-jump-btn .btn-ic i{
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.08));
 }
 .app-jump-btn .btn-label { flex: 1 1 auto; }
 .app-jump-btn .btn-arrow {
     flex: 0 0 auto;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--t3);
     opacity: 0.6;
     transition: transform 0.22s, opacity 0.22s;
 }
 .app-jump-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.78);
+    background: rgba(255,255,255,0.48);
     border-color: color-mix(in srgb, var(--ic) 45%, #FFFFFF);
     transform: translateY(-2px);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 26px rgba(40,55,90,0.16);
 }
-.app-jump-btn:hover:not(:disabled) .btn-ic { transform: scale(1.07); }
+.app-jump-btn:hover:not(:disabled) .btn-ic { transform: scale(1.08); }
 .app-jump-btn:hover:not(:disabled) .btn-arrow { transform: translateX(3px); opacity: 1; }
 .app-jump-btn:active:not(:disabled) { transform: scale(0.985); }
 .app-jump-btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
@@ -343,7 +405,7 @@ body {
     pointer-events: none;
 }
 @keyframes energyBurst { 0% { opacity: 1; transform: scale(0.2); } 100% { opacity: 0; transform: scale(2.2); } }
-/* 提示 */
+
 .tips {
     font-size: 11.5px;
     color: var(--t3);
@@ -353,9 +415,11 @@ body {
     font-weight: 500;
     opacity: 0;
     animation: fadeText 0.8s ease-out 0.9s forwards;
+    position:relative;
+    z-index:2;
 }
 @keyframes fadeText { to { opacity: 1; } }
-/* ================= 背景装饰 ================= */
+
 .bg-decoration {
     position: absolute;
     width: 100%;
@@ -406,7 +470,7 @@ body {
     animation: haloPulse 14s ease-in-out infinite alternate;
 }
 @keyframes haloPulse { from { opacity: 0.75; } to { opacity: 1; } }
-/* ================= 粒子 ================= */
+
 .particle-layer {
     position: fixed;
     inset: 0;
@@ -469,7 +533,7 @@ body {
     50%  { transform: translate3d(var(--sway, 0px), 52vh, 0) rotate(190deg); }
     100% { transform: translate3d(calc(var(--sway, 0px) * -1), 116vh, 0) rotate(360deg); opacity: 0; }
 }
-/* ================= 深色模式 ================= */
+
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-top: #1B2030;
@@ -480,25 +544,48 @@ body {
         --acc: #0A84FF;
         --acc-h: #409CFF;
         --sakura: #FF8FB0;
-        --glass: rgba(32,36,50,0.55);
-        --glass-line: rgba(255,255,255,0.16);
+
+        --glass-bg: rgba(40,44,60,0.28);
+        --glass-bg-strong: rgba(40,44,60,0.38);
+        --glass-border: rgba(255,255,255,0.14);
+        --glass-border-soft: rgba(255,255,255,0.08);
+        --glass-highlight: rgba(255,255,255,0.32);
+        --glass-inner-shine: rgba(255,255,255,0.14);
+        --glass-edge-glow: rgba(120,145,255,0.22);
+        --glass-shadow-out: 0 22px 55px rgba(0,0,0,0.45), 0 2px 12px rgba(0,0,0,0.18);
+        --glass-shadow-in: inset 0 1px 0 rgba(255,255,255,0.08);
+        --blur-strong: blur(32px) saturate(190%) contrast(105%);
         --hairline: rgba(255,255,255,0.10);
-        --shadow: 0 24px 60px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.2);
-        --blur: blur(28px) saturate(170%);
+        --shadow: var(--glass-shadow-out);
+        --blur: var(--blur-strong);
     }
     .blob-a { background: radial-gradient(circle, rgba(70,100,190,0.55), rgba(70,100,190,0) 68%); }
     .blob-b { background: radial-gradient(circle, rgba(190,90,140,0.5), rgba(190,90,140,0) 68%); }
     .blob-c { background: radial-gradient(circle, rgba(60,150,130,0.5), rgba(60,150,130,0) 68%); }
     .blob-d { background: radial-gradient(circle, rgba(110,95,180,0.5), rgba(110,95,180,0) 68%); }
     .halo { background: radial-gradient(58% 42% at 50% 0%, rgba(120,150,220,0.35), transparent 70%); }
-    .app-jump-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
-    .app-jump-btn:hover:not(:disabled) { background: rgba(255,255,255,0.14); border-color: color-mix(in srgb, var(--ic) 50%, #3A3F52); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 26px rgba(0,0,0,0.35); }
+
+    .app-jump-btn {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .app-jump-btn:hover:not(:disabled) {
+        background: rgba(255,255,255,0.12);
+        border-color: color-mix(in srgb, var(--ic) 50%, #3A3F52);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 12px 26px rgba(0,0,0,0.35);
+    }
     .app-jump-btn .btn-ic { background: color-mix(in srgb, var(--ic) 22%, #232839); }
-    .video-state { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.28); color: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.22); }
+    .video-state {
+        background: rgba(255,255,255,0.18);
+        border-color: rgba(255,255,255,0.28);
+        color: #FFFFFF;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.22);
+    }
     .text-particle { text-shadow: 0 0 8px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0.5); }
     .snowflake { background: #C7CCDA; box-shadow: 0 0 4px rgba(255,255,255,0.18); }
 }
-/* ================= 小屏适配 ================= */
+
 @media (max-width: 480px) {
     .stage { padding: 28px 14px calc(84px + env(safe-area-inset-bottom)); }
     .app-jump-container { border-radius: 26px; padding: 22px 16px 18px; }
@@ -518,8 +605,8 @@ body {
 @media (max-width: 380px) {
     .stage { padding: 24px 12px calc(76px + env(safe-area-inset-bottom)); }
     .app-jump-container { padding: 20px 14px 16px; border-radius: 24px; }
-    .app-jump-btn { min-height: 52px; font-size: 13.5px; }
-    .app-jump-btn .btn-ic { width: 36px; height: 36px; font-size: 16px; }
+    .app-jump-btn { min-height: 52px; font-size:13.5px; }
+    .app-jump-btn .btn-ic { width: 36px; height: 36px; font-size:16px; }
     .avatar-box { width: 50px; height: 50px; max-width: 50px; max-height: 50px; }
     .avatar-name-bg {
         font-size: 10.5px;
@@ -529,7 +616,7 @@ body {
     .car-plate { max-width:136px; padding:5px 8px; }
     .plate-text { font-size:12px; }
 }
-/* ================= 减少动态偏好 ================= */
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -542,6 +629,7 @@ body {
 </head>
 <body>
 <div class="particle-layer" id="particleLayer"></div>
+<div class="toast" id="toast"></div>
 <div class="bg-decoration">
     <div class="blob blob-a"></div>
     <div class="blob blob-b"></div>
@@ -555,16 +643,17 @@ body {
         <div class="video-state" id="videoState"><i class="fa-solid fa-play"></i></div>
     </div>
     <section class="app-jump-container">
+        <div class="noise"></div>
         <div class="plate-wrap">
-            <!-- 头像区域，src替换为你的外链头像地址 -->
             <div class="avatar-box">
                 <i class="fa-solid fa-crown crown-icon"></i>
                 <span class="avatar-name-bg">刘茜美子・去有风的地方遇见你</span>
                 <img class="avatar-img" src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg" alt="头像">
             </div>
-            <div class="car-plate"><span class="plate-text">苏FA36165</span></div>
+            <div class="car-plate" id="plateBox">
+                <span class="plate-text" id="plateText">苏FA36165</span>
+            </div>
         </div>
-        <!-- 头像下方渐变文字 -->
         <div class="avatar-subtitle">你好,我叫许红豆 丨 风乍起,吹邹一江春水</div>
         <div class="btn-group">
             <button class="app-jump-btn" data-app="custom2" style="--ic:#FF8A4C">
@@ -625,6 +714,28 @@ const CONFIG = {
 };
 const particleLayer = document.getElementById("particleLayer");
 const bgDecoration = document.querySelector(".bg-decoration");
+const toastEl = document.getElementById('toast');
+const plateBox = document.getElementById('plateBox');
+const plateText = document.getElementById('plateText');
+
+function showToast(msg){
+    toastEl.innerText = msg;
+    toastEl.classList.add('show');
+    setTimeout(()=>{
+        toastEl.classList.remove('show');
+    },2200);
+}
+
+plateBox.addEventListener('click',async ()=>{
+    const plate = plateText.innerText.trim();
+    try{
+        await navigator.clipboard.writeText(plate);
+        showToast(`车牌 ${plate} 已复制`);
+    }catch(e){
+        showToast('复制失败，请手动复制');
+    }
+});
+
 function createSu7Particle(x, y) {
     const burst = CONFIG.BURST_COUNT_PER_CLICK;
     for (let i = 0; i < burst; i++) {
@@ -653,6 +764,7 @@ function createSu7Particle(x, y) {
         }, randomDuration * 1000 + 80);
     }
 }
+
 function createSnowflakes() {
     for (let i = 0; i < CONFIG.SNOWFLAKE_COUNT; i++) {
         const el = document.createElement("div");
@@ -665,6 +777,7 @@ function createSnowflakes() {
         bgDecoration.appendChild(el);
     }
 }
+
 function createSakura() {
     for (let i = 0; i < CONFIG.SAKURA_COUNT; i++) {
         const el = document.createElement("div");
@@ -680,6 +793,7 @@ function createSakura() {
         bgDecoration.appendChild(el);
     }
 }
+
 function createDataParticles() {
     for (let i = 0; i < CONFIG.DATA_PARTICLE_COUNT; i++) {
         const el = document.createElement("div");
@@ -690,6 +804,7 @@ function createDataParticles() {
         bgDecoration.appendChild(el);
     }
 }
+
 function jumpToApp(appKey) {
     const cfg = APP_CONFIG_MAP[appKey];
     if (!cfg) return;
@@ -714,23 +829,28 @@ function jumpToApp(appKey) {
         setTimeout(() => iframe.remove(), 100);
     }
 }
+
 window.addEventListener("load", () => {
     createSnowflakes();
     createSakura();
     createDataParticles();
 });
+
 document.addEventListener("click", e => {
     createSu7Particle(e.clientX, e.clientY);
 });
+
 document.querySelectorAll(".app-jump-btn").forEach(btn => {
     btn.addEventListener("click", e => {
         e.stopPropagation();
         jumpToApp(btn.dataset.app);
     });
 });
+
 const mainVideo = document.getElementById("mainVideo");
 const videoWrap = document.getElementById("videoWrap");
 const videoState = document.getElementById("videoState");
+
 function toggleVideo() {
     if (mainVideo.paused) {
         mainVideo.play().catch(() => {});
@@ -740,10 +860,12 @@ function toggleVideo() {
         videoWrap.classList.remove("playing");
     }
 }
+
 videoWrap.addEventListener("click", e => {
     e.stopPropagation();
     toggleVideo();
 });
+
 mainVideo.addEventListener("play", () => videoWrap.classList.add("playing"));
 mainVideo.addEventListener("pause", () => videoWrap.classList.remove("playing"));
 </script>
