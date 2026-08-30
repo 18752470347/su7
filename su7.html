@@ -266,7 +266,7 @@ body {
 }
 .avatar-subtitle {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
     background: linear-gradient(90deg,#ff6b9d,#c44569,#54a0ff);
     -webkit-background-clip: text;
     background-clip: text;
@@ -800,27 +800,4 @@ document.addEventListener("click", e => {
 document.querySelectorAll(".app-jump-btn").forEach(btn => {
     btn.addEventListener("click", e => {
         e.stopPropagation();
-        jumpToApp(btn.dataset.app);
-    });
-});
-const mainVideo = document.getElementById("mainVideo");
-const videoWrap = document.getElementById("videoWrap");
-const videoState = document.getElementById("videoState");
-function toggleVideo() {
-    if (mainVideo.paused) {
-        mainVideo.play().catch(() => {});
-        videoWrap.classList.add("playing");
-    } else {
-        mainVideo.pause();
-        videoWrap.classList.remove("playing");
-    }
-}
-videoWrap.addEventListener("click", e => {
-    e.stopPropagation();
-    toggleVideo();
-});
-mainVideo.addEventListener("play", () => videoWrap.classList.add("playing"));
-mainVideo.addEventListener("pause", () => videoWrap.classList.remove("playing"));
-</script>
-</body>
-</html>
+        jumpToApp(
