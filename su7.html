@@ -177,7 +177,7 @@
       100% { transform: translate(-30px, 40px) rotate(-4deg) scale(1.03); }
     }
 
-    /* ===== 樱花 ===== */
+    /* ===== 樱花 (仅从主卡片开始飘落) ===== */
     .sakura-container {
       position: fixed;
       inset: 0;
@@ -197,7 +197,7 @@
       transition: opacity 0.3s ease;
     }
     @keyframes sakuraFall {
-      0% { transform: translateY(-8vh) rotate(0deg) translateX(0px); opacity: 0.9; }
+      0% { transform: translateY(0) rotate(0deg) translateX(0px); opacity: 0.9; }
       30% { transform: translateY(30vh) rotate(240deg) translateX(20px); }
       70% { transform: translateY(70vh) rotate(520deg) translateX(-20px); }
       100% { transform: translateY(105vh) rotate(720deg) translateX(0px); opacity: 0; }
@@ -387,7 +387,7 @@
     .video-card {
       position: relative;
       width: 100%;
-      margin-bottom: 24px;
+      margin-bottom: 6px;
       border-radius: 32px;
       box-shadow: var(--glass-shadow);
       overflow: hidden;
@@ -400,14 +400,14 @@
     .video-box {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 7.2;
+      aspect-ratio: 16 / 6.8;
       border-radius: 32px;
       overflow: hidden;
       background: #090D17;
       transition: aspect-ratio 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .video-box.normal {
-      aspect-ratio: 16 / 9.2;
+      aspect-ratio: 16 / 8.8;
     }
     .video-box video {
       display: block;
@@ -972,7 +972,6 @@
       cursor: pointer;
     }
     .viewer-close:active { transform: scale(.9); }
-    /* 提示文字 - 显示在图片下方 */
     .viewer-hint {
       position: relative;
       margin-top: 16px;
@@ -1019,7 +1018,7 @@
       .buttons { gap: 14px 8px; }
       .app-icon-wrap { width: 48px; height: 48px; font-size: 17px; }
       .app-label { font-size: 10px; }
-      .video-box { aspect-ratio: 16/7.8; }
+      .video-box { aspect-ratio: 16/7.2; }
       .dynamic-island { height: 32px; font-size: 12px; padding: 0 12px; }
       .video-play { width: 50px; height: 50px; font-size: 20px; }
     }
@@ -1168,7 +1167,7 @@
       // ============================================================
       const videoList = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/6.mp4",
@@ -1176,7 +1175,6 @@
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/8.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
-
         // 在此添加更多视频链接，例如：
         // "https://example.com/video2.mp4",
         // "https://example.com/video3.mp4"
@@ -1187,7 +1185,7 @@
       // ============================================================
       const avatarImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/2.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/3.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/4.jpg",
@@ -1201,7 +1199,7 @@
       // ============================================================
       const slideImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
@@ -1310,6 +1308,7 @@
       const sakuraContainer = $("#sakuraBox");
       const dynamicIsland = $("#dynamicIsland");
       const islandText = $("#islandText");
+      const mainCard = $(".main-card");
 
       // 弹出播放器
       const videoPopup = $("#videoPopup");
@@ -1343,6 +1342,49 @@
       let textRollInterval = null;
 
       let popupControlsVisible = false;
+
+      // ===== 樱花生成 (仅从主卡片区域开始) =====
+      function createSakura() {
+        const sakura = document.createElement("div");
+        sakura.className = "sakura";
+        const size = Math.random() * 10 + 4;
+        sakura.style.width = size + "px";
+        sakura.style.height = size + "px";
+        
+        // 获取主卡片的位置
+        const cardRect = mainCard.getBoundingClientRect();
+        // 樱花起始X位置：主卡片范围内随机
+        const leftPos = cardRect.left + Math.random() * cardRect.width;
+        sakura.style.left = leftPos + "px";
+        // 起始Y位置：主卡片顶部附近，稍微浮动
+        const topPos = cardRect.top - 20 + Math.random() * 30;
+        sakura.style.top = topPos + "px";
+        
+        const dur = Math.random() * 6 + 5;
+        sakura.style.animation = `sakuraFall ${dur}s linear forwards`;
+        sakura.style.opacity = '0.72';
+        sakuraContainer.appendChild(sakura);
+
+        let frameId = null;
+        const check = () => {
+          if (!sakura.parentNode) return;
+          const rect = sakura.getBoundingClientRect();
+          const cardRectNow = mainCard.getBoundingClientRect();
+          // 如果樱花飘落到了主卡片区域外（超出底部），则隐藏
+          if (rect.top > cardRectNow.bottom + 50) {
+            sakura.style.opacity = '0';
+          } else {
+            sakura.style.opacity = '0.72';
+          }
+          frameId = requestAnimationFrame(check);
+        };
+        check();
+
+        setTimeout(() => {
+          if (frameId) cancelAnimationFrame(frameId);
+          if (sakura.parentNode) sakura.remove();
+        }, dur * 1000);
+      }
 
       // ===== 灵动岛文字滚动 =====
       const textPool = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子"];
@@ -1552,40 +1594,6 @@
         togglePopupControls();
       });
 
-      // ===== 樱花 =====
-      function createSakura() {
-        const sakura = document.createElement("div");
-        sakura.className = "sakura";
-        const size = Math.random() * 10 + 4;
-        sakura.style.width = size + "px";
-        sakura.style.height = size + "px";
-        sakura.style.left = Math.random() * 100 + "%";
-        const dur = Math.random() * 6 + 5;
-        sakura.style.animation = `sakuraFall ${dur}s linear forwards`;
-        sakura.style.opacity = '0.72';
-        sakuraContainer.appendChild(sakura);
-
-        let frameId = null;
-        const check = () => {
-          if (!sakura.parentNode) return;
-          const rect = sakura.getBoundingClientRect();
-          const videoRect = videoCard.getBoundingClientRect();
-          const cardRect = document.querySelector('.main-card').getBoundingClientRect();
-          const isOverVideo = !(rect.right < videoRect.left || rect.left > videoRect.right ||
-            rect.bottom < videoRect.top || rect.top > videoRect.bottom);
-          const isOverCard = !(rect.right < cardRect.left || rect.left > cardRect.right ||
-            rect.bottom < cardRect.top || rect.top > cardRect.bottom);
-          sakura.style.opacity = isOverVideo ? '0' : '0.72';
-          frameId = requestAnimationFrame(check);
-        };
-        check();
-
-        setTimeout(() => {
-          if (frameId) cancelAnimationFrame(frameId);
-          if (sakura.parentNode) sakura.remove();
-        }, dur * 1000);
-      }
-
       // ===== 主视频事件 =====
       if (videoList.length > 0) {
         mainVideo.src = videoList[0];
@@ -1669,10 +1677,8 @@
       });
 
       // ===== 弹出播放器事件 =====
-      // 副视频循环播放：通过 loop 属性实现，同时监听 ended 事件作为后备
       popupVideo.loop = true;
       popupVideo.addEventListener('ended', () => {
-        // 如果 loop 属性失效，手动重新播放
         if (!popupVideo.paused) {
           popupVideo.play().catch(() => {});
         }
@@ -1909,7 +1915,6 @@
         viewer.classList.add("show");
         viewer.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
-        // 更新提示文字
         viewerHint.textContent = '左右滑动切换 · 长按保存';
       }
 
@@ -2062,8 +2067,9 @@
       glowInterval = setInterval(updateGlowColor, 1000);
       setTimeout(updateGlowColor, 50);
 
-      sakuraInterval = setInterval(createSakura, 150);
-      for (let i = 0; i < 5; i++) setTimeout(createSakura, i * 100);
+      // 樱花：从主卡片区域开始飘落，降低频率减少性能消耗
+      sakuraInterval = setInterval(createSakura, 200);
+      for (let i = 0; i < 3; i++) setTimeout(createSakura, i * 150);
 
       setTimeout(showControls, 500);
 
