@@ -111,7 +111,7 @@ animation: cardSpringIn .7s var(--spring) 0.14s both;
 .video-box {
 position: relative;
 width: 100%;
-aspect-ratio: 16 / 7.2; /* 修改：拉高视频容器高度 */
+aspect-ratio: 16 / 9.2; /* 修改：拉高视频容器高度 */
 border-radius: var(--radius-xl);
 overflow: hidden;
 background: #090D17;
@@ -498,7 +498,7 @@ animation: popTextAnim 6s ease-out forwards, textShine 2.5s linear infinite;
 <div class="viewer-content" id="viewerContent">
 <img class="viewer-img" id="viewerImg" src="" alt="原图预览" draggable="false">
 </div>
-<div class="viewer-hint" id="viewerHint">双击放大 · 双指缩放 · 左右滑动切换 · 长按保存图片</div>
+<div class="viewer-hint" id="viewerHint">双击放大 · 双击缩放 · 左右滑动切换 · 长按保存图片</div>
 </div>
 <main class="page">
 <div class="wrap-inner">
@@ -535,7 +535,7 @@ animation: popTextAnim 6s ease-out forwards, textShine 2.5s linear infinite;
 </div>
 <div class="plate" id="plate">苏FA36165</div>
 <div class="name">刘茜美子・去有风的地方遇见你</div>
-<div class="subtitle">你好,我叫许红豆<br>风乍起，吹皱一江春水</div>
+<div class="subtitle">你好,我叫许红豆<br>风乍起,吹皱一江春水</div>
 </div>
 <div class="plate-photo" id="platePhoto" title="查看原图">
 <img id="platePhotoImg" src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png" alt="图片" draggable="false">
@@ -613,14 +613,22 @@ let hideControlTimer = null;
 const HIDE_DELAY = 3000;
 let toastTimer = null;
 
-// ====================== 视频列表【在这里添加你的视频外链】======================
+// ====================== 视频轮播数组【在这里添加你的视频外链】======================
 const videoList = [
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
 
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
+
+
+
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/6.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/7.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/8.mp4",
+
+
+
 ];
 let currentVideoIndex = 0;
 // 切换上一个视频函数
@@ -649,6 +657,7 @@ const avatarImages = [
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
 
+
 ];
 let avatarIndex = 0;
 const avatarImg = $("#avatarImg");
@@ -659,7 +668,7 @@ if(avatarIndex >= avatarImages.length) avatarIndex = 0;
 avatarImg.src = avatarImages[avatarIndex];
 }
 setInterval(changeAvatar, 10 * 1000);
-// ===========右侧图片轮播配置【你自行修改图片链接】============
+// ===========右侧图片轮播数组【你自行修改图片链接】============
 const slideImages = [
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
 
@@ -730,6 +739,7 @@ const slideImages = [
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
+
 
 
 ];
