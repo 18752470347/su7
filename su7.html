@@ -17,28 +17,26 @@
             margin: 0;
             padding: 0;
         }
-
         html {
             width: 100%;
             min-height: 100%;
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
         }
-
         body {
             width: 100%;
             min-height: 100vh;
             min-height: 100dvh;
             overflow-x: hidden;
             overflow-y: auto;
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+            /* 修改全局字体为 iOS San Francisco（iOS27系统字体） */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
             background: #f7f9fc;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             overscroll-behavior-x: none;
             user-select: none;
         }
-
         :root {
             --text-main: #1D1D1F;
             --text-sub: #555861;
@@ -49,7 +47,7 @@
             --glass-bg: rgba(255,255,255,0.42);
             --glass-strong: rgba(255,255,255,0.65);
             --glass-border: rgba(255,255,255,0.6);
-            --glass-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06);
+            --glass-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0.06);
             --radius-xl: 32px;
             --radius-lg: 24px;
             --radius-md: 18px;
@@ -57,14 +55,12 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --spring: cubic-bezier(0.22, 1, 0.36, 1);
         }
-
         button, img, video {
             -webkit-user-drag: none;
         }
         button {
             font: inherit;
         }
-
         /* 液态动态渐变背景 Liquid Glass */
         .liquid-bg {
             position: fixed;
@@ -87,13 +83,11 @@
             animation: liquidFlow 22s ease-in-out infinite alternate;
             filter: blur(60px);
         }
-
         @keyframes liquidFlow {
             0% { transform: translate(0,0) rotate(0deg) scale(1.05); }
             50% { transform: translate(40px, -30px) rotate(4deg) scale(1.12); }
             100% { transform: translate(-30px, 40px) rotate(-4deg) scale(1.05); }
         }
-
         /* 页面入场动画 弹簧 */
         @keyframes pageSpringIn {
             from {
@@ -115,7 +109,6 @@
                 transform: translateY(0) scale(1);
             }
         }
-
         .page {
             position: relative;
             z-index: 2;
@@ -130,15 +123,12 @@
             align-items: center;
             animation: pageSpringIn .75s var(--spring) both;
         }
-
-        /* 视频卡片 */
+        /* 视频卡片 - 移除padding白边 */
         .video-card {
             position: relative;
             width: 100%;
             margin-bottom: 20px;
-            padding: 3px;
             border-radius: var(--radius-xl);
-            background: linear-gradient(145deg, rgba(255,255,255,0.85), rgba(255,255,255,0.22));
             box-shadow: var(--glass-shadow);
             overflow: hidden;
             isolation: isolate;
@@ -148,7 +138,7 @@
             position: relative;
             width: 100%;
             aspect-ratio: 16 / 9;
-            border-radius: calc(var(--radius-xl) - 3px);
+            border-radius: var(--radius-xl);
             overflow: hidden;
             background: #090D17;
         }
@@ -178,12 +168,98 @@
             -webkit-backdrop-filter: blur(18px) saturate(160%);
             pointer-events: none;
             transition: opacity .28s ease, transform .28s var(--spring);
+            z-index: 2;
         }
         .video-card.playing .video-play {
             opacity: 0;
             transform: translate(-50%,-50%) scale(0.72);
         }
-
+        /* ========= 视频自定义控件 ========= */
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 14px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.65));
+            z-index: 3;
+            opacity: 1;
+            transition: opacity 0.35s ease;
+            pointer-events: auto;
+        }
+        .video-controls.hidden-controls{
+            opacity: 0;
+            pointer-events: none;
+        }
+        .progress-wrap {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 99px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: inherit;
+            background: #fff;
+            width:0%;
+        }
+        .control-row {
+            display:flex;
+            align-items:center;
+            gap:14px;
+        }
+        .control-row button {
+            color:#fff;
+            border:none;
+            background:none;
+            font-size:18px;
+            cursor:pointer;
+        }
+        .video-time {
+            margin-left:auto;
+            color:#fff;
+            font-size:13px;
+        }
+        /* ========== 头像旋转渐变发光边框特效 ========== */
+        .avatar {
+            position: relative;
+            width: 66px;
+            height: 66px;
+            margin-bottom: 12px;
+            border-radius: 50%;
+            cursor: zoom-in;
+            isolation: isolate;
+        }
+        .avatar::before {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            z-index: -1;
+            border-radius: 50%;
+            background: linear-gradient(45deg,#FF5C93,#4A8DFF,#74E9D1,#FFD270);
+            background-size:300% 300%;
+            animation: avatarRotateBorder 3s linear infinite;
+        }
+        @keyframes avatarRotateBorder{
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+        .avatar img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border:2px solid rgba(255,255,255,.92);
+            transition: transform .2s var(--spring), filter .2s ease;
+        }
+        .avatar:active img {
+            transform: scale(.92);
+            filter: brightness(.9);
+        }
         /* 主液态玻璃卡片 */
         .main-card {
             position: relative;
@@ -203,7 +279,6 @@
                 background: rgba(255,255,255,.86);
             }
         }
-
         .profile-row {
             display: grid;
             grid-template-columns: minmax(0,1fr) auto;
@@ -217,57 +292,13 @@
             flex-direction: column;
             align-items: center;
         }
-
-        .avatar {
-            position: relative;
-            width: 66px;
-            height: 66px;
-            margin-bottom: 12px;
-            border-radius: 50%;
-            cursor: zoom-in;
-            isolation: isolate;
-        }
-        .avatar::before {
-            content: "";
-            position: absolute;
-            inset: -4px;
-            z-index: -1;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ffffff, rgba(255,255,255,.2));
-            box-shadow: 0 10px 24px rgba(60,70,110,.16);
-        }
-        .avatar img {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,.9);
-            transition: transform .2s var(--spring), filter .2s ease;
-        }
-        .avatar:active img {
-            transform: scale(.92);
-            filter: brightness(.9);
-        }
-        .crown {
-            position: absolute;
-            z-index: 4;
-            left: -6px;
-            top: -10px;
-            color: #FFD43B;
-            font-size: 21px;
-            transform: rotate(-18deg);
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,.28));
-            pointer-events: none;
-        }
-
         .plate {
             padding: 6px 14px;
             margin-bottom: 11px;
             border-radius: 8px;
             background: linear-gradient(135deg, #14994F, #08763C);
-            color: #fff;
-            font-family: "Space Grotesk", Inter, sans-serif;
+            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             font-size: 17px;
             font-weight: 700;
             letter-spacing: 1.6px;
@@ -279,7 +310,6 @@
         .plate:active {
             transform: scale(.93);
         }
-
         .name {
             max-width: 100%;
             font-size: 12.5px;
@@ -318,7 +348,6 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
         .plate-photo {
             width: 92px;
             flex-shrink: 0;
@@ -340,98 +369,56 @@
             aspect-ratio: 9 / 16;
             object-fit: cover;
         }
-
+        /* ========= APP宫格布局 修改为一行4个 ========= */
         .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 22px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap:16px 8px;
+            margin-top:22px;
         }
         .app-button {
             --icon-color: #1677FF;
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            width: 100%;
-            min-height: 58px;
-            padding: 8px 14px 8px 10px;
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            background: var(--glass-bg);
-            color: var(--text-main);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
-            backdrop-filter: blur(24px) saturate(170%);
-            -webkit-backdrop-filter: blur(24px) saturate(170%);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:8px;
+            border:none;
+            background:transparent;
             cursor: pointer;
-            text-align: left;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            transition: transform .2s var(--spring), background .2s ease, box-shadow .2s ease;
         }
-        @supports not ( backdrop-filter: blur(10px) ) {
-            .app-button {
-                background: rgba(255,255,255,.82);
-            }
-        }
-        @media (hover: none) {
-            .app-button:active {
-                transform: scale(.97);
-                background: var(--glass-strong);
-                box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
-            }
-        }
-        @media (hover: hover) {
-            .app-button:hover {
-                transform: translateY(-3px);
-                background: var(--glass-strong);
-                box-shadow: var(--glass-shadow);
-            }
-        }
-        .app-icon {
-            flex: 0 0 auto;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 14px;
-            color: var(--icon-color);
+        .app-icon-wrap{
+            width:50px;
+            height:50px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:18px;
             background: rgba(255,255,255,.65);
             box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 4px 10px rgba(50,65,100,.10);
-            font-size: 17px;
-        }
-        .app-label {
-            flex: 1;
-            min-width: 0;
-            font-size: 14.5px;
-            font-weight: 600;
-            line-height: 1.4;
-        }
-        .app-arrow {
-            flex: 0 0 auto;
-            color: var(--text-muted);
-            font-size: 12px;
-            opacity: .7;
+            font-size:18px;
+            color:var(--icon-color);
+            backdrop-filter: blur(24px) saturate(170%);
+            -webkit-backdrop-filter: blur(24px) saturate(170%);
             transition: transform .2s var(--spring);
         }
-        .app-button:hover .app-arrow {
-            transform: translateX(4px);
+        .app-button:active .app-icon-wrap{
+            transform: scale(0.92);
         }
-        .app-button.loading {
-            pointer-events: none;
-            opacity: .7;
+        .app-label {
+            font-size:11px;
+            font-weight:500;
+            color:var(--text-main);
+            text-align:center;
+            line-height:1.2;
         }
-
-        .tips {
-            margin-top: 18px;
-            font-size: 11px;
-            line-height: 1.6;
-            text-align: center;
-            color: var(--text-muted);
-            letter-spacing: .06em;
+        .app-button.loading .app-icon-wrap{
+            opacity:0.65;
         }
-
+        .app-button.loading .app-label{
+            font-size:10px;
+        }
         /* Toast */
         .toast {
             position: fixed;
@@ -454,7 +441,6 @@
             opacity: 1;
             transform: translate(-50%,0) scale(1);
         }
-
         /* 图片查看器 */
         .viewer {
             position: fixed;
@@ -542,7 +528,6 @@
             text-shadow: 0 2px 6px rgba(0,0,0,.6);
             pointer-events: none;
         }
-
         /* 小屏幕适配 */
         @media (max-width: 380px) {
             .page {
@@ -559,18 +544,18 @@
             .plate-photo {
                 width: 80px;
             }
-            .app-button {
-                min-height: 54px;
+            .buttons{
+                gap:12px 6px;
             }
-            .app-icon {
-                width: 38px;
-                height: 38px;
+            .app-icon-wrap {
+                width:46px;
+                height:46px;
+                font-size:16px;
             }
             .app-label {
-                font-size:13.5px;
+                font-size:10px;
             }
         }
-
         /* 减少动画 */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -580,15 +565,55 @@
             }
             .liquid-gradient { display:none; }
         }
+        /* ========== 樱花飘落 ========== */
+        .sakura-container {
+            position: fixed;
+            inset: 0;
+            z-index:1;
+            pointer-events: none;
+            overflow:hidden;
+        }
+        .sakura {
+            position:absolute;
+            background:#ffc8d8;
+            border-radius: 50% 0 50% 50%;
+            opacity:0.75;
+            will-change: transform;
+        }
+        @keyframes sakuraFall {
+            0% {transform: translateY(-8vh) rotate(0deg); opacity:0.9;}
+            100% {transform: translateY(105vh) rotate(720deg); opacity:0;}
+        }
+        /* ========== 点击弹出渐变文字（延长消失时间） ========== */
+        .click-text-item {
+            position:fixed;
+            z-index:999;
+            pointer-events:none;
+            font-weight:700;
+            background: linear-gradient(90deg,#ff6492,#628cff,#ffb258);
+            background-size:200% 100%;
+            -webkit-background-clip:text;
+            background-clip:text;
+            color:transparent;
+            animation: popTextAnim 6s ease-out forwards, textShine 2.5s linear infinite;
+        }
+        @keyframes popTextAnim {
+            0% {transform:translateY(0) scale(1); opacity:1;}
+            100% {transform:translateY(-140px) scale(1.08); opacity:0;}
+        }
+        @keyframes textShine {
+            0% {background-position:0% 50%;}
+            100% {background-position:200% 50%;}
+        }
     </style>
 </head>
 <body>
 <div class="liquid-bg">
     <div class="liquid-gradient"></div>
 </div>
-
+<!-- 樱花容器 -->
+<div class="sakura-container" id="sakuraBox"></div>
 <div class="toast" id="toast">复制成功</div>
-
 <div class="viewer" id="viewer" aria-hidden="true">
     <button class="viewer-close" id="viewerClose" type="button" aria-label="关闭图片">
         <i class="fa-solid fa-xmark"></i>
@@ -598,24 +623,36 @@
     </div>
     <div class="viewer-hint">双击放大 · 双指缩放 · 拖动查看</div>
 </div>
-
 <main class="page">
     <section class="video-card" id="videoCard">
         <div class="video-box">
-            <video id="mainVideo" src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4" playsinline webkit-playsinline loop preload="metadata" controlslist="nodownload noplaybackrate">
+            <video id="mainVideo" src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4" playsinline webkit-playsinline preload="metadata">
                 您的浏览器不支持视频播放。
             </video>
             <div class="video-play" id="videoPlay">
                 <i class="fa-solid fa-play"></i>
             </div>
+            <!-- 视频自定义控件 增加上一曲、下一曲按钮 -->
+            <div class="video-controls" id="videoControls">
+                <div class="progress-wrap" id="progressWrap">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="control-row">
+                    <button id="videoPrevBtn"><i class="fa-solid fa-backward-step"></i></button>
+                    <button id="videoPlayBtn"><i class="fa-solid fa-play"></i></button>
+                    <button id="videoNextBtn"><i class="fa-solid fa-forward-step"></i></button>
+                    <button id="videoMuteBtn"><i class="fa-solid fa-volume-high"></i></button>
+                    <div class="video-time">
+                        <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
-
     <section class="main-card">
         <div class="profile-row">
             <div class="profile-left">
                 <div class="avatar" id="avatar" title="查看头像原图">
-                    <i class="fa-solid fa-crown crown"></i>
                     <img id="avatarImg" src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg" alt="头像" draggable="false">
                 </div>
                 <div class="plate" id="plate">苏FA36165</div>
@@ -626,78 +663,230 @@
                 <img id="platePhotoImg" src="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png" alt="图片" draggable="false">
             </div>
         </div>
-
         <div class="buttons">
             <button class="app-button" data-app="custom2" style="--icon-color:#FF8A4C" type="button">
-                <span class="app-icon"><i class="fa-solid fa-plus"></i></span>
-                <span class="app-label">打开 A➕ 系统</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-solid fa-plus"></i></div>
+                <span class="app-label">A+ 系统</span>
             </button>
             <button class="app-button" data-app="custom7" style="--icon-color:#FFB03C" type="button">
-                <span class="app-icon"><i class="fa-solid fa-music"></i></span>
-                <span class="app-label">打开汽水音乐</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-solid fa-music"></i></div>
+                <span class="app-label">汽水音乐</span>
             </button>
             <button class="app-button" data-app="custom1" style="--icon-color:#3DDC84" type="button">
-                <span class="app-icon"><i class="fa-solid fa-music"></i></span>
-                <span class="app-label">打开 LX Music</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-solid fa-music"></i></div>
+                <span class="app-label">LX Music</span>
             </button>
             <button class="app-button" data-app="custom3" style="--icon-color:#FF3B5C" type="button">
-                <span class="app-icon"><i class="fa-brands fa-youtube"></i></span>
-                <span class="app-label">打开 YouTube</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-brands fa-youtube"></i></div>
+                <span class="app-label">YouTube</span>
             </button>
             <button class="app-button" data-app="custom4" style="--icon-color:#38E1FF" type="button">
-                <span class="app-icon"><i class="fa-solid fa-globe"></i></span>
-                <span class="app-label">打开 FlClash</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-solid fa-globe"></i></div>
+                <span class="app-label">FlClash</span>
             </button>
             <button class="app-button" data-app="custom5" style="--icon-color:#4DA3FF" type="button">
-                <span class="app-icon"><i class="fa-solid fa-map-location-dot"></i></span>
-                <span class="app-label">打开高德地图</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-solid fa-map-location-dot"></i></div>
+                <span class="app-label">高德地图</span>
             </button>
             <button class="app-button" data-app="custom6" style="--icon-color:#A3B8FF" type="button">
-                <span class="app-icon"><i class="fa-brands fa-tiktok"></i></span>
-                <span class="app-label">打开抖音</span>
-                <i class="fa-solid fa-chevron-right app-arrow"></i>
+                <div class="app-icon-wrap"><i class="fa-brands fa-tiktok"></i></div>
+                <span class="app-label">抖音</span>
+            </button>
+            <button class="app-button" data-app="custom8" style="--icon-color:#A3B8FF" type="button">
+                <div class="app-icon-wrap"><i class="fa-solid fa-headphones-simple"></i></div>
+                <span class="app-label">酷狗音乐</span>
             </button>
         </div>
-
-        <p class="tips" id="tips">苏FA36165 · 去有风的地方遇见你</p>
+        <!-- 删除底部tips文本 -->
     </section>
 </main>
-
 <script>
 const APP_CONFIG = {
     custom1: {scheme: "anywhere://open?sid=0444", name: "LX Music", icon: "fa-solid fa-music"},
-    custom2: {scheme: "anywhere://open?sid=2848", name: "A➕系统", icon: "fa-solid fa-plus"},
+    custom2: {scheme: "anywhere://open?sid=2848", name: "A+系统", icon: "fa-solid fa-plus"},
     custom7: {scheme: "anywhere://open?sid=5395", name: "汽水音乐", icon: "fa-solid fa-music"},
     custom3: {scheme: "anywhere://open?sid=0451", name: "YouTube", icon: "fa-brands fa-youtube"},
     custom4: {scheme: "anywhere://open?sid=2305", name: "FlClash", icon: "fa-solid fa-globe"},
     custom5: {scheme: "anywhere://open?sid=7535", name: "高德地图", icon: "fa-solid fa-map-location-dot"},
-    custom6: {scheme: "anywhere://open?sid=5181", name: "抖音", icon: "fa-brands fa-tiktok"}
+    custom6: {scheme: "anywhere://open?sid=5181", name: "抖音", icon: "fa-brands fa-tiktok"},
+    custom8: {scheme: "anywhere://open?sid=9850", name: "酷狗音乐", icon: "fa-solid fa-headphones-simple"}
 };
-
 const $ = selector => document.querySelector(selector);
 const $$ = selector => document.querySelectorAll(selector);
 const toast = $("#toast");
-const tips = $("#tips");
 const viewer = $("#viewer");
 const viewerContent = $("#viewerContent");
 const viewerImg = $("#viewerImg");
 const mainVideo = $("#mainVideo");
 const videoCard = $("#videoCard");
-
+const videoBox = $(".video-box");
+const videoPlayBtn = $("#videoPlayBtn");
+const videoPrevBtn = $("#videoPrevBtn");
+const videoNextBtn = $("#videoNextBtn");
+const videoMuteBtn = $("#videoMuteBtn");
+const videoControls = $("#videoControls");
+const progressWrap = $("#progressWrap");
+const progressBar = $("#progressBar");
+const currentTimeEl = $("#currentTime");
+const totalTimeEl = $("#totalTime");
+const videoPlayCenter = $("#videoPlay");
+let hideControlTimer = null;
+const HIDE_DELAY = 3000; // 静止3秒自动隐藏控件
 let toastTimer = null;
+
+// ====================== 视频列表【在这里添加你的视频外链】======================
+const videoList = [
+    "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
+
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
+    //"https://xxx/xxx.mp4",
+    //"https://xxx/xxx.mp4"
+];
+let currentVideoIndex = 0;
+
+// 切换上一个视频函数
+function prevVideo(){
+    currentVideoIndex --;
+    if(currentVideoIndex < 0) currentVideoIndex = videoList.length - 1;
+    mainVideo.src = videoList[currentVideoIndex];
+    mainVideo.play().catch(()=>showToast("请手动点击播放"));
+}
+
+// 切换下一个视频函数
+function nextVideo(){
+    currentVideoIndex ++;
+    if(currentVideoIndex >= videoList.length) currentVideoIndex = 0;
+    mainVideo.src = videoList[currentVideoIndex];
+    mainVideo.play().catch(()=>showToast("请手动点击播放"));
+}
+
+// ====================== 头像轮播数组【在这里添加你的头像外链】======================
+const avatarImages = [
+    "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg",
+
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/2.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/3.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/4.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/5.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
+
+    //"https://xxx/avatar2.jpg",
+    //"https://xxx/avatar3.jpg"
+];
+let avatarIndex = 0;
+const avatarImg = $("#avatarImg");
+// 每60秒切换头像
+function changeAvatar(){
+    avatarIndex ++;
+    if(avatarIndex >= avatarImages.length) avatarIndex = 0;
+    avatarImg.src = avatarImages[avatarIndex];
+}
+setInterval(changeAvatar, 60 * 1000);
+
+// ===========右侧图片轮播配置【你自行修改图片链接】============
+const slideImages = [
+    "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
+
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/4.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/5.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/6.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/7.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/8.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/9.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/11.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/12.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/13.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/14.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/15.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/16.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/17.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/18.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/19.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/20.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/21.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/22.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/23.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/24.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/25.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/26.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/27.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/28.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/29.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/30.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/31.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/32.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/33.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/34.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/35.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/36.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/37.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/38.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/39.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/40.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/41.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/43.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/42.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/44.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/45.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/46.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/47.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/48.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/49.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/50.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/51.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/52.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/53.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/54.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/55.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/56.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/57.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/58.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/59.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/60.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/61.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/62.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/63.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
+
+    // 在这里继续追加外链图片地址
+    // "https://xxx/xxx.jpg",
+    // "https://xxx/xxx.png"
+];
+let slideIndex = 0;
+const platePhotoImg = $("#platePhotoImg");
+function startImageLoop(){
+    setInterval(()=>{
+        slideIndex ++;
+        if(slideIndex >= slideImages.length) slideIndex = 0;
+        platePhotoImg.src = slideImages[slideIndex];
+    },2000);
+}
+startImageLoop();
+
+// 时间格式化 mm:ss
+function formatTime(s) {
+    if(isNaN(s)) return "00:00";
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return String(m).padStart(2,"0") + ":" + String(sec).padStart(2,"0");
+}
 function showToast(text) {
     toast.textContent = text;
     toast.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(()=>toast.classList.remove("show"),1300);
 }
-
 $("#plate").addEventListener("click", async event=>{
     event.stopPropagation();
     const text = "苏FA36165";
@@ -714,42 +903,48 @@ $("#plate").addEventListener("click", async event=>{
     }
     showToast("车牌号已复制");
 });
-
 function jumpToApp(key){
     const config = APP_CONFIG[key];
     if(!config) return;
     const button = document.querySelector(`[data-app="${key}"]`);
     if(!button || button.classList.contains("loading")) return;
-    button.classList.add("loading");
+    // 保存原始按钮HTML
     const originalHTML = button.innerHTML;
+    // 设置加载态
+    button.classList.add("loading");
     button.innerHTML = `
-        <span class="app-icon"><i class="fa-solid fa-spinner fa-spin"></i></span>
-        <span class="app-label">正在打开 ${config.name}…</span>
-        <i class="fa-solid fa-chevron-right app-arrow"></i>
+        <div class="app-icon-wrap"><i class="fa-solid fa-spinner fa-spin"></i></div>
+        <span class="app-label">打开中</span>
     `;
-    tips.textContent = `正在尝试打开「${config.name}」`;
-    let finished = false;
-    const restore = ()=>{
-        if(finished) return;
-        finished=true;
+    // 页面跳转，页面成功跳转刷新后自动恢复按钮原样
+    window.location.href = config.scheme;
+    // 兜底：如果无法唤起APP（没有页面刷新），超时恢复按钮
+    setTimeout(()=>{
         button.classList.remove("loading");
         button.innerHTML = originalHTML;
-        tips.textContent = "苏FA36165 · 去有风的地方遇见你";
-    };
-    document.addEventListener("visibilitychange", ()=>{
-        if(document.visibilityState==="hidden") clearTimeout(timer);
-    },{once:true});
-    const timer = setTimeout(restore,1800);
-    try{ window.location.href = config.scheme; }catch{ restore(); }
+    },2200);
 }
-
 $$(".app-button").forEach(btn=>{
     btn.addEventListener("click",e=>{
         e.stopPropagation();
         jumpToApp(btn.dataset.app);
     })
 });
-
+// ========= 视频控件显示/隐藏函数 =========
+function showControls(){
+    videoControls.classList.remove("hidden-controls");
+    clearTimeout(hideControlTimer);
+    if(!mainVideo.paused){
+        hideControlTimer = setTimeout(()=>{
+            videoControls.classList.add("hidden-controls");
+        }, HIDE_DELAY);
+    }
+}
+function hideControls(){
+    clearTimeout(hideControlTimer);
+    videoControls.classList.add("hidden-controls");
+}
+// ========= 视频播放暂停逻辑 =========
 function toggleVideo(){
     if(mainVideo.paused){
         const p = mainVideo.play();
@@ -758,15 +953,78 @@ function toggleVideo(){
         mainVideo.pause();
     }
 }
-videoCard.addEventListener("click",e=>{e.stopPropagation();toggleVideo()});
-mainVideo.addEventListener("play",()=>videoCard.classList.add("playing"));
-mainVideo.addEventListener("pause",()=>videoCard.classList.remove("playing"));
-
+videoCard.addEventListener("click",e=>{
+    // 点击控件区域不触发卡片播放
+    if(e.target.closest(".video-controls")) return;
+    e.stopPropagation();toggleVideo();
+});
+// 触摸/鼠标移动视频区域 → 显示控件
+videoBox.addEventListener("touchstart", ()=>showControls());
+videoBox.addEventListener("touchmove", ()=>showControls());
+videoBox.addEventListener("mousemove", ()=>showControls());
+// 自定义播放按钮
+videoPlayBtn.onclick = (e)=>{
+    e.stopPropagation();
+    toggleVideo();
+};
+// 上一个视频按钮事件
+videoPrevBtn.onclick = (e)=>{
+    e.stopPropagation();
+    prevVideo();
+};
+// 下一个视频按钮事件
+videoNextBtn.onclick = (e)=>{
+    e.stopPropagation();
+    nextVideo();
+};
+// 静音按钮
+videoMuteBtn.onclick = (e)=>{
+    e.stopPropagation();
+    mainVideo.muted = !mainVideo.muted;
+    if(mainVideo.muted){
+        videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i>`;
+    }else{
+        videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
+    }
+};
+// 视频加载完成获取总时长
+mainVideo.addEventListener('loadedmetadata', ()=>{
+    totalTimeEl.textContent = formatTime(mainVideo.duration);
+})
+// 实时更新进度条+当前时间
+mainVideo.addEventListener('timeupdate', ()=>{
+    const percent = (mainVideo.currentTime / mainVideo.duration) *100;
+    progressBar.style.width = percent + "%";
+    currentTimeEl.textContent = formatTime(mainVideo.currentTime);
+})
+// 点击进度条跳转
+progressWrap.addEventListener("click",e=>{
+    const rect = progressWrap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const ratio = x / rect.width;
+    mainVideo.currentTime = ratio * mainVideo.duration;
+})
+// 播放/暂停时，更新中间播放图标 + 底部按钮图标 + 控件显示隐藏
+mainVideo.addEventListener("play",()=>{
+    videoCard.classList.add("playing");
+    videoPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+    hideControlTimer = setTimeout(()=>{
+        videoControls.classList.add("hidden-controls");
+    }, HIDE_DELAY);
+});
+mainVideo.addEventListener("pause",()=>{
+    videoCard.classList.remove("playing");
+    videoPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+    showControls();
+});
+// =========视频播放结束自动切下一个视频=========
+mainVideo.addEventListener("ended",()=>{
+    nextVideo();
+});
 let scale = 1, translateX = 0, translateY = 0;
 let pinchStartDistance = 0, pinchStartScale = 1;
 let dragging = false, dragStartX=0,dragStartY=0,dragOriginX=0,dragOriginY=0;
 let lastTap = 0;
-
 function updateViewer(){
     viewerImg.style.setProperty("--scale",scale);
     viewerImg.style.setProperty("--move-x",`${translateX}px`);
@@ -774,12 +1032,6 @@ function updateViewer(){
 }
 function resetViewer(){
     scale=1;translateX=0;translateY=0;updateViewer();
-}
-function touchDistance(touches){
-    if(touches.length<2) return 0;
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.hypot(dx,dy);
 }
 function openViewer(src,alt){
     if(!src) return;
@@ -797,12 +1049,10 @@ function closeViewer(){
     resetViewer();
     setTimeout(()=>{if(!viewer.classList.contains("show")) viewerImg.src="";},280);
 }
-
 $("#avatar").addEventListener("click",e=>{e.stopPropagation();openViewer($("#avatarImg").src,"头像原图")});
-$("#platePhoto").addEventListener("click",e=>{e.stopPropagation();openViewer($("#platePhotoImg").src,"图片原图")});
+$("#platePhoto").addEventListener("click",e=>{e.stopPropagation();openViewer(platePhotoImg.src,"图片原图")});
 $("#viewerClose").addEventListener("click",e=>{e.stopPropagation();closeViewer()});
 viewer.addEventListener("click",e=>{if(e.target===viewer||e.target===viewerContent) closeViewer()});
-
 viewerImg.addEventListener("click",e=>{
     e.stopPropagation();
     const now = performance.now();
@@ -812,8 +1062,8 @@ viewerImg.addEventListener("click",e=>{
     }
     lastTap = now;
 });
-
 viewerContent.addEventListener("touchstart",e=>{
+    if(e.touches.length<2) pinchStartDistance=0;
     if(e.touches.length===2){
         e.preventDefault();
         pinchStartDistance = touchDistance(e.touches);
@@ -829,7 +1079,6 @@ viewerContent.addEventListener("touchstart",e=>{
         dragOriginY = translateY;
     }
 },{passive:false});
-
 viewerContent.addEventListener("touchmove",e=>{
     if(e.touches.length===2){
         e.preventDefault();
@@ -848,12 +1097,10 @@ viewerContent.addEventListener("touchmove",e=>{
         updateViewer();
     }
 },{passive:false});
-
 viewerContent.addEventListener("touchend",e=>{
     if(e.touches.length<2) pinchStartDistance=0;
     if(e.touches.length===0) dragging=false;
 },{passive:true});
-
 viewerContent.addEventListener("wheel",e=>{
     if(!viewer.classList.contains("show")) return;
     e.preventDefault();
@@ -862,13 +1109,46 @@ viewerContent.addEventListener("wheel",e=>{
     if(scale===1){ translateX=0; translateY=0; }
     updateViewer();
 },{passive:false});
-
 document.addEventListener("keydown",e=>{
     if(e.key==="Escape" && viewer.classList.contains("show")) closeViewer();
 });
 document.addEventListener("gesturestart",e=>e.preventDefault());
 document.addEventListener("gesturechange",e=>e.preventDefault());
 document.addEventListener("gestureend",e=>e.preventDefault());
+// ========== 樱花生成（高密度） ==========
+const sakuraBox = $("#sakuraBox");
+function createSakura(){
+    const sakura = document.createElement("div");
+    sakura.className = "sakura";
+    const size = Math.random()*12 +5;
+    sakura.style.width = size+"px";
+    sakura.style.height = size+"px";
+    sakura.style.left = Math.random()*100 +"%";
+    const dur = Math.random()*7 +6;
+    sakura.style.animation = `sakuraFall ${dur}s linear forwards`;
+    sakuraBox.appendChild(sakura);
+    setTimeout(()=>sakura.remove(), dur*1000);
+}
+setInterval(createSakura,120);
+// ========== 点击页面弹出渐变文字 ==========
+const textPool = ["苏FA36165","Xiaomi SU7 Pro","刘茜美子"];
+document.body.addEventListener("click",(e)=>{
+    // 过滤按钮、图片查看器，不干扰原有点击事件
+    if(e.target.closest(".app-button") || e.target.closest(".viewer") || e.target.closest("#plate") || e.target.closest(".video-controls")) return;
+    const txt = textPool[Math.floor(Math.random()*textPool.length)];
+    const span = document.createElement("div");
+    span.className = "click-text-item";
+    span.innerText = txt;
+    span.style.left = e.clientX +"px";
+    span.style.top = e.clientY +"px";
+    document.body.appendChild(span);
+    setTimeout(()=>span.remove(), 6000);
+});
+function touchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+}
 </script>
 </body>
 </html>
