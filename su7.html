@@ -421,8 +421,6 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 64px;
-      height: 64px;
       transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
@@ -437,6 +435,8 @@
       pointer-events: none;
       transition: opacity .28s ease, transform .28s cubic-bezier(0.22, 1, 0.36, 1);
       z-index: 2;
+      width: 64px;
+      height: 64px;
     }
     .video-card.playing .video-play {
       opacity: 0;
@@ -479,6 +479,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
     .control-row button {
       color: #fff;
@@ -514,7 +516,7 @@
       transform: scale(0.88);
     }
 
-    /* ===== 视频弹出播放器 (副视频 - 自适应比例) ===== */
+    /* ===== 视频弹出播放器 (副视频) ===== */
     .video-popup {
       position: fixed;
       inset: 0;
@@ -540,7 +542,6 @@
       position: relative;
       width: 100%;
       max-width: 800px;
-      /* 宽高比由JS动态设置，不再固定16:9 */
       background: #000;
       border-radius: 20px;
       overflow: hidden;
@@ -927,6 +928,7 @@
       width: 100%;
       height: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       overflow: hidden;
@@ -935,7 +937,7 @@
     .viewer-img {
       display: block;
       max-width: 94vw;
-      max-height: 86vh;
+      max-height: 80vh;
       width: auto;
       height: auto;
       object-fit: contain;
@@ -947,6 +949,7 @@
       transition: opacity .24s ease;
       will-change: transform;
       user-select: none;
+      flex-shrink: 0;
     }
     .viewer.show .viewer-img { opacity: 1; }
     .viewer-close {
@@ -969,19 +972,20 @@
       cursor: pointer;
     }
     .viewer-close:active { transform: scale(.9); }
+    /* 提示文字 - 显示在图片下方 */
     .viewer-hint {
-      position: fixed;
-      z-index: 10003;
-      left: 50%;
-      bottom: calc(22px + var(--safe-bottom));
-      transform: translateX(-50%);
+      position: relative;
+      margin-top: 16px;
       color: rgba(255, 255, 255, .7);
       font-size: 12px;
       letter-spacing: .3px;
-      white-space: nowrap;
+      text-align: center;
       text-shadow: 0 2px 6px rgba(0, 0, 0, .6);
       pointer-events: none;
       font-weight: 400;
+      flex-shrink: 0;
+      width: 100%;
+      padding: 0 20px;
     }
 
     /* ===== 点击弹字 ===== */
@@ -1017,6 +1021,11 @@
       .app-label { font-size: 10px; }
       .video-box { aspect-ratio: 16/7.8; }
       .dynamic-island { height: 32px; font-size: 12px; padding: 0 12px; }
+      .video-play { width: 50px; height: 50px; font-size: 20px; }
+    }
+
+    @media (max-width: 420px) {
+      .video-play { width: 54px; height: 54px; font-size: 22px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1039,15 +1048,15 @@
     <button class="viewer-close" id="viewerClose" type="button" aria-label="关闭图片"><i class="fa-solid fa-xmark"></i></button>
     <div class="viewer-content" id="viewerContent">
       <img class="viewer-img" id="viewerImg" src="" alt="原图预览" draggable="false">
+      <div class="viewer-hint" id="viewerHint">左右滑动切换 · 长按保存</div>
     </div>
-    <div class="viewer-hint" id="viewerHint">左右滑动切换 · 长按保存</div>
   </div>
 
   <!-- 视频弹出播放器 (副视频) -->
   <div class="video-popup" id="videoPopup">
     <div class="video-popup-inner" id="popupInner">
       <button class="video-popup-close" id="videoPopupClose"><i class="fa-solid fa-xmark"></i></button>
-      <video id="popupVideo" playsinline webkit-playsinline preload="metadata"></video>
+      <video id="popupVideo" playsinline webkit-playsinline preload="metadata" loop></video>
       <div class="video-popup-controls" id="popupControls">
         <button id="popupPrevBtn" class="popup-nav-btn"><i class="fa-solid fa-backward-step"></i></button>
         <button id="popupPlayBtn"><i class="fa-solid fa-play"></i></button>
@@ -1159,7 +1168,7 @@
       // ============================================================
       const videoList = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
-        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/6.mp4",
@@ -1167,6 +1176,7 @@
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/8.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
+
         // 在此添加更多视频链接，例如：
         // "https://example.com/video2.mp4",
         // "https://example.com/video3.mp4"
@@ -1177,21 +1187,20 @@
       // ============================================================
       const avatarImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg",
-      ];
-      "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
+"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/2.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/3.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/4.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/5.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
+      ];
 
       // ============================================================
       // 3. 右侧图片列表
       // ============================================================
       const slideImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
-      ];
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
@@ -1258,6 +1267,8 @@
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
+      ];
+
       // ============================================================
       // 以下代码为页面功能逻辑
       // ============================================================
@@ -1281,6 +1292,7 @@
       const viewer = $("#viewer");
       const viewerContent = $("#viewerContent");
       const viewerImg = $("#viewerImg");
+      const viewerHint = $("#viewerHint");
       const mainVideo = $("#mainVideo");
       const videoCard = $("#videoCard");
       const videoBox = $("#videoBox");
@@ -1433,11 +1445,9 @@
       // ===== 副视频自适应比例 =====
       function updatePopupSize(src) {
         const video = popupVideo;
-        // 如果视频已加载元数据，直接获取比例
         if (video.videoWidth > 0 && video.videoHeight > 0) {
           setPopupAspectRatio(video.videoWidth, video.videoHeight);
         } else {
-          // 否则等待 loadedmetadata 事件
           video.addEventListener('loadedmetadata', function onMeta() {
             setPopupAspectRatio(video.videoWidth, video.videoHeight);
             video.removeEventListener('loadedmetadata', onMeta);
@@ -1448,7 +1458,6 @@
       function setPopupAspectRatio(w, h) {
         if (w === 0 || h === 0) return;
         const ratio = w / h;
-        // 限制最大宽高，防止溢出屏幕
         const maxWidth = Math.min(800, window.innerWidth - 40);
         const maxHeight = Math.min(600, window.innerHeight - 100);
         let width = maxWidth;
@@ -1462,7 +1471,6 @@
         popupInner.style.maxWidth = 'none';
       }
 
-      // 窗口变化时重新调整
       window.addEventListener('resize', () => {
         if (videoPopup.classList.contains('active')) {
           const video = popupVideo;
@@ -1500,7 +1508,6 @@
         document.body.style.overflow = 'hidden';
         popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` : `<i class="fa-solid fa-volume-high"></i>`;
         popupTotalTime.textContent = formatTime(popupVideo.duration);
-        // 自适应比例
         if (popupVideo.videoWidth > 0 && popupVideo.videoHeight > 0) {
           setPopupAspectRatio(popupVideo.videoWidth, popupVideo.videoHeight);
         } else {
@@ -1535,7 +1542,6 @@
         popupClose.classList.remove("hidden-controls");
         popupControlsVisible = true;
         clearTimeout(popupHideTimer);
-        // 重置尺寸
         popupInner.style.width = '';
         popupInner.style.height = '';
       }
@@ -1663,6 +1669,15 @@
       });
 
       // ===== 弹出播放器事件 =====
+      // 副视频循环播放：通过 loop 属性实现，同时监听 ended 事件作为后备
+      popupVideo.loop = true;
+      popupVideo.addEventListener('ended', () => {
+        // 如果 loop 属性失效，手动重新播放
+        if (!popupVideo.paused) {
+          popupVideo.play().catch(() => {});
+        }
+      });
+
       popupTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
         openPopup();
@@ -1761,7 +1776,6 @@
 
       popupVideo.addEventListener('loadedmetadata', () => {
         popupTotalTime.textContent = formatTime(popupVideo.duration);
-        // 自适应比例
         if (popupVideo.videoWidth > 0 && popupVideo.videoHeight > 0) {
           setPopupAspectRatio(popupVideo.videoWidth, popupVideo.videoHeight);
         }
@@ -1817,10 +1831,6 @@
           popupClose.classList.add("hidden-controls");
           popupControlsVisible = false;
         }, POPUP_HIDE_DELAY);
-      });
-      popupVideo.addEventListener('ended', () => {
-        closePopup();
-        nextVideo();
       });
 
       // ===== 头像轮播 =====
@@ -1899,6 +1909,8 @@
         viewer.classList.add("show");
         viewer.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
+        // 更新提示文字
+        viewerHint.textContent = '左右滑动切换 · 长按保存';
       }
 
       function closeViewer() {
