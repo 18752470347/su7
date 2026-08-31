@@ -400,7 +400,7 @@
     .video-box {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 6.8;
+      aspect-ratio: 16 / 4.8;
       border-radius: 32px;
       overflow: hidden;
       background: #090D17;
@@ -2030,16 +2030,16 @@
       setInterval(updateStatusTime, 1000);
 
       // ===== 视频高度切换 =====
-      videoCard.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.video-controls') || e.target.closest('.video-popup-trigger')) return;
-        if (videoBox.classList.contains('tall')) {
-          videoBox.classList.remove('tall');
-          videoBox.classList.add('normal');
-        } else {
-          videoBox.classList.remove('normal');
-          videoBox.classList.add('tall');
-        }
-      });
+      //videoCard.addEventListener('dblclick', (e) => {
+      //if (e.target.closest('.video-controls') || e.target.closest('.video-popup-trigger')) return;
+      //if (videoBox.classList.contains('tall')) {
+      //videoBox.classList.remove('tall');
+      //videoBox.classList.add('normal');
+      //} else {
+          //videoBox.classList.remove('normal');
+          //videoBox.classList.add('tall');
+        //}
+      //});
 
       // ===== 深色模式 =====
       function applyThemeBasedOnTime() {
