@@ -13,9 +13,7 @@
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* ===== 全局重置 ===== */
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -23,7 +21,6 @@
       -moz-osx-font-smoothing: grayscale;
       -webkit-tap-highlight-color: transparent;
     }
-
     :root {
       --text-main: #1C1C1E;
       --text-sub: #3A3A3C;
@@ -56,8 +53,6 @@
       --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
-
-    /* 深色模式 */
     html.dark-mode {
       --text-main: #F5F5F7;
       --text-sub: #A1A1A6;
@@ -112,7 +107,6 @@
       --popup-overlay: rgba(0, 0, 0, 0.85);
       --glow-color: #FF2E63;
     }
-
     html {
       width: 100%;
       min-height: 100%;
@@ -121,7 +115,6 @@
       transition: background-color 0.3s ease, color 0.3s ease;
       will-change: background-color, color;
     }
-
     body {
       width: 100%;
       min-height: 100vh;
@@ -142,20 +135,8 @@
       align-items: center;
       justify-content: center;
     }
-
-    button,
-    img,
-    video {
-      -webkit-user-drag: none;
-      user-select: none;
-    }
-    button {
-      font: inherit;
-      cursor: pointer;
-      background: none;
-      border: none;
-      outline: none;
-    }
+    button, img, video { -webkit-user-drag: none; user-select: none; }
+    button { font: inherit; cursor: pointer; background: none; border: none; outline: none; }
 
     /* ===== 背景 ===== */
     .liquid-bg {
@@ -181,15 +162,9 @@
       transform: translateZ(0);
     }
     @keyframes liquidFlow {
-      0% {
-        transform: translate(0, 0) rotate(0deg) scale(1.03);
-      }
-      50% {
-        transform: translate(40px, -30px) rotate(4deg) scale(1.08);
-      }
-      100% {
-        transform: translate(-30px, 40px) rotate(-4deg) scale(1.03);
-      }
+      0% { transform: translate(0, 0) rotate(0deg) scale(1.03); }
+      50% { transform: translate(40px, -30px) rotate(4deg) scale(1.08); }
+      100% { transform: translate(-30px, 40px) rotate(-4deg) scale(1.03); }
     }
 
     /* ===== 樱花 ===== */
@@ -212,42 +187,20 @@
       transition: opacity 0.3s ease;
     }
     @keyframes sakuraFall {
-      0% {
-        transform: translateY(0) rotate(0deg) translateX(0px);
-        opacity: 0.9;
-      }
-      30% {
-        transform: translateY(30vh) rotate(240deg) translateX(20px);
-      }
-      70% {
-        transform: translateY(70vh) rotate(520deg) translateX(-20px);
-      }
-      100% {
-        transform: translateY(105vh) rotate(720deg) translateX(0px);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) rotate(0deg) translateX(0px); opacity: 0.9; }
+      30% { transform: translateY(30vh) rotate(240deg) translateX(20px); }
+      70% { transform: translateY(70vh) rotate(520deg) translateX(-20px); }
+      100% { transform: translateY(105vh) rotate(720deg) translateX(0px); opacity: 0; }
     }
 
     /* ===== 页面入场 ===== */
     @keyframes pageSpringIn {
-      from {
-        opacity: 0;
-        transform: translateY(14px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes cardSpringIn {
-      from {
-        opacity: 0;
-        transform: translateY(18px) scale(0.97);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(18px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     /* ===== 主容器 ===== */
@@ -275,7 +228,6 @@
       background: transparent;
       transition: color 0.3s ease;
     }
-
     .ios-status-bar {
       width: 100%;
       display: flex;
@@ -296,8 +248,6 @@
       font-variant-numeric: tabular-nums;
       font-size: 15px;
     }
-
-    /* ===== 灵动岛 ===== */
     .dynamic-island {
       display: inline-flex;
       align-items: center;
@@ -335,14 +285,8 @@
       animation: islandPulse 2.4s ease-in-out infinite alternate;
     }
     @keyframes islandPulse {
-      0% {
-        transform: scale(0.92);
-        opacity: 0.12;
-      }
-      100% {
-        transform: scale(1.12);
-        opacity: 0.3;
-      }
+      0% { transform: scale(0.92); opacity: 0.12; }
+      100% { transform: scale(1.12); opacity: 0.3; }
     }
     .dynamic-island::after {
       content: '';
@@ -360,14 +304,9 @@
       animation: borderPulse 2s ease-in-out infinite alternate;
     }
     @keyframes borderPulse {
-      0% {
-        opacity: 0.3;
-      }
-      100% {
-        opacity: 0.7;
-      }
+      0% { opacity: 0.3; }
+      100% { opacity: 0.7; }
     }
-
     .island-text-wrap {
       display: flex;
       align-items: center;
@@ -396,30 +335,15 @@
       animation: textRoll 0.6s var(--spring) forwards, textShine 4s ease-in-out infinite;
     }
     @keyframes textRoll {
-      0% {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      30% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(0%);
-        opacity: 1;
-      }
+      0% { transform: translateY(100%); opacity: 0; }
+      30% { opacity: 1; }
+      100% { transform: translateY(0%); opacity: 1; }
     }
     @keyframes textShine {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-
     .ios-status-right {
       flex: 1;
       display: flex;
@@ -463,7 +387,6 @@
       -webkit-object-fit: cover;
       background: #0A0A0C;
     }
-
     .video-controls {
       position: absolute;
       bottom: 0;
@@ -480,7 +403,6 @@
       opacity: 0;
       pointer-events: none;
     }
-
     .progress-track {
       width: 100%;
       height: 3px;
@@ -490,9 +412,7 @@
       margin-bottom: 10px;
       transition: height 0.15s;
     }
-    .progress-track:hover {
-      height: 5px;
-    }
+    .progress-track:hover { height: 5px; }
     .progress-fill {
       height: 100%;
       border-radius: inherit;
@@ -500,7 +420,6 @@
       width: 0%;
       transition: width 0.1s linear;
     }
-
     .controls-row {
       display: flex;
       align-items: center;
@@ -513,9 +432,7 @@
       opacity: 0.85;
       transition: opacity 0.2s;
     }
-    .controls-row button:active {
-      opacity: 0.5;
-    }
+    .controls-row button:active { opacity: 0.5; }
     .controls-time {
       margin-left: auto;
       color: #fff;
@@ -602,14 +519,8 @@
       animation: avatarPulse 2.4s ease-in-out infinite alternate;
     }
     @keyframes avatarPulse {
-      0% {
-        transform: scale(0.92);
-        opacity: 0.1;
-      }
-      100% {
-        transform: scale(1.12);
-        opacity: 0.25;
-      }
+      0% { transform: scale(0.92); opacity: 0.1; }
+      100% { transform: scale(1.12); opacity: 0.25; }
     }
     .avatar::before {
       content: '';
@@ -626,12 +537,8 @@
       padding: 2px;
     }
     @keyframes avatarRotate {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .avatar img {
       width: 100%;
@@ -644,9 +551,7 @@
       position: relative;
       z-index: 1;
     }
-    .avatar:active img {
-      transform: scale(0.92);
-    }
+    .avatar:active img { transform: scale(0.92); }
 
     .plate {
       padding: 4px 14px;
@@ -661,9 +566,7 @@
       cursor: pointer;
       transition: transform 0.18s var(--spring);
     }
-    .plate:active {
-      transform: scale(0.93);
-    }
+    .plate:active { transform: scale(0.93); }
 
     .name {
       font-size: 13px;
@@ -682,17 +585,10 @@
       text-overflow: ellipsis;
     }
     @keyframes textGradient {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-
     .subtitle {
       font-size: 11px;
       font-weight: 600;
@@ -716,9 +612,7 @@
       transition: transform 0.2s var(--spring);
       position: relative;
     }
-    .plate-photo:active {
-      transform: scale(0.93);
-    }
+    .plate-photo:active { transform: scale(0.93); }
     .plate-photo img {
       width: 100%;
       aspect-ratio: 9 / 16;
@@ -749,9 +643,7 @@
       -webkit-user-select: none;
       user-select: none;
     }
-    .apps-page[data-page="1"] {
-      display: none;
-    }
+    .apps-page[data-page="1"] { display: none; }
 
     .app-button {
       --icon-color: #007AFF;
@@ -787,12 +679,8 @@
       transform: scale(0.88);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
-    .app-button.loading .app-icon-wrap {
-      opacity: 0.6;
-    }
-    .app-button.loading .app-label {
-      font-size: 9px;
-    }
+    .app-button.loading .app-icon-wrap { opacity: 0.6; }
+    .app-button.loading .app-label { font-size: 9px; }
     .app-label {
       font-size: 10px;
       font-weight: 500;
@@ -828,7 +716,7 @@
       transform: translate(-50%, 0) scale(1);
     }
 
-    /* ===== 图片查看器 (无指示器) ===== */
+    /* ===== 图片查看器 ===== */
     .viewer {
       position: fixed;
       inset: 0;
@@ -871,9 +759,7 @@
       -webkit-user-select: none;
       touch-action: none;
     }
-    .viewer.show .viewer-img {
-      opacity: 1;
-    }
+    .viewer.show .viewer-img { opacity: 1; }
     .viewer-close {
       position: fixed;
       top: calc(16px + var(--safe-top));
@@ -921,17 +807,9 @@
       will-change: transform, opacity;
     }
     @keyframes popFloat {
-      0% {
-        transform: translateY(0) scale(1.1);
-        opacity: 1;
-      }
-      40% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-150px) scale(0.7);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(1.1); opacity: 1; }
+      40% { opacity: 1; }
+      100% { transform: translateY(-150px) scale(0.7); opacity: 0; }
     }
 
     /* ===== 跳转遮罩 ===== */
@@ -950,9 +828,7 @@
       transition: opacity 0.5s var(--ease);
     }
     @supports not (backdrop-filter: blur(10px)) {
-      .jump-overlay {
-        background: rgba(0, 0, 0, 0.7);
-      }
+      .jump-overlay { background: rgba(0, 0, 0, 0.7); }
     }
     .jump-overlay.active {
       opacity: 1;
@@ -994,15 +870,9 @@
       transform: translateY(0);
     }
     @keyframes spin {
-      0% {
-        transform: rotate(0deg) scale(1);
-      }
-      50% {
-        transform: rotate(180deg) scale(1.06);
-      }
-      100% {
-        transform: rotate(360deg) scale(1);
-      }
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.06); }
+      100% { transform: rotate(360deg) scale(1); }
     }
 
     /* ===== 视频弹出播放器 ===== */
@@ -1042,11 +912,20 @@
       transform: scale(1);
     }
     .popup-inner video {
-      width: 100%;
-      height: 100%;
       display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
       object-fit: contain;
-      aspect-ratio: 16/9;
+      background: #000;
+    }
+    /* 适配不同视频比例，自动撑开 */
+    .popup-inner video {
+      aspect-ratio: auto;
+      height: auto;
+      max-height: 80vh;
+      width: 100%;
+      object-fit: contain;
     }
     .popup-close {
       position: absolute;
@@ -1102,9 +981,7 @@
       padding: 4px;
       opacity: 0.85;
     }
-    .popup-controls button:active {
-      opacity: 0.5;
-    }
+    .popup-controls button:active { opacity: 0.5; }
     .popup-progress-wrap {
       flex: 1;
       height: 3px;
@@ -1125,82 +1002,35 @@
       min-width: 90px;
       text-align: right;
     }
-    .popup-nav-btn {
-      font-size: 16px !important;
-    }
+    .popup-nav-btn { font-size: 16px !important; }
 
     /* ===== 小屏适配 ===== */
     @media (max-width: 380px) {
-      .app-container {
-        padding: 12px 12px 16px;
-        gap: 10px;
-      }
-      .main-card {
-        padding: 20px 14px 22px;
-      }
-      .avatar {
-        width: 56px;
-        height: 56px;
-      }
-      .plate-photo {
-        width: 84px;
-      }
-      .plate {
-        font-size: 14px;
-        padding: 3px 12px;
-      }
-      .name {
-        font-size: 12px;
-      }
-      .subtitle {
-        font-size: 10px;
-      }
-      .app-icon-wrap {
-        width: 48px;
-        height: 48px;
-        font-size: 17px;
-      }
-      .app-label {
-        font-size: 9px;
-      }
-      .apps-page {
-        gap: 12px 6px;
-      }
-      .dynamic-island {
-        height: 30px;
-        font-size: 11px;
-        padding: 0 12px;
-      }
+      .app-container { padding: 12px 12px 16px; gap: 10px; }
+      .main-card { padding: 20px 14px 22px; }
+      .avatar { width: 56px; height: 56px; }
+      .plate-photo { width: 84px; }
+      .plate { font-size: 14px; padding: 3px 12px; }
+      .name { font-size: 12px; }
+      .subtitle { font-size: 10px; }
+      .app-icon-wrap { width: 48px; height: 48px; font-size: 17px; }
+      .app-label { font-size: 9px; }
+      .apps-page { gap: 12px 6px; }
+      .dynamic-island { height: 30px; font-size: 11px; padding: 0 12px; }
     }
-
     @media (max-width: 360px) {
-      .plate-photo {
-        width: 72px;
-      }
-      .profile-row {
-        gap: 10px;
-      }
+      .plate-photo { width: 72px; }
+      .profile-row { gap: 10px; }
     }
-
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
+      *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .liquid-gradient,
-      .sakura {
-        display: none;
-      }
+      .liquid-gradient, .sakura { display: none; }
     }
-
-    ::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-      background: transparent;
-    }
+    ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
   </style>
 </head>
 <body>
@@ -1366,12 +1196,12 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/6.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/7.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/8.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/6.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/7.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/8.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
       ];
 
       const avatarImages = [
@@ -1379,10 +1209,10 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/2.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/3.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/4.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/5.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/4.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/5.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
       ];
 
       const slideImages = [
@@ -1390,72 +1220,72 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/4.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/5.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/6.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/7.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/8.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/9.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/11.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/12.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/13.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/14.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/15.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/16.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/17.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/18.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/19.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/20.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/21.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/22.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/23.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/24.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/25.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/26.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/27.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/28.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/29.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/30.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/31.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/32.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/33.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/34.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/35.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/36.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/37.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/38.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/39.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/40.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/41.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/43.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/42.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/44.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/45.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/46.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/47.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/48.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/49.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/50.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/51.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/52.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/53.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/54.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/55.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/56.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/57.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/58.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/59.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/60.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/61.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/62.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/63.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
-"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/4.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/5.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/6.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/7.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/8.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/9.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/11.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/12.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/13.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/14.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/15.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/16.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/17.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/18.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/19.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/20.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/21.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/22.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/23.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/24.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/25.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/26.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/27.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/28.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/29.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/30.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/31.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/32.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/33.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/34.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/35.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/36.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/37.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/38.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/39.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/40.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/41.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/43.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/42.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/44.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/45.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/46.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/47.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/48.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/49.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/50.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/51.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/52.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/53.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/54.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/55.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/56.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/57.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/58.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/59.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/60.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/61.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/62.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/63.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
+        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
       ];
 
       const APP_CONFIG = {
@@ -1940,6 +1770,7 @@
       // ============================================================
       // 弹出播放器事件
       // ============================================================
+      // 移除 loop 属性，使用 ended 事件处理
       popupVideo.removeAttribute('loop');
       popupVideo.addEventListener('ended', () => {
         if (videoList.length > 0) {
