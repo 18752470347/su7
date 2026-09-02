@@ -233,7 +233,7 @@
       font-size: 14px;
     }
 
-    /* ===== 灵动岛 - 移除呼吸，边框加黑 ===== */
+    /* ===== 灵动岛 ===== */
     .dynamic-island {
       display: inline-flex;
       align-items: center;
@@ -261,11 +261,6 @@
     html.light-mode .dynamic-island {
       border-color: #555;
     }
-    /* 移除呼吸灯光晕 */
-    .dynamic-island .island-glow {
-      display: none;
-    }
-    /* 保留3D顶部高光 */
     .dynamic-island::before {
       content: '';
       position: absolute;
@@ -278,7 +273,9 @@
       pointer-events: none;
       z-index: 2;
     }
-    /* 移除边框脉冲动画 */
+    .dynamic-island .island-glow {
+      display: none;
+    }
     .dynamic-island::after {
       display: none;
     }
@@ -484,7 +481,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* ===== 炫酷主题切换按钮 ===== */
+    /* ===== 主题切换按钮 ===== */
     .theme-toggle {
       position: absolute;
       top: 12px;
@@ -509,7 +506,6 @@
       position: relative;
       overflow: hidden;
     }
-    /* 按钮光晕特效 */
     .theme-toggle::before {
       content: '';
       position: absolute;
@@ -568,7 +564,7 @@
       align-items: center;
     }
 
-    /* ===== Avatar - 3D翻转效果（左右翻转） ===== */
+    /* ===== Avatar ===== */
     .avatar {
       position: relative;
       width: 68px;
@@ -678,7 +674,7 @@
       backface-visibility: hidden;
     }
 
-    /* ===== 右侧图片 - 3D翻转效果（上下翻转） ===== */
+    /* ===== 右侧图片 ===== */
     .plate-photo {
       width: 92px;
       flex-shrink: 0;
@@ -1219,7 +1215,7 @@
     <!-- 主卡片 -->
     <div class="main-card-container">
       <div class="main-card">
-        <!-- 炫酷主题切换按钮 -->
+        <!-- 主题切换按钮 -->
         <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式">
           <i class="fa-solid fa-moon" id="themeIcon"></i>
         </button>
@@ -1490,7 +1486,7 @@
       themeToggle.addEventListener('click', toggleTheme);
 
       // ============================================================
-      // 粒子背景 - 随机颜色渐变
+      // 粒子背景
       // ============================================================
       const canvas = document.getElementById('particles-canvas');
       const ctx = canvas.getContext('2d');
@@ -1639,7 +1635,7 @@
       ensureSakura();
 
       // ============================================================
-      // 灵动岛文字 - 轮播
+      // 灵动岛文字轮播
       // ============================================================
       const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
@@ -1664,7 +1660,7 @@
       setTimeout(updateGlow, 50);
 
       // ============================================================
-      // 头像 & 图片轮播 - 不同3D翻转动画
+      // 头像 & 图片轮播
       // ============================================================
       function animateAvatar(newSrc) {
         if (isFlipping) return;
@@ -2031,6 +2027,7 @@
         toggleVideo();
       });
 
+      // 点击视频区域切换控件显示/隐藏
       videoBox.addEventListener("click", function(e) {
         if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) {
           return;
@@ -2132,8 +2129,37 @@
         }
       });
 
-      mainVideo.addEventListener("ended", () => {
-        nextVideo();
+      mainVideo.addEventListener("ended", function() {
+        // 视频结束时自动播放下一个
+        if (videoList.length > 0) {
+          currentVideoIndex = (currentVideoIndex + 1) % videoList.length;
+          const src = videoList[currentVideoIndex];
+          mainVideo.src = src;
+          progressFill.style.width = '0%';
+          curTime.textContent = '00:00';
+          // 播放完成后自动播放下一个
+          mainVideo.play().catch(() => showToastMsg("请手动播放"));
+          // 同步弹出播放器
+          if (videoPopup.classList.contains('active')) {
+            popupVideo.src = src;
+            popupVideo.play().catch(() => {});
+          }
+          // 更新UI
+          updateCenterPlayBtn();
+          updatePlayBtnIcon();
+          // 显示控件并设置自动隐藏
+          videoControls.classList.remove('hidden');
+          centerPlayBtn.classList.remove('hidden');
+          controlsVisible = true;
+          clearTimeout(hideControlTimer);
+          hideControlTimer = setTimeout(() => {
+            videoControls.classList.add("hidden");
+            controlsVisible = false;
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add("hidden");
+            }
+          }, HIDE_DELAY);
+        }
       });
 
       // ============================================================
@@ -2162,6 +2188,18 @@
             popupClose.classList.add("hidden");
             popupControlsVisible = false;
           }, POPUP_HIDE_DELAY);
+          // 主视频控件自动隐藏
+          videoControls.classList.remove('hidden');
+          centerPlayBtn.classList.remove('hidden');
+          controlsVisible = true;
+          clearTimeout(hideControlTimer);
+          hideControlTimer = setTimeout(() => {
+            videoControls.classList.add("hidden");
+            controlsVisible = false;
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add("hidden");
+            }
+          }, HIDE_DELAY);
         }
       });
 
@@ -2222,6 +2260,18 @@
           popupClose.classList.add("hidden");
           popupControlsVisible = false;
         }, POPUP_HIDE_DELAY);
+        // 主视频控件自动隐藏
+        videoControls.classList.remove('hidden');
+        centerPlayBtn.classList.remove('hidden');
+        controlsVisible = true;
+        clearTimeout(hideControlTimer);
+        hideControlTimer = setTimeout(() => {
+          videoControls.classList.add("hidden");
+          controlsVisible = false;
+          if (!mainVideo.paused) {
+            centerPlayBtn.classList.add("hidden");
+          }
+        }, HIDE_DELAY);
       });
 
       popupNextBtn.addEventListener('click', (e) => {
@@ -2246,6 +2296,18 @@
           popupClose.classList.add("hidden");
           popupControlsVisible = false;
         }, POPUP_HIDE_DELAY);
+        // 主视频控件自动隐藏
+        videoControls.classList.remove('hidden');
+        centerPlayBtn.classList.remove('hidden');
+        controlsVisible = true;
+        clearTimeout(hideControlTimer);
+        hideControlTimer = setTimeout(() => {
+          videoControls.classList.add("hidden");
+          controlsVisible = false;
+          if (!mainVideo.paused) {
+            centerPlayBtn.classList.add("hidden");
+          }
+        }, HIDE_DELAY);
       });
 
       popupMuteBtn.addEventListener('click', (e) => {
@@ -2499,7 +2561,7 @@
       });
 
       // ============================================================
-      // 点击弹字 - 随机渐变
+      // 点击弹字
       // ============================================================
       const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "刘亦菲", "亦菲"];
       document.body.addEventListener("click", (e) => {
