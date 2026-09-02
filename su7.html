@@ -1607,19 +1607,21 @@
       }
       ensureSakura();
 
-      // ===== 灵动岛：由下向上滚动 =====
+      // ===== 灵动岛：由下向上滚动 循环 =====
       const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
       function rollIsland() {
         tidx = (tidx + 1) % textPool.length;
         islandText.textContent = textPool[tidx];
-        // 触发重新动画
+        // 重置动画以实现循环
         islandText.style.animation = 'none';
         void islandText.offsetWidth;
         islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 3s ease-in-out infinite';
       }
+      // 初始化：设置文字并启动动画
       islandText.textContent = textPool[0];
       islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 3s ease-in-out infinite';
+      // 每3.5秒切换一次文字（滚动动画周期3秒，留0.5秒缓冲）
       textRollInterval = setInterval(rollIsland, 3500);
 
       // ===== 呼吸灯 =====
