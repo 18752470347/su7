@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#0A0A0C">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
   <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -54,12 +54,40 @@
       --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
+    /* ===== 浅色模式变量 ===== */
+    html.light-mode {
+      --text-main: #1C1C1E;
+      --text-sub: #3A3A3C;
+      --text-muted: #8E8E93;
+      --bg-primary: #F2F2F7;
+      --bg-secondary: rgba(255, 255, 255, 0.75);
+      --glass-bg: rgba(255, 255, 255, 0.48);
+      --glass-border: rgba(255, 255, 255, 0.60);
+      --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --icon-bg: rgba(255, 255, 255, 0.7);
+      --status-color: #1C1C1E;
+      --toast-bg: rgba(20, 22, 28, 0.78);
+      --viewer-bg: rgba(0, 0, 0, 0.85);
+      --plate-bg: linear-gradient(135deg, #34C759, #28A745);
+      --name-gradient: linear-gradient(90deg, #FF5C93, #C84870, #4A8DFF, #FF5C93);
+      --sub-gradient: linear-gradient(90deg, #FF6D9C, #558EFF);
+      --liquid-gradient: radial-gradient(ellipse at 15% 10%, rgba(120, 170, 255, 0.30), transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(255, 160, 200, 0.25), transparent 55%),
+        radial-gradient(ellipse at 20% 85%, rgba(110, 230, 200, 0.22), transparent 55%),
+        radial-gradient(ellipse at 80% 88%, rgba(190, 160, 255, 0.28), transparent 55%);
+      --island-bg: rgba(255, 255, 255, 0.8);
+      --island-text: #1C1C1E;
+      --popup-overlay: rgba(0, 0, 0, 0.85);
+      --glow-color: #FF2E63;
+    }
+
     html {
       width: 100%;
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
       background-color: #0A0A0C;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     body {
       width: 100%;
@@ -68,7 +96,7 @@
       overflow-x: hidden;
       overflow-y: auto;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
-      background: #0A0A0C;
+      background: var(--bg-primary);
       -webkit-touch-callout: none;
       overscroll-behavior: none;
       user-select: none;
@@ -79,6 +107,7 @@
       align-items: center;
       justify-content: center;
       -webkit-overflow-scrolling: touch;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     button, img, video { -webkit-user-drag: none; user-select: none; }
     button { font: inherit; cursor: pointer; background: none; border: none; outline: none; }
@@ -115,6 +144,7 @@
       will-change: transform;
       transform: translateZ(0);
       animation: liquidFlow 18s ease-in-out infinite alternate;
+      transition: background 0.6s ease;
     }
     @keyframes liquidFlow {
       0% { transform: translate(0, 0) rotate(0deg) scale(1.02); }
@@ -185,6 +215,7 @@
       font-weight: 600;
       color: var(--status-color);
       min-height: 36px;
+      transition: color 0.3s ease;
     }
     .ios-status-left {
       flex: 1;
@@ -194,7 +225,7 @@
       font-size: 14px;
     }
 
-    /* ===== 灵动岛 - 3D效果 + 快速呼吸灯 ===== */
+    /* ===== 灵动岛 ===== */
     .dynamic-island {
       display: inline-flex;
       align-items: center;
@@ -202,9 +233,9 @@
       height: 32px;
       padding: 0 16px;
       min-width: 56px;
-      background: rgba(20, 20, 24, 0.85);
+      background: var(--island-bg);
       border-radius: 20px;
-      color: #fff;
+      color: var(--island-text);
       font-size: 11px;
       font-weight: 500;
       backdrop-filter: blur(12px);
@@ -217,8 +248,8 @@
       position: relative;
       transform: perspective(600px) rotateX(2deg) rotateY(-1deg) translateZ(4px);
       box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1);
+      transition: background 0.3s ease, color 0.3s ease;
     }
-    /* 灵动岛3D光效 - 顶部高光 */
     .dynamic-island::before {
       content: '';
       position: absolute;
@@ -231,7 +262,6 @@
       pointer-events: none;
       z-index: 2;
     }
-    /* 灵动岛呼吸灯 - 外层光晕（更快） */
     .dynamic-island::after {
       content: '';
       position: absolute;
@@ -245,12 +275,12 @@
       pointer-events: none;
       opacity: 0.6;
       animation: borderBreathFast 0.9s ease-in-out infinite alternate;
+      transition: background 0.3s ease;
     }
     @keyframes borderBreathFast {
       0% { opacity: 0.2; transform: scale(0.92); }
       100% { opacity: 0.9; transform: scale(1.08); }
     }
-    /* 额外光晕脉冲 - 更快 */
     .dynamic-island .island-glow {
       position: absolute;
       inset: -8px;
@@ -260,6 +290,7 @@
       z-index: -1;
       filter: blur(16px);
       animation: glowPulseFast 0.8s ease-in-out infinite alternate;
+      transition: background 0.3s ease;
     }
     @keyframes glowPulseFast {
       0% { transform: scale(0.7); opacity: 0.1; filter: blur(10px); }
@@ -298,6 +329,7 @@
       height: 11px;
       fill: var(--status-color);
       flex-shrink: 0;
+      transition: fill 0.3s ease;
     }
 
     /* ===== 视频卡片 ===== */
@@ -433,6 +465,7 @@
       width: 100%;
       flex-shrink: 0;
       animation: cardSpringIn .6s var(--ease) 0.18s both;
+      position: relative;
     }
     .main-card {
       width: 100%;
@@ -444,7 +477,7 @@
       backdrop-filter: blur(16px) saturate(180%);
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       overflow: visible;
-      transition: box-shadow 0.3s ease;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
       transform: translateZ(0);
       position: relative;
     }
@@ -458,10 +491,41 @@
       z-index: -1;
       animation: borderGlow 8s linear infinite;
       filter: blur(6px);
+      transition: background 0.3s ease;
     }
     @keyframes borderGlow {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+
+    /* ===== 深色/浅色模式切换开关 ===== */
+    .theme-toggle {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 20;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      color: var(--text-main);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s var(--spring), background 0.3s ease, color 0.3s ease;
+      will-change: transform;
+    }
+    .theme-toggle:active {
+      transform: scale(0.88);
+    }
+    .theme-toggle:hover {
+      transform: scale(1.05);
     }
 
     /* ===== Profile Row ===== */
@@ -472,6 +536,7 @@
       gap: 12px;
       width: 100%;
       flex-shrink: 0;
+      padding-top: 8px;
     }
     .profile-left {
       min-width: 0;
@@ -480,7 +545,7 @@
       align-items: center;
     }
 
-    /* ===== Avatar - 增强呼吸灯效果 ===== */
+    /* ===== Avatar ===== */
     .avatar {
       position: relative;
       width: 68px;
@@ -491,7 +556,6 @@
       flex-shrink: 0;
       perspective: 800px;
     }
-    /* 外层光晕 */
     .avatar::before {
       content: '';
       position: absolute;
@@ -503,12 +567,12 @@
       filter: blur(24px);
       animation: glowPulse 1.8s ease-in-out infinite alternate;
       transform: scale(0.8);
+      transition: background 0.3s ease;
     }
     @keyframes glowPulse {
       0% { transform: scale(0.7); opacity: 0.3; filter: blur(20px); }
       100% { transform: scale(1.4); opacity: 0.8; filter: blur(35px); }
     }
-    /* 第二层光晕 - 更柔和 */
     .avatar::after {
       content: '';
       position: absolute;
@@ -520,6 +584,7 @@
       filter: blur(40px);
       animation: glowPulse2 2.2s ease-in-out infinite alternate;
       transform: scale(0.6);
+      transition: background 0.3s ease;
     }
     @keyframes glowPulse2 {
       0% { transform: scale(0.5); opacity: 0.2; filter: blur(30px); }
@@ -537,7 +602,6 @@
     .avatar-inner.flipping {
       transform: rotateY(180deg);
     }
-    /* 旋转边框 - 更亮更明显 */
     .avatar-ring {
       position: absolute;
       inset: -4px;
@@ -548,13 +612,13 @@
       z-index: -1;
       opacity: 0.9;
       box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+      transition: background 0.3s ease;
     }
     @keyframes ringRotate {
       0% { transform: rotate(0deg) scale(1); }
       50% { transform: rotate(180deg) scale(1.08); }
       100% { transform: rotate(360deg) scale(1); }
     }
-    /* 第二层旋转边框 - 反向更炫 */
     .avatar-ring-2 {
       position: absolute;
       inset: -8px;
@@ -564,6 +628,7 @@
       filter: blur(6px);
       z-index: -2;
       opacity: 0.5;
+      transition: background 0.3s ease;
     }
     @keyframes ringRotate2 {
       0% { transform: rotate(0deg) scale(0.9); }
@@ -590,7 +655,7 @@
       backface-visibility: hidden;
     }
 
-    /* ===== 右侧图片 - 3D翻转效果 ===== */
+    /* ===== 右侧图片 ===== */
     .plate-photo {
       width: 92px;
       flex-shrink: 0;
@@ -628,7 +693,6 @@
       transform: rotateY(180deg);
       backface-visibility: hidden;
     }
-    /* 图片光晕 */
     .plate-photo::after {
       content: '';
       position: absolute;
@@ -639,6 +703,7 @@
       z-index: -1;
       filter: blur(10px);
       animation: ringRotate 4s linear infinite;
+      transition: background 0.3s ease;
     }
 
     /* ===== 车牌 ===== */
@@ -653,7 +718,7 @@
       box-shadow: 0 3px 18px rgba(0, 212, 255, 0.20);
       border: 0.5px solid rgba(255,255,255,0.10);
       cursor: pointer;
-      transition: transform 0.15s var(--spring);
+      transition: transform 0.15s var(--spring), background 0.3s ease;
       position: relative;
       overflow: hidden;
     }
@@ -687,6 +752,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: background 0.3s ease;
     }
     @keyframes textGradient {
       0% { background-position: 0% 50%; }
@@ -705,6 +771,7 @@
       color: transparent;
       animation: textGradientSub 3.5s ease-in-out infinite;
       line-height: 1.4;
+      transition: background 0.3s ease;
     }
     @keyframes textGradientSub {
       0% { background-position: 0% 50%; }
@@ -763,7 +830,7 @@
       backdrop-filter: blur(12px) saturate(170%);
       -webkit-backdrop-filter: blur(12px) saturate(170%);
       border: 0.5px solid rgba(255,255,255,0.04);
-      transition: transform 0.15s var(--spring), box-shadow 0.3s ease;
+      transition: transform 0.15s var(--spring), box-shadow 0.3s ease, background 0.3s ease;
       z-index: 10;
     }
     .app-icon-wrap::after {
@@ -791,6 +858,7 @@
       text-align: center;
       line-height: 1.2;
       letter-spacing: 0.1px;
+      transition: color 0.3s ease;
     }
 
     /* ===== Toast ===== */
@@ -899,7 +967,7 @@
     }
     .viewer.show .viewer-counter { opacity: 1; }
 
-    /* ===== 点击弹字 - 随机渐变 ===== */
+    /* ===== 点击弹字 ===== */
     .click-text-item {
       position: fixed;
       z-index: 10002;
@@ -1021,6 +1089,7 @@
       .apps-page { gap: 10px 4px; }
       .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 48px; }
       .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 28px); }
+      .theme-toggle { width: 38px; height: 38px; font-size: 15px; top: 8px; left: 8px; }
     }
     @media (max-width: 360px) {
       .plate-photo { width: 68px; }
@@ -1128,6 +1197,11 @@
     <!-- 主卡片 -->
     <div class="main-card-container">
       <div class="main-card">
+        <!-- 深色/浅色模式切换开关 -->
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
         <div class="profile-row">
           <div class="profile-left">
             <!-- 增强版头像 -->
@@ -1344,6 +1418,8 @@
       const islandText = $("#islandText");
       const mainCard = $(".main-card");
       const expandBtn = $("#expandBtn");
+      const themeToggle = $("#themeToggle");
+      const themeIcon = $("#themeIcon");
 
       // 弹出播放器
       const videoPopup = $("#videoPopup");
@@ -1361,6 +1437,38 @@
       const popupControls = $("#popupControls");
 
       // ============================================================
+      // 深色/浅色模式切换
+      // ============================================================
+      function toggleTheme() {
+        const html = document.documentElement;
+        const isLight = html.classList.contains('light-mode');
+        if (isLight) {
+          html.classList.remove('light-mode');
+          html.classList.add('dark-mode');
+          themeIcon.className = 'fa-solid fa-moon';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
+          showToastMsg('🌙 已切换到深色模式');
+        } else {
+          html.classList.remove('dark-mode');
+          html.classList.add('light-mode');
+          themeIcon.className = 'fa-solid fa-sun';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
+          showToastMsg('☀️ 已切换到浅色模式');
+        }
+      }
+
+      // 初始化主题
+      (function initTheme() {
+        const html = document.documentElement;
+        // 默认深色模式
+        html.classList.add('dark-mode');
+        themeIcon.className = 'fa-solid fa-moon';
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
+      })();
+
+      themeToggle.addEventListener('click', toggleTheme);
+
+      // ============================================================
       // 粒子背景 - 随机颜色渐变
       // ============================================================
       const canvas = document.getElementById('particles-canvas');
@@ -1368,6 +1476,7 @@
       let particles = [];
       let w, h;
       let hueOffset = 0;
+      let animFrameId = null;
 
       function resizeCanvas() {
         w = canvas.width = window.innerWidth;
@@ -1409,14 +1518,17 @@
         }
       }
 
-      for (let i = 0; i < 120; i++) {
+      for (let i = 0; i < 100; i++) {
         particles.push(new Particle());
       }
 
       function animateParticles() {
         ctx.clearRect(0, 0, w, h);
         hueOffset = (hueOffset + 0.1) % 360;
-        particles.forEach(p => { p.update(); p.draw(); });
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+        }
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
@@ -1434,7 +1546,7 @@
             }
           }
         }
-        requestAnimationFrame(animateParticles);
+        animFrameId = requestAnimationFrame(animateParticles);
       }
       animateParticles();
 
@@ -2358,7 +2470,7 @@
       });
 
       // ============================================================
-      // 点击弹字 - 随机渐变 + 刘亦菲文字
+      // 点击弹字 - 随机渐变
       // ============================================================
       const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "刘亦菲", "亦菲"];
       document.body.addEventListener("click", (e) => {
@@ -2366,14 +2478,13 @@
           e.target.closest("#plate") || e.target.closest(".video-controls") ||
           e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
           e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
-          e.target.closest(".center-play-btn")) return;
+          e.target.closest(".center-play-btn") || e.target.closest(".theme-toggle")) return;
         
         const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
         const el = document.createElement("div");
         el.className = "click-text-item";
         el.textContent = txt;
         
-        // 随机生成渐变色
         const colors = [
           ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'],
           ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF'],
@@ -2406,11 +2517,6 @@
       setInterval(updateTime, 1000);
 
       // ============================================================
-      // 深色模式（固定深色炫酷）
-      // ============================================================
-      document.documentElement.classList.add('dark-mode');
-
-      // ============================================================
       // 启动
       // ============================================================
       setTimeout(() => {
@@ -2440,6 +2546,7 @@
         if (avatarTimer) clearInterval(avatarTimer);
         if (slideTimer) clearInterval(slideTimer);
         stopViewerAutoPlay();
+        if (animFrameId) cancelAnimationFrame(animFrameId);
       });
     })();
   </script>
