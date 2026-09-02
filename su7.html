@@ -277,7 +277,7 @@
       background: #0A0A0C;
     }
 
-    /* ===== 中央播放按钮（自适应大小） ===== */
+    /* ===== 中央播放按钮 ===== */
     .center-play-btn {
       position: absolute;
       top: 50%;
@@ -428,58 +428,165 @@
       align-items: center;
     }
 
-    /* ===== Avatar ===== */
+    /* ===== Avatar - 增强呼吸灯效果 ===== */
     .avatar {
       position: relative;
-      width: 60px;
-      height: 60px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       cursor: zoom-in;
       flex-shrink: 0;
+      perspective: 800px;
     }
+    /* 外层光晕 */
+    .avatar::before {
+      content: '';
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+      opacity: 0.5;
+      z-index: -1;
+      filter: blur(24px);
+      animation: glowPulse 1.8s ease-in-out infinite alternate;
+      transform: scale(0.8);
+    }
+    @keyframes glowPulse {
+      0% { transform: scale(0.7); opacity: 0.3; filter: blur(20px); }
+      100% { transform: scale(1.4); opacity: 0.8; filter: blur(35px); }
+    }
+    /* 第二层光晕 - 更柔和 */
     .avatar::after {
       content: '';
       position: absolute;
       inset: -8px;
       border-radius: 50%;
-      background: var(--glow-color);
-      opacity: 0.10;
-      filter: blur(14px);
+      background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
+      opacity: 0.6;
       z-index: -1;
-      animation: avatarPulse 2.8s ease-in-out infinite alternate;
+      filter: blur(40px);
+      animation: glowPulse2 2.2s ease-in-out infinite alternate;
+      transform: scale(0.6);
     }
-    @keyframes avatarPulse {
-      0% { transform: scale(0.94); opacity: 0.08; }
-      100% { transform: scale(1.10); opacity: 0.18; }
+    @keyframes glowPulse2 {
+      0% { transform: scale(0.5); opacity: 0.2; filter: blur(30px); }
+      100% { transform: scale(1.6); opacity: 0.7; filter: blur(50px); }
     }
-    .avatar::before {
-      content: '';
+
+    .avatar-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+    }
+    .avatar-inner.flipping {
+      transform: rotateY(180deg);
+    }
+    /* 旋转边框 - 更亮更明显 */
+    .avatar-ring {
       position: absolute;
-      inset: -2px;
+      inset: -4px;
       border-radius: 50%;
       background: conic-gradient(from 0deg, var(--glow-color), #FFD046, #00D4FF, #7B61FF, var(--glow-color));
-      animation: avatarRotate 4s linear infinite;
-      filter: blur(2px);
+      animation: ringRotate 2.5s linear infinite;
+      filter: blur(3px);
       z-index: -1;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      padding: 2px;
+      opacity: 0.9;
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
     }
-    @keyframes avatarRotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes ringRotate {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.08); }
+      100% { transform: rotate(360deg) scale(1); }
     }
+    /* 第二层旋转边框 - 反向更炫 */
+    .avatar-ring-2 {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg, #7B61FF, #00D4FF, #FF6B9E, #7B61FF);
+      animation: ringRotate2 3.2s linear infinite reverse;
+      filter: blur(6px);
+      z-index: -2;
+      opacity: 0.5;
+    }
+    @keyframes ringRotate2 {
+      0% { transform: rotate(0deg) scale(0.9); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(0.9); }
+    }
+
     .avatar img {
       width: 100%;
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.12);
-      box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+      border: 2.5px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
       position: relative;
       z-index: 1;
+      backface-visibility: hidden;
+    }
+    .avatar img.back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotateY(180deg);
+      backface-visibility: hidden;
+    }
+
+    /* ===== 右侧图片 - 3D翻转效果 ===== */
+    .plate-photo {
+      width: 92px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      overflow: visible;
+      cursor: zoom-in;
+      perspective: 800px;
+      position: relative;
+    }
+    .plate-photo-inner {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .plate-photo-inner.flipping {
+      transform: rotateY(180deg);
+    }
+    .plate-photo-inner img {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      object-fit: cover;
+      -webkit-object-fit: cover;
+      display: block;
+      border-radius: 12px;
+      backface-visibility: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .plate-photo-inner img.back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotateY(180deg);
+      backface-visibility: hidden;
+    }
+    /* 图片光晕 */
+    .plate-photo::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 16px;
+      background: conic-gradient(from 0deg, var(--glow-color), #7B61FF, #00D4FF, var(--glow-color));
+      opacity: 0.15;
+      z-index: -1;
+      filter: blur(10px);
+      animation: ringRotate 4s linear infinite;
     }
 
     /* ===== 车牌 ===== */
@@ -544,26 +651,6 @@
       background-clip: text;
       color: transparent;
       line-height: 1.4;
-    }
-
-    /* ===== 右侧图片 ===== */
-    .plate-photo {
-      width: 88px;
-      flex-shrink: 0;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: zoom-in;
-      box-shadow: 0 3px 16px rgba(0,0,0,0.3);
-      border: 0.5px solid rgba(255,255,255,0.04);
-      transition: transform 0.15s var(--spring);
-    }
-    .plate-photo:active { transform: scale(0.94); }
-    .plate-photo img {
-      width: 100%;
-      aspect-ratio: 9 / 16;
-      object-fit: cover;
-      -webkit-object-fit: cover;
-      display: block;
     }
 
     /* ===== APP宫格 ===== */
@@ -861,8 +948,8 @@
     @media (max-width: 380px) {
       .app-container { padding: 10px 12px 14px; gap: 10px; }
       .main-card { padding: 16px 12px 18px; }
-      .avatar { width: 52px; height: 52px; }
-      .plate-photo { width: 72px; }
+      .avatar { width: 56px; height: 56px; }
+      .plate-photo { width: 76px; }
       .plate { font-size: 13px; padding: 2px 12px; }
       .name { font-size: 11px; }
       .subtitle { font-size: 9px; }
@@ -873,7 +960,7 @@
       .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 28px); }
     }
     @media (max-width: 360px) {
-      .plate-photo { width: 64px; }
+      .plate-photo { width: 68px; }
       .profile-row { gap: 10px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -976,15 +1063,25 @@
       <div class="main-card">
         <div class="profile-row">
           <div class="profile-left">
+            <!-- 增强版头像 -->
             <div class="avatar" id="avatar">
-              <img id="avatarImg" src="" alt="头像" draggable="false">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring-2"></div>
+              <div class="avatar-inner" id="avatarInner">
+                <img id="avatarImg" src="" alt="头像" draggable="false">
+                <img class="back" id="avatarImgBack" src="" alt="头像" draggable="false">
+              </div>
             </div>
             <div class="plate" id="plate">苏FA36165</div>
             <div class="name">刘茜美子・去有风的地方遇见你</div>
             <div class="subtitle">你好,我叫许红豆<br>风乍起,吹皱一江春水</div>
           </div>
+          <!-- 3D翻转图片 -->
           <div class="plate-photo" id="platePhoto">
-            <img id="platePhotoImg" src="" alt="图片" draggable="false">
+            <div class="plate-photo-inner" id="photoInner">
+              <img id="platePhotoImg" src="" alt="图片" draggable="false">
+              <img class="back" id="platePhotoImgBack" src="" alt="图片" draggable="false">
+            </div>
           </div>
         </div>
 
@@ -1171,7 +1268,11 @@
       const curTime = $("#curTime");
       const totTime = $("#totTime");
       const avatarImg = $("#avatarImg");
+      const avatarImgBack = $("#avatarImgBack");
+      const avatarInner = $("#avatarInner");
       const platePhotoImg = $("#platePhotoImg");
+      const platePhotoImgBack = $("#platePhotoImgBack");
+      const photoInner = $("#photoInner");
       const sakuraBox = $("#sakuraBox");
       const islandText = $("#islandText");
       const mainCard = $(".main-card");
@@ -1213,6 +1314,7 @@
       let avatarTimer = null;
       let slideTimer = null;
       let controlsVisible = true;
+      let isFlipping = false;
 
       let viewerAutoPlayTimer = null;
       let isViewerInteracting = false;
@@ -1224,8 +1326,14 @@
         mainVideo.src = videoList[0];
         popupVideo.src = videoList[0];
       }
-      if (avatarImages.length > 0) avatarImg.src = avatarImages[0];
-      if (slideImages.length > 0) platePhotoImg.src = slideImages[0];
+      if (avatarImages.length > 0) {
+        avatarImg.src = avatarImages[0];
+        avatarImgBack.src = avatarImages[avatarImages.length > 1 ? 1 : 0];
+      }
+      if (slideImages.length > 0) {
+        platePhotoImg.src = slideImages[0];
+        platePhotoImgBack.src = slideImages[slideImages.length > 1 ? 1 : 0];
+      }
 
       // ============================================================
       // 樱花引擎
@@ -1278,32 +1386,49 @@
       setTimeout(updateGlow, 50);
 
       // ============================================================
-      // 头像 & 图片轮播
+      // 头像 & 图片轮播 - 3D翻转动画
       // ============================================================
-      function animateMedia(imgEl, newSrc) {
-        imgEl.style.transition = 'opacity 0.4s var(--ease), transform 0.4s var(--spring)';
-        imgEl.style.opacity = '0';
-        imgEl.style.transform = 'scale(0.94)';
+      function animate3DMedia(container, frontImg, backImg, newSrc, isAvatar) {
+        if (isFlipping) return;
+        isFlipping = true;
+        
+        // 设置背面图片为新图片
+        backImg.src = newSrc;
+        
+        // 触发翻转
+        container.classList.add('flipping');
+        
         setTimeout(() => {
-          imgEl.src = newSrc;
-          imgEl.style.opacity = '1';
-          imgEl.style.transform = 'scale(1)';
-        }, 350);
+          // 翻转完成后，更新正面图片，移除翻转类
+          frontImg.src = newSrc;
+          container.classList.remove('flipping');
+          isFlipping = false;
+        }, isAvatar ? 650 : 750);
       }
 
       function nextAvatar() {
         if (avatarImages.length < 2) return;
-        avatarIndex = (avatarIndex + 1) % avatarImages.length;
-        animateMedia(avatarImg, avatarImages[avatarIndex]);
+        const nextIdx = (avatarIndex + 1) % avatarImages.length;
+        const newSrc = avatarImages[nextIdx];
+        animate3DMedia(avatarInner, avatarImg, avatarImgBack, newSrc, true);
+        avatarIndex = nextIdx;
       }
-      if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 5000);
 
       function nextSlide() {
         if (slideImages.length < 2) return;
-        slideIndex = (slideIndex + 1) % slideImages.length;
-        animateMedia(platePhotoImg, slideImages[slideIndex]);
+        const nextIdx = (slideIndex + 1) % slideImages.length;
+        const newSrc = slideImages[nextIdx];
+        animate3DMedia(photoInner, platePhotoImg, platePhotoImgBack, newSrc, false);
+        slideIndex = nextIdx;
       }
-      if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 3000);
+
+      // 启动轮播
+      if (avatarImages.length > 1) {
+        avatarTimer = setInterval(nextAvatar, 4500);
+      }
+      if (slideImages.length > 1) {
+        slideTimer = setInterval(nextSlide, 3800);
+      }
 
       // ============================================================
       // 视频控制
@@ -1330,12 +1455,10 @@
         }
         updateCenterPlayBtn();
         updatePlayBtnIcon();
-        // 播放/暂停时显示控件，不自动隐藏
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
         controlsVisible = true;
         clearTimeout(hideControlTimer);
-        // 如果视频在播放，设置自动隐藏定时器
         if (!mainVideo.paused) {
           hideControlTimer = setTimeout(() => {
             videoControls.classList.add("hidden");
@@ -1353,7 +1476,6 @@
           centerPlayBtn.classList.remove('hidden');
         } else {
           centerPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-          // 播放时延迟隐藏中央按钮
           clearTimeout(hideControlTimer);
           hideControlTimer = setTimeout(() => {
             if (!mainVideo.paused) {
@@ -1371,13 +1493,11 @@
         }
       }
 
-      // 显示控件（带自动隐藏定时器）
       function showControls() {
         videoControls.classList.remove("hidden");
         centerPlayBtn.classList.remove("hidden");
         controlsVisible = true;
         clearTimeout(hideControlTimer);
-        // 只有在视频播放时才设置自动隐藏
         if (!mainVideo.paused) {
           hideControlTimer = setTimeout(() => {
             videoControls.classList.add("hidden");
@@ -1389,16 +1509,13 @@
         }
       }
 
-      // 切换控件显示/隐藏（点击视频空白区域触发）
       function toggleControlsVisibility() {
         const isHidden = videoControls.classList.contains('hidden');
         if (isHidden) {
-          // 显示控件
           videoControls.classList.remove('hidden');
           centerPlayBtn.classList.remove('hidden');
           controlsVisible = true;
           clearTimeout(hideControlTimer);
-          // 如果视频在播放，设置自动隐藏
           if (!mainVideo.paused) {
             hideControlTimer = setTimeout(() => {
               videoControls.classList.add("hidden");
@@ -1409,7 +1526,6 @@
             }, HIDE_DELAY);
           }
         } else {
-          // 隐藏控件
           videoControls.classList.add('hidden');
           centerPlayBtn.classList.add('hidden');
           controlsVisible = false;
@@ -1428,7 +1544,6 @@
         popupVideo.src = src;
         updateCenterPlayBtn();
         updatePlayBtnIcon();
-        // 切换视频时显示控件
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
         controlsVisible = true;
@@ -1455,7 +1570,6 @@
         popupVideo.src = src;
         updateCenterPlayBtn();
         updatePlayBtnIcon();
-        // 切换视频时显示控件
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
         controlsVisible = true;
@@ -1631,15 +1745,12 @@
       // 事件绑定
       // ============================================================
 
-      // 中央播放按钮
       centerPlayBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleVideo();
       });
 
-      // 主视频点击 - 点击空白区域切换控件显示/隐藏
       videoBox.addEventListener("click", function(e) {
-        // 如果点击的是控件区域、按钮或中央播放按钮，不处理
         if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) {
           return;
         }
@@ -1712,12 +1823,10 @@
       mainVideo.addEventListener("play", () => {
         updatePlayBtnIcon();
         updateCenterPlayBtn();
-        // 播放时显示控件
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
         controlsVisible = true;
         clearTimeout(hideControlTimer);
-        // 设置自动隐藏
         hideControlTimer = setTimeout(() => {
           videoControls.classList.add("hidden");
           controlsVisible = false;
@@ -2149,12 +2258,10 @@
       // 启动
       // ============================================================
       setTimeout(() => {
-        // 初始显示控件
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
         controlsVisible = true;
         updateCenterPlayBtn();
-        // 如果视频在播放，设置自动隐藏
         if (!mainVideo.paused) {
           hideControlTimer = setTimeout(() => {
             videoControls.classList.add("hidden");
