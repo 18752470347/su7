@@ -279,7 +279,7 @@
       pointer-events: none;
       z-index: 2;
     }
-    .island-text-fade {
+    .island-text-scroll {
       display: inline-block;
       font-weight: 600;
       font-size: 11px;
@@ -292,22 +292,18 @@
       white-space: nowrap;
       position: relative;
       z-index: 1;
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .island-text-fade.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .island-text-fade.hide {
-      opacity: 0;
-      transform: translateY(-8px);
+      animation: textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite;
     }
     @keyframes textShine {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
+    }
+    @keyframes scrollUp {
+      0% { transform: translateY(100%); opacity: 0; }
+      10% { transform: translateY(0); opacity: 1; }
+      90% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100%); opacity: 0; }
     }
     .ios-status-right {
       flex: 1;
@@ -1157,7 +1153,7 @@
       <div class="ios-status-bar">
         <span class="ios-status-left" id="statusTime">09:41</span>
         <div class="dynamic-island" id="dynamicIsland">
-          <span class="island-text-fade show" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
+          <span class="island-text-scroll" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
         </div>
         <div class="ios-status-right">
           <svg class="signal-icon" viewBox="0 0 18 12">
@@ -1929,35 +1925,22 @@
       }
       ensureSakura();
 
-      // ===== 灵动岛 =====
+      // ===== 灵动岛：由下向上滚动，每2秒切换 =====
       const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
-      let isIslandAnimating = false;
-
-      function updateIslandText(index) {
-        const text = textPool[index % textPool.length];
-        islandText.classList.remove('show');
-        islandText.classList.add('hide');
-        setTimeout(() => {
-          islandText.textContent = text;
-          islandText.classList.remove('hide');
-          islandText.classList.add('show');
-        }, 300);
-      }
 
       function rollIsland() {
-        if (isIslandAnimating) return;
-        isIslandAnimating = true;
         tidx = (tidx + 1) % textPool.length;
-        updateIslandText(tidx);
-        setTimeout(() => {
-          isIslandAnimating = false;
-        }, 600);
+        islandText.textContent = textPool[tidx];
+        // 重置动画实现循环
+        islandText.style.animation = 'none';
+        void islandText.offsetWidth;
+        islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite';
       }
 
       islandText.textContent = textPool[0];
-      islandText.classList.add('show');
-      islandInterval = setInterval(rollIsland, 3000);
+      islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite';
+      islandInterval = setInterval(rollIsland, 2000);
 
       // ===== 呼吸灯 =====
       function randomColor() {
