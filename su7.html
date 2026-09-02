@@ -233,7 +233,7 @@
       font-size: 14px;
     }
 
-    /* ===== 灵动岛 ===== */
+    /* ===== 灵动岛 - 移除呼吸，边框加黑 ===== */
     .dynamic-island {
       display: inline-flex;
       align-items: center;
@@ -248,7 +248,7 @@
       font-weight: 500;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 0.5px solid rgba(255,255,255,0.08);
+      border: 2px solid #1a1a1a;
       flex-shrink: 0;
       margin: 0 6px;
       overflow: hidden;
@@ -256,8 +256,16 @@
       position: relative;
       transform: perspective(600px) rotateX(2deg) rotateY(-1deg) translateZ(4px);
       box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1);
-      transition: background 0.3s ease, color 0.3s ease;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
+    html.light-mode .dynamic-island {
+      border-color: #555;
+    }
+    /* 移除呼吸灯光晕 */
+    .dynamic-island .island-glow {
+      display: none;
+    }
+    /* 保留3D顶部高光 */
     .dynamic-island::before {
       content: '';
       position: absolute;
@@ -270,39 +278,9 @@
       pointer-events: none;
       z-index: 2;
     }
+    /* 移除边框脉冲动画 */
     .dynamic-island::after {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 24px;
-      padding: 2px;
-      background: conic-gradient(from 0deg, var(--glow-color), #FFD046, #00D4FF, #7B61FF, var(--glow-color));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      opacity: 0.6;
-      animation: borderBreathFast 0.9s ease-in-out infinite alternate;
-      transition: background 0.3s ease;
-    }
-    @keyframes borderBreathFast {
-      0% { opacity: 0.2; transform: scale(0.92); }
-      100% { opacity: 0.9; transform: scale(1.08); }
-    }
-    .dynamic-island .island-glow {
-      position: absolute;
-      inset: -8px;
-      border-radius: 28px;
-      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
-      opacity: 0.25;
-      z-index: -1;
-      filter: blur(16px);
-      animation: glowPulseFast 0.8s ease-in-out infinite alternate;
-      transition: background 0.3s ease;
-    }
-    @keyframes glowPulseFast {
-      0% { transform: scale(0.7); opacity: 0.1; filter: blur(10px); }
-      100% { transform: scale(1.5); opacity: 0.4; filter: blur(24px); }
+      display: none;
     }
 
     .island-text-scroll {
@@ -506,34 +484,71 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* ===== 深色/浅色模式切换开关 ===== */
+    /* ===== 炫酷主题切换按钮 ===== */
     .theme-toggle {
       position: absolute;
       top: 12px;
       left: 12px;
       z-index: 20;
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 0.5px solid var(--glass-border);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid var(--glass-border);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.05);
       color: var(--text-main);
-      font-size: 18px;
+      font-size: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.2s var(--spring), background 0.3s ease, color 0.3s ease;
+      transition: transform 0.4s var(--spring), box-shadow 0.4s ease, background 0.3s ease, border-color 0.3s ease;
       will-change: transform;
+      position: relative;
+      overflow: hidden;
+    }
+    /* 按钮光晕特效 */
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966, #00D4FF);
+      opacity: 0.3;
+      z-index: -1;
+      animation: toggleRotate 3s linear infinite;
+      filter: blur(8px);
+    }
+    @keyframes toggleRotate {
+      0% { transform: rotate(0deg) scale(0.8); }
+      50% { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(0.8); }
+    }
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      z-index: -1;
+      transition: background 0.3s ease;
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.3), inset 0 0 30px rgba(0, 212, 255, 0.1);
     }
     .theme-toggle:active {
       transform: scale(0.88);
     }
-    .theme-toggle:hover {
-      transform: scale(1.05);
+    .theme-toggle i {
+      position: relative;
+      z-index: 1;
+      transition: transform 0.6s var(--spring);
+    }
+    .theme-toggle:hover i {
+      transform: rotate(180deg);
     }
 
     /* ===== Profile Row ===== */
@@ -553,7 +568,7 @@
       align-items: center;
     }
 
-    /* ===== Avatar ===== */
+    /* ===== Avatar - 3D翻转效果（左右翻转） ===== */
     .avatar {
       position: relative;
       width: 68px;
@@ -604,7 +619,7 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
       transform-style: preserve-3d;
     }
     .avatar-inner.flipping {
@@ -663,7 +678,7 @@
       backface-visibility: hidden;
     }
 
-    /* ===== 右侧图片 ===== */
+    /* ===== 右侧图片 - 3D翻转效果（上下翻转） ===== */
     .plate-photo {
       width: 92px;
       flex-shrink: 0;
@@ -677,12 +692,12 @@
       position: relative;
       width: 100%;
       border-radius: 12px;
-      transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       transform-style: preserve-3d;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     .plate-photo-inner.flipping {
-      transform: rotateY(180deg);
+      transform: rotateX(180deg);
     }
     .plate-photo-inner img {
       width: 100%;
@@ -698,7 +713,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      transform: rotateY(180deg);
+      transform: rotateX(180deg);
       backface-visibility: hidden;
     }
     .plate-photo::after {
@@ -1097,7 +1112,7 @@
       .apps-page { gap: 10px 4px; }
       .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 48px; }
       .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 28px); }
-      .theme-toggle { width: 38px; height: 38px; font-size: 15px; top: 8px; left: 8px; }
+      .theme-toggle { width: 40px; height: 40px; font-size: 16px; top: 8px; left: 8px; }
     }
     @media (max-width: 360px) {
       .plate-photo { width: 68px; }
@@ -1160,7 +1175,6 @@
       <div class="ios-status-bar">
         <span class="ios-status-left" id="statusTime">09:41</span>
         <div class="dynamic-island" id="dynamicIsland">
-          <span class="island-glow"></span>
           <span class="island-text-scroll" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
         </div>
         <div class="ios-status-right">
@@ -1205,14 +1219,14 @@
     <!-- 主卡片 -->
     <div class="main-card-container">
       <div class="main-card">
-        <!-- 深色/浅色模式切换开关 -->
+        <!-- 炫酷主题切换按钮 -->
         <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式">
           <i class="fa-solid fa-moon" id="themeIcon"></i>
         </button>
 
         <div class="profile-row">
           <div class="profile-left">
-            <!-- 增强版头像 -->
+            <!-- 头像 - 左右翻转 -->
             <div class="avatar" id="avatar">
               <div class="avatar-ring"></div>
               <div class="avatar-ring-2"></div>
@@ -1225,7 +1239,7 @@
             <div class="name">刘茜美子・去有风的地方遇见你</div>
             <div class="subtitle">你好,我叫许红豆<br>风乍起,吹皱一江春水</div>
           </div>
-          <!-- 3D翻转图片 -->
+          <!-- 图片 - 上下翻转 -->
           <div class="plate-photo" id="platePhoto">
             <div class="plate-photo-inner" id="photoInner">
               <img id="platePhotoImg" src="" alt="图片" draggable="false">
@@ -1650,35 +1664,43 @@
       setTimeout(updateGlow, 50);
 
       // ============================================================
-      // 头像 & 图片轮播 - 3D翻转动画
+      // 头像 & 图片轮播 - 不同3D翻转动画
       // ============================================================
-      function animate3DMedia(container, frontImg, backImg, newSrc, isAvatar) {
+      function animateAvatar(newSrc) {
         if (isFlipping) return;
         isFlipping = true;
-        
-        backImg.src = newSrc;
-        container.classList.add('flipping');
-        
+        avatarImgBack.src = newSrc;
+        avatarInner.classList.add('flipping');
         setTimeout(() => {
-          frontImg.src = newSrc;
-          container.classList.remove('flipping');
+          avatarImg.src = newSrc;
+          avatarInner.classList.remove('flipping');
           isFlipping = false;
-        }, isAvatar ? 650 : 750);
+        }, 700);
+      }
+
+      function animatePhoto(newSrc) {
+        if (isFlipping) return;
+        isFlipping = true;
+        platePhotoImgBack.src = newSrc;
+        photoInner.classList.add('flipping');
+        setTimeout(() => {
+          platePhotoImg.src = newSrc;
+          photoInner.classList.remove('flipping');
+          isFlipping = false;
+        }, 800);
       }
 
       function nextAvatar() {
         if (avatarImages.length < 2) return;
         const nextIdx = (avatarIndex + 1) % avatarImages.length;
-        const newSrc = avatarImages[nextIdx];
-        animate3DMedia(avatarInner, avatarImg, avatarImgBack, newSrc, true);
+        animateAvatar(avatarImages[nextIdx]);
         avatarIndex = nextIdx;
       }
 
       function nextSlide() {
         if (slideImages.length < 2) return;
         const nextIdx = (slideIndex + 1) % slideImages.length;
-        const newSrc = slideImages[nextIdx];
-        animate3DMedia(photoInner, platePhotoImg, platePhotoImgBack, newSrc, false);
+        animatePhoto(slideImages[nextIdx]);
         slideIndex = nextIdx;
       }
 
