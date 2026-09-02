@@ -1572,6 +1572,7 @@
       let slideTimer = null;
       let controlsVisible = true;
       let isFlipping = false;
+      let isVideoControlsVisible = true;
 
       let viewerAutoPlayTimer = null;
       let isViewerInteracting = false;
@@ -1691,7 +1692,7 @@
       }
 
       // ============================================================
-      // 视频控制 - 核心修复
+      // 视频控制 - 与副视频逻辑保持一致
       // ============================================================
       function formatTime(s) {
         if (isNaN(s) || !isFinite(s)) return "00:00";
@@ -1707,14 +1708,29 @@
         toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
       }
 
-      // 核心：切换视频后重置自动隐藏定时器
-      function resetAutoHide() {
+      // 切换视频
+      function switchVideo(index) {
+        if (videoList.length === 0) return;
+        currentVideoIndex = (index + videoList.length) % videoList.length;
+        const src = videoList[currentVideoIndex];
+        mainVideo.src = src;
+        progressFill.style.width = '0%';
+        curTime.textContent = '00:00';
+        mainVideo.play().catch(() => showToastMsg("请手动播放"));
+        popupVideo.src = src;
+        updateCenterPlayBtn();
+        updatePlayBtnIcon();
+        // 显示控件
+        videoControls.classList.remove('hidden');
+        centerPlayBtn.classList.remove('hidden');
+        isVideoControlsVisible = true;
+        // 清除旧定时器
         clearTimeout(hideControlTimer);
-        // 如果视频在播放且控件可见，设置自动隐藏
-        if (!mainVideo.paused && !videoControls.classList.contains('hidden')) {
+        // 如果视频在播放，设置自动隐藏
+        if (!mainVideo.paused) {
           hideControlTimer = setTimeout(function() {
             videoControls.classList.add("hidden");
-            controlsVisible = false;
+            isVideoControlsVisible = false;
             if (!mainVideo.paused) {
               centerPlayBtn.classList.add("hidden");
             }
@@ -1730,10 +1746,20 @@
         }
         updateCenterPlayBtn();
         updatePlayBtnIcon();
+        // 显示控件
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
-        controlsVisible = true;
-        resetAutoHide();
+        isVideoControlsVisible = true;
+        clearTimeout(hideControlTimer);
+        if (!mainVideo.paused) {
+          hideControlTimer = setTimeout(function() {
+            videoControls.classList.add("hidden");
+            isVideoControlsVisible = false;
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add("hidden");
+            }
+          }, HIDE_DELAY);
+        }
       }
 
       function updateCenterPlayBtn() {
@@ -1742,7 +1768,6 @@
           centerPlayBtn.classList.remove('hidden');
         } else {
           centerPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-          // 播放时延迟隐藏中央按钮
           clearTimeout(hideControlTimer);
           hideControlTimer = setTimeout(() => {
             if (!mainVideo.paused) {
@@ -1763,8 +1788,17 @@
       function showControls() {
         videoControls.classList.remove("hidden");
         centerPlayBtn.classList.remove("hidden");
-        controlsVisible = true;
-        resetAutoHide();
+        isVideoControlsVisible = true;
+        clearTimeout(hideControlTimer);
+        if (!mainVideo.paused) {
+          hideControlTimer = setTimeout(function() {
+            videoControls.classList.add("hidden");
+            isVideoControlsVisible = false;
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add("hidden");
+            }
+          }, HIDE_DELAY);
+        }
       }
 
       function toggleControlsVisibility() {
@@ -1772,33 +1806,23 @@
         if (isHidden) {
           videoControls.classList.remove('hidden');
           centerPlayBtn.classList.remove('hidden');
-          controlsVisible = true;
-          resetAutoHide();
+          isVideoControlsVisible = true;
+          clearTimeout(hideControlTimer);
+          if (!mainVideo.paused) {
+            hideControlTimer = setTimeout(function() {
+              videoControls.classList.add("hidden");
+              isVideoControlsVisible = false;
+              if (!mainVideo.paused) {
+                centerPlayBtn.classList.add("hidden");
+              }
+            }, HIDE_DELAY);
+          }
         } else {
           videoControls.classList.add('hidden');
           centerPlayBtn.classList.add('hidden');
-          controlsVisible = false;
+          isVideoControlsVisible = false;
           clearTimeout(hideControlTimer);
         }
-      }
-
-      function switchVideo(index) {
-        if (videoList.length === 0) return;
-        currentVideoIndex = (index + videoList.length) % videoList.length;
-        const src = videoList[currentVideoIndex];
-        mainVideo.src = src;
-        progressFill.style.width = '0%';
-        curTime.textContent = '00:00';
-        mainVideo.play().catch(() => showToastMsg("请手动播放"));
-        popupVideo.src = src;
-        updateCenterPlayBtn();
-        updatePlayBtnIcon();
-        // 显示所有控件
-        videoControls.classList.remove('hidden');
-        centerPlayBtn.classList.remove('hidden');
-        controlsVisible = true;
-        // 清除旧定时器，设置新的自动隐藏
-        resetAutoHide();
       }
 
       function prevVideo() {
@@ -2049,8 +2073,15 @@
         updateCenterPlayBtn();
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
-        controlsVisible = true;
-        resetAutoHide();
+        isVideoControlsVisible = true;
+        clearTimeout(hideControlTimer);
+        hideControlTimer = setTimeout(function() {
+          videoControls.classList.add("hidden");
+          isVideoControlsVisible = false;
+          if (!mainVideo.paused) {
+            centerPlayBtn.classList.add("hidden");
+          }
+        }, HIDE_DELAY);
         if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
           popupVideo.play().catch(() => {});
         }
@@ -2061,7 +2092,7 @@
         centerPlayBtn.classList.remove('hidden');
         centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
         videoControls.classList.remove("hidden");
-        controlsVisible = true;
+        isVideoControlsVisible = true;
         clearTimeout(hideControlTimer);
         if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
           popupVideo.pause();
@@ -2466,9 +2497,17 @@
       setTimeout(() => {
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
-        controlsVisible = true;
+        isVideoControlsVisible = true;
         updateCenterPlayBtn();
-        resetAutoHide();
+        if (!mainVideo.paused) {
+          hideControlTimer = setTimeout(function() {
+            videoControls.classList.add("hidden");
+            isVideoControlsVisible = false;
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add("hidden");
+            }
+          }, HIDE_DELAY);
+        }
       }, 500);
 
       document.addEventListener('visibilitychange', () => {
