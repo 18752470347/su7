@@ -278,7 +278,7 @@
       pointer-events: none;
       z-index: 2;
     }
-    .island-text-scroll {
+    .island-text-fade {
       display: inline-block;
       font-weight: 600;
       font-size: 11px;
@@ -291,18 +291,22 @@
       white-space: nowrap;
       position: relative;
       z-index: 1;
-      animation: textShine 2.5s ease-in-out infinite, scrollUp 3s ease-in-out infinite;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .island-text-fade.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .island-text-fade.hide {
+      opacity: 0;
+      transform: translateY(-8px);
     }
     @keyframes textShine {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
-    }
-    @keyframes scrollUp {
-      0% { transform: translateY(100%); opacity: 0; }
-      10% { transform: translateY(0); opacity: 1; }
-      90% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-100%); opacity: 0; }
     }
     .ios-status-right {
       flex: 1;
@@ -1097,7 +1101,7 @@
       <div class="ios-status-bar">
         <span class="ios-status-left" id="statusTime">09:41</span>
         <div class="dynamic-island" id="dynamicIsland">
-          <span class="island-text-scroll" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
+          <span class="island-text-fade show" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
         </div>
         <div class="ios-status-right">
           <svg class="signal-icon" viewBox="0 0 18 12">
@@ -1371,7 +1375,7 @@
       let viewerGalleryIndex = 0;
       let glowInterval = null;
       let sakuraInterval = null;
-      let textRollInterval = null;
+      let islandInterval = null;
       let popupControlsVisible = false;
       let isJumping = false;
       let avatarTimer = null;
@@ -1607,22 +1611,38 @@
       }
       ensureSakura();
 
-      // ===== 灵动岛：由下向上滚动 循环 =====
+      // ===== 灵动岛：由下向上淡入淡出，每3秒循环 =====
       const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
-      function rollIsland() {
-        tidx = (tidx + 1) % textPool.length;
-        islandText.textContent = textPool[tidx];
-        // 重置动画以实现循环
-        islandText.style.animation = 'none';
-        void islandText.offsetWidth;
-        islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 3s ease-in-out infinite';
+      let isIslandAnimating = false;
+
+      function updateIslandText(index) {
+        const text = textPool[index % textPool.length];
+        // 先淡出
+        islandText.classList.remove('show');
+        islandText.classList.add('hide');
+        setTimeout(() => {
+          islandText.textContent = text;
+          // 淡入
+          islandText.classList.remove('hide');
+          islandText.classList.add('show');
+        }, 300);
       }
-      // 初始化：设置文字并启动动画
+
+      function rollIsland() {
+        if (isIslandAnimating) return;
+        isIslandAnimating = true;
+        tidx = (tidx + 1) % textPool.length;
+        updateIslandText(tidx);
+        setTimeout(() => {
+          isIslandAnimating = false;
+        }, 600);
+      }
+
+      // 初始化
       islandText.textContent = textPool[0];
-      islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 3s ease-in-out infinite';
-      // 每3.5秒切换一次文字（滚动动画周期3秒，留0.5秒缓冲）
-      textRollInterval = setInterval(rollIsland, 3500);
+      islandText.classList.add('show');
+      islandInterval = setInterval(rollIsland, 3000);
 
       // ===== 呼吸灯 =====
       function randomColor() {
@@ -1687,7 +1707,7 @@
       videoNextBtn.onclick = (e) => { e.stopPropagation(); nextVideo(); };
       expandBtn.onclick = (e) => { e.stopPropagation(); openPopup(); };
 
-      // 滑动切换视频 (左右滑动)
+      // 主视频滑动切换 (左右滑动)
       let startX = 0, startY = 0, isSwiping = false;
       videoBox.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
@@ -1707,6 +1727,39 @@
       }, { passive: false });
       videoBox.addEventListener('touchend', () => { isSwiping = false; });
       videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
+
+      // ===== 副视频（弹出播放器）滑动切换 =====
+      let popupStartX = 0, popupStartY = 0, isPopupSwiping = false;
+      popupVideo.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        popupStartX = touch.clientX;
+        popupStartY = touch.clientY;
+        isPopupSwiping = true;
+      }, { passive: true });
+      popupVideo.addEventListener('touchmove', (e) => {
+        if (!isPopupSwiping || !videoPopup.classList.contains('active')) return;
+        const dx = e.touches[0].clientX - popupStartX;
+        const dy = e.touches[0].clientY - popupStartY;
+        if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          e.preventDefault();
+          if (dx < 0) { nextVideo(); isPopupSwiping = false; }
+          else { prevVideo(); isPopupSwiping = false; }
+          // 同步popup视频
+          popupVideo.src = videoList[currentVideoIndex];
+          popupVideo.play().catch(() => {});
+          popupControlsVisible = true;
+          popupControls.classList.remove("hidden");
+          popupClose.classList.remove("hidden");
+          clearTimeout(popupHideTimer);
+          popupHideTimer = setTimeout(() => {
+            popupControls.classList.add("hidden");
+            popupClose.classList.add("hidden");
+            popupControlsVisible = false;
+          }, POPUP_HIDE_DELAY);
+        }
+      }, { passive: false });
+      popupVideo.addEventListener('touchend', () => { isPopupSwiping = false; });
+      popupVideo.addEventListener('touchcancel', () => { isPopupSwiping = false; });
 
       let volDrag = false, volStartY = 0, volStartVal = 0;
       videoMuteBtn.addEventListener('touchstart', (e) => {
@@ -2137,7 +2190,7 @@
       window.addEventListener('beforeunload', () => {
         if (glowInterval) clearInterval(glowInterval);
         if (sakuraInterval) clearInterval(sakuraInterval);
-        if (textRollInterval) clearInterval(textRollInterval);
+        if (islandInterval) clearInterval(islandInterval);
         if (avatarTimer) clearInterval(avatarTimer);
         if (slideTimer) clearInterval(slideTimer);
         stopViewerAutoPlay();
