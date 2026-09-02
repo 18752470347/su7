@@ -8,7 +8,7 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>苏FA36165 · 快速启动</title>
+  <title>苏FA36165 · 许红豆</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -79,6 +79,7 @@
       align-items: center;
       justify-content: center;
       -webkit-overflow-scrolling: touch;
+      position: relative;
     }
     /* 手动深色模式 */
     html.dark-mode {
@@ -1059,6 +1060,56 @@
       .liquid-gradient, .sakura { display: none; }
     }
     ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+
+    /* ===== 许红豆漂浮文字 ===== */
+    .floating-word {
+      position: fixed;
+      font-size: 52px;
+      font-weight: 900;
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      cursor: pointer;
+      z-index: 1000;
+      pointer-events: auto;
+      transition: none;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.08);
+      letter-spacing: 4px;
+      will-change: transform, left, top;
+      user-select: none;
+      -webkit-user-select: none;
+      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.05));
+    }
+    .floating-word.following {
+      transition: all 0.08s ease-out;
+      z-index: 1001;
+      filter: drop-shadow(0 4px 30px rgba(0,0,0,0.15));
+    }
+    .floating-word .char {
+      display: inline-block;
+      background: linear-gradient(135deg, #FF6B9E, #FFD93D, #6BCB77, #4D96FF, #9B59B6, #FF6B9E);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: rainbowMove 4s ease-in-out infinite alternate;
+      font-weight: 900;
+    }
+    @keyframes rainbowMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .floating-word .char:nth-child(1) { animation-delay: 0s; }
+    .floating-word .char:nth-child(2) { animation-delay: 0.4s; }
+    .floating-word .char:nth-child(3) { animation-delay: 0.8s; }
+
+    .floating-word .char.diff {
+      animation: rainbowMoveDiff 3.2s ease-in-out infinite alternate;
+    }
+    @keyframes rainbowMoveDiff {
+      0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+      50% { background-position: 100% 50%; filter: hue-rotate(180deg); }
+      100% { background-position: 0% 50%; filter: hue-rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -1066,6 +1117,11 @@
   <canvas id="particles-canvas"></canvas>
   <div class="liquid-bg"><div class="liquid-gradient"></div></div>
   <div class="sakura-container" id="sakuraBox"></div>
+
+  <!-- 许红豆漂浮文字 -->
+  <div class="floating-word" id="wordXu" style="left:8%; top:18%;"><span class="char">许</span></div>
+  <div class="floating-word" id="wordHong" style="left:25%; top:55%;"><span class="char">红</span></div>
+  <div class="floating-word" id="wordDou" style="left:70%; top:35%;"><span class="char">豆</span></div>
 
   <div class="toast" id="toast">复制成功</div>
 
@@ -1210,6 +1266,269 @@
     (function() {
       'use strict';
 
+      // ===== 许红豆漂浮文字逻辑 =====
+      const wordXu = document.getElementById('wordXu');
+      const wordHong = document.getElementById('wordHong');
+      const wordDou = document.getElementById('wordDou');
+      const allWords = [wordXu, wordHong, wordDou];
+      const chars = ['许', '红', '豆'];
+
+      // 每个字的随机速度
+      const speeds = [
+        { x: 0.6, y: 0.4 },
+        { x: -0.5, y: 0.7 },
+        { x: 0.8, y: -0.5 }
+      ];
+
+      let pos = [
+        { x: 8, y: 18 },
+        { x: 25, y: 55 },
+        { x: 70, y: 35 }
+      ];
+
+      let isFollowing = false;
+      let followTarget = null;
+      let followOffsetX = 0;
+      let followOffsetY = 0;
+      let isDragging = false;
+
+      // 随机颜色生成
+      function randomGradient() {
+        const colors = [
+          ['#FF6B9E', '#FFD93D', '#6BCB77', '#4D96FF', '#9B59B6'],
+          ['#FF4757', '#FF6B81', '#FFA502', '#2ED573', '#1E90FF'],
+          ['#A29BFE', '#FD79A8', '#FDCB6E', '#00CEC9', '#6C5CE7'],
+          ['#FF9FF3', '#54A0FF', '#5F27CD', '#FF6B6B', '#FECA57'],
+          ['#00D2D3', '#FF9F43', '#EE5A24', '#0ABDE3', '#A29BFE']
+        ];
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        return `linear-gradient(135deg, ${c[0]}, ${c[1]}, ${c[2]}, ${c[3]}, ${c[4]})`;
+      }
+
+      // 为每个字符设置随机渐变
+      function randomizeColors() {
+        allWords.forEach(word => {
+          const charEls = word.querySelectorAll('.char');
+          charEls.forEach(el => {
+            const grad = randomGradient();
+            el.style.background = grad;
+            el.style.backgroundSize = '300% 300%';
+            el.style.webkitBackgroundClip = 'text';
+            el.style.backgroundClip = 'text';
+          });
+        });
+      }
+
+      // 初始随机化
+      randomizeColors();
+
+      // 每5秒随机变换一次颜色
+      setInterval(randomizeColors, 5000);
+
+      // 无规律飘动
+      let animFrameId = null;
+
+      function startFloating() {
+        if (isFollowing) return;
+        function animate() {
+          if (isFollowing) {
+            animFrameId = requestAnimationFrame(animate);
+            return;
+          }
+          allWords.forEach((word, idx) => {
+            if (word.classList.contains('following')) return;
+            // 随机改变方向
+            if (Math.random() < 0.02) {
+              speeds[idx].x = (Math.random() - 0.5) * 1.2;
+              speeds[idx].y = (Math.random() - 0.5) * 1.2;
+            }
+            pos[idx].x += speeds[idx].x * 0.3;
+            pos[idx].y += speeds[idx].y * 0.3;
+
+            // 边界反弹
+            if (pos[idx].x < 2) { pos[idx].x = 2; speeds[idx].x *= -1; }
+            if (pos[idx].x > 88) { pos[idx].x = 88; speeds[idx].x *= -1; }
+            if (pos[idx].y < 5) { pos[idx].y = 5; speeds[idx].y *= -1; }
+            if (pos[idx].y > 88) { pos[idx].y = 88; speeds[idx].y *= -1; }
+
+            word.style.left = pos[idx].x + '%';
+            word.style.top = pos[idx].y + '%';
+          });
+          animFrameId = requestAnimationFrame(animate);
+        }
+        animate();
+      }
+
+      // 点击组合跟随
+      function handleWordClick(e) {
+        const word = e.currentTarget;
+        if (isFollowing && !word.classList.contains('following')) {
+          // 如果已经在跟随模式，点击其他字则切换
+          allWords.forEach(w => w.classList.remove('following'));
+          isFollowing = false;
+          followTarget = null;
+          // 让所有字回到飘动状态
+          allWords.forEach((w, idx) => {
+            w.style.transition = 'none';
+            w.style.left = pos[idx].x + '%';
+            w.style.top = pos[idx].y + '%';
+            w.style.transform = '';
+          });
+          setTimeout(() => {
+            allWords.forEach(w => w.style.transition = '');
+          }, 50);
+          return;
+        }
+
+        // 进入跟随模式
+        isFollowing = true;
+        isDragging = false;
+        followTarget = word;
+
+        // 所有字组合到点击的字附近
+        const rect = word.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        // 计算偏移量，让三个字并排
+        const wordWidth = rect.width;
+        const spacing = wordWidth * 1.2;
+
+        allWords.forEach((w, idx) => {
+          w.classList.add('following');
+          w.style.transition = 'all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          const offset = (idx - 1) * spacing;
+          w.style.left = (cx - wordWidth/2 + offset) + 'px';
+          w.style.top = (cy - rect.height/2) + 'px';
+          w.style.transform = 'scale(1.05)';
+          // 保存相对偏移用于拖动
+          if (idx === 0) followOffsetX = -spacing;
+          else if (idx === 1) followOffsetX = 0;
+          else followOffsetX = spacing;
+          followOffsetY = 0;
+        });
+
+        // 更新位置存储为像素
+        const rects = allWords.map(w => w.getBoundingClientRect());
+        allWords.forEach((w, idx) => {
+          pos[idx].x = (rects[idx].left / window.innerWidth) * 100;
+          pos[idx].y = (rects[idx].top / window.innerHeight) * 100;
+        });
+
+        // 添加拖动监听
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('touchmove', onDragMoveTouch, { passive: false });
+        document.addEventListener('mouseup', onDragEnd);
+        document.addEventListener('touchend', onDragEnd);
+        document.addEventListener('touchcancel', onDragEnd);
+      }
+
+      function onDragMove(e) {
+        if (!isFollowing || !followTarget) return;
+        isDragging = true;
+        const cx = e.clientX;
+        const cy = e.clientY;
+
+        const wordWidth = followTarget.getBoundingClientRect().width;
+        const spacing = wordWidth * 1.2;
+
+        allWords.forEach((w, idx) => {
+          const offset = (idx - 1) * spacing;
+          w.style.left = (cx - wordWidth/2 + offset) + 'px';
+          w.style.top = (cy - 30) + 'px';
+          w.style.transform = 'scale(1.05)';
+          // 更新pos存储
+          const rect = w.getBoundingClientRect();
+          pos[idx].x = (rect.left / window.innerWidth) * 100;
+          pos[idx].y = (rect.top / window.innerHeight) * 100;
+        });
+        e.preventDefault();
+      }
+
+      function onDragMoveTouch(e) {
+        if (!isFollowing || !followTarget) return;
+        isDragging = true;
+        const touch = e.touches[0];
+        const cx = touch.clientX;
+        const cy = touch.clientY;
+
+        const wordWidth = followTarget.getBoundingClientRect().width;
+        const spacing = wordWidth * 1.2;
+
+        allWords.forEach((w, idx) => {
+          const offset = (idx - 1) * spacing;
+          w.style.left = (cx - wordWidth/2 + offset) + 'px';
+          w.style.top = (cy - 30) + 'px';
+          w.style.transform = 'scale(1.05)';
+          const rect = w.getBoundingClientRect();
+          pos[idx].x = (rect.left / window.innerWidth) * 100;
+          pos[idx].y = (rect.top / window.innerHeight) * 100;
+        });
+        e.preventDefault();
+      }
+
+      function onDragEnd() {
+        if (!isFollowing) return;
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('touchmove', onDragMoveTouch);
+        document.removeEventListener('mouseup', onDragEnd);
+        document.removeEventListener('touchend', onDragEnd);
+        document.removeEventListener('touchcancel', onDragEnd);
+
+        // 如果拖动距离很小，视为点击取消跟随
+        if (!isDragging) {
+          // 取消跟随，回到飘动
+          allWords.forEach(w => {
+            w.classList.remove('following');
+            w.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          });
+          setTimeout(() => {
+            isFollowing = false;
+            followTarget = null;
+            allWords.forEach(w => w.style.transition = '');
+            // 随机分散
+            allWords.forEach((w, idx) => {
+              pos[idx].x = 10 + Math.random() * 75;
+              pos[idx].y = 10 + Math.random() * 75;
+              w.style.left = pos[idx].x + '%';
+              w.style.top = pos[idx].y + '%';
+              w.style.transform = '';
+            });
+          }, 500);
+        } else {
+          // 保持跟随模式，但恢复过渡
+          setTimeout(() => {
+            allWords.forEach(w => {
+              w.style.transition = 'all 0.08s ease-out';
+            });
+          }, 50);
+        }
+        isDragging = false;
+      }
+
+      // 绑定点击事件
+      allWords.forEach(word => {
+        word.addEventListener('click', handleWordClick);
+        word.addEventListener('touchstart', (e) => {
+          // 防止触发页面滚动
+          e.preventDefault();
+        }, { passive: false });
+      });
+
+      // 启动飘动
+      startFloating();
+
+      // 窗口改变时调整位置
+      window.addEventListener('resize', () => {
+        if (!isFollowing) {
+          allWords.forEach((w, idx) => {
+            w.style.left = pos[idx].x + '%';
+            w.style.top = pos[idx].y + '%';
+          });
+        }
+      });
+
+      // ===== 原有功能代码 =====
       const videoList = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
@@ -1418,7 +1737,7 @@
       const ctx = canvas.getContext('2d');
       let particles = [];
       let w, h;
-      let animFrameId = null;
+      let animFrameIdParticles = null;
 
       function resizeCanvas() {
         w = canvas.width = window.innerWidth;
@@ -1473,7 +1792,7 @@
             }
           }
         }
-        animFrameId = requestAnimationFrame(animateParticles);
+        animFrameIdParticles = requestAnimationFrame(animateParticles);
       }
       animateParticles();
 
@@ -1575,8 +1894,7 @@
         }
       }
 
-      // ===== 视频初始化 =====
-      if (videoList.length > 0) {
+      // ===== 视频初始化 =====      if (videoList.length > 0) {
         mainVideo.src = videoList[0];
         popupVideo.src = videoList[0];
       }
@@ -1611,19 +1929,17 @@
       }
       ensureSakura();
 
-      // ===== 灵动岛：由下向上淡入淡出，每3秒循环 =====
+      // ===== 灵动岛 =====
       const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
       let isIslandAnimating = false;
 
       function updateIslandText(index) {
         const text = textPool[index % textPool.length];
-        // 先淡出
         islandText.classList.remove('show');
         islandText.classList.add('hide');
         setTimeout(() => {
           islandText.textContent = text;
-          // 淡入
           islandText.classList.remove('hide');
           islandText.classList.add('show');
         }, 300);
@@ -1639,7 +1955,6 @@
         }, 600);
       }
 
-      // 初始化
       islandText.textContent = textPool[0];
       islandText.classList.add('show');
       islandInterval = setInterval(rollIsland, 3000);
@@ -1707,7 +2022,6 @@
       videoNextBtn.onclick = (e) => { e.stopPropagation(); nextVideo(); };
       expandBtn.onclick = (e) => { e.stopPropagation(); openPopup(); };
 
-      // 主视频滑动切换 (左右滑动)
       let startX = 0, startY = 0, isSwiping = false;
       videoBox.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
@@ -1728,7 +2042,6 @@
       videoBox.addEventListener('touchend', () => { isSwiping = false; });
       videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
 
-      // ===== 副视频（弹出播放器）滑动切换 =====
       let popupStartX = 0, popupStartY = 0, isPopupSwiping = false;
       popupVideo.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
@@ -1744,7 +2057,6 @@
           e.preventDefault();
           if (dx < 0) { nextVideo(); isPopupSwiping = false; }
           else { prevVideo(); isPopupSwiping = false; }
-          // 同步popup视频
           popupVideo.src = videoList[currentVideoIndex];
           popupVideo.play().catch(() => {});
           popupControlsVisible = true;
@@ -2148,14 +2460,15 @@
         showToastMsg("车牌号已复制");
       });
 
-      // ===== 点击弹字 (速度变慢) =====
+      // ===== 点击弹字 =====
       const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "刘亦菲", "亦菲"];
       document.body.addEventListener("click", (e) => {
         if (e.target.closest(".app-button") || e.target.closest(".viewer") ||
           e.target.closest("#plate") || e.target.closest(".video-controls") ||
           e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
           e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
-          e.target.closest(".center-play-btn") || e.target.closest(".theme-toggle")) return;
+          e.target.closest(".center-play-btn") || e.target.closest(".theme-toggle") ||
+          e.target.closest(".floating-word")) return;
         const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
         const el = document.createElement("div");
         el.className = "click-text-item";
@@ -2194,6 +2507,7 @@
         if (avatarTimer) clearInterval(avatarTimer);
         if (slideTimer) clearInterval(slideTimer);
         stopViewerAutoPlay();
+        if (animFrameIdParticles) cancelAnimationFrame(animFrameIdParticles);
         if (animFrameId) cancelAnimationFrame(animFrameId);
       });
     })();
