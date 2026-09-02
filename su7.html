@@ -1198,7 +1198,7 @@
       let toastTimer = null;
       let hideControlTimer = null;
       let popupHideTimer = null;
-      const HIDE_DELAY = 4000; // 延长到4秒，给用户足够时间操作
+      const HIDE_DELAY = 3000;
       const POPUP_HIDE_DELAY = 2000;
       let currentVideoIndex = 0;
       let avatarIndex = 0;
@@ -1213,7 +1213,6 @@
       let avatarTimer = null;
       let slideTimer = null;
       let controlsVisible = true;
-      let isControlsToggling = false; // 防止重复切换
 
       let viewerAutoPlayTimer = null;
       let isViewerInteracting = false;
@@ -1307,7 +1306,7 @@
       if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 3000);
 
       // ============================================================
-      // 视频控制 - 核心修复
+      // 视频控制
       // ============================================================
       function formatTime(s) {
         if (isNaN(s) || !isFinite(s)) return "00:00";
@@ -1336,6 +1335,16 @@
         centerPlayBtn.classList.remove('hidden');
         controlsVisible = true;
         clearTimeout(hideControlTimer);
+        // 如果视频在播放，设置自动隐藏定时器
+        if (!mainVideo.paused) {
+          hideControlTimer = setTimeout(() => {
+            videoControls.classList.add("hidden");
+            controlsVisible = false;
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add("hidden");
+            }
+          }, HIDE_DELAY);
+        }
       }
 
       function updateCenterPlayBtn() {
@@ -1382,9 +1391,6 @@
 
       // 切换控件显示/隐藏（点击视频空白区域触发）
       function toggleControlsVisibility() {
-        if (isControlsToggling) return;
-        isControlsToggling = true;
-        
         const isHidden = videoControls.classList.contains('hidden');
         if (isHidden) {
           // 显示控件
@@ -1403,16 +1409,12 @@
             }, HIDE_DELAY);
           }
         } else {
-          // 隐藏控件（用户主动隐藏）
+          // 隐藏控件
           videoControls.classList.add('hidden');
           centerPlayBtn.classList.add('hidden');
           controlsVisible = false;
           clearTimeout(hideControlTimer);
         }
-        
-        setTimeout(() => {
-          isControlsToggling = false;
-        }, 300);
       }
 
       function prevVideo() {
@@ -1635,23 +1637,14 @@
         toggleVideo();
       });
 
-      // 主视频点击 - 仅切换控件显示/隐藏，不切换播放状态
+      // 主视频点击 - 点击空白区域切换控件显示/隐藏
       videoBox.addEventListener("click", function(e) {
-        // 如果点击的是控件、按钮或中央播放按钮，不处理
+        // 如果点击的是控件区域、按钮或中央播放按钮，不处理
         if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) {
           return;
         }
         e.stopPropagation();
         toggleControlsVisibility();
-      });
-
-      // 鼠标移动显示控件（但不自动隐藏，由showControls处理）
-      videoBox.addEventListener("mousemove", function(e) {
-        if (e.target.closest(".video-controls") || e.target.closest(".center-play-btn")) return;
-        // 只有控件隐藏时才显示
-        if (videoControls.classList.contains('hidden')) {
-          showControls();
-        }
       });
 
       videoPlayBtn.onclick = (e) => { e.stopPropagation();
