@@ -194,62 +194,76 @@
       font-size: 14px;
     }
 
-    /* ===== 灵动岛 - 增加呼吸灯 ===== */
+    /* ===== 灵动岛 - 3D效果 + 快速呼吸灯 ===== */
     .dynamic-island {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 30px;
-      padding: 0 14px;
-      min-width: 50px;
-      background: rgba(20, 20, 24, 0.8);
-      border-radius: 18px;
+      height: 32px;
+      padding: 0 16px;
+      min-width: 56px;
+      background: rgba(20, 20, 24, 0.85);
+      border-radius: 20px;
       color: #fff;
       font-size: 11px;
       font-weight: 500;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 0.5px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 0.5px solid rgba(255,255,255,0.08);
       flex-shrink: 0;
       margin: 0 6px;
       overflow: hidden;
       pointer-events: none;
       position: relative;
+      transform: perspective(600px) rotateX(2deg) rotateY(-1deg) translateZ(4px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1);
     }
-    /* 灵动岛呼吸灯 - 外层光晕 */
+    /* 灵动岛3D光效 - 顶部高光 */
     .dynamic-island::before {
       content: '';
       position: absolute;
-      inset: -6px;
-      border-radius: 24px;
-      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
-      opacity: 0.4;
-      z-index: -1;
-      filter: blur(14px);
-      animation: islandBreath 1.8s ease-in-out infinite alternate;
+      top: 0;
+      left: 10%;
+      width: 80%;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
     }
-    /* 灵动岛呼吸灯 - 边框脉冲 */
+    /* 灵动岛呼吸灯 - 外层光晕（更快） */
     .dynamic-island::after {
       content: '';
       position: absolute;
-      inset: -1px;
-      border-radius: 20px;
-      padding: 1.5px;
-      background: var(--glow-color);
+      inset: -4px;
+      border-radius: 24px;
+      padding: 2px;
+      background: conic-gradient(from 0deg, var(--glow-color), #FFD046, #00D4FF, #7B61FF, var(--glow-color));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       pointer-events: none;
-      opacity: 0.7;
-      animation: borderBreath 2s ease-in-out infinite alternate;
+      opacity: 0.6;
+      animation: borderBreathFast 0.9s ease-in-out infinite alternate;
     }
-    @keyframes islandBreath {
-      0% { transform: scale(0.8); opacity: 0.15; filter: blur(10px); }
-      100% { transform: scale(1.3); opacity: 0.5; filter: blur(20px); }
+    @keyframes borderBreathFast {
+      0% { opacity: 0.2; transform: scale(0.92); }
+      100% { opacity: 0.9; transform: scale(1.08); }
     }
-    @keyframes borderBreath {
-      0% { opacity: 0.3; transform: scale(0.95); }
-      100% { opacity: 0.9; transform: scale(1.05); }
+    /* 额外光晕脉冲 - 更快 */
+    .dynamic-island .island-glow {
+      position: absolute;
+      inset: -8px;
+      border-radius: 28px;
+      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+      opacity: 0.25;
+      z-index: -1;
+      filter: blur(16px);
+      animation: glowPulseFast 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes glowPulseFast {
+      0% { transform: scale(0.7); opacity: 0.1; filter: blur(10px); }
+      100% { transform: scale(1.5); opacity: 0.4; filter: blur(24px); }
     }
 
     .island-text-scroll {
@@ -261,8 +275,10 @@
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      animation: textShine 3s ease-in-out infinite;
+      animation: textShine 2.5s ease-in-out infinite;
       white-space: nowrap;
+      position: relative;
+      z-index: 1;
     }
     @keyframes textShine {
       0% { background-position: 0% 50%; }
@@ -883,25 +899,29 @@
     }
     .viewer.show .viewer-counter { opacity: 1; }
 
-    /* ===== 点击弹字 ===== */
+    /* ===== 点击弹字 - 随机渐变 ===== */
     .click-text-item {
       position: fixed;
       z-index: 10002;
       pointer-events: none;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 20px;
       background: linear-gradient(90deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966);
-      background-size: 300% 100%;
+      background-size: 400% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      animation: popFloat 4s var(--ease) forwards;
+      animation: popFloatGrad 3.5s var(--ease) forwards;
       will-change: transform, opacity;
+      filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.2));
     }
-    @keyframes popFloat {
-      0% { transform: translateY(0) scale(1.1); opacity: 1; }
-      30% { opacity: 1; }
-      100% { transform: translateY(-160px) scale(0.6); opacity: 0; }
+    @keyframes popFloatGrad {
+      0% { transform: translateY(0) scale(1.2); opacity: 1; background-position: 0% 50%; }
+      20% { background-position: 50% 50%; }
+      40% { background-position: 100% 50%; }
+      60% { background-position: 50% 50%; }
+      80% { background-position: 0% 50%; }
+      100% { transform: translateY(-180px) scale(0.5); opacity: 0; background-position: 0% 50%; }
     }
 
     /* ===== 视频弹出播放器 ===== */
@@ -999,7 +1019,7 @@
       .app-icon-wrap { width: 44px; height: 44px; font-size: 17px; }
       .app-label { font-size: 8px; }
       .apps-page { gap: 10px 4px; }
-      .dynamic-island { height: 26px; font-size: 10px; padding: 0 10px; }
+      .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 48px; }
       .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 28px); }
     }
     @media (max-width: 360px) {
@@ -1063,7 +1083,8 @@
       <div class="ios-status-bar">
         <span class="ios-status-left" id="statusTime">09:41</span>
         <div class="dynamic-island" id="dynamicIsland">
-          <span class="island-text-scroll" id="islandText">SU7 Pro 正在播放</span>
+          <span class="island-glow"></span>
+          <span class="island-text-scroll" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
         </div>
         <div class="ios-status-right">
           <svg class="signal-icon" viewBox="0 0 18 12">
@@ -1370,8 +1391,7 @@
         update() {
           this.x += this.speedX;
           this.y += this.speedY;
-          // 渐变偏移
-          this.hue = (this.hue + 0.15) % 360;
+          this.hue = (this.hue + 0.2) % 360;
           if (this.x < 0) this.x = w;
           if (this.x > w) this.x = 0;
           if (this.y < 0) this.y = h;
@@ -1382,7 +1402,6 @@
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
           ctx.fill();
-          // 发光效果
           ctx.shadowColor = `hsla(${this.hue}, 100%, 70%, 0.2)`;
           ctx.shadowBlur = 12;
           ctx.fill();
@@ -1396,10 +1415,8 @@
 
       function animateParticles() {
         ctx.clearRect(0, 0, w, h);
-        // 全局色相偏移
         hueOffset = (hueOffset + 0.1) % 360;
         particles.forEach(p => { p.update(); p.draw(); });
-        // 连线
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
@@ -1491,7 +1508,7 @@
       // ============================================================
       // 灵动岛文字 - 轮播
       // ============================================================
-      const textPool = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子"];
+      const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
       function rollIsland() {
         tidx = (tidx + 1) % textPool.length;
@@ -2341,23 +2358,39 @@
       });
 
       // ============================================================
-      // 点击弹字
+      // 点击弹字 - 随机渐变 + 刘亦菲文字
       // ============================================================
-      const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子"];
+      const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "刘亦菲", "亦菲"];
       document.body.addEventListener("click", (e) => {
         if (e.target.closest(".app-button") || e.target.closest(".viewer") ||
           e.target.closest("#plate") || e.target.closest(".video-controls") ||
           e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
           e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
           e.target.closest(".center-play-btn")) return;
+        
         const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
         const el = document.createElement("div");
         el.className = "click-text-item";
         el.textContent = txt;
+        
+        // 随机生成渐变色
+        const colors = [
+          ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'],
+          ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF'],
+          ['#FF6B9E', '#FFD966', '#6AA9FF', '#FF6B9E'],
+          ['#00FFA3', '#00D4FF', '#7B61FF', '#FF6B9E'],
+          ['#FF6B9E', '#FF8A5C', '#FFD93D', '#6BCB77']
+        ];
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        el.style.background = `linear-gradient(90deg, ${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})`;
+        el.style.backgroundSize = '400% 100%';
+        el.style.webkitBackgroundClip = 'text';
+        el.style.backgroundClip = 'text';
+        
         el.style.left = (e.clientX - 40) + "px";
         el.style.top = (e.clientY - 20) + "px";
         document.body.appendChild(el);
-        setTimeout(() => { if (el.parentNode) el.remove(); }, 4200);
+        setTimeout(() => { if (el.parentNode) el.remove(); }, 3600);
       });
 
       // ============================================================
