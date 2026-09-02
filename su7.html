@@ -1198,7 +1198,7 @@
       let toastTimer = null;
       let hideControlTimer = null;
       let popupHideTimer = null;
-      const HIDE_DELAY = 2000;
+      const HIDE_DELAY = 3000; // 延长到3秒，方便操作
       const POPUP_HIDE_DELAY = 2000;
       let currentVideoIndex = 0;
       let avatarIndex = 0;
@@ -1212,6 +1212,7 @@
       let isJumping = false;
       let avatarTimer = null;
       let slideTimer = null;
+      let controlsVisible = true; // 新增：控件可见状态
 
       let viewerAutoPlayTimer = null;
       let isViewerInteracting = false;
@@ -1341,7 +1342,9 @@
           // 播放时延迟隐藏中央按钮
           clearTimeout(hideControlTimer);
           hideControlTimer = setTimeout(() => {
-            centerPlayBtn.classList.add('hidden');
+            if (!mainVideo.paused) {
+              centerPlayBtn.classList.add('hidden');
+            }
           }, 1500);
         }
       }
@@ -1357,10 +1360,12 @@
       function showControls() {
         videoControls.classList.remove("hidden");
         centerPlayBtn.classList.remove("hidden");
+        controlsVisible = true;
         clearTimeout(hideControlTimer);
         if (!mainVideo.paused) {
           hideControlTimer = setTimeout(() => {
             videoControls.classList.add("hidden");
+            controlsVisible = false;
             // 播放时隐藏中央按钮
             if (!mainVideo.paused) {
               centerPlayBtn.classList.add("hidden");
@@ -1373,20 +1378,25 @@
       function toggleControlsVisibility() {
         const isHidden = videoControls.classList.contains('hidden');
         if (isHidden) {
+          // 显示控件
           videoControls.classList.remove('hidden');
           centerPlayBtn.classList.remove('hidden');
+          controlsVisible = true;
           clearTimeout(hideControlTimer);
           if (!mainVideo.paused) {
             hideControlTimer = setTimeout(() => {
               videoControls.classList.add("hidden");
+              controlsVisible = false;
               if (!mainVideo.paused) {
                 centerPlayBtn.classList.add("hidden");
               }
             }, HIDE_DELAY);
           }
         } else {
+          // 隐藏控件
           videoControls.classList.add('hidden');
           centerPlayBtn.classList.add('hidden');
+          controlsVisible = false;
           clearTimeout(hideControlTimer);
         }
       }
@@ -1586,15 +1596,27 @@
       });
 
       // 主视频点击 - 仅切换控件显示/隐藏，不切换播放状态
-      videoCard.addEventListener("click", e => {
-        if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) return;
+      // 修复：使用更精确的事件处理，防止安卓上点击空白区域导致控件消失
+      videoBox.addEventListener("click", function(e) {
+        // 如果点击的是控件、按钮或中央播放按钮，不处理
+        if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) {
+          return;
+        }
         e.stopPropagation();
         toggleControlsVisibility();
       });
 
-      videoBox.addEventListener("touchstart", showControls);
-      videoBox.addEventListener("touchmove", showControls);
-      videoBox.addEventListener("mousemove", showControls);
+      // 鼠标移动显示控件
+      videoBox.addEventListener("mousemove", function(e) {
+        if (e.target.closest(".video-controls") || e.target.closest(".center-play-btn")) return;
+        showControls();
+      });
+
+      // 触摸支持 - 显示控件
+      videoBox.addEventListener("touchstart", function(e) {
+        if (e.target.closest(".video-controls") || e.target.closest(".center-play-btn")) return;
+        showControls();
+      }, { passive: true });
 
       videoPlayBtn.onclick = (e) => { e.stopPropagation();
         toggleVideo(); };
@@ -1672,6 +1694,7 @@
         centerPlayBtn.classList.remove('hidden');
         centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
         videoControls.classList.remove("hidden");
+        controlsVisible = true;
         clearTimeout(hideControlTimer);
         if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
           popupVideo.pause();
