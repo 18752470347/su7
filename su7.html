@@ -14,7 +14,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ===== 全局重置 ===== */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -54,6 +53,8 @@
       --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
       --sakura-color: rgba(255, 200, 216, 0.45);
+      --particle-light: rgba(255,255,255,0.6);
+      --particle-dark: rgba(180,180,255,0.3);
     }
     /* ===== 浅色模式变量 ===== */
     html.light-mode {
@@ -81,19 +82,43 @@
       --popup-overlay: rgba(0, 0, 0, 0.85);
       --glow-color: #FF2E63;
       --sakura-color: rgba(255, 80, 120, 0.55);
+      --particle-light: rgba(40,40,60,0.5);
+      --particle-dark: rgba(100,100,180,0.25);
     }
     html.light-mode .sakura {
       background: rgba(255, 80, 120, 0.5);
       box-shadow: 0 0 20px rgba(255, 80, 120, 0.15);
     }
-
+    /* ===== 炫酷过渡效果 ===== */
+    html.transitioning {
+      transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    html.transitioning * {
+      transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  fill 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    /* 粒子canvas过渡 */
+    html.transitioning #particles-canvas {
+      transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    /* 流光过渡 */
+    html.transitioning .liquid-gradient {
+      transition: background 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
     html {
       width: 100%;
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
       background-color: #0A0A0C;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     body {
       width: 100%;
@@ -113,12 +138,11 @@
       align-items: center;
       justify-content: center;
       -webkit-overflow-scrolling: touch;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     button, img, video { -webkit-user-drag: none; user-select: none; }
     button { font: inherit; cursor: pointer; background: none; border: none; outline: none; }
 
-    /* ===== 粒子背景 ===== */
     #particles-canvas {
       position: fixed;
       top: 0;
@@ -127,9 +151,8 @@
       height: 100%;
       z-index: 0;
       pointer-events: none;
+      transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    /* ===== 背景流光 ===== */
     .liquid-bg {
       position: fixed;
       inset: 0;
@@ -150,14 +173,12 @@
       will-change: transform;
       transform: translateZ(0);
       animation: liquidFlow 18s ease-in-out infinite alternate;
-      transition: background 0.6s ease;
+      transition: background 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes liquidFlow {
       0% { transform: translate(0, 0) rotate(0deg) scale(1.02); }
       100% { transform: translate(-20px, 20px) rotate(-3deg) scale(1.02); }
     }
-
-    /* ===== 樱花 ===== */
     .sakura-container {
       position: fixed;
       inset: 0;
@@ -174,14 +195,12 @@
       will-change: transform, opacity;
       transform: translateZ(0);
       box-shadow: 0 0 16px rgba(255, 180, 200, 0.15);
-      transition: background 0.3s ease, opacity 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes sakuraFall {
       0% { transform: translateY(0) rotate(0deg) translateX(0px); opacity: 0.7; }
       100% { transform: translateY(105vh) rotate(720deg) translateX(0px); opacity: 0; }
     }
-
-    /* ===== 页面入场 ===== */
     @keyframes pageSpringIn {
       from { opacity: 0; transform: translateY(16px) scale(0.97); }
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -190,8 +209,6 @@
       from { opacity: 0; transform: translateY(18px) scale(0.96); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
-
-    /* ===== 主容器 ===== */
     .app-container {
       display: flex;
       flex-direction: column;
@@ -207,8 +224,6 @@
       animation: pageSpringIn .7s var(--spring) both;
       gap: 12px;
     }
-
-    /* ===== 状态栏 ===== */
     .status-bar-container {
       width: 100%;
       flex-shrink: 0;
@@ -223,7 +238,7 @@
       font-weight: 600;
       color: var(--status-color);
       min-height: 36px;
-      transition: color 0.3s ease;
+      transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .ios-status-left {
       flex: 1;
@@ -232,8 +247,6 @@
       letter-spacing: 0.2px;
       font-size: 14px;
     }
-
-    /* ===== 灵动岛 - 无黑边 ===== */
     .dynamic-island {
       display: inline-flex;
       align-items: center;
@@ -256,7 +269,7 @@
       position: relative;
       transform: perspective(600px) rotateX(2deg) rotateY(-1deg) translateZ(4px);
       box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1);
-      transition: background 0.3s ease, color 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .dynamic-island::before {
       content: '';
@@ -272,7 +285,6 @@
     }
     .dynamic-island .island-glow { display: none; }
     .dynamic-island::after { display: none; }
-
     .island-text-scroll {
       display: inline-block;
       font-weight: 600;
@@ -292,7 +304,6 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
     .ios-status-right {
       flex: 1;
       display: flex;
@@ -305,10 +316,8 @@
       height: 11px;
       fill: var(--status-color);
       flex-shrink: 0;
-      transition: fill 0.3s ease;
+      transition: fill 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    /* ===== 视频卡片 ===== */
     .video-player-container {
       width: 100%;
       flex-shrink: 0;
@@ -320,6 +329,7 @@
       box-shadow: 0 4px 24px rgba(0,0,0,0.4);
       will-change: transform;
       position: relative;
+      transition: border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .video-box {
       position: relative;
@@ -336,8 +346,6 @@
       -webkit-object-fit: cover;
       background: #0A0A0C;
     }
-
-    /* ===== 中央播放按钮 ===== */
     .center-play-btn {
       position: absolute;
       top: 50%;
@@ -358,7 +366,7 @@
       align-items: center;
       justify-content: center;
       z-index: 5;
-      transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease, border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       cursor: pointer;
       box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
@@ -371,8 +379,6 @@
       pointer-events: none;
     }
     .center-play-btn i { margin-left: 4px; }
-
-    /* ===== 视频控制栏 ===== */
     .video-controls {
       position: absolute;
       bottom: 0;
@@ -382,7 +388,7 @@
       background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
       z-index: 3;
       opacity: 1;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.35s ease, background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: auto;
     }
     .video-controls.hidden {
@@ -396,13 +402,14 @@
       border-radius: 99px;
       cursor: pointer;
       margin-bottom: 8px;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .progress-fill {
       height: 100%;
       border-radius: inherit;
       background: linear-gradient(90deg, #00D4FF, #7B61FF);
       width: 0%;
-      transition: width 0.08s linear;
+      transition: width 0.08s linear, background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .controls-row {
       display: flex;
@@ -414,7 +421,7 @@
       font-size: 15px;
       padding: 3px;
       opacity: 0.8;
-      transition: opacity 0.15s;
+      transition: opacity 0.15s, color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .controls-row button:active { opacity: 0.4; }
     .controls-time {
@@ -425,16 +432,16 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .btn-expand {
       color: #fff;
       font-size: 13px;
       padding: 3px;
       opacity: 0.8;
+      transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .btn-expand:active { opacity: 0.4; transform: scale(0.9); }
-
-    /* ===== 主卡片 ===== */
     .main-card-container {
       width: 100%;
       flex-shrink: 0;
@@ -451,7 +458,7 @@
       backdrop-filter: blur(16px) saturate(180%);
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       overflow: visible;
-      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       transform: translateZ(0);
       position: relative;
     }
@@ -465,14 +472,12 @@
       z-index: -1;
       animation: borderGlow 8s linear infinite;
       filter: blur(6px);
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes borderGlow {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    /* ===== 主题切换按钮 ===== */
     .theme-toggle {
       position: absolute;
       top: 12px;
@@ -492,7 +497,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.4s var(--spring), box-shadow 0.4s ease, background 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.4s var(--spring), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       will-change: transform;
       position: relative;
       overflow: hidden;
@@ -507,6 +512,7 @@
       z-index: -1;
       animation: toggleRotate 3s linear infinite;
       filter: blur(6px);
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes toggleRotate {
       0% { transform: rotate(0deg) scale(0.8); }
@@ -520,7 +526,7 @@
       border-radius: 50%;
       background: var(--bg-secondary);
       z-index: -1;
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .theme-toggle:hover {
       transform: scale(1.1) rotate(15deg);
@@ -533,8 +539,6 @@
       transition: transform 0.6s var(--spring);
     }
     .theme-toggle:hover i { transform: rotate(180deg); }
-
-    /* ===== Profile Row ===== */
     .profile-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -550,8 +554,6 @@
       flex-direction: column;
       align-items: center;
     }
-
-    /* ===== Avatar ===== */
     .avatar {
       position: relative;
       width: 68px;
@@ -573,7 +575,7 @@
       filter: blur(24px);
       animation: glowPulse 1.8s ease-in-out infinite alternate;
       transform: scale(0.8);
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes glowPulse {
       0% { transform: scale(0.7); opacity: 0.3; filter: blur(20px); }
@@ -590,13 +592,12 @@
       filter: blur(40px);
       animation: glowPulse2 2.2s ease-in-out infinite alternate;
       transform: scale(0.6);
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes glowPulse2 {
       0% { transform: scale(0.5); opacity: 0.2; filter: blur(30px); }
       100% { transform: scale(1.6); opacity: 0.7; filter: blur(50px); }
     }
-
     .avatar-inner {
       position: relative;
       width: 100%;
@@ -616,7 +617,7 @@
       z-index: -1;
       opacity: 0.9;
       box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes ringRotate {
       0% { transform: rotate(0deg) scale(1); }
@@ -632,14 +633,13 @@
       filter: blur(6px);
       z-index: -2;
       opacity: 0.5;
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes ringRotate2 {
       0% { transform: rotate(0deg) scale(0.9); }
       50% { transform: rotate(180deg) scale(1.1); }
       100% { transform: rotate(360deg) scale(0.9); }
     }
-
     .avatar img {
       width: 100%;
       height: 100%;
@@ -650,6 +650,7 @@
       position: relative;
       z-index: 1;
       backface-visibility: hidden;
+      transition: border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .avatar img.back {
       position: absolute;
@@ -658,8 +659,6 @@
       transform: rotateY(180deg);
       backface-visibility: hidden;
     }
-
-    /* ===== 右侧图片 ===== */
     .plate-photo {
       width: 92px;
       flex-shrink: 0;
@@ -688,6 +687,7 @@
       border-radius: 12px;
       backface-visibility: hidden;
       border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .plate-photo-inner img.back {
       position: absolute;
@@ -706,10 +706,8 @@
       z-index: -1;
       filter: blur(10px);
       animation: ringRotate 4s linear infinite;
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    /* ===== 车牌 ===== */
     .plate {
       padding: 3px 14px;
       border-radius: 6px;
@@ -721,7 +719,7 @@
       box-shadow: 0 3px 18px rgba(0, 212, 255, 0.20);
       border: 0.5px solid rgba(255,255,255,0.10);
       cursor: pointer;
-      transition: transform 0.15s var(--spring), background 0.3s ease;
+      transition: transform 0.15s var(--spring), background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
       overflow: hidden;
     }
@@ -739,7 +737,6 @@
       100% { transform: translateX(100%); }
     }
     .plate:active { transform: scale(0.94); }
-
     .name {
       font-size: 12px;
       font-weight: 700;
@@ -755,7 +752,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes textGradient {
       0% { background-position: 0% 50%; }
@@ -774,15 +771,13 @@
       color: transparent;
       animation: textGradientSub 3.5s ease-in-out infinite;
       line-height: 1.4;
-      transition: background 0.3s ease;
+      transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes textGradientSub {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
-    /* ===== APP宫格 ===== */
     .apps-scroll-wrapper {
       width: 100%;
       overflow: visible;
@@ -804,7 +799,6 @@
       min-height: 100px;
     }
     .apps-page[data-page="1"] { display: none; }
-
     .app-button {
       --icon-color: #00D4FF;
       display: flex;
@@ -833,7 +827,7 @@
       backdrop-filter: blur(12px) saturate(170%);
       -webkit-backdrop-filter: blur(12px) saturate(170%);
       border: 0.5px solid rgba(255,255,255,0.04);
-      transition: transform 0.15s var(--spring), box-shadow 0.3s ease, background 0.3s ease;
+      transition: transform 0.15s var(--spring), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       z-index: 10;
     }
     .app-icon-wrap::after {
@@ -861,10 +855,8 @@
       text-align: center;
       line-height: 1.2;
       letter-spacing: 0.1px;
-      transition: color 0.3s ease;
+      transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    /* ===== Toast ===== */
     .toast {
       position: fixed;
       z-index: 10001;
@@ -881,12 +873,10 @@
       font-weight: 500;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s var(--ease), transform 0.25s var(--spring);
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--spring), background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       border: 0.5px solid rgba(255,255,255,0.06);
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
-
-    /* ===== 图片查看器 ===== */
     .viewer {
       position: fixed;
       inset: 0;
@@ -900,7 +890,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.25s var(--ease), visibility 0.25s var(--ease);
+      transition: opacity 0.25s var(--ease), visibility 0.25s var(--ease), background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .viewer.show { opacity: 1; visibility: visible; pointer-events: auto; }
     .viewer-content {
@@ -941,6 +931,7 @@
       justify-content: center;
       cursor: pointer;
       z-index: 10003;
+      transition: background 0.3s ease, transform 0.3s ease, color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .viewer-close:active { background: rgba(255,255,255,0.12); transform: scale(0.9); }
     .viewer-hint {
@@ -948,6 +939,7 @@
       font-size: 11px;
       margin-top: 12px;
       letter-spacing: 0.2px;
+      transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .viewer-counter {
       position: fixed;
@@ -965,12 +957,10 @@
       border: 0.5px solid rgba(255,255,255,0.04);
       z-index: 10004;
       opacity: 0;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.25s ease, background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
     }
     .viewer.show .viewer-counter { opacity: 1; }
-
-    /* ===== 点击弹字 ===== */
     .click-text-item {
       position: fixed;
       z-index: 10002;
@@ -994,8 +984,6 @@
       80% { background-position: 0% 50%; }
       100% { transform: translateY(-180px) scale(0.5); opacity: 0; background-position: 0% 50%; }
     }
-
-    /* ===== 视频弹出播放器 ===== */
     .video-popup {
       position: fixed;
       inset: 0;
@@ -1009,7 +997,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.3s var(--ease), visibility 0.3s var(--ease);
+      transition: opacity 0.3s var(--ease), visibility 0.3s var(--ease), background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       padding: 16px;
     }
     .video-popup.active { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -1053,6 +1041,7 @@
       cursor: pointer;
       z-index: 10;
       opacity: 0.9;
+      transition: opacity 0.3s ease, background 0.3s ease, color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .popup-close:active { background: rgba(255,255,255,0.12); transform: scale(0.9); }
     .popup-close.hidden { opacity: 0; pointer-events: none; }
@@ -1069,16 +1058,14 @@
       gap: 10px;
       color: #fff;
       opacity: 1;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .popup-controls.hidden { opacity: 0; pointer-events: none; }
-    .popup-controls button { color: #fff; font-size: 16px; padding: 3px; opacity: 0.8; }
+    .popup-controls button { color: #fff; font-size: 16px; padding: 3px; opacity: 0.8; transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .popup-controls button:active { opacity: 0.4; }
-    .popup-progress-wrap { flex: 1; height: 2px; background: rgba(255,255,255,0.15); border-radius: 99px; cursor: pointer; }
-    .popup-progress-bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #00D4FF, #7B61FF); width: 0%; }
-    .popup-time { font-size: 11px; font-weight: 500; min-width: 80px; text-align: right; }
-
-    /* ===== 小屏适配 ===== */
+    .popup-progress-wrap { flex: 1; height: 2px; background: rgba(255,255,255,0.15); border-radius: 99px; cursor: pointer; transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .popup-progress-bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #00D4FF, #7B61FF); width: 0%; transition: background 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .popup-time { font-size: 11px; font-weight: 500; min-width: 80px; text-align: right; transition: color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
     @media (max-width: 380px) {
       .app-container { padding: 10px 12px 14px; gap: 10px; }
       .main-card { padding: 16px 12px 18px; }
@@ -1108,19 +1095,12 @@
 </head>
 <body>
 
-  <!-- 粒子背景 -->
   <canvas id="particles-canvas"></canvas>
-
-  <!-- 背景流光 -->
   <div class="liquid-bg"><div class="liquid-gradient"></div></div>
-
-  <!-- 樱花容器 -->
   <div class="sakura-container" id="sakuraBox"></div>
 
-  <!-- Toast -->
   <div class="toast" id="toast">复制成功</div>
 
-  <!-- 图片查看器 -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <button class="viewer-close" id="viewerClose"><i class="fa-solid fa-xmark"></i></button>
     <div class="viewer-content">
@@ -1130,7 +1110,6 @@
     <div class="viewer-counter" id="viewerCounter">1 / 1</div>
   </div>
 
-  <!-- 视频弹出播放器 -->
   <div class="video-popup" id="videoPopup">
     <div class="popup-inner" id="popupInner">
       <button class="popup-close" id="popupClose"><i class="fa-solid fa-xmark"></i></button>
@@ -1148,10 +1127,8 @@
     </div>
   </div>
 
-  <!-- 主容器 -->
   <div class="app-container">
 
-    <!-- 状态栏 -->
     <div class="status-bar-container">
       <div class="ios-status-bar">
         <span class="ios-status-left" id="statusTime">09:41</span>
@@ -1169,16 +1146,12 @@
       </div>
     </div>
 
-    <!-- 视频卡片 -->
     <div class="video-player-container" id="videoCard">
       <div class="video-box" id="videoBox">
         <video id="mainVideo" src="" playsinline webkit-playsinline preload="metadata"></video>
-        
-        <!-- 中央播放按钮 -->
         <button class="center-play-btn" id="centerPlayBtn" aria-label="播放/暂停">
           <i class="fa-solid fa-play"></i>
         </button>
-
         <div class="video-controls" id="videoControls">
           <div class="progress-track" id="progressTrack">
             <div class="progress-fill" id="progressFill"></div>
@@ -1197,17 +1170,13 @@
       </div>
     </div>
 
-    <!-- 主卡片 -->
     <div class="main-card-container">
       <div class="main-card">
-        <!-- 主题切换按钮 -->
         <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式">
           <i class="fa-solid fa-moon" id="themeIcon"></i>
         </button>
-
         <div class="profile-row">
           <div class="profile-left">
-            <!-- 头像 -->
             <div class="avatar" id="avatar">
               <div class="avatar-ring"></div>
               <div class="avatar-ring-2"></div>
@@ -1220,7 +1189,6 @@
             <div class="name">刘茜美子・去有风的地方遇见你</div>
             <div class="subtitle">你好,我叫许红豆<br>风乍起,吹皱一江春水</div>
           </div>
-          <!-- 图片 - 向左微调 -->
           <div class="plate-photo" id="platePhoto">
             <div class="plate-photo-inner" id="photoInner">
               <img id="platePhotoImg" src="" alt="图片" draggable="false">
@@ -1228,8 +1196,6 @@
             </div>
           </div>
         </div>
-
-        <!-- APP宫格 -->
         <div class="apps-scroll-wrapper" id="appsWrapper">
           <div class="apps-track" id="appsTrack">
             <div class="apps-page" data-page="0">
@@ -1276,9 +1242,6 @@
     (function() {
       'use strict';
 
-      // ============================================================
-      // 数据配置
-      // ============================================================
       const videoList = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
@@ -1290,7 +1253,6 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/3.mp4",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/4.mp4",
       ];
-
       const avatarImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/1.jpg",
@@ -1301,7 +1263,6 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
       ];
-
       const slideImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
@@ -1374,7 +1335,6 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
       ];
-
       const APP_CONFIG = {
         custom1: { scheme: "anywhere://open?sid=0444", name: "LX Music" },
         custom2: { scheme: "anywhere://open?sid=2848", name: "A+系统" },
@@ -1386,9 +1346,6 @@
         custom8: { scheme: "anywhere://open?sid=9850", name: "酷狗音乐" }
       };
 
-      // ============================================================
-      // DOM 引用
-      // ============================================================
       const $ = (s, ctx = document) => ctx.querySelector(s);
       const $$ = (s, ctx = document) => [...ctx.querySelectorAll(s)];
 
@@ -1438,12 +1395,35 @@
       const popupClose = $("#popupClose");
       const popupControls = $("#popupControls");
 
-      // ============================================================
-      // 深色/浅色模式切换
-      // ============================================================
+      let toastTimer = null;
+      let hideControlTimer = null;
+      let popupHideTimer = null;
+      const HIDE_DELAY = 2000;
+      const POPUP_HIDE_DELAY = 2000;
+      let currentVideoIndex = 0;
+      let avatarIndex = 0;
+      let slideIndex = 0;
+      let viewerGallery = [];
+      let viewerGalleryIndex = 0;
+      let glowInterval = null;
+      let sakuraInterval = null;
+      let textRollInterval = null;
+      let popupControlsVisible = false;
+      let isJumping = false;
+      let avatarTimer = null;
+      let slideTimer = null;
+      let isFlipping = false;
+      let viewerAutoPlayTimer = null;
+      let isViewerInteracting = false;
+
+      // ===== 炫酷主题切换 =====
       function toggleTheme() {
         const html = document.documentElement;
         const isLight = html.classList.contains('light-mode');
+
+        // 添加过渡类触发动画
+        html.classList.add('transitioning');
+
         if (isLight) {
           html.classList.remove('light-mode');
           html.classList.add('dark-mode');
@@ -1457,6 +1437,11 @@
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
           showToastMsg('☀️ 已切换到浅色模式');
         }
+
+        // 过渡结束后移除过渡类
+        setTimeout(() => {
+          html.classList.remove('transitioning');
+        }, 800);
       }
 
       (function initTheme() {
@@ -1468,9 +1453,7 @@
 
       themeToggle.addEventListener('click', toggleTheme);
 
-      // ============================================================
-      // 粒子背景
-      // ============================================================
+      // ===== 粒子背景 - 优化浅色模式可见度 =====
       const canvas = document.getElementById('particles-canvas');
       const ctx = canvas.getContext('2d');
       let particles = [];
@@ -1496,6 +1479,13 @@
           this.saturation = 70 + Math.random() * 30;
           this.lightness = 60 + Math.random() * 30;
           this.opacity = Math.random() * 0.5 + 0.15;
+          // 根据当前主题调整初始透明度
+          this.updateOpacity();
+        }
+        updateOpacity() {
+          const isLight = document.documentElement.classList.contains('light-mode');
+          this.baseOpacity = isLight ? 0.6 : 0.3;
+          this.opacity = (Math.random() * 0.3 + 0.2) * (isLight ? 1.8 : 1);
         }
         update() {
           this.x += this.speedX;
@@ -1507,11 +1497,14 @@
           if (this.y > h) this.y = 0;
         }
         draw() {
+          const isLight = document.documentElement.classList.contains('light-mode');
+          const alpha = isLight ? 0.35 : 0.25;
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
+          const hue = isLight ? (this.hue + 40) % 360 : this.hue;
+          ctx.fillStyle = `hsla(${hue}, ${isLight ? 60 : 80}%, ${isLight ? 50 : 70}%, ${alpha})`;
           ctx.fill();
-          ctx.shadowColor = `hsla(${this.hue}, 100%, 70%, 0.2)`;
+          ctx.shadowColor = `hsla(${hue}, 100%, 70%, ${isLight ? 0.1 : 0.15})`;
           ctx.shadowBlur = 12;
           ctx.fill();
           ctx.shadowBlur = 0;
@@ -1540,7 +1533,8 @@
               ctx.lineTo(particles[j].x, particles[j].y);
               const alpha = 0.06 * (1 - dist / 140);
               const avgHue = (particles[i].hue + particles[j].hue) / 2;
-              ctx.strokeStyle = `hsla(${avgHue}, 80%, 70%, ${alpha})`;
+              const isLight = document.documentElement.classList.contains('light-mode');
+              ctx.strokeStyle = `hsla(${avgHue}, ${isLight ? 50 : 80}%, ${isLight ? 50 : 70}%, ${isLight ? 0.12 : 0.06})`;
               ctx.lineWidth = 0.6;
               ctx.stroke();
             }
@@ -1550,34 +1544,120 @@
       }
       animateParticles();
 
-      // ============================================================
-      // 状态
-      // ============================================================
-      let toastTimer = null;
-      let hideControlTimer = null;
-      let popupHideTimer = null;
-      const HIDE_DELAY = 2000; // 2秒自动隐藏
-      const POPUP_HIDE_DELAY = 2000;
-      let currentVideoIndex = 0;
-      let avatarIndex = 0;
-      let slideIndex = 0;
-      let viewerGallery = [];
-      let viewerGalleryIndex = 0;
-      let glowInterval = null;
-      let sakuraInterval = null;
-      let textRollInterval = null;
-      let popupControlsVisible = false;
-      let isJumping = false;
-      let avatarTimer = null;
-      let slideTimer = null;
-      let isFlipping = false;
+      // 主题变化时刷新粒子透明度
+      const observer = new MutationObserver(() => {
+        particles.forEach(p => p.updateOpacity());
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-      let viewerAutoPlayTimer = null;
-      let isViewerInteracting = false;
+      // ===== 其他功能（保留原有逻辑） =====
+      function formatTime(s) {
+        if (isNaN(s) || !isFinite(s)) return "00:00";
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+      }
 
-      // ============================================================
-      // 初始化
-      // ============================================================
+      function showToastMsg(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
+      }
+
+      function startAutoHideTimer() {
+        clearTimeout(hideControlTimer);
+        if (!mainVideo.paused && !videoControls.classList.contains('hidden')) {
+          hideControlTimer = setTimeout(function() {
+            videoControls.classList.add("hidden");
+            centerPlayBtn.classList.add("hidden");
+          }, HIDE_DELAY);
+        }
+      }
+
+      function showControls() {
+        videoControls.classList.remove("hidden");
+        centerPlayBtn.classList.remove("hidden");
+        startAutoHideTimer();
+      }
+
+      function toggleControlsVisibility() {
+        const isHidden = videoControls.classList.contains('hidden');
+        if (isHidden) {
+          videoControls.classList.remove("hidden");
+          centerPlayBtn.classList.remove("hidden");
+          startAutoHideTimer();
+        } else {
+          videoControls.classList.add("hidden");
+          centerPlayBtn.classList.add("hidden");
+          clearTimeout(hideControlTimer);
+        }
+      }
+
+      function switchVideo(index) {
+        if (videoList.length === 0) return;
+        currentVideoIndex = (index + videoList.length) % videoList.length;
+        const src = videoList[currentVideoIndex];
+        mainVideo.src = src;
+        progressFill.style.width = '0%';
+        curTime.textContent = '00:00';
+        mainVideo.play().catch(() => showToastMsg("请手动播放"));
+        popupVideo.src = src;
+        updateCenterPlayBtn();
+        updatePlayBtnIcon();
+        showControls();
+      }
+
+      function toggleVideo() {
+        if (mainVideo.paused) {
+          mainVideo.play().catch(() => showToastMsg("请点击播放"));
+        } else {
+          mainVideo.pause();
+        }
+        updateCenterPlayBtn();
+        updatePlayBtnIcon();
+        if (!mainVideo.paused) {
+          showControls();
+        } else {
+          videoControls.classList.remove("hidden");
+          centerPlayBtn.classList.remove("hidden");
+          clearTimeout(hideControlTimer);
+        }
+      }
+
+      function updateCenterPlayBtn() {
+        if (mainVideo.paused) {
+          centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+          centerPlayBtn.classList.remove('hidden');
+          clearTimeout(hideControlTimer);
+        } else {
+          centerPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+          startAutoHideTimer();
+        }
+      }
+
+      function updatePlayBtnIcon() {
+        if (mainVideo.paused) {
+          videoPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+        } else {
+          videoPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+        }
+      }
+
+      function prevVideo() { switchVideo(currentVideoIndex - 1); }
+      function nextVideo() { switchVideo(currentVideoIndex + 1); }
+
+      function updateMuteIcon() {
+        if (mainVideo.muted || mainVideo.volume <= 0) {
+          videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i>`;
+        } else if (mainVideo.volume < 0.5) {
+          videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-low"></i>`;
+        } else {
+          videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
+        }
+      }
+
+      // ===== 初始化视频 =====
       if (videoList.length > 0) {
         mainVideo.src = videoList[0];
         popupVideo.src = videoList[0];
@@ -1591,9 +1671,7 @@
         platePhotoImgBack.src = slideImages[slideImages.length > 1 ? 1 : 0];
       }
 
-      // ============================================================
-      // 樱花引擎
-      // ============================================================
+      // ===== 樱花引擎 =====
       function createSakura() {
         const el = document.createElement("div");
         el.className = "sakura";
@@ -1616,11 +1694,10 @@
       }
       ensureSakura();
 
-      // ============================================================
-      // 灵动岛文字轮播
-      // ============================================================
+      // ===== 灵动岛文字轮播 =====
       const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
+
       function rollIsland() {
         tidx = (tidx + 1) % textPool.length;
         islandText.textContent = textPool[tidx];
@@ -1628,22 +1705,19 @@
       islandText.textContent = textPool[0];
       textRollInterval = setInterval(rollIsland, 3000);
 
-      // ============================================================
-      // 呼吸灯颜色
-      // ============================================================
+      // ===== 呼吸灯颜色 =====
       function randomColor() {
         const c = ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'];
         return c[Math.floor(Math.random() * c.length)];
       }
+
       function updateGlow() {
         document.documentElement.style.setProperty('--glow-color', randomColor());
       }
       glowInterval = setInterval(updateGlow, 1800);
       setTimeout(updateGlow, 50);
 
-      // ============================================================
-      // 头像 & 图片轮播
-      // ============================================================
+      // ===== 头像 & 图片轮播 =====
       function animateAvatar(newSrc) {
         if (isFlipping) return;
         isFlipping = true;
@@ -1689,135 +1763,104 @@
         slideTimer = setInterval(nextSlide, 3800);
       }
 
-      // ============================================================
-      // 主视频控件控制 - 全新重写
-      // ============================================================
-      function formatTime(s) {
-        if (isNaN(s) || !isFinite(s)) return "00:00";
-        const m = Math.floor(s / 60);
-        const sec = Math.floor(s % 60);
-        return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
-      }
+      // ===== 视频事件绑定 =====
+      centerPlayBtn.addEventListener('click', (e) => { e.stopPropagation();
+        toggleVideo(); });
 
-      function showToastMsg(msg) {
-        toast.textContent = msg;
-        toast.classList.add("show");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
-      }
-
-      // ===== 核心：控制控件自动隐藏 =====
-      function startAutoHideTimer() {
-        clearTimeout(hideControlTimer);
-        // 只有在视频播放且控件可见时才启动定时器
-        if (!mainVideo.paused && !videoControls.classList.contains('hidden')) {
-          hideControlTimer = setTimeout(function() {
-            videoControls.classList.add("hidden");
-            centerPlayBtn.classList.add("hidden");
-          }, HIDE_DELAY);
+      videoBox.addEventListener("click", function(e) {
+        if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) {
+          return;
         }
-      }
+        e.stopPropagation();
+        toggleControlsVisibility();
+      });
 
-      // ===== 显示控件（并启动自动隐藏定时器） =====
-      function showControls() {
-        videoControls.classList.remove("hidden");
-        centerPlayBtn.classList.remove("hidden");
-        startAutoHideTimer();
-      }
+      videoPlayBtn.onclick = (e) => { e.stopPropagation();
+        toggleVideo(); };
+      videoPrevBtn.onclick = (e) => { e.stopPropagation();
+        prevVideo(); };
+      videoNextBtn.onclick = (e) => { e.stopPropagation();
+        nextVideo(); };
+      expandBtn.onclick = (e) => { e.stopPropagation();
+        openPopup(); };
 
-      // ===== 切换控件显示/隐藏（点击屏幕触发） =====
-      function toggleControlsVisibility() {
-        const isHidden = videoControls.classList.contains('hidden');
-        if (isHidden) {
-          // 显示控件
-          videoControls.classList.remove("hidden");
-          centerPlayBtn.classList.remove("hidden");
-          startAutoHideTimer();
-        } else {
-          // 隐藏控件
-          videoControls.classList.add("hidden");
-          centerPlayBtn.classList.add("hidden");
-          clearTimeout(hideControlTimer);
-        }
-      }
-
-      // ===== 切换视频 =====
-      function switchVideo(index) {
-        if (videoList.length === 0) return;
-        currentVideoIndex = (index + videoList.length) % videoList.length;
-        const src = videoList[currentVideoIndex];
-        mainVideo.src = src;
-        progressFill.style.width = '0%';
-        curTime.textContent = '00:00';
-        mainVideo.play().catch(() => showToastMsg("请手动播放"));
-        popupVideo.src = src;
-        // 更新播放按钮状态
-        updateCenterPlayBtn();
-        updatePlayBtnIcon();
-        // 显示控件并启动自动隐藏
+      let volDrag = false,
+        volStartY = 0,
+        volStartVal = 0;
+      videoMuteBtn.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        volDrag = true;
+        volStartY = e.touches[0].clientY;
+        volStartVal = mainVideo.volume;
+      }, { passive: true });
+      videoMuteBtn.addEventListener('touchmove', (e) => {
+        if (!volDrag) return;
+        e.preventDefault();
+        const dy = volStartY - e.touches[0].clientY;
+        let v = Math.max(0, Math.min(1, volStartVal + dy / 800));
+        mainVideo.volume = v;
+        updateMuteIcon();
+      }, { passive: false });
+      videoMuteBtn.addEventListener('touchend', () => { volDrag = false; });
+      videoMuteBtn.addEventListener('touchcancel', () => { volDrag = false; });
+      videoMuteBtn.onclick = (e) => {
+        if (volDrag) return;
+        e.stopPropagation();
+        mainVideo.muted = !mainVideo.muted;
+        updateMuteIcon();
         showControls();
-      }
+      };
 
-      // ===== 播放/暂停切换 =====
-      function toggleVideo() {
-        if (mainVideo.paused) {
-          mainVideo.play().catch(() => showToastMsg("请点击播放"));
-        } else {
-          mainVideo.pause();
+      mainVideo.addEventListener('loadedmetadata', () => {
+        totTime.textContent = formatTime(mainVideo.duration);
+        if (mainVideo.currentTime > 0) {
+          const p = (mainVideo.currentTime / mainVideo.duration) * 100;
+          progressFill.style.width = p + "%";
+          curTime.textContent = formatTime(mainVideo.currentTime);
         }
         updateCenterPlayBtn();
+      });
+
+      mainVideo.addEventListener('timeupdate', () => {
+        if (mainVideo.duration > 0) {
+          const p = (mainVideo.currentTime / mainVideo.duration) * 100;
+          progressFill.style.width = p + "%";
+          curTime.textContent = formatTime(mainVideo.currentTime);
+        }
+      });
+
+      progressTrack.addEventListener("click", (e) => {
+        const rect = progressTrack.getBoundingClientRect();
+        const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        mainVideo.currentTime = r * mainVideo.duration;
+        showControls();
+      });
+
+      mainVideo.addEventListener("play", () => {
         updatePlayBtnIcon();
-        // 如果视频正在播放，显示控件并启动自动隐藏；如果暂停，显示控件但不自动隐藏
-        if (!mainVideo.paused) {
-          showControls();
-        } else {
-          videoControls.classList.remove("hidden");
-          centerPlayBtn.classList.remove("hidden");
-          clearTimeout(hideControlTimer);
+        updateCenterPlayBtn();
+        showControls();
+        if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
+          popupVideo.play().catch(() => {});
         }
-      }
+      });
 
-      function updateCenterPlayBtn() {
-        if (mainVideo.paused) {
-          centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-          centerPlayBtn.classList.remove('hidden');
-          clearTimeout(hideControlTimer);
-        } else {
-          centerPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-          // 播放时启动自动隐藏
-          startAutoHideTimer();
+      mainVideo.addEventListener("pause", () => {
+        updatePlayBtnIcon();
+        centerPlayBtn.classList.remove('hidden');
+        centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        videoControls.classList.remove("hidden");
+        clearTimeout(hideControlTimer);
+        if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
+          popupVideo.pause();
         }
-      }
+      });
 
-      function updatePlayBtnIcon() {
-        if (mainVideo.paused) {
-          videoPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
-        } else {
-          videoPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-        }
-      }
-
-      function prevVideo() {
-        switchVideo(currentVideoIndex - 1);
-      }
-
-      function nextVideo() {
+      mainVideo.addEventListener("ended", function() {
         switchVideo(currentVideoIndex + 1);
-      }
+      });
 
-      function updateMuteIcon() {
-        if (mainVideo.muted || mainVideo.volume <= 0) {
-          videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i>`;
-        } else if (mainVideo.volume < 0.5) {
-          videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-low"></i>`;
-        } else {
-          videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
-        }
-      }
-
-      // ============================================================
-      // 弹出播放器
-      // ============================================================
+      // ===== 弹出播放器 =====
       function togglePopupControls() {
         popupControlsVisible = !popupControlsVisible;
         popupControls.classList.toggle("hidden", !popupControlsVisible);
@@ -1869,215 +1912,6 @@
         clearTimeout(popupHideTimer);
       }
 
-      // ============================================================
-      // 图片查看器
-      // ============================================================
-      function updateViewerCounter() {
-        if (viewerGallery && viewerGallery.length > 0) {
-          viewerCounter.textContent = (viewerGalleryIndex + 1) + ' / ' + viewerGallery.length;
-        } else {
-          viewerCounter.textContent = '1 / 1';
-        }
-      }
-
-      function startViewerAutoPlay() {
-        stopViewerAutoPlay();
-        if (!viewerGallery || viewerGallery.length <= 1) return;
-        viewerAutoPlayTimer = setInterval(() => {
-          if (isViewerInteracting) return;
-          viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
-          viewerImg.src = viewerGallery[viewerGalleryIndex];
-          updateViewerCounter();
-        }, 3500);
-      }
-
-      function stopViewerAutoPlay() {
-        if (viewerAutoPlayTimer) {
-          clearInterval(viewerAutoPlayTimer);
-          viewerAutoPlayTimer = null;
-        }
-      }
-
-      function resetViewerAutoPlay() {
-        stopViewerAutoPlay();
-        if (viewer.classList.contains('show') && viewerGallery && viewerGallery.length > 1) {
-          startViewerAutoPlay();
-        }
-      }
-
-      function openViewer(gallery, idx, alt) {
-        if (!gallery || gallery.length === 0) return;
-        stopViewerAutoPlay();
-
-        viewerGallery = gallery;
-        viewerGalleryIndex = idx;
-        viewerImg.src = viewerGallery[viewerGalleryIndex];
-        viewerImg.alt = alt || "原图";
-        viewer.classList.add("show");
-        document.body.style.overflow = "hidden";
-        viewerHint.textContent = '左右滑动切换 · 长按保存';
-        updateViewerCounter();
-
-        if (viewerGallery.length > 1) {
-          setTimeout(() => {
-            if (viewer.classList.contains('show')) {
-              startViewerAutoPlay();
-            }
-          }, 1200);
-        }
-
-        isViewerInteracting = false;
-      }
-
-      function closeViewer() {
-        stopViewerAutoPlay();
-        viewer.classList.remove("show");
-        document.body.style.overflow = "";
-        isViewerInteracting = false;
-        setTimeout(() => {
-          if (!viewer.classList.contains("show")) {
-            viewerImg.src = "";
-          }
-        }, 250);
-      }
-
-      function viewerPrev() {
-        if (!viewerGallery || viewerGallery.length === 0) return;
-        isViewerInteracting = true;
-        viewerGalleryIndex = (viewerGalleryIndex - 1 + viewerGallery.length) % viewerGallery.length;
-        viewerImg.src = viewerGallery[viewerGalleryIndex];
-        updateViewerCounter();
-        resetViewerAutoPlay();
-        setTimeout(() => { isViewerInteracting = false; }, 300);
-      }
-
-      function viewerNext() {
-        if (!viewerGallery || viewerGallery.length === 0) return;
-        isViewerInteracting = true;
-        viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
-        viewerImg.src = viewerGallery[viewerGalleryIndex];
-        updateViewerCounter();
-        resetViewerAutoPlay();
-        setTimeout(() => { isViewerInteracting = false; }, 300);
-      }
-
-      // ============================================================
-      // 事件绑定
-      // ============================================================
-
-      // 中央播放按钮
-      centerPlayBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleVideo();
-      });
-
-      // 点击视频区域 - 切换控件显示/隐藏
-      videoBox.addEventListener("click", function(e) {
-        // 如果点击的是控件、按钮或中央播放按钮，不处理（让它们自己处理）
-        if (e.target.closest(".video-controls") || e.target.closest(".btn-expand") || e.target.closest(".center-play-btn")) {
-          return;
-        }
-        e.stopPropagation();
-        toggleControlsVisibility();
-      });
-
-      // 播放/暂停按钮
-      videoPlayBtn.onclick = (e) => { e.stopPropagation();
-        toggleVideo(); };
-
-      // 上一首/下一首
-      videoPrevBtn.onclick = (e) => { e.stopPropagation();
-        prevVideo(); };
-      videoNextBtn.onclick = (e) => { e.stopPropagation();
-        nextVideo(); };
-
-      // 展开
-      expandBtn.onclick = (e) => { e.stopPropagation();
-        openPopup(); };
-
-      // 音量
-      let volDrag = false,
-        volStartY = 0,
-        volStartVal = 0;
-      videoMuteBtn.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-        volDrag = true;
-        volStartY = e.touches[0].clientY;
-        volStartVal = mainVideo.volume;
-      }, { passive: true });
-      videoMuteBtn.addEventListener('touchmove', (e) => {
-        if (!volDrag) return;
-        e.preventDefault();
-        const dy = volStartY - e.touches[0].clientY;
-        let v = Math.max(0, Math.min(1, volStartVal + dy / 800));
-        mainVideo.volume = v;
-        updateMuteIcon();
-      }, { passive: false });
-      videoMuteBtn.addEventListener('touchend', () => { volDrag = false; });
-      videoMuteBtn.addEventListener('touchcancel', () => { volDrag = false; });
-      videoMuteBtn.onclick = (e) => {
-        if (volDrag) return;
-        e.stopPropagation();
-        mainVideo.muted = !mainVideo.muted;
-        updateMuteIcon();
-        showControls();
-      };
-
-      // 视频事件
-      mainVideo.addEventListener('loadedmetadata', () => {
-        totTime.textContent = formatTime(mainVideo.duration);
-        if (mainVideo.currentTime > 0) {
-          const p = (mainVideo.currentTime / mainVideo.duration) * 100;
-          progressFill.style.width = p + "%";
-          curTime.textContent = formatTime(mainVideo.currentTime);
-        }
-        updateCenterPlayBtn();
-      });
-
-      mainVideo.addEventListener('timeupdate', () => {
-        if (mainVideo.duration > 0) {
-          const p = (mainVideo.currentTime / mainVideo.duration) * 100;
-          progressFill.style.width = p + "%";
-          curTime.textContent = formatTime(mainVideo.currentTime);
-        }
-      });
-
-      progressTrack.addEventListener("click", (e) => {
-        const rect = progressTrack.getBoundingClientRect();
-        const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        mainVideo.currentTime = r * mainVideo.duration;
-        showControls();
-      });
-
-      mainVideo.addEventListener("play", () => {
-        updatePlayBtnIcon();
-        updateCenterPlayBtn();
-        // 播放时显示控件并启动自动隐藏
-        showControls();
-        if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
-          popupVideo.play().catch(() => {});
-        }
-      });
-
-      mainVideo.addEventListener("pause", () => {
-        updatePlayBtnIcon();
-        centerPlayBtn.classList.remove('hidden');
-        centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-        videoControls.classList.remove("hidden");
-        clearTimeout(hideControlTimer);
-        if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
-          popupVideo.pause();
-        }
-      });
-
-      // 视频结束自动播放下一个
-      mainVideo.addEventListener("ended", function() {
-        switchVideo(currentVideoIndex + 1);
-      });
-
-      // ============================================================
-      // 弹出播放器事件
-      // ============================================================
       popupVideo.removeAttribute('loop');
       popupVideo.addEventListener('ended', () => {
         if (videoList.length > 0) {
@@ -2236,20 +2070,102 @@
         }, POPUP_HIDE_DELAY);
       });
 
-      // ============================================================
-      // 图片查看器事件绑定
-      // ============================================================
+      // ===== 图片查看器 =====
+      function updateViewerCounter() {
+        if (viewerGallery && viewerGallery.length > 0) {
+          viewerCounter.textContent = (viewerGalleryIndex + 1) + ' / ' + viewerGallery.length;
+        } else {
+          viewerCounter.textContent = '1 / 1';
+        }
+      }
+
+      function startViewerAutoPlay() {
+        stopViewerAutoPlay();
+        if (!viewerGallery || viewerGallery.length <= 1) return;
+        viewerAutoPlayTimer = setInterval(() => {
+          if (isViewerInteracting) return;
+          viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
+          viewerImg.src = viewerGallery[viewerGalleryIndex];
+          updateViewerCounter();
+        }, 3500);
+      }
+
+      function stopViewerAutoPlay() {
+        if (viewerAutoPlayTimer) {
+          clearInterval(viewerAutoPlayTimer);
+          viewerAutoPlayTimer = null;
+        }
+      }
+
+      function resetViewerAutoPlay() {
+        stopViewerAutoPlay();
+        if (viewer.classList.contains('show') && viewerGallery && viewerGallery.length > 1) {
+          startViewerAutoPlay();
+        }
+      }
+
+      function openViewer(gallery, idx, alt) {
+        if (!gallery || gallery.length === 0) return;
+        stopViewerAutoPlay();
+        viewerGallery = gallery;
+        viewerGalleryIndex = idx;
+        viewerImg.src = viewerGallery[viewerGalleryIndex];
+        viewerImg.alt = alt || "原图";
+        viewer.classList.add("show");
+        document.body.style.overflow = "hidden";
+        viewerHint.textContent = '左右滑动切换 · 长按保存';
+        updateViewerCounter();
+        if (viewerGallery.length > 1) {
+          setTimeout(() => {
+            if (viewer.classList.contains('show')) {
+              startViewerAutoPlay();
+            }
+          }, 1200);
+        }
+        isViewerInteracting = false;
+      }
+
+      function closeViewer() {
+        stopViewerAutoPlay();
+        viewer.classList.remove("show");
+        document.body.style.overflow = "";
+        isViewerInteracting = false;
+        setTimeout(() => {
+          if (!viewer.classList.contains("show")) {
+            viewerImg.src = "";
+          }
+        }, 250);
+      }
+
+      function viewerPrev() {
+        if (!viewerGallery || viewerGallery.length === 0) return;
+        isViewerInteracting = true;
+        viewerGalleryIndex = (viewerGalleryIndex - 1 + viewerGallery.length) % viewerGallery.length;
+        viewerImg.src = viewerGallery[viewerGalleryIndex];
+        updateViewerCounter();
+        resetViewerAutoPlay();
+        setTimeout(() => { isViewerInteracting = false; }, 300);
+      }
+
+      function viewerNext() {
+        if (!viewerGallery || viewerGallery.length === 0) return;
+        isViewerInteracting = true;
+        viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
+        viewerImg.src = viewerGallery[viewerGalleryIndex];
+        updateViewerCounter();
+        resetViewerAutoPlay();
+        setTimeout(() => { isViewerInteracting = false; }, 300);
+      }
+
       let vStartX = 0,
         vStartY = 0,
         vIsHoriz = null;
-
       viewer.addEventListener("touchstart", (e) => {
         isViewerInteracting = true;
         vStartX = e.touches[0].clientX;
         vStartY = e.touches[0].clientY;
         vIsHoriz = null;
       }, { passive: true });
-
       viewer.addEventListener("touchmove", (e) => {
         if (!viewer.classList.contains('show')) return;
         const dx = e.touches[0].clientX - vStartX;
@@ -2261,7 +2177,6 @@
           e.preventDefault();
         }
       }, { passive: false });
-
       viewer.addEventListener("touchend", (e) => {
         if (!viewer.classList.contains('show')) return;
         const dx = e.changedTouches[0].clientX - vStartX;
@@ -2277,7 +2192,6 @@
           resetViewerAutoPlay();
         }, 400);
       }, { passive: true });
-
       viewer.addEventListener('wheel', (e) => {
         if (!viewer.classList.contains('show')) return;
         e.preventDefault();
@@ -2288,7 +2202,6 @@
         }
         resetViewerAutoPlay();
       }, { passive: false });
-
       document.addEventListener('keydown', (e) => {
         if (!viewer.classList.contains('show')) return;
         if (e.key === 'ArrowLeft') {
@@ -2318,7 +2231,6 @@
         if (e.target === viewer) closeViewer();
       });
 
-      // 长按保存
       let lpTimer = null;
       viewerImg.addEventListener('touchstart', () => {
         lpTimer = setTimeout(() => {
@@ -2334,22 +2246,18 @@
       viewerImg.addEventListener('touchend', () => { clearTimeout(lpTimer); });
       viewerImg.addEventListener('touchcancel', () => { clearTimeout(lpTimer); });
 
-      // ============================================================
-      // APP跳转
-      // ============================================================
+      // ===== APP跳转 =====
       function jumpToApp(key) {
         if (isJumping) return;
         const config = APP_CONFIG[key];
         if (!config) return;
         const item = document.querySelector(`[data-app="${key}"]`);
         if (!item || item.classList.contains("loading")) return;
-
         isJumping = true;
         item.classList.add("loading");
         const orig = item.innerHTML;
         item.innerHTML =
           `<div class="app-icon-wrap"><i class="fa-solid fa-spinner fa-spin"></i></div><span class="app-label">打开中</span>`;
-
         let unloaded = false;
         const onUnload = () => { unloaded = true;
           isJumping = false;
@@ -2366,7 +2274,6 @@
         };
         window.addEventListener('beforeunload', onUnload);
         document.addEventListener('visibilitychange', onVis);
-
         try {
           const win = window.open(config.scheme, '_blank');
           if (!win || win.closed) window.location.href = config.scheme;
@@ -2378,7 +2285,6 @@
           document.removeEventListener('visibilitychange', onVis);
           return;
         }
-
         setTimeout(() => {
           if (!unloaded && isJumping) {
             if (document.body.contains(item)) { item.classList.remove("loading");
@@ -2397,9 +2303,7 @@
         });
       });
 
-      // ============================================================
-      // 复制车牌
-      // ============================================================
+      // ===== 复制车牌 =====
       $("#plate").addEventListener("click", async (e) => {
         e.stopPropagation();
         const txt = "苏FA36165";
@@ -2415,9 +2319,7 @@
         showToastMsg("车牌号已复制");
       });
 
-      // ============================================================
-      // 点击弹字
-      // ============================================================
+      // ===== 点击弹字 =====
       const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "刘亦菲", "亦菲"];
       document.body.addEventListener("click", (e) => {
         if (e.target.closest(".app-button") || e.target.closest(".viewer") ||
@@ -2425,12 +2327,10 @@
           e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
           e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
           e.target.closest(".center-play-btn") || e.target.closest(".theme-toggle")) return;
-
         const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
         const el = document.createElement("div");
         el.className = "click-text-item";
         el.textContent = txt;
-
         const colors = [
           ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'],
           ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF'],
@@ -2443,16 +2343,13 @@
         el.style.backgroundSize = '400% 100%';
         el.style.webkitBackgroundClip = 'text';
         el.style.backgroundClip = 'text';
-
         el.style.left = (e.clientX - 40) + "px";
         el.style.top = (e.clientY - 20) + "px";
         document.body.appendChild(el);
         setTimeout(() => { if (el.parentNode) el.remove(); }, 3600);
       });
 
-      // ============================================================
-      // 状态栏时间
-      // ============================================================
+      // ===== 状态栏时间 =====
       function updateTime() {
         const now = new Date();
         const h = String(now.getHours()).padStart(2, "0");
@@ -2462,11 +2359,8 @@
       updateTime();
       setInterval(updateTime, 1000);
 
-      // ============================================================
-      // 启动
-      // ============================================================
+      // ===== 启动 =====
       setTimeout(() => {
-        // 初始显示控件，并启动自动隐藏（如果视频在播放）
         videoControls.classList.remove('hidden');
         centerPlayBtn.classList.remove('hidden');
         updateCenterPlayBtn();
@@ -2487,6 +2381,7 @@
         if (slideTimer) clearInterval(slideTimer);
         stopViewerAutoPlay();
         if (animFrameId) cancelAnimationFrame(animFrameId);
+        observer.disconnect();
       });
     })();
   </script>
