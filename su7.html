@@ -54,7 +54,6 @@
       --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    /* 强制浅色模式，深色模式由手动切换 */
     html {
       width: 100%;
       min-height: 100%;
@@ -81,7 +80,6 @@
       -webkit-overflow-scrolling: touch;
       position: relative;
     }
-    /* 手动深色模式 */
     html.dark-mode {
       --text-main: #F5F5F7;
       --text-sub: #A1A1A6;
@@ -126,7 +124,6 @@
         radial-gradient(ellipse at 20% 85%, rgba(70, 180, 150, 0.18), transparent 55%),
         radial-gradient(ellipse at 80% 88%, rgba(130, 110, 200, 0.22), transparent 55%);
     }
-    /* 炫酷过渡 */
     html.transitioning {
       transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -463,45 +460,54 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    /* ===== 主题切换按钮 ===== */
     .theme-toggle {
       position: absolute;
       top: 12px;
       left: 12px;
       z-index: 20;
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
       border: 1.5px solid var(--glass-border);
-      box-shadow: 0 0 16px rgba(0, 212, 255, 0.12), inset 0 0 16px rgba(0, 212, 255, 0.04);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 0 16px rgba(255, 255, 255, 0.15);
       color: var(--text-main);
-      font-size: 16px;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.4s var(--spring), box-shadow 0.3s, background 0.3s, border-color 0.3s, color 0.3s;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  box-shadow 0.4s ease,
+                  background 0.4s ease,
+                  border-color 0.4s ease,
+                  color 0.4s ease;
       will-change: transform;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
     .theme-toggle::before {
       content: '';
       position: absolute;
-      inset: -3px;
+      inset: -4px;
       border-radius: 50%;
       background: conic-gradient(from 0deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966, #00D4FF);
-      opacity: 0.25;
+      opacity: 0;
       z-index: -1;
-      animation: toggleRotate 3s linear infinite;
-      filter: blur(6px);
+      transition: opacity 0.5s ease, transform 0.8s ease;
+      filter: blur(8px);
+      transform: scale(0.8);
     }
-    @keyframes toggleRotate {
-      0% { transform: rotate(0deg) scale(0.8); }
-      50% { transform: rotate(180deg) scale(1.2); }
-      100% { transform: rotate(360deg) scale(0.8); }
+    .theme-toggle:hover::before {
+      opacity: 0.3;
+      transform: scale(1.1);
+    }
+    .theme-toggle:active::before {
+      opacity: 0.5;
+      transform: scale(1.2);
     }
     .theme-toggle::after {
       content: '';
@@ -510,11 +516,102 @@
       border-radius: 50%;
       background: var(--bg-secondary);
       z-index: -1;
+      transition: background 0.4s ease;
     }
-    .theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
-    .theme-toggle:active { transform: scale(0.88); }
-    .theme-toggle i { position: relative; z-index: 1; transition: transform 0.6s var(--spring); }
-    .theme-toggle:hover i { transform: rotate(180deg); }
+    .theme-toggle:hover {
+      transform: scale(1.08) rotate(8deg);
+      box-shadow: 0 6px 28px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.06);
+      border-color: rgba(0, 212, 255, 0.2);
+    }
+    .theme-toggle:active {
+      transform: scale(0.88);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .theme-toggle i {
+      position: relative;
+      z-index: 1;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  color 0.4s ease;
+      font-size: 19px;
+      line-height: 1;
+    }
+    .theme-toggle:hover i {
+      transform: rotate(180deg) scale(1.1);
+    }
+    html.dark-mode .theme-toggle {
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(0, 212, 255, 0.04);
+    }
+    html.dark-mode .theme-toggle::before {
+      opacity: 0.15;
+    }
+    /* ===== 许红豆漂浮文字 ===== */
+    .floating-word {
+      position: fixed;
+      font-size: 22px;
+      font-weight: 900;
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      cursor: grab;
+      z-index: 1000;
+      pointer-events: auto;
+      transition: none;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.06);
+      letter-spacing: 2px;
+      will-change: transform, left, top;
+      user-select: none;
+      -webkit-user-select: none;
+      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.04));
+      touch-action: none;
+      -webkit-touch-callout: none;
+    }
+    .floating-word:active {
+      cursor: grabbing;
+    }
+    .floating-word.following {
+      transition: all 0.05s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+      z-index: 1001;
+      filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.18));
+      cursor: grabbing;
+      transform: scale(1.08);
+    }
+    .floating-word .char {
+      display: inline-block;
+      background: linear-gradient(135deg, #FF6B9E, #FFD93D, #6BCB77, #4D96FF, #9B59B6, #FF6B9E);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: rainbowMove 5s ease-in-out infinite alternate;
+      font-weight: 900;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .floating-word.following .char {
+      transform: scale(1.06);
+      animation-duration: 1.8s;
+    }
+    @keyframes rainbowMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .floating-word .char:nth-child(1) { animation-delay: 0s; }
+    .floating-word .char:nth-child(2) { animation-delay: 0.3s; }
+    .floating-word .char:nth-child(3) { animation-delay: 0.6s; }
+    .floating-word.following::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
+      z-index: -1;
+      filter: blur(16px);
+      animation: trailPulse 0.8s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes trailPulse {
+      0% { transform: scale(0.8); opacity: 0.3; }
+      100% { transform: scale(1.4); opacity: 0.8; }
+    }
     .profile-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -1046,58 +1143,18 @@
       .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 28px); }
       .theme-toggle { width: 34px; height: 34px; font-size: 14px; top: 8px; left: 8px; }
       .plate-photo { margin-right: -2px; }
+      .floating-word { font-size: 18px; }
     }
     @media (max-width: 360px) {
       .plate-photo { width: 68px; }
       .profile-row { gap: 6px; }
+      .floating-word { font-size: 16px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
       .liquid-gradient, .sakura { display: none; }
     }
     ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
-
-    /* ===== 许红豆漂浮文字 ===== */
-    .floating-word {
-      position: fixed;
-      font-size: 20px;
-      font-weight: 900;
-      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-      cursor: pointer;
-      z-index: 1000;
-      pointer-events: auto;
-      transition: none;
-      text-shadow: 0 4px 30px rgba(0,0,0,0.08);
-      letter-spacing: 1px;
-      will-change: transform, left, top;
-      user-select: none;
-      -webkit-user-select: none;
-      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.05));
-      touch-action: none;
-    }
-    .floating-word.following {
-      transition: all 0.08s ease-out;
-      z-index: 1001;
-      filter: drop-shadow(0 4px 30px rgba(0,0,0,0.15));
-    }
-    .floating-word .char {
-      display: inline-block;
-      background: linear-gradient(135deg, #FF6B9E, #FFD93D, #6BCB77, #4D96FF, #9B59B6, #FF6B9E);
-      background-size: 300% 300%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: rainbowMove 4s ease-in-out infinite alternate;
-      font-weight: 900;
-    }
-    @keyframes rainbowMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .floating-word .char:nth-child(1) { animation-delay: 0s; }
-    .floating-word .char:nth-child(2) { animation-delay: 0.4s; }
-    .floating-word .char:nth-child(3) { animation-delay: 0.8s; }
   </style>
 </head>
 <body>
@@ -1245,7 +1302,7 @@
     </div>
   </div>
 
-  <!-- 许红豆漂浮文字 - 放在主卡片内 -->
+  <!-- 许红豆漂浮文字 -->
   <div class="floating-word" id="wordXu" style="left:8%; top:18%;"><span class="char">许</span></div>
   <div class="floating-word" id="wordHong" style="left:25%; top:55%;"><span class="char">红</span></div>
   <div class="floating-word" id="wordDou" style="left:70%; top:35%;"><span class="char">豆</span></div>
@@ -1261,14 +1318,12 @@
       const allWords = [wordXu, wordHong, wordDou];
       const mainCard = document.getElementById('mainCard');
 
-      // 每个字的恒定速度（不会在中间减速或悬停）
       const speeds = [
-        { x: 0.35, y: 0.25 },
-        { x: -0.3, y: 0.4 },
-        { x: 0.4, y: -0.3 }
+        { x: 0.3, y: 0.2 },
+        { x: -0.25, y: 0.35 },
+        { x: 0.35, y: -0.25 }
       ];
 
-      // 位置百分比相对于主卡片
       let pos = [
         { x: 8, y: 18 },
         { x: 25, y: 55 },
@@ -1280,9 +1335,8 @@
       let isDragging = false;
       let floatingAnimId = null;
       let cardRect = null;
-      let speedFactor = 0.5; // 速度系数
+      let speedFactor = 0.45;
 
-      // 更新卡片边界
       function updateCardRect() {
         cardRect = mainCard.getBoundingClientRect();
       }
@@ -1290,7 +1344,6 @@
       window.addEventListener('resize', updateCardRect);
       window.addEventListener('scroll', updateCardRect);
 
-      // 将百分比位置转换为像素位置（相对于主卡片）
       function getPixelPosition(percentX, percentY) {
         if (!cardRect) updateCardRect();
         const cardW = cardRect.width;
@@ -1301,7 +1354,6 @@
         return { x: px, y: py };
       }
 
-      // 将像素位置转换为百分比位置
       function getPercentPosition(px, py) {
         if (!cardRect) updateCardRect();
         const cardW = cardRect.width;
@@ -1312,14 +1364,12 @@
         return { x: Math.max(0, Math.min(100, percentX)), y: Math.max(0, Math.min(100, percentY)) };
       }
 
-      // 更新文字位置（使用百分比）
       function updateWordPosition(word, percentX, percentY) {
         const pos = getPixelPosition(percentX, percentY);
         word.style.left = pos.x + 'px';
         word.style.top = pos.y + 'px';
       }
 
-      // 随机颜色生成
       function randomGradient() {
         const colors = [
           ['#FF6B9E', '#FFD93D', '#6BCB77', '#4D96FF', '#9B59B6'],
@@ -1348,7 +1398,6 @@
       randomizeColors();
       setInterval(randomizeColors, 5000);
 
-      // 初始化位置
       function initPositions() {
         allWords.forEach((word, idx) => {
           updateWordPosition(word, pos[idx].x, pos[idx].y);
@@ -1356,7 +1405,6 @@
       }
       initPositions();
 
-      // 无规律飘动 - 碰到边缘才反弹，中间一直匀速直线运动
       function startFloating() {
         if (isFollowing) return;
         function animate() {
@@ -1368,29 +1416,26 @@
           allWords.forEach((word, idx) => {
             if (word.classList.contains('following')) return;
 
-            // 持续以恒定速度移动，永不减速
             pos[idx].x += speeds[idx].x * speedFactor;
             pos[idx].y += speeds[idx].y * speedFactor;
 
-            // 边界反弹（碰到边缘才反弹，并保持速度大小不变）
             if (pos[idx].x < 1) {
               pos[idx].x = 1;
-              speeds[idx].x = Math.abs(speeds[idx].x); // 确保向右
+              speeds[idx].x = Math.abs(speeds[idx].x);
             } else if (pos[idx].x > 93) {
               pos[idx].x = 93;
-              speeds[idx].x = -Math.abs(speeds[idx].x); // 确保向左
+              speeds[idx].x = -Math.abs(speeds[idx].x);
             }
 
             if (pos[idx].y < 1) {
               pos[idx].y = 1;
-              speeds[idx].y = Math.abs(speeds[idx].y); // 确保向下
+              speeds[idx].y = Math.abs(speeds[idx].y);
             } else if (pos[idx].y > 93) {
               pos[idx].y = 93;
-              speeds[idx].y = -Math.abs(speeds[idx].y); // 确保向上
+              speeds[idx].y = -Math.abs(speeds[idx].y);
             }
 
-            // 极小概率随机微调方向（让运动看起来更自然，但不影响速度大小）
-            if (Math.random() < 0.003) {
+            if (Math.random() < 0.002) {
               const angle = (Math.random() - 0.5) * 0.3;
               const currentSpeed = Math.sqrt(speeds[idx].x * speeds[idx].x + speeds[idx].y * speeds[idx].y);
               const newAngle = Math.atan2(speeds[idx].y, speeds[idx].x) + angle;
@@ -1405,13 +1450,11 @@
         animate();
       }
 
-      // 点击组合跟随
       function handleWordClick(e) {
         e.preventDefault();
         e.stopPropagation();
         const word = e.currentTarget;
 
-        // 如果点击的是同一个字且正在跟随，取消跟随
         if (isFollowing && followTarget === word) {
           allWords.forEach(w => w.classList.remove('following'));
           isFollowing = false;
@@ -1431,7 +1474,6 @@
         }
 
         if (isFollowing && word !== followTarget) {
-          // 切换到新字
           allWords.forEach(w => w.classList.remove('following'));
           isFollowing = false;
           followTarget = null;
@@ -1468,13 +1510,13 @@
 
         allWords.forEach((w, idx) => {
           w.classList.add('following');
-          w.style.transition = 'all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          w.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
           const offset = (idx - 1) * spacing;
           const px = cx - wordWidth/2 + offset;
           const py = cy - rect.height/2;
           w.style.left = px + 'px';
           w.style.top = py + 'px';
-          w.style.transform = 'scale(1.05)';
+          w.style.transform = 'scale(1.06)';
           const p = getPercentPosition(px, py);
           pos[idx].x = p.x;
           pos[idx].y = p.y;
@@ -1505,7 +1547,7 @@
           const py = cy - 25;
           w.style.left = px + 'px';
           w.style.top = py + 'px';
-          w.style.transform = 'scale(1.05)';
+          w.style.transform = 'scale(1.06)';
           const p = getPercentPosition(px, py);
           pos[idx].x = Math.max(0, Math.min(100, p.x));
           pos[idx].y = Math.max(0, Math.min(100, p.y));
@@ -1531,7 +1573,7 @@
           const py = cy - 25;
           w.style.left = px + 'px';
           w.style.top = py + 'px';
-          w.style.transform = 'scale(1.05)';
+          w.style.transform = 'scale(1.06)';
           const p = getPercentPosition(px, py);
           pos[idx].x = Math.max(0, Math.min(100, p.x));
           pos[idx].y = Math.max(0, Math.min(100, p.y));
@@ -1562,10 +1604,9 @@
           followTarget = null;
           isDragging = false;
           startFloating();
-        }, 100);
+        }, 80);
       }
 
-      // 绑定点击事件
       allWords.forEach(word => {
         word.addEventListener('click', handleWordClick);
         word.addEventListener('touchstart', function(e) {
@@ -1574,7 +1615,6 @@
         }, { passive: false });
       });
 
-      // 窗口/滚动变化时更新位置
       window.addEventListener('resize', () => {
         updateCardRect();
         if (!isFollowing) {
@@ -1592,7 +1632,6 @@
         }
       });
 
-      // 启动飘动
       setTimeout(startFloating, 100);
 
       // ===== 原有功能代码 =====
@@ -1617,7 +1656,6 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/8.jpg",
-
       ];
       const slideImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
@@ -1785,19 +1823,17 @@
       let viewerAutoPlayTimer = null;
       let isViewerInteracting = false;
 
-      // ===== 强制浅色模式，手动切换深色 =====
+      // ===== 主题切换 =====
       function toggleTheme() {
         const html = document.documentElement;
         const isDark = html.classList.contains('dark-mode');
         html.classList.add('transitioning');
         if (isDark) {
-          // 切换到浅色模式：显示太阳图标
           html.classList.remove('dark-mode');
           themeIcon.className = 'fa-solid fa-sun';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
           showToastMsg('☀️ 已切换到浅色模式');
         } else {
-          // 切换到深色模式：显示圆形满月图标
           html.classList.add('dark-mode');
           themeIcon.className = 'fa-solid fa-circle';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
@@ -1806,7 +1842,6 @@
         setTimeout(() => html.classList.remove('transitioning'), 800);
       }
 
-      // 初始浅色 - 显示太阳图标
       (function initTheme() {
         const html = document.documentElement;
         html.classList.remove('dark-mode');
@@ -2014,7 +2049,7 @@
       }
       ensureSakura();
 
-      // ===== 灵动岛：由下向上滚动，每2秒切换 =====
+      // ===== 灵动岛 =====
       const textPool = ["❤️ 刘亦菲", "苏FA36165", "Xiaomi SU7 Pro", "许红豆"];
       let tidx = 0;
 
