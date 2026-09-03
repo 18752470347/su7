@@ -1098,6 +1098,11 @@
     .floating-word .char:nth-child(1) { animation-delay: 0s; }
     .floating-word .char:nth-child(2) { animation-delay: 0.4s; }
     .floating-word .char:nth-child(3) { animation-delay: 0.8s; }
+
+    /* 月亮图标 - 缺口朝右（默认fa-moon就是缺口朝右） */
+    .fa-moon-right {
+      /* fa-moon 默认缺口朝右，无需额外转换 */
+    }
   </style>
 </head>
 <body>
@@ -1617,6 +1622,7 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/6.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/7.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/8.jpg",
+
       ];
       const slideImages = [
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
@@ -1790,13 +1796,13 @@
         const isDark = html.classList.contains('dark-mode');
         html.classList.add('transitioning');
         if (isDark) {
-          // 切换到浅色模式：显示太阳图标（表示当前是浅色，点击切换到深色）
+          // 切换到浅色模式：显示太阳图标
           html.classList.remove('dark-mode');
           themeIcon.className = 'fa-solid fa-sun';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
           showToastMsg('☀️ 已切换到浅色模式');
         } else {
-          // 切换到深色模式：显示月亮图标（表示当前是深色，点击切换到浅色）
+          // 切换到深色模式：显示月亮图标（缺口朝右，fa-moon默认就是缺口朝右）
           html.classList.add('dark-mode');
           themeIcon.className = 'fa-solid fa-moon';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
@@ -1805,7 +1811,7 @@
         setTimeout(() => html.classList.remove('transitioning'), 800);
       }
 
-      // 初始浅色 - 显示太阳图标（点击切换到深色）
+      // 初始浅色 - 显示太阳图标
       (function initTheme() {
         const html = document.documentElement;
         html.classList.remove('dark-mode');
