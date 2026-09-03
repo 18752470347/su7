@@ -1140,7 +1140,7 @@
       <div class="ios-status-bar">
         <span class="ios-status-left" id="statusTime">09:41</span>
         <div class="dynamic-island" id="dynamicIsland">
-          <span class="island-text-scroll" id="islandText">❤️ 刘亦菲</span>
+          <span class="island-text-scroll" id="islandText">❤️ 刘亦菲 · SU7 Pro</span>
         </div>
         <div class="ios-status-right">
           <svg class="signal-icon" viewBox="0 0 18 12">
@@ -1180,7 +1180,7 @@
     <div class="main-card-container">
       <div class="main-card" id="mainCard">
         <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式">
-          <i class="fa-solid fa-moon" id="themeIcon"></i>
+          <i class="fa-solid fa-sun" id="themeIcon"></i>
         </button>
         <div class="profile-row">
           <div class="profile-left">
@@ -1703,7 +1703,6 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/77.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/78.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/79.jpg",
-        
       ];
       const APP_CONFIG = {
         custom1: { scheme: "anywhere://open?sid=0444", name: "LX Music" },
@@ -1791,24 +1790,26 @@
         const isDark = html.classList.contains('dark-mode');
         html.classList.add('transitioning');
         if (isDark) {
+          // 切换到浅色模式：显示太阳图标（表示当前是浅色，点击切换到深色）
           html.classList.remove('dark-mode');
-          themeIcon.className = 'fa-solid fa-moon';
+          themeIcon.className = 'fa-solid fa-sun';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
           showToastMsg('☀️ 已切换到浅色模式');
         } else {
+          // 切换到深色模式：显示月亮图标（表示当前是深色，点击切换到浅色）
           html.classList.add('dark-mode');
-          themeIcon.className = 'fa-solid fa-sun';
+          themeIcon.className = 'fa-solid fa-moon';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
           showToastMsg('🌙 已切换到深色模式');
         }
         setTimeout(() => html.classList.remove('transitioning'), 800);
       }
 
-      // 初始浅色
+      // 初始浅色 - 显示太阳图标（点击切换到深色）
       (function initTheme() {
         const html = document.documentElement;
         html.classList.remove('dark-mode');
-        themeIcon.className = 'fa-solid fa-moon';
+        themeIcon.className = 'fa-solid fa-sun';
         document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
       })();
 
@@ -2013,7 +2014,7 @@
       ensureSakura();
 
       // ===== 灵动岛：由下向上滚动，每2秒切换 =====
-      const textPool = ["❤️ 刘亦菲", "苏FA36165", "Xiaomi SU7 Pro", "许红豆"];
+      const textPool = ["❤️ 刘亦菲 · SU7 Pro", "苏FA36165 · 巡航", "Xiaomi SU7 Pro"];
       let tidx = 0;
 
       function rollIsland() {
@@ -2530,7 +2531,7 @@
       });
 
       // ===== 点击弹字 =====
-      const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "许红豆"];
+      const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "刘亦菲", "亦菲"];
       document.body.addEventListener("click", (e) => {
         if (e.target.closest(".app-button") || e.target.closest(".viewer") ||
           e.target.closest("#plate") || e.target.closest(".video-controls") ||
