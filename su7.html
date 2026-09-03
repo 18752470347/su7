@@ -1060,7 +1060,7 @@
     /* ===== 许红豆漂浮文字 ===== */
     .floating-word {
       position: fixed;
-      font-size: 52px;
+      font-size: 28px;
       font-weight: 900;
       font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
       cursor: pointer;
@@ -1068,7 +1068,7 @@
       pointer-events: auto;
       transition: none;
       text-shadow: 0 4px 30px rgba(0,0,0,0.08);
-      letter-spacing: 4px;
+      letter-spacing: 2px;
       will-change: transform, left, top;
       user-select: none;
       -webkit-user-select: none;
@@ -1267,7 +1267,6 @@
       const wordHong = document.getElementById('wordHong');
       const wordDou = document.getElementById('wordDou');
       const allWords = [wordXu, wordHong, wordDou];
-      const chars = ['许', '红', '豆'];
 
       // 每个字的随机速度
       const speeds = [
@@ -1284,9 +1283,8 @@
 
       let isFollowing = false;
       let followTarget = null;
-      let followOffsetX = 0;
-      let followOffsetY = 0;
       let isDragging = false;
+      let floatingAnimId = null;
 
       // 随机颜色生成
       function randomGradient() {
@@ -1317,18 +1315,14 @@
 
       // 初始随机化
       randomizeColors();
-
-      // 每5秒随机变换一次颜色
       setInterval(randomizeColors, 5000);
 
       // 无规律飘动
-      let animFrameId = null;
-
       function startFloating() {
         if (isFollowing) return;
         function animate() {
           if (isFollowing) {
-            animFrameId = requestAnimationFrame(animate);
+            floatingAnimId = requestAnimationFrame(animate);
             return;
           }
           allWords.forEach((word, idx) => {
@@ -1350,7 +1344,7 @@
             word.style.left = pos[idx].x + '%';
             word.style.top = pos[idx].y + '%';
           });
-          animFrameId = requestAnimationFrame(animate);
+          floatingAnimId = requestAnimationFrame(animate);
         }
         animate();
       }
@@ -1386,7 +1380,6 @@
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
 
-        // 计算偏移量，让三个字并排
         const wordWidth = rect.width;
         const spacing = wordWidth * 1.2;
 
@@ -1397,14 +1390,9 @@
           w.style.left = (cx - wordWidth/2 + offset) + 'px';
           w.style.top = (cy - rect.height/2) + 'px';
           w.style.transform = 'scale(1.05)';
-          // 保存相对偏移用于拖动
-          if (idx === 0) followOffsetX = -spacing;
-          else if (idx === 1) followOffsetX = 0;
-          else followOffsetX = spacing;
-          followOffsetY = 0;
         });
 
-        // 更新位置存储为像素
+        // 更新位置存储
         const rects = allWords.map(w => w.getBoundingClientRect());
         allWords.forEach((w, idx) => {
           pos[idx].x = (rects[idx].left / window.innerWidth) * 100;
@@ -1433,7 +1421,6 @@
           w.style.left = (cx - wordWidth/2 + offset) + 'px';
           w.style.top = (cy - 30) + 'px';
           w.style.transform = 'scale(1.05)';
-          // 更新pos存储
           const rect = w.getBoundingClientRect();
           pos[idx].x = (rect.left / window.innerWidth) * 100;
           pos[idx].y = (rect.top / window.innerHeight) * 100;
@@ -1473,7 +1460,6 @@
 
         // 如果拖动距离很小，视为点击取消跟随
         if (!isDragging) {
-          // 取消跟随，回到飘动
           allWords.forEach(w => {
             w.classList.remove('following');
             w.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
@@ -1492,7 +1478,6 @@
             });
           }, 500);
         } else {
-          // 保持跟随模式，但恢复过渡
           setTimeout(() => {
             allWords.forEach(w => {
               w.style.transition = 'all 0.08s ease-out';
@@ -1506,7 +1491,6 @@
       allWords.forEach(word => {
         word.addEventListener('click', handleWordClick);
         word.addEventListener('touchstart', (e) => {
-          // 防止触发页面滚动
           e.preventDefault();
         }, { passive: false });
       });
@@ -1514,7 +1498,6 @@
       // 启动飘动
       startFloating();
 
-      // 窗口改变时调整位置
       window.addEventListener('resize', () => {
         if (!isFollowing) {
           allWords.forEach((w, idx) => {
@@ -1890,7 +1873,8 @@
         }
       }
 
-      // ===== 视频初始化 =====      if (videoList.length > 0) {
+      // ===== 视频初始化 =====
+      if (videoList.length > 0) {
         mainVideo.src = videoList[0];
         popupVideo.src = videoList[0];
       }
@@ -1932,7 +1916,6 @@
       function rollIsland() {
         tidx = (tidx + 1) % textPool.length;
         islandText.textContent = textPool[tidx];
-        // 重置动画实现循环
         islandText.style.animation = 'none';
         void islandText.offsetWidth;
         islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite';
@@ -2491,7 +2474,7 @@
         if (slideTimer) clearInterval(slideTimer);
         stopViewerAutoPlay();
         if (animFrameIdParticles) cancelAnimationFrame(animFrameIdParticles);
-        if (animFrameId) cancelAnimationFrame(animFrameId);
+        if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
       });
     })();
   </script>
