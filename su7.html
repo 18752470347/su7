@@ -1098,11 +1098,6 @@
     .floating-word .char:nth-child(1) { animation-delay: 0s; }
     .floating-word .char:nth-child(2) { animation-delay: 0.4s; }
     .floating-word .char:nth-child(3) { animation-delay: 0.8s; }
-
-    /* 月亮图标 - 缺口朝右（默认fa-moon就是缺口朝右） */
-    .fa-moon-right {
-      /* fa-moon 默认缺口朝右，无需额外转换 */
-    }
   </style>
 </head>
 <body>
@@ -1695,7 +1690,7 @@
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
-        "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/67.jpg",
+         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/67.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/68.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/69.jpg",
         "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/70.jpg",
@@ -1802,11 +1797,11 @@
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
           showToastMsg('☀️ 已切换到浅色模式');
         } else {
-          // 切换到深色模式：显示月亮图标（缺口朝右，fa-moon默认就是缺口朝右）
+          // 切换到深色模式：显示圆形满月图标
           html.classList.add('dark-mode');
-          themeIcon.className = 'fa-solid fa-moon';
+          themeIcon.className = 'fa-solid fa-circle';
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
-          showToastMsg('🌙 已切换到深色模式');
+          showToastMsg('🌕 已切换到深色模式');
         }
         setTimeout(() => html.classList.remove('transitioning'), 800);
       }
