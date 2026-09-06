@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== 样式（移除卡片旋转边框） ===== */
+        /* ===== 样式（移除图片旋转边框，增加堆叠样式） ===== */
         *,
         *::before,
         *::after {
@@ -30,7 +30,6 @@
             --text-sub: #3A3A3C;
             --text-muted: #8E8E93;
             --bg-primary: #F2F2F7;
-            /* 卡片透明度：0.35 */
             --bg-secondary: rgba(255, 255, 255, 0.35);
             --glass-bg: rgba(255, 255, 255, 0.25);
             --glass-border: rgba(255, 255, 255, 0.55);
@@ -150,7 +149,6 @@
             display: block;
         }
 
-        /* 移除液体背景 */
         .liquid-bg {
             display: none;
         }
@@ -473,7 +471,6 @@
             position: relative;
             transform: translateZ(0);
         }
-        /* 移除 .main-card::before 旋转边框 */
         .theme-toggle {
             position: absolute;
             top: 12px;
@@ -787,27 +784,54 @@
             width: 100%;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .plate-photo-inner img {
-            width: 100%;
             aspect-ratio: 9 / 16;
+            overflow: hidden;
+        }
+        /* 移除 .plate-photo::after 旋转边框 */
+
+        /* 堆叠图片样式 */
+        .stack-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             -webkit-object-fit: cover;
-            display: block;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
         }
-        .plate-photo::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 16px;
-            background: conic-gradient(from 0deg, var(--glow-color), #7B61FF, #00D4FF, var(--glow-color));
-            opacity: 0.15;
-            z-index: -1;
-            filter: blur(10px);
-            animation: ringRotate 4s linear infinite;
+        .stack-img.active {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            z-index: 5;
         }
+        .stack-img.pile {
+            transform: scale(0.92) translateY(6px);
+            opacity: 0.7;
+            z-index: 4;
+        }
+        .stack-img.pile2 {
+            transform: scale(0.85) translateY(12px);
+            opacity: 0.4;
+            z-index: 3;
+        }
+        .stack-img.pile3 {
+            transform: scale(0.78) translateY(18px);
+            opacity: 0.2;
+            z-index: 2;
+        }
+        .stack-img.hidden {
+            transform: scale(0.7) translateY(24px);
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
         .plate {
             padding: 3px 14px;
             border-radius: 6px;
@@ -1352,11 +1376,8 @@
 </head>
 <body>
 
-    <!-- ===== 星空画布（星星+流星） ===== -->
+    <!-- ===== 星空画布 ===== -->
     <canvas id="particles-canvas"></canvas>
-
-    <!-- 移除液体背景 -->
-
     <div class="sakura-container" id="sakuraBox"></div>
 
     <div class="toast" id="toast">复制成功</div>
@@ -1450,7 +1471,7 @@
                     </div>
                     <div class="plate-photo" id="platePhoto">
                         <div class="plate-photo-inner" id="photoInner">
-                            <img id="platePhotoImg" src="" alt="图片" draggable="false">
+                            <!-- 堆叠图片由 JavaScript 动态生成 -->
                         </div>
                     </div>
                 </div>
@@ -1506,7 +1527,7 @@
             'use strict';
 
             // ================================================================
-            //  🌌 星空 + 流星雨系统（增强浅色模式可见度）
+            //  🌌 星空 + 流星雨系统（浅色模式强化版）
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
             const ctx = canvas.getContext('2d');
@@ -1520,12 +1541,10 @@
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
 
-            // 主题检测
             function isDarkMode() {
                 return document.documentElement.classList.contains('dark-mode');
             }
 
-            // ===== 星星 =====
             const stars = [];
             const STAR_COUNT = 380;
 
@@ -1533,9 +1552,9 @@
                 constructor() {
                     this.x = Math.random() * w;
                     this.y = Math.random() * h;
-                    this.size = 0.4 + Math.random() * 2.4;
+                    this.size = 0.6 + Math.random() * 2.8;
                     this.baseBrightness = 0.3 + Math.random() * 0.6;
-                    this.twinkleSpeed = 0.005 + Math.random() * 0.025;
+                    this.twinkleSpeed = 0.015 + Math.random() * 0.03;
                     this.twinkleOffset = Math.random() * Math.PI * 2;
                     this.hue = 200 + Math.random() * 40;
                     this.saturation = 50 + Math.random() * 40;
@@ -1543,7 +1562,7 @@
 
                 draw(time) {
                     const dark = isDarkMode();
-                    const brightnessScale = dark ? 1.2 : 1.0;
+                    const brightnessScale = dark ? 1.2 : 1.8;
                     const opacity = this.baseBrightness * brightnessScale *
                         (0.55 + 0.45 * Math.sin(time * this.twinkleSpeed + this.twinkleOffset));
                     const finalOpacity = Math.min(1, Math.max(0, opacity));
@@ -1564,7 +1583,7 @@
 
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
-                    const light = dark ? 92 : 88;
+                    const light = dark ? 92 : 95;
                     ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${light}%, ${finalOpacity})`;
                     ctx.fill();
 
@@ -1581,11 +1600,10 @@
                 stars.push(new Star());
             }
 
-            // ===== 流星 =====
             let meteors = [];
             let meteorSpawnCounter = 0;
-            const METEOR_SPAWN_INTERVAL_MIN = 60;
-            const METEOR_SPAWN_INTERVAL_MAX = 180;
+            const METEOR_SPAWN_INTERVAL_MIN = 30;
+            const METEOR_SPAWN_INTERVAL_MAX = 90;
 
             class Meteor {
                 constructor() {
@@ -1610,7 +1628,7 @@
                             break;
                     }
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = 10 + Math.random() * 14;
+                    const speed = 12 + Math.random() * 16;
                     this.vx = Math.cos(angle) * speed;
                     this.vy = Math.sin(angle) * speed;
                     if (this.x < 0) this.vx = Math.abs(this.vx);
@@ -1618,13 +1636,13 @@
                     if (this.y < 0) this.vy = Math.abs(this.vy);
                     if (this.y > h) this.vy = -Math.abs(this.vy);
 
-                    this.tailLength = 60 + Math.random() * 90;
+                    this.tailLength = 70 + Math.random() * 100;
                     this.life = 1.0;
-                    this.decay = 0.004 + Math.random() * 0.008;
+                    this.decay = 0.003 + Math.random() * 0.006;
                     this.hue = 200 + Math.random() * 30;
                     this.saturation = 80 + Math.random() * 20;
                     this.lightness = 85 + Math.random() * 15;
-                    this.size = 1.5 + Math.random() * 2;
+                    this.size = 1.8 + Math.random() * 2.5;
                 }
 
                 update() {
@@ -1637,7 +1655,7 @@
                 draw() {
                     const dark = isDarkMode();
                     const lifeFactor = Math.max(0, this.life);
-                    const alpha = lifeFactor * (dark ? 0.95 : 1.0);
+                    const alpha = lifeFactor * (dark ? 0.95 : 1.2);
 
                     const tailX = this.x - this.vx * this.tailLength * 0.5;
                     const tailY = this.y - this.vy * this.tailLength * 0.5;
@@ -1665,7 +1683,7 @@
                         this.x, this.y, 0,
                         this.x, this.y, glowSize
                     );
-                    const glowAlpha = alpha * (dark ? 0.4 : 0.35);
+                    const glowAlpha = alpha * (dark ? 0.4 : 0.45);
                     glowGrad.addColorStop(0, `hsla(${hue + 10}, 100%, 98%, ${glowAlpha})`);
                     glowGrad.addColorStop(0.3, `hsla(${hue + 5}, 90%, 90%, ${glowAlpha * 0.5})`);
                     glowGrad.addColorStop(1, `hsla(${hue}, 80%, 80%, 0)`);
@@ -1702,7 +1720,7 @@
                 meteorSpawnCounter++;
                 const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
                     Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN));
-                if (meteorSpawnCounter > interval && meteors.length < 5) {
+                if (meteorSpawnCounter > interval && meteors.length < 8) {
                     meteors.push(new Meteor());
                     meteorSpawnCounter = 0;
                 }
@@ -1731,7 +1749,7 @@
             });
 
             // ================================================================
-            //  轮播进度 localStorage 存储（完整保留）
+            //  轮播进度 localStorage 存储
             // ================================================================
             const STORAGE_PREFIX = 'su7_carousel_';
 
@@ -2093,7 +2111,7 @@
             setTimeout(startFloating, 100);
 
             // ================================================================
-            //  原有功能代码（视频、头像、主题等，完整保留）
+            //  原有功能代码（视频、头像、主题等） + 堆叠图片轮播
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
@@ -2266,7 +2284,7 @@
             const curTime = $("#curTime");
             const totTime = $("#totTime");
             const avatarImg = $("#avatarImg");
-            const platePhotoImg = $("#platePhotoImg");
+            const photoInner = document.getElementById('photoInner');
             const sakuraBox = $("#sakuraBox");
             const islandText = $("#islandText");
             const expandBtn = $("#expandBtn");
@@ -2305,6 +2323,76 @@
             let slideTimer = null;
             let viewerAutoPlayTimer = null;
             let isViewerInteracting = false;
+
+            // ---- 堆叠图片相关 ----
+            let stackImgs = []; // 存储所有图片元素
+
+            function buildStack() {
+                photoInner.innerHTML = '';
+                stackImgs = [];
+                slideImages.forEach((url, idx) => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'stack-img';
+                    img.dataset.index = idx;
+                    img.alt = '堆叠图片';
+                    img.draggable = false;
+                    photoInner.appendChild(img);
+                    stackImgs.push(img);
+                });
+                updateStack(0);
+            }
+
+            function updateStack(activeIndex) {
+                const len = stackImgs.length;
+                stackImgs.forEach((img, idx) => {
+                    img.classList.remove('active', 'pile', 'pile2', 'pile3', 'hidden');
+                    if (idx === activeIndex) {
+                        img.classList.add('active');
+                    } else {
+                        const diff = (idx - activeIndex + len) % len;
+                        if (diff === 1) img.classList.add('pile');
+                        else if (diff === 2) img.classList.add('pile2');
+                        else if (diff === 3) img.classList.add('pile3');
+                        else img.classList.add('hidden');
+                    }
+                });
+                // 更新查看器索引
+                slideIndex = activeIndex;
+                try { localStorage.setItem(STORAGE_PREFIX + 'slide_index', String(slideIndex)); } catch (e) {}
+            }
+
+            // 轮播下一张
+            function nextSlide() {
+                if (slideImages.length < 2) return;
+                const next = (slideIndex + 1) % slideImages.length;
+                updateStack(next);
+            }
+
+            // 初始化堆叠
+            buildStack();
+
+            // 点击堆叠区域打开查看器
+            photoInner.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openViewer(slideImages, slideIndex, '图片原图');
+            });
+
+            // 轮播定时器
+            if (slideImages.length > 1) {
+                slideTimer = setInterval(nextSlide, 3800);
+            }
+
+            // 加载存储的 slideIndex
+            try {
+                const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
+                if (si !== null) {
+                    const idx = parseInt(si, 10);
+                    if (!isNaN(idx) && idx >= 0 && idx < slideImages.length) {
+                        updateStack(idx);
+                    }
+                }
+            } catch (e) {}
 
             // ===== 主题切换 =====
             function toggleTheme() {
@@ -2454,9 +2542,7 @@
             if (avatarImages.length > 0) {
                 avatarImg.src = avatarImages[avatarIndex % avatarImages.length];
             }
-            if (slideImages.length > 0) {
-                platePhotoImg.src = slideImages[slideIndex % slideImages.length];
-            }
+            // 堆叠图片已初始化
 
             mainVideo.addEventListener('loadedmetadata', function() {
                 const saved = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
@@ -2518,7 +2604,7 @@
             glowInterval = setInterval(updateGlow, 1800);
             setTimeout(updateGlow, 50);
 
-            // ===== 头像 & 图片轮播 =====
+            // ===== 头像轮播 =====
             function nextAvatar() {
                 if (avatarImages.length < 2) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
@@ -2526,15 +2612,7 @@
                 saveCarouselState();
             }
 
-            function nextSlide() {
-                if (slideImages.length < 2) return;
-                slideIndex = (slideIndex + 1) % slideImages.length;
-                platePhotoImg.src = slideImages[slideIndex];
-                saveCarouselState();
-            }
-
             if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 4500);
-            if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 3800);
 
             // ===== 视频事件 =====
             centerPlayBtn.addEventListener('click', (e) => { e.stopPropagation();
@@ -2942,8 +3020,6 @@
             });
             $("#avatar").addEventListener("click", (e) => { e.stopPropagation();
                 openViewer(avatarImages, avatarIndex, "头像原图"); });
-            $("#platePhoto").addEventListener("click", (e) => { e.stopPropagation();
-                openViewer(slideImages, slideIndex, "图片原图"); });
             viewerClose.addEventListener("click", closeViewer);
             viewer.addEventListener("click", (e) => { if (e.target === viewer) closeViewer(); });
             let lpTimer = null;
@@ -3036,7 +3112,7 @@
                     e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
                     e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
                     e.target.closest(".center-play-btn") || e.target.closest(".theme-toggle") ||
-                    e.target.closest(".floating-word")) return;
+                    e.target.closest(".floating-word") || e.target.closest(".plate-photo")) return;
                 const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
                 const el = document.createElement("div");
                 el.className = "click-text-item";
