@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== 样式（卡片透明度调整 + 主题适配） ===== */
+        /* ===== 样式（移除卡片旋转边框） ===== */
         *,
         *::before,
         *::after {
@@ -30,22 +30,18 @@
             --text-sub: #3A3A3C;
             --text-muted: #8E8E93;
             --bg-primary: #F2F2F7;
-            /* 修改：卡片背景透明度降低，从0.75→0.45，更透 */
-            --bg-secondary: rgba(255, 255, 255, 0.45);
-            --glass-bg: rgba(255, 255, 255, 0.30);
-            --glass-border: rgba(255, 255, 255, 0.60);
+            /* 卡片透明度：0.35 */
+            --bg-secondary: rgba(255, 255, 255, 0.35);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.55);
             --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-            --icon-bg: rgba(255, 255, 255, 0.6);
+            --icon-bg: rgba(255, 255, 255, 0.5);
             --status-color: #1C1C1E;
             --toast-bg: rgba(20, 22, 28, 0.78);
             --viewer-bg: rgba(0, 0, 0, 0.85);
             --plate-bg: linear-gradient(135deg, #34C759, #28A745);
             --name-gradient: linear-gradient(90deg, #FF5C93, #C84870, #4A8DFF, #FF5C93);
             --sub-gradient: linear-gradient(90deg, #FF6D9C, #558EFF);
-            --liquid-gradient: radial-gradient(ellipse at 15% 10%, rgba(120, 170, 255, 0.30), transparent 55%),
-                radial-gradient(ellipse at 85% 20%, rgba(255, 160, 200, 0.25), transparent 55%),
-                radial-gradient(ellipse at 20% 85%, rgba(110, 230, 200, 0.22), transparent 55%),
-                radial-gradient(ellipse at 80% 88%, rgba(190, 160, 255, 0.28), transparent 55%);
             --island-bg: rgba(255, 255, 255, 0.8);
             --island-text: #1C1C1E;
             --popup-overlay: rgba(0, 0, 0, 0.85);
@@ -87,22 +83,17 @@
             --text-sub: #A1A1A6;
             --text-muted: #6E6E73;
             --bg-primary: #0A0A0C;
-            /* 修改：深色模式卡片透明度降低，从0.75→0.40 */
-            --bg-secondary: rgba(20, 20, 24, 0.40);
-            --glass-bg: rgba(44, 44, 46, 0.30);
+            --bg-secondary: rgba(20, 20, 24, 0.30);
+            --glass-bg: rgba(44, 44, 46, 0.25);
             --glass-border: rgba(255, 255, 255, 0.06);
             --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            --icon-bg: rgba(60, 60, 66, 0.4);
+            --icon-bg: rgba(60, 60, 66, 0.35);
             --status-color: #F5F5F7;
             --toast-bg: rgba(60, 60, 66, 0.85);
             --viewer-bg: rgba(0, 0, 0, 0.92);
             --plate-bg: linear-gradient(135deg, #00D4FF, #7B61FF);
             --name-gradient: linear-gradient(90deg, #FF7A9E, #D86A8A, #6A9EFF, #FF7A9E);
             --sub-gradient: linear-gradient(90deg, #FF8AAF, #7AA5FF);
-            --liquid-gradient: radial-gradient(ellipse at 15% 10%, rgba(60, 100, 200, 0.25), transparent 55%),
-                radial-gradient(ellipse at 85% 20%, rgba(180, 100, 140, 0.20), transparent 55%),
-                radial-gradient(ellipse at 20% 85%, rgba(70, 180, 150, 0.18), transparent 55%),
-                radial-gradient(ellipse at 80% 88%, rgba(130, 110, 200, 0.22), transparent 55%);
             --island-bg: rgba(20, 20, 24, 0.8);
             --island-text: #fff;
             --popup-overlay: rgba(0, 0, 0, 0.92);
@@ -118,12 +109,6 @@
         html.dark-mode .sakura {
             background: rgba(255, 200, 216, 0.45);
             box-shadow: 0 0 20px rgba(255, 200, 216, 0.15);
-        }
-        html.dark-mode .liquid-gradient {
-            background: radial-gradient(ellipse at 15% 10%, rgba(60, 100, 200, 0.25), transparent 55%),
-                radial-gradient(ellipse at 85% 20%, rgba(180, 100, 140, 0.20), transparent 55%),
-                radial-gradient(ellipse at 20% 85%, rgba(70, 180, 150, 0.18), transparent 55%),
-                radial-gradient(ellipse at 80% 88%, rgba(130, 110, 200, 0.22), transparent 55%);
         }
         html.transitioning {
             transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -153,6 +138,7 @@
             outline: none;
         }
 
+        /* ===== 星空画布 ===== */
         #particles-canvas {
             position: fixed;
             top: 0;
@@ -161,36 +147,14 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
+            display: block;
         }
+
+        /* 移除液体背景 */
         .liquid-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
-            transform: translateZ(0);
+            display: none;
         }
-        .liquid-gradient {
-            position: absolute;
-            width: 120vw;
-            height: 120vh;
-            top: -10vh;
-            left: -10vw;
-            background: var(--liquid-gradient);
-            filter: blur(60px);
-            -webkit-filter: blur(60px);
-            will-change: transform;
-            transform: translateZ(0);
-            animation: liquidFlow 18s ease-in-out infinite alternate;
-        }
-        @keyframes liquidFlow {
-            0% {
-                transform: translate(0, 0) rotate(0deg) scale(1.02);
-            }
-            100% {
-                transform: translate(-20px, 20px) rotate(-3deg) scale(1.02);
-            }
-        }
+
         .sakura-container {
             position: fixed;
             inset: 0;
@@ -319,7 +283,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: textShine 2.5s ease-in-out infinite;
             white-space: nowrap;
             position: relative;
             z-index: 1;
@@ -499,7 +462,7 @@
         }
         .main-card {
             width: 100%;
-            padding: 20px 16px 22px;
+            padding: 12px 16px 22px;
             border-radius: 24px;
             background: var(--bg-secondary);
             border: 0.5px solid var(--glass-border);
@@ -510,25 +473,7 @@
             position: relative;
             transform: translateZ(0);
         }
-        .main-card::before {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: 25px;
-            background: conic-gradient(from 0deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966, #00D4FF);
-            opacity: 0.06;
-            z-index: -1;
-            animation: borderGlow 8s linear infinite;
-            filter: blur(6px);
-        }
-        @keyframes borderGlow {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
+        /* 移除 .main-card::before 旋转边框 */
         .theme-toggle {
             position: absolute;
             top: 12px;
@@ -704,7 +649,7 @@
             gap: 8px;
             width: 100%;
             flex-shrink: 0;
-            padding-top: 8px;
+            padding-top: 2px;
         }
         .profile-left {
             min-width: 0;
@@ -1394,7 +1339,6 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
-            .liquid-gradient,
             .sakura {
                 display: none;
             }
@@ -1408,10 +1352,11 @@
 </head>
 <body>
 
-    <!-- ===== 粒子画布 ===== -->
+    <!-- ===== 星空画布（星星+流星） ===== -->
     <canvas id="particles-canvas"></canvas>
 
-    <div class="liquid-bg"><div class="liquid-gradient"></div></div>
+    <!-- 移除液体背景 -->
+
     <div class="sakura-container" id="sakuraBox"></div>
 
     <div class="toast" id="toast">复制成功</div>
@@ -1561,13 +1506,12 @@
             'use strict';
 
             // ================================================================
-            //  🚀 增强版粒子系统 — 适配深色/浅色模式 + 更淡的效果
+            //  🌌 星空 + 流星雨系统（增强浅色模式可见度）
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
             const ctx = canvas.getContext('2d');
-            let particles = [];
             let w, h;
-            let animFrameIdParticles = null;
+            let animFrameId = null;
 
             function resizeCanvas() {
                 w = canvas.width = window.innerWidth;
@@ -1576,126 +1520,226 @@
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
 
-            // 判断当前主题
+            // 主题检测
             function isDarkMode() {
                 return document.documentElement.classList.contains('dark-mode');
             }
 
-            class Particle {
+            // ===== 星星 =====
+            const stars = [];
+            const STAR_COUNT = 380;
+
+            class Star {
                 constructor() {
                     this.x = Math.random() * w;
                     this.y = Math.random() * h;
-                    // 修改：粒子尺寸缩小 2~5px（原 3~7）
-                    this.size = Math.random() * 3 + 2;
-                    this.speedX = (Math.random() - 0.5) * 0.4;
-                    this.speedY = (Math.random() - 0.5) * 0.4;
-                    this.hue = Math.random() * 360;
-                    // 修改：不透明度降低 0.15~0.40（原 0.4~0.8）
-                    this.opacity = Math.random() * 0.25 + 0.15;
-                    // 光晕半径缩小
-                    this.glowRadius = this.size * 3 + 4;
-                    // 存储基础色相偏移
-                    this.hueOffset = (Math.random() - 0.5) * 40;
+                    this.size = 0.4 + Math.random() * 2.4;
+                    this.baseBrightness = 0.3 + Math.random() * 0.6;
+                    this.twinkleSpeed = 0.005 + Math.random() * 0.025;
+                    this.twinkleOffset = Math.random() * Math.PI * 2;
+                    this.hue = 200 + Math.random() * 40;
+                    this.saturation = 50 + Math.random() * 40;
                 }
+
+                draw(time) {
+                    const dark = isDarkMode();
+                    const brightnessScale = dark ? 1.2 : 1.0;
+                    const opacity = this.baseBrightness * brightnessScale *
+                        (0.55 + 0.45 * Math.sin(time * this.twinkleSpeed + this.twinkleOffset));
+                    const finalOpacity = Math.min(1, Math.max(0, opacity));
+
+                    const size = this.size * (dark ? 1.1 : 0.9);
+
+                    if (size > 1.2) {
+                        const glowSize = size * (3 + Math.random() * 2);
+                        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowSize);
+                        const glowOpacity = finalOpacity * 0.2;
+                        grad.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, 90%, ${glowOpacity})`);
+                        grad.addColorStop(1, `hsla(${this.hue}, ${this.saturation}%, 80%, 0)`);
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                        ctx.fillStyle = grad;
+                        ctx.fill();
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                    const light = dark ? 92 : 88;
+                    ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${light}%, ${finalOpacity})`;
+                    ctx.fill();
+
+                    if (size > 0.8 && finalOpacity > 0.3) {
+                        ctx.beginPath();
+                        ctx.arc(this.x - size * 0.2, this.y - size * 0.2, size * 0.15, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${this.hue + 20}, 100%, 98%, ${finalOpacity * 0.4})`;
+                        ctx.fill();
+                    }
+                }
+            }
+
+            for (let i = 0; i < STAR_COUNT; i++) {
+                stars.push(new Star());
+            }
+
+            // ===== 流星 =====
+            let meteors = [];
+            let meteorSpawnCounter = 0;
+            const METEOR_SPAWN_INTERVAL_MIN = 60;
+            const METEOR_SPAWN_INTERVAL_MAX = 180;
+
+            class Meteor {
+                constructor() {
+                    const side = Math.floor(Math.random() * 4);
+                    const margin = 30;
+                    switch (side) {
+                        case 0:
+                            this.x = Math.random() * w;
+                            this.y = -margin;
+                            break;
+                        case 1:
+                            this.x = w + margin;
+                            this.y = Math.random() * h * 0.7;
+                            break;
+                        case 2:
+                            this.x = Math.random() * w;
+                            this.y = h + margin;
+                            break;
+                        case 3:
+                            this.x = -margin;
+                            this.y = Math.random() * h * 0.7;
+                            break;
+                    }
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 10 + Math.random() * 14;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    if (this.x < 0) this.vx = Math.abs(this.vx);
+                    if (this.x > w) this.vx = -Math.abs(this.vx);
+                    if (this.y < 0) this.vy = Math.abs(this.vy);
+                    if (this.y > h) this.vy = -Math.abs(this.vy);
+
+                    this.tailLength = 60 + Math.random() * 90;
+                    this.life = 1.0;
+                    this.decay = 0.004 + Math.random() * 0.008;
+                    this.hue = 200 + Math.random() * 30;
+                    this.saturation = 80 + Math.random() * 20;
+                    this.lightness = 85 + Math.random() * 15;
+                    this.size = 1.5 + Math.random() * 2;
+                }
+
                 update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    this.hue = (this.hue + 0.2) % 360;
-                    if (this.x < -30) this.x = w + 30;
-                    if (this.x > w + 30) this.x = -30;
-                    if (this.y < -30) this.y = h + 30;
-                    if (this.y > h + 30) this.y = -30;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life -= this.decay;
+                    return this.life > 0 && this.x > -100 && this.x < w + 100 && this.y > -100 && this.y < h + 100;
                 }
+
                 draw() {
                     const dark = isDarkMode();
-                    // 根据主题调整饱和度和亮度
-                    let sat, light;
-                    if (dark) {
-                        // 深色模式：高饱和 (75~95%)，高亮度 (70~85%)
-                        sat = 75 + Math.random() * 20;
-                        light = 70 + Math.random() * 15;
-                    } else {
-                        // 浅色模式：低饱和 (30~55%)，中等亮度 (45~65%)
-                        sat = 30 + Math.random() * 25;
-                        light = 45 + Math.random() * 20;
-                    }
-                    // 光晕
-                    const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.glowRadius);
-                    grad.addColorStop(0, `hsla(${this.hue + this.hueOffset}, ${sat}%, ${light + 10}%, ${this.opacity})`);
-                    grad.addColorStop(0.4,
-                        `hsla(${this.hue + this.hueOffset}, ${sat}%, ${light}%, ${this.opacity * 0.4})`);
-                    grad.addColorStop(1, `hsla(${this.hue + this.hueOffset}, ${sat}%, ${light}%, 0)`);
+                    const lifeFactor = Math.max(0, this.life);
+                    const alpha = lifeFactor * (dark ? 0.95 : 1.0);
+
+                    const tailX = this.x - this.vx * this.tailLength * 0.5;
+                    const tailY = this.y - this.vy * this.tailLength * 0.5;
+
+                    const grad = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
+                    const hue = this.hue + 10;
+                    const sat = this.saturation;
+                    const light = this.lightness;
+
+                    grad.addColorStop(0, `hsla(${hue}, ${sat}%, ${light + 5}%, ${alpha * 0.95})`);
+                    grad.addColorStop(0.15, `hsla(${hue}, ${sat}%, ${light}%, ${alpha * 0.8})`);
+                    grad.addColorStop(0.5, `hsla(${this.hue}, ${sat - 10}%, ${light - 10}%, ${alpha * 0.4})`);
+                    grad.addColorStop(1, `hsla(${this.hue - 10}, ${sat - 20}%, ${light - 25}%, 0)`);
+
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.glowRadius, 0, Math.PI * 2);
-                    ctx.fillStyle = grad;
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(tailX, tailY);
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = this.size * lifeFactor * 1.2 + 0.3;
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+
+                    const glowSize = this.size * (4 + lifeFactor * 3);
+                    const glowGrad = ctx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, glowSize
+                    );
+                    const glowAlpha = alpha * (dark ? 0.4 : 0.35);
+                    glowGrad.addColorStop(0, `hsla(${hue + 10}, 100%, 98%, ${glowAlpha})`);
+                    glowGrad.addColorStop(0.3, `hsla(${hue + 5}, 90%, 90%, ${glowAlpha * 0.5})`);
+                    glowGrad.addColorStop(1, `hsla(${hue}, 80%, 80%, 0)`);
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                    ctx.fillStyle = glowGrad;
                     ctx.fill();
 
-                    // 核心亮点（更淡）
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
-                    ctx.fillStyle = `hsla(${this.hue + this.hueOffset}, ${sat}%, ${light + 15}%, ${this.opacity * 0.7})`;
+                    ctx.arc(this.x, this.y, this.size * lifeFactor * 0.7 + 0.3, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${hue + 15}, 100%, 100%, ${alpha * 0.95})`;
                     ctx.fill();
-                    // 高光白点（更淡）
-                    ctx.beginPath();
-                    ctx.arc(this.x - this.size * 0.12, this.y - this.size * 0.12, this.size * 0.15, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255,255,255,${this.opacity * 0.5})`;
-                    ctx.fill();
+
+                    if (lifeFactor > 0.3) {
+                        ctx.beginPath();
+                        ctx.arc(this.x - this.size * 0.15, this.y - this.size * 0.15, this.size * 0.2 * lifeFactor, 0, Math
+                            .PI * 2);
+                        ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+                        ctx.fill();
+                    }
                 }
             }
 
-            // 初始化 180 个粒子（原200，略减）
-            for (let i = 0; i < 180; i++) {
-                particles.push(new Particle());
-            }
+            let time = 0;
 
-            function animateParticles() {
+            function animate() {
+                time += 1;
                 ctx.clearRect(0, 0, w, h);
 
-                const dark = isDarkMode();
-                // 连线颜色根据主题微调
-                const lineSat = dark ? 70 : 40;
-                const lineLight = dark ? 65 : 55;
+                for (const star of stars) {
+                    star.draw(time);
+                }
 
-                // 绘制连线（距离150px，透明度最高0.18，更淡）
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 150) {
-                            const alpha = (1 - dist / 150) * 0.18;
-                            const hue = (particles[i].hue + particles[j].hue) / 2;
-                            ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = `hsla(${hue}, ${lineSat}%, ${lineLight}%, ${alpha})`;
-                            ctx.lineWidth = 0.6;
-                            ctx.stroke();
-                        }
+                meteorSpawnCounter++;
+                const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
+                    Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN));
+                if (meteorSpawnCounter > interval && meteors.length < 5) {
+                    meteors.push(new Meteor());
+                    meteorSpawnCounter = 0;
+                }
+
+                for (let i = meteors.length - 1; i >= 0; i--) {
+                    const m = meteors[i];
+                    const alive = m.update();
+                    if (!alive) {
+                        meteors.splice(i, 1);
+                    } else {
+                        m.draw();
                     }
                 }
 
-                for (let p of particles) {
-                    p.update();
-                    p.draw();
-                }
-
-                animFrameIdParticles = requestAnimationFrame(animateParticles);
+                animFrameId = requestAnimationFrame(animate);
             }
-            animateParticles();
 
-            // 主题切换时，粒子颜色会自动适配（因为绘制时实时检测 isDarkMode）
+            animate();
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                for (const star of stars) {
+                    star.x = Math.random() * w;
+                    star.y = Math.random() * h;
+                }
+            });
 
             // ================================================================
-            //  轮播进度 localStorage 存储
+            //  轮播进度 localStorage 存储（完整保留）
             // ================================================================
             const STORAGE_PREFIX = 'su7_carousel_';
+
             function saveCarouselState() {
                 try {
                     localStorage.setItem(STORAGE_PREFIX + 'video_index', String(currentVideoIndex));
                     localStorage.setItem(STORAGE_PREFIX + 'avatar_index', String(avatarIndex));
                     localStorage.setItem(STORAGE_PREFIX + 'slide_index', String(slideIndex));
-                    // 保存视频播放时间
                     if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
                         localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime));
                     }
@@ -1719,7 +1763,6 @@
                 return 0;
             }
 
-            // 定期保存（每5秒）
             let saveTimer = setInterval(saveCarouselState, 5000);
 
             // ================================================================
@@ -2050,7 +2093,7 @@
             setTimeout(startFloating, 100);
 
             // ================================================================
-            //  原有功能代码（视频、头像、主题等）
+            //  原有功能代码（视频、头像、主题等，完整保留）
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
@@ -2263,9 +2306,7 @@
             let viewerAutoPlayTimer = null;
             let isViewerInteracting = false;
 
-            // ================================================================
-            //  主题切换（触发粒子重绘）
-            // ================================================================
+            // ===== 主题切换 =====
             function toggleTheme() {
                 const html = document.documentElement;
                 const isDark = html.classList.contains('dark-mode');
@@ -2282,13 +2323,10 @@
                     showToastMsg('🌕 已切换到深色模式');
                 }
                 setTimeout(() => html.classList.remove('transitioning'), 800);
-                // 粒子颜色会在下一帧自动适配（isDarkMode 实时检测）
             }
             themeToggle.addEventListener('click', toggleTheme);
 
-            // ================================================================
-            //  工具函数
-            // ================================================================
+            // ===== 工具函数 =====
             function formatTime(s) {
                 if (isNaN(s) || !isFinite(s)) return "00:00";
                 const m = Math.floor(s / 60);
@@ -2334,7 +2372,6 @@
 
             function switchVideo(index) {
                 if (videoList.length === 0) return;
-                // 保存当前视频时间
                 if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
                     try {
                         localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime));
@@ -2345,7 +2382,6 @@
                 mainVideo.src = src;
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
-                // 尝试恢复该视频的播放时间（如果有存储）
                 const savedTime = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) || 0;
                 if (savedTime > 0) {
                     mainVideo.currentTime = savedTime;
@@ -2402,11 +2438,8 @@
                 }
             }
 
-            // ================================================================
-            //  初始化：加载存储的轮播状态
-            // ================================================================
+            // ===== 初始化：加载存储的轮播状态 =====
             const savedVideoTime = loadCarouselState();
-            // 确保索引在有效范围内
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
             if (avatarIndex >= avatarImages.length) avatarIndex = 0;
             if (slideIndex >= slideImages.length) slideIndex = 0;
@@ -2414,7 +2447,6 @@
             if (videoList.length > 0) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
-                // 恢复播放时间
                 if (savedVideoTime > 0 && savedVideoTime < (mainVideo.duration || Infinity)) {
                     mainVideo.currentTime = savedVideoTime;
                 }
@@ -2426,7 +2458,6 @@
                 platePhotoImg.src = slideImages[slideIndex % slideImages.length];
             }
 
-            // 视频加载完成后，如果有保存的时间，跳转
             mainVideo.addEventListener('loadedmetadata', function() {
                 const saved = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
                     0;
@@ -2437,9 +2468,7 @@
                 updateCenterPlayBtn();
             });
 
-            // ================================================================
-            //  樱花
-            // ================================================================
+            // ===== 樱花 =====
             function createSakura() {
                 const el = document.createElement("div");
                 el.className = "sakura";
@@ -2462,9 +2491,7 @@
             }
             ensureSakura();
 
-            // ================================================================
-            //  灵动岛
-            // ================================================================
+            // ===== 灵动岛 =====
             const textPool = ["❤️ 刘亦菲", "苏FA36165", "Xiaomi SU7 Pro", "许红豆"];
             let tidx = 0;
 
@@ -2479,9 +2506,7 @@
             islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite';
             islandInterval = setInterval(rollIsland, 2000);
 
-            // ================================================================
-            //  呼吸灯
-            // ================================================================
+            // ===== 呼吸灯 =====
             function randomColor() {
                 const c = ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'];
                 return c[Math.floor(Math.random() * c.length)];
@@ -2493,9 +2518,7 @@
             glowInterval = setInterval(updateGlow, 1800);
             setTimeout(updateGlow, 50);
 
-            // ================================================================
-            //  头像 & 图片轮播（保存索引）
-            // ================================================================
+            // ===== 头像 & 图片轮播 =====
             function nextAvatar() {
                 if (avatarImages.length < 2) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
@@ -2513,9 +2536,7 @@
             if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 4500);
             if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 3800);
 
-            // ================================================================
-            //  视频事件
-            // ================================================================
+            // ===== 视频事件 =====
             centerPlayBtn.addEventListener('click', (e) => { e.stopPropagation();
                 toggleVideo(); });
             videoBox.addEventListener("click", function(e) {
@@ -2533,7 +2554,6 @@
             expandBtn.onclick = (e) => { e.stopPropagation();
                 openPopup(); };
 
-            // 视频播放时保存进度
             mainVideo.addEventListener('timeupdate', function() {
                 if (mainVideo.duration > 0 && !isNaN(mainVideo.currentTime)) {
                     try {
@@ -2549,7 +2569,6 @@
                 }
             });
 
-            // 进度条点击
             progressTrack.addEventListener("click", (e) => {
                 const rect = progressTrack.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -2577,7 +2596,6 @@
             });
             mainVideo.addEventListener("ended", function() { switchVideo(currentVideoIndex + 1); });
 
-            // 左右滑动切换视频
             let startX = 0,
                 startY = 0,
                 isSwiping = false;
@@ -2601,7 +2619,6 @@
             videoBox.addEventListener('touchend', () => { isSwiping = false; });
             videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
 
-            // 音量
             let volDrag = false,
                 volStartY = 0,
                 volStartVal = 0;
@@ -2629,9 +2646,7 @@
                 showControls();
             };
 
-            // ================================================================
-            //  弹出播放器
-            // ================================================================
+            // ===== 弹出播放器 =====
             function togglePopupControls() {
                 popupControlsVisible = !popupControlsVisible;
                 popupControls.classList.toggle("hidden", !popupControlsVisible);
@@ -2827,9 +2842,7 @@
                 }, POPUP_HIDE_DELAY);
             });
 
-            // ================================================================
-            //  图片查看器
-            // ================================================================
+            // ===== 图片查看器 =====
             function updateViewerCounter() {
                 viewerCounter.textContent = viewerGallery && viewerGallery.length > 0 ? (viewerGalleryIndex + 1) +
                     ' / ' + viewerGallery.length : '1 / 1';
@@ -2945,9 +2958,7 @@
             viewerImg.addEventListener('touchend', () => { clearTimeout(lpTimer); });
             viewerImg.addEventListener('touchcancel', () => { clearTimeout(lpTimer); });
 
-            // ================================================================
-            //  APP跳转
-            // ================================================================
+            // ===== APP跳转 =====
             function jumpToApp(key) {
                 if (isJumping) return;
                 const config = APP_CONFIG[key];
@@ -3001,9 +3012,7 @@
                     jumpToApp(el.dataset.app); });
             });
 
-            // ================================================================
-            //  复制车牌
-            // ================================================================
+            // ===== 复制车牌 =====
             $("#plate").addEventListener("click", async (e) => {
                 e.stopPropagation();
                 const txt = "苏FA36165";
@@ -3019,9 +3028,7 @@
                 showToastMsg("车牌号已复制");
             });
 
-            // ================================================================
-            //  点击弹字
-            // ================================================================
+            // ===== 点击弹字 =====
             const clickTexts = ["苏FA36165", "Xiaomi SU7 Pro", "刘茜美子", "❤️ 刘亦菲", "许红豆"];
             document.body.addEventListener("click", (e) => {
                 if (e.target.closest(".app-button") || e.target.closest(".viewer") ||
@@ -3041,9 +3048,7 @@
                 setTimeout(() => { if (el.parentNode) el.remove(); }, 4600);
             });
 
-            // ================================================================
-            //  状态栏时间
-            // ================================================================
+            // ===== 状态栏时间 =====
             function updateTime() {
                 const now = new Date();
                 const h = String(now.getHours()).padStart(2, "0");
@@ -3053,15 +3058,12 @@
             updateTime();
             setInterval(updateTime, 1000);
 
-            // ================================================================
-            //  启动
-            // ================================================================
+            // ===== 启动 =====
             setTimeout(() => {
                 videoControls.classList.remove('hidden');
                 centerPlayBtn.classList.remove('hidden');
                 updateCenterPlayBtn();
                 if (!mainVideo.paused) startAutoHideTimer();
-                // 恢复视频播放时间
                 const saved = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
                     0;
                 if (saved > 0 && mainVideo.duration && saved < mainVideo.duration) {
@@ -3071,9 +3073,7 @@
 
             document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureSakura(); });
 
-            // ================================================================
-            //  页面卸载时保存状态
-            // ================================================================
+            // ===== 页面卸载时保存 =====
             window.addEventListener('beforeunload', () => {
                 saveCarouselState();
                 if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
@@ -3090,7 +3090,7 @@
                 if (slideTimer) clearInterval(slideTimer);
                 if (saveTimer) clearInterval(saveTimer);
                 stopViewerAutoPlay();
-                if (animFrameIdParticles) cancelAnimationFrame(animFrameIdParticles);
+                if (animFrameId) cancelAnimationFrame(animFrameId);
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
