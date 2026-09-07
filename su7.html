@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== 样式（移除图片旋转边框，增加堆叠样式） ===== */
+        /* ===== 样式（完整保留，并补全 .floating-word 的 position: fixed） ===== */
         *,
         *::before,
         *::after {
@@ -148,11 +148,9 @@
             pointer-events: none;
             display: block;
         }
-
         .liquid-bg {
             display: none;
         }
-
         .sakura-container {
             position: fixed;
             inset: 0;
@@ -236,7 +234,92 @@
             font-weight: 600;
             letter-spacing: 0.2px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        /* ---- 状态栏中的主题切换按钮（满月） ---- */
+        .status-theme-toggle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), inset 0 0 12px rgba(255, 255, 255, 0.06);
+            color: var(--status-color);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.4s ease,
+                background 0.4s ease,
+                border-color 0.4s ease,
+                color 0.4s ease;
+            flex-shrink: 0;
+            position: relative;
+            overflow: visible;
+        }
+        .status-theme-toggle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966, #00D4FF);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.5s ease, transform 0.8s ease;
+            filter: blur(6px);
+            transform: scale(0.8);
+        }
+        .status-theme-toggle:hover::before {
+            opacity: 0.25;
+            transform: scale(1.1);
+        }
+        .status-theme-toggle:active::before {
+            opacity: 0.4;
+            transform: scale(1.2);
+        }
+        .status-theme-toggle::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            z-index: -1;
+            transition: background 0.4s ease;
+        }
+        .status-theme-toggle:hover {
+            transform: scale(1.06) rotate(6deg);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.08), inset 0 0 16px rgba(0, 212, 255, 0.04);
+            border-color: rgba(0, 212, 255, 0.15);
+        }
+        .status-theme-toggle:active {
+            transform: scale(0.84);
+        }
+        .status-theme-toggle i {
+            position: relative;
+            z-index: 1;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                color 0.4s ease;
+            font-size: 15px;
+            line-height: 1;
+        }
+        .status-theme-toggle:hover i {
+            transform: rotate(180deg) scale(1.05);
+        }
+        html.dark-mode .status-theme-toggle {
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), inset 0 0 16px rgba(0, 212, 255, 0.03);
+        }
+        html.dark-mode .status-theme-toggle::before {
+            opacity: 0.12;
+        }
+
         .dynamic-island {
             display: inline-flex;
             align-items: center;
@@ -471,174 +554,131 @@
             position: relative;
             transform: translateZ(0);
         }
-        .theme-toggle {
+
+        /* ===== 天气组件（调小并下移） ===== */
+        .weather-widget {
             position: absolute;
-            top: 12px;
-            left: 12px;
+            top: 18px;
+            left: 10px;
             z-index: 20;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px 3px 6px;
+            border-radius: 16px;
             background: var(--glass-bg);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1.5px solid var(--glass-border);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 0 16px rgba(255, 255, 255, 0.15);
-            color: var(--text-main);
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 0 16px rgba(255, 255, 255, 0.08);
             cursor: pointer;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.4s ease,
                 background 0.4s ease,
-                border-color 0.4s ease,
-                color 0.4s ease;
+                border-color 0.4s ease;
             will-change: transform;
-            position: relative;
-            overflow: visible;
-        }
-        .theme-toggle::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966, #00D4FF);
-            opacity: 0;
-            z-index: -1;
-            transition: opacity 0.5s ease, transform 0.8s ease;
-            filter: blur(8px);
-            transform: scale(0.8);
-        }
-        .theme-toggle:hover::before {
-            opacity: 0.3;
-            transform: scale(1.1);
-        }
-        .theme-toggle:active::before {
-            opacity: 0.5;
-            transform: scale(1.2);
-        }
-        .theme-toggle::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            border-radius: 50%;
-            background: var(--bg-secondary);
-            z-index: -1;
-            transition: background 0.4s ease;
-        }
-        .theme-toggle:hover {
-            transform: scale(1.08) rotate(8deg);
-            box-shadow: 0 6px 28px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.06);
-            border-color: rgba(0, 212, 255, 0.2);
-        }
-        .theme-toggle:active {
-            transform: scale(0.88);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        .theme-toggle i {
-            position: relative;
-            z-index: 1;
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
-                color 0.4s ease;
-            font-size: 19px;
-            line-height: 1;
-        }
-        .theme-toggle:hover i {
-            transform: rotate(180deg) scale(1.1);
-        }
-        html.dark-mode .theme-toggle {
-            border-color: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(0, 212, 255, 0.04);
-        }
-        html.dark-mode .theme-toggle::before {
-            opacity: 0.15;
-        }
-        .floating-word {
-            position: fixed;
-            font-size: 22px;
-            font-weight: 900;
-            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-            cursor: grab;
-            z-index: 1000;
-            pointer-events: auto;
-            transition: none;
-            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
-            letter-spacing: 2px;
-            will-change: transform, left, top;
+            min-height: 28px;
             user-select: none;
-            -webkit-user-select: none;
-            filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.04));
-            touch-action: none;
-            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        .floating-word:active {
-            cursor: grabbing;
+        .weather-widget:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 24px rgba(0, 212, 255, 0.08), inset 0 0 20px rgba(0, 212, 255, 0.03);
+            border-color: rgba(0, 212, 255, 0.12);
         }
-        .floating-word.following {
-            transition: all 0.05s cubic-bezier(0.2, 0.9, 0.3, 1.1);
-            z-index: 1001;
-            filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.18));
-            cursor: grabbing;
-            transform: scale(1.08);
+        .weather-widget:active {
+            transform: scale(0.92);
         }
-        .floating-word .char {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF6B9E, #FFD93D, #6BCB77, #4D96FF, #9B59B6, #FF6B9E);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: rainbowMove 5s ease-in-out infinite alternate;
-            font-weight: 900;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .weather-widget .weather-icon {
+            font-size: 15px;
+            line-height: 1;
+            flex-shrink: 0;
         }
-        .floating-word.following .char {
-            transform: scale(1.06);
-            animation-duration: 1.8s;
+        .weather-widget .weather-temp {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.1px;
+            line-height: 1.2;
+            white-space: nowrap;
         }
-        @keyframes rainbowMove {
-            0% {
-                background-position: 0% 50%;
+        .weather-widget .weather-desc {
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.2;
+            white-space: nowrap;
+            max-width: 30px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .weather-widget .weather-divider {
+            width: 1px;
+            height: 14px;
+            background: var(--glass-border);
+            opacity: 0.3;
+            flex-shrink: 0;
+        }
+        .weather-widget .weather-refresh {
+            font-size: 9px;
+            color: var(--text-muted);
+            opacity: 0.4;
+            transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-shrink: 0;
+        }
+        .weather-widget:hover .weather-refresh {
+            opacity: 0.7;
+        }
+        .weather-widget .weather-refresh.spinning {
+            transform: rotate(360deg);
+            opacity: 0.8;
+        }
+        html.dark-mode .weather-widget {
+            border-color: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 16px rgba(0, 212, 255, 0.02);
+        }
+        html.dark-mode .weather-widget .weather-temp {
+            color: var(--text-main);
+        }
+        @media (max-width: 380px) {
+            .weather-widget {
+                padding: 2px 8px 2px 4px;
+                min-height: 24px;
+                top: 14px;
+                left: 8px;
             }
-            50% {
-                background-position: 100% 50%;
+            .weather-widget .weather-icon {
+                font-size: 13px;
             }
-            100% {
-                background-position: 0% 50%;
+            .weather-widget .weather-temp {
+                font-size: 10px;
             }
-        }
-        .floating-word .char:nth-child(1) {
-            animation-delay: 0s;
-        }
-        .floating-word .char:nth-child(2) {
-            animation-delay: 0.3s;
-        }
-        .floating-word .char:nth-child(3) {
-            animation-delay: 0.6s;
-        }
-        .floating-word.following::after {
-            content: '';
-            position: absolute;
-            inset: -12px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
-            z-index: -1;
-            filter: blur(16px);
-            animation: trailPulse 0.8s ease-in-out infinite alternate;
-            pointer-events: none;
-        }
-        @keyframes trailPulse {
-            0% {
-                transform: scale(0.8);
-                opacity: 0.3;
+            .weather-widget .weather-desc {
+                font-size: 8px;
+                max-width: 22px;
             }
-            100% {
-                transform: scale(1.4);
-                opacity: 0.8;
+            .weather-widget .weather-refresh {
+                font-size: 8px;
+            }
+            .status-theme-toggle {
+                width: 24px;
+                height: 24px;
+                font-size: 13px;
+            }
+            .ios-status-left {
+                font-size: 12px;
+                gap: 5px;
             }
         }
+        @media (max-width: 360px) {
+            .weather-widget .weather-desc {
+                display: none;
+            }
+            .weather-widget .weather-divider {
+                display: none;
+            }
+        }
+
         .profile-row {
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
@@ -787,9 +827,6 @@
             aspect-ratio: 9 / 16;
             overflow: hidden;
         }
-        /* 移除 .plate-photo::after 旋转边框 */
-
-        /* 堆叠图片样式 */
         .stack-img {
             position: absolute;
             top: 0;
@@ -831,7 +868,6 @@
             z-index: 1;
             pointer-events: none;
         }
-
         .plate {
             padding: 3px 14px;
             border-radius: 6px;
@@ -1330,13 +1366,6 @@
                 min-width: 32px;
                 font-size: clamp(14px, 4vw, 28px);
             }
-            .theme-toggle {
-                width: 34px;
-                height: 34px;
-                font-size: 14px;
-                top: 8px;
-                left: 8px;
-            }
             .plate-photo {
                 margin-right: -2px;
             }
@@ -1371,6 +1400,92 @@
             width: 0;
             height: 0;
             background: transparent;
+        }
+
+        /* ===== 漂浮文字：必须 position: fixed，并确保 z-index 足够 ===== */
+        .floating-word {
+            position: fixed;
+            font-size: 22px;
+            font-weight: 900;
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            cursor: grab;
+            z-index: 1100;
+            pointer-events: auto;
+            transition: none;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
+            letter-spacing: 2px;
+            will-change: transform, left, top;
+            user-select: none;
+            -webkit-user-select: none;
+            filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.04));
+            touch-action: none;
+            -webkit-touch-callout: none;
+        }
+        .floating-word:active {
+            cursor: grabbing;
+        }
+        .floating-word.following {
+            transition: all 0.05s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+            z-index: 1101;
+            filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.18));
+            cursor: grabbing;
+            transform: scale(1.08);
+        }
+        .floating-word .char {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B9E, #FFD93D, #6BCB77, #4D96FF, #9B59B6, #FF6B9E);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbowMove 5s ease-in-out infinite alternate;
+            font-weight: 900;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .floating-word.following .char {
+            transform: scale(1.06);
+            animation-duration: 1.8s;
+        }
+        @keyframes rainbowMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .floating-word .char:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .floating-word .char:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        .floating-word .char:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        .floating-word.following::after {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(16px);
+            animation: trailPulse 0.8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        @keyframes trailPulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.4);
+                opacity: 0.8;
+            }
         }
     </style>
 </head>
@@ -1412,7 +1527,12 @@
 
         <div class="status-bar-container">
             <div class="ios-status-bar">
-                <span class="ios-status-left" id="statusTime">09:41</span>
+                <span class="ios-status-left" id="statusTime">
+                    09:41
+                    <button class="status-theme-toggle" id="statusThemeToggle" aria-label="切换深色/浅色模式">
+                        <i class="fa-regular fa-circle" id="statusThemeIcon"></i>
+                    </button>
+                </span>
                 <div class="dynamic-island" id="dynamicIsland">
                     <span class="island-text-scroll" id="islandText">❤️ 刘亦菲</span>
                 </div>
@@ -1453,9 +1573,15 @@
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式">
-                    <i class="fa-solid fa-sun" id="themeIcon"></i>
-                </button>
+                <!-- ===== 天气组件 ===== -->
+                <div class="weather-widget" id="weatherWidget" title="点击刷新天气">
+                    <span class="weather-icon" id="weatherIcon">☀️</span>
+                    <span class="weather-temp" id="weatherTemp">28°</span>
+                    <span class="weather-divider"></span>
+                    <span class="weather-desc" id="weatherDesc">晴</span>
+                    <span class="weather-refresh" id="weatherRefresh"><i class="fa-solid fa-rotate"></i></span>
+                </div>
+
                 <div class="profile-row">
                     <div class="profile-left">
                         <div class="avatar" id="avatar">
@@ -1466,8 +1592,8 @@
                             </div>
                         </div>
                         <div class="subtitle">你好,我叫许红豆<br>风乍起,吹皱一江春水</div>
-						<div class="plate" id="plate">苏FA36165</div>
-						<div class="name">刘茜美子・去有风的地方遇见你</div>
+                        <div class="plate" id="plate">苏FA36165</div>
+                        <div class="name">刘茜美子・去有风的地方遇见你</div>
                     </div>
                     <div class="plate-photo" id="platePhoto">
                         <div class="plate-photo-inner" id="photoInner">
@@ -1527,7 +1653,7 @@
             'use strict';
 
             // ================================================================
-            //  🌌 星空 + 流星雨系统（浅色模式强化版）
+            //  🌌 星空 + 流星雨系统（保持不变）
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
             const ctx = canvas.getContext('2d');
@@ -1559,16 +1685,13 @@
                     this.hue = 200 + Math.random() * 40;
                     this.saturation = 50 + Math.random() * 40;
                 }
-
                 draw(time) {
                     const dark = isDarkMode();
                     const brightnessScale = dark ? 1.2 : 1.8;
                     const opacity = this.baseBrightness * brightnessScale *
                         (0.55 + 0.45 * Math.sin(time * this.twinkleSpeed + this.twinkleOffset));
                     const finalOpacity = Math.min(1, Math.max(0, opacity));
-
                     const size = this.size * (dark ? 1.1 : 0.9);
-
                     if (size > 1.2) {
                         const glowSize = size * (3 + Math.random() * 2);
                         const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowSize);
@@ -1580,13 +1703,11 @@
                         ctx.fillStyle = grad;
                         ctx.fill();
                     }
-
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
                     const light = dark ? 92 : 95;
                     ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${light}%, ${finalOpacity})`;
                     ctx.fill();
-
                     if (size > 0.8 && finalOpacity > 0.3) {
                         ctx.beginPath();
                         ctx.arc(this.x - size * 0.2, this.y - size * 0.2, size * 0.15, 0, Math.PI * 2);
@@ -1595,10 +1716,7 @@
                     }
                 }
             }
-
-            for (let i = 0; i < STAR_COUNT; i++) {
-                stars.push(new Star());
-            }
+            for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
 
             let meteors = [];
             let meteorSpawnCounter = 0;
@@ -1635,7 +1753,6 @@
                     if (this.x > w) this.vx = -Math.abs(this.vx);
                     if (this.y < 0) this.vy = Math.abs(this.vy);
                     if (this.y > h) this.vy = -Math.abs(this.vy);
-
                     this.tailLength = 70 + Math.random() * 100;
                     this.life = 1.0;
                     this.decay = 0.003 + Math.random() * 0.006;
@@ -1644,32 +1761,26 @@
                     this.lightness = 85 + Math.random() * 15;
                     this.size = 1.8 + Math.random() * 2.5;
                 }
-
                 update() {
                     this.x += this.vx;
                     this.y += this.vy;
                     this.life -= this.decay;
                     return this.life > 0 && this.x > -100 && this.x < w + 100 && this.y > -100 && this.y < h + 100;
                 }
-
                 draw() {
                     const dark = isDarkMode();
                     const lifeFactor = Math.max(0, this.life);
                     const alpha = lifeFactor * (dark ? 0.95 : 1.2);
-
                     const tailX = this.x - this.vx * this.tailLength * 0.5;
                     const tailY = this.y - this.vy * this.tailLength * 0.5;
-
                     const grad = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
                     const hue = this.hue + 10;
                     const sat = this.saturation;
                     const light = this.lightness;
-
                     grad.addColorStop(0, `hsla(${hue}, ${sat}%, ${light + 5}%, ${alpha * 0.95})`);
                     grad.addColorStop(0.15, `hsla(${hue}, ${sat}%, ${light}%, ${alpha * 0.8})`);
                     grad.addColorStop(0.5, `hsla(${this.hue}, ${sat - 10}%, ${light - 10}%, ${alpha * 0.4})`);
                     grad.addColorStop(1, `hsla(${this.hue - 10}, ${sat - 20}%, ${light - 25}%, 0)`);
-
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(tailX, tailY);
@@ -1677,12 +1788,8 @@
                     ctx.lineWidth = this.size * lifeFactor * 1.2 + 0.3;
                     ctx.lineCap = 'round';
                     ctx.stroke();
-
                     const glowSize = this.size * (4 + lifeFactor * 3);
-                    const glowGrad = ctx.createRadialGradient(
-                        this.x, this.y, 0,
-                        this.x, this.y, glowSize
-                    );
+                    const glowGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowSize);
                     const glowAlpha = alpha * (dark ? 0.4 : 0.45);
                     glowGrad.addColorStop(0, `hsla(${hue + 10}, 100%, 98%, ${glowAlpha})`);
                     glowGrad.addColorStop(0.3, `hsla(${hue + 5}, 90%, 90%, ${glowAlpha * 0.5})`);
@@ -1691,12 +1798,10 @@
                     ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
                     ctx.fillStyle = glowGrad;
                     ctx.fill();
-
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size * lifeFactor * 0.7 + 0.3, 0, Math.PI * 2);
                     ctx.fillStyle = `hsla(${hue + 15}, 100%, 100%, ${alpha * 0.95})`;
                     ctx.fill();
-
                     if (lifeFactor > 0.3) {
                         ctx.beginPath();
                         ctx.arc(this.x - this.size * 0.15, this.y - this.size * 0.15, this.size * 0.2 * lifeFactor, 0, Math
@@ -1706,17 +1811,12 @@
                     }
                 }
             }
-
             let time = 0;
 
             function animate() {
                 time += 1;
                 ctx.clearRect(0, 0, w, h);
-
-                for (const star of stars) {
-                    star.draw(time);
-                }
-
+                for (const star of stars) star.draw(time);
                 meteorSpawnCounter++;
                 const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
                     Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN));
@@ -1724,28 +1824,17 @@
                     meteors.push(new Meteor());
                     meteorSpawnCounter = 0;
                 }
-
                 for (let i = meteors.length - 1; i >= 0; i--) {
                     const m = meteors[i];
-                    const alive = m.update();
-                    if (!alive) {
-                        meteors.splice(i, 1);
-                    } else {
-                        m.draw();
-                    }
+                    if (!m.update()) { meteors.splice(i, 1); } else { m.draw(); }
                 }
-
                 animFrameId = requestAnimationFrame(animate);
             }
-
             animate();
-
             window.addEventListener('resize', () => {
                 resizeCanvas();
-                for (const star of stars) {
-                    star.x = Math.random() * w;
-                    star.y = Math.random() * h;
-                }
+                for (const star of stars) { star.x = Math.random() * w;
+                    star.y = Math.random() * h; }
             });
 
             // ================================================================
@@ -1780,68 +1869,60 @@
                 } catch (e) {}
                 return 0;
             }
-
             let saveTimer = setInterval(saveCarouselState, 5000);
 
             // ================================================================
-            //  许红豆漂浮文字逻辑（完整保留）
+            //  许红豆漂浮文字（修复溢出：添加边界限制）
             // ================================================================
             const wordXu = document.getElementById('wordXu');
             const wordHong = document.getElementById('wordHong');
             const wordDou = document.getElementById('wordDou');
             const allWords = [wordXu, wordHong, wordDou];
             const mainCard = document.getElementById('mainCard');
-
-            const speeds = [
-                { x: 0.3, y: 0.2 },
-                { x: -0.25, y: 0.35 },
-                { x: 0.35, y: -0.25 }
-            ];
-
-            let pos = [
-                { x: 8, y: 18 },
-                { x: 25, y: 55 },
-                { x: 70, y: 35 }
-            ];
-
+            const speeds = [{ x: 0.3, y: 0.2 }, { x: -0.25, y: 0.35 }, { x: 0.35, y: -0.25 }];
+            let pos = [{ x: 8, y: 18 }, { x: 25, y: 55 }, { x: 70, y: 35 }];
             let isFollowing = false;
             let followTarget = null;
             let isDragging = false;
             let floatingAnimId = null;
             let cardRect = null;
             let speedFactor = 0.45;
+            let autoUnfollowTimer = null;
 
-            function updateCardRect() {
-                cardRect = mainCard.getBoundingClientRect();
-            }
+            function updateCardRect() { cardRect = mainCard.getBoundingClientRect(); }
             updateCardRect();
             window.addEventListener('resize', updateCardRect);
             window.addEventListener('scroll', updateCardRect);
 
-            function getPixelPosition(percentX, percentY) {
+            // 核心：设置文字位置并强制限制在主卡片内
+            function setWordPosition(word, left, top) {
                 if (!cardRect) updateCardRect();
-                const cardW = cardRect.width;
-                const cardH = cardRect.height;
                 const margin = 15;
-                const px = cardRect.left + margin + (percentX / 100) * (cardW - margin * 2);
-                const py = cardRect.top + margin + (percentY / 100) * (cardH - margin * 2);
-                return { x: px, y: py };
+                // 获取文字自身尺寸（每次重新获取，以防变化）
+                const rect = word.getBoundingClientRect();
+                const w = rect.width || 30;
+                const h = rect.height || 30;
+                // 计算边界（相对于视口）
+                const minLeft = cardRect.left + margin;
+                const maxLeft = cardRect.right - margin - w;
+                const minTop = cardRect.top + margin;
+                const maxTop = cardRect.bottom - margin - h;
+                // 限制
+                left = Math.max(minLeft, Math.min(maxLeft, left));
+                top = Math.max(minTop, Math.min(maxTop, top));
+                word.style.left = left + 'px';
+                word.style.top = top + 'px';
             }
 
-            function getPercentPosition(px, py) {
-                if (!cardRect) updateCardRect();
-                const cardW = cardRect.width;
-                const cardH = cardRect.height;
-                const margin = 15;
-                const percentX = ((px - cardRect.left - margin) / (cardW - margin * 2)) * 100;
-                const percentY = ((py - cardRect.top - margin) / (cardH - margin * 2)) * 100;
-                return { x: Math.max(0, Math.min(100, percentX)), y: Math.max(0, Math.min(100, percentY)) };
-            }
-
+            // 通过百分比更新位置
             function updateWordPosition(word, percentX, percentY) {
-                const pos = getPixelPosition(percentX, percentY);
-                word.style.left = pos.x + 'px';
-                word.style.top = pos.y + 'px';
+                if (!cardRect) updateCardRect();
+                const margin = 15;
+                const cardW = cardRect.width;
+                const cardH = cardRect.height;
+                const left = cardRect.left + margin + (percentX / 100) * (cardW - margin * 2);
+                const top = cardRect.top + margin + (percentY / 100) * (cardH - margin * 2);
+                setWordPosition(word, left, top);
             }
 
             function randomGradient() {
@@ -1868,19 +1949,16 @@
                     });
                 });
             }
-
             randomizeColors();
             setInterval(randomizeColors, 5000);
 
-            function initPositions() {
-                allWords.forEach((word, idx) => {
-                    updateWordPosition(word, pos[idx].x, pos[idx].y);
-                });
-            }
+            function initPositions() { allWords.forEach((word, idx) => updateWordPosition(word, pos[idx].x, pos[idx].y)); }
             initPositions();
 
+            // 开始自动漂浮
             function startFloating() {
                 if (isFollowing) return;
+                if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
 
                 function animate() {
                     if (isFollowing) {
@@ -1890,35 +1968,24 @@
                     updateCardRect();
                     allWords.forEach((word, idx) => {
                         if (word.classList.contains('following')) return;
-
                         pos[idx].x += speeds[idx].x * speedFactor;
                         pos[idx].y += speeds[idx].y * speedFactor;
-
-                        if (pos[idx].x < 1) {
-                            pos[idx].x = 1;
-                            speeds[idx].x = Math.abs(speeds[idx].x);
-                        } else if (pos[idx].x > 93) {
-                            pos[idx].x = 93;
-                            speeds[idx].x = -Math.abs(speeds[idx].x);
-                        }
-
-                        if (pos[idx].y < 1) {
-                            pos[idx].y = 1;
-                            speeds[idx].y = Math.abs(speeds[idx].y);
-                        } else if (pos[idx].y > 93) {
-                            pos[idx].y = 93;
-                            speeds[idx].y = -Math.abs(speeds[idx].y);
-                        }
-
+                        if (pos[idx].x < 1) { pos[idx].x = 1;
+                            speeds[idx].x = Math.abs(speeds[idx].x); } else if (pos[idx].x > 93) { pos[idx].x =
+                                93;
+                            speeds[idx].x = -Math.abs(speeds[idx].x); }
+                        if (pos[idx].y < 1) { pos[idx].y = 1;
+                            speeds[idx].y = Math.abs(speeds[idx].y); } else if (pos[idx].y > 93) { pos[idx].y =
+                                93;
+                            speeds[idx].y = -Math.abs(speeds[idx].y); }
                         if (Math.random() < 0.002) {
                             const angle = (Math.random() - 0.5) * 0.3;
                             const currentSpeed = Math.sqrt(speeds[idx].x * speeds[idx].x + speeds[idx].y * speeds[idx]
-                            .y);
+                                .y);
                             const newAngle = Math.atan2(speeds[idx].y, speeds[idx].x) + angle;
                             speeds[idx].x = Math.cos(newAngle) * currentSpeed;
                             speeds[idx].y = Math.sin(newAngle) * currentSpeed;
                         }
-
                         updateWordPosition(word, pos[idx].x, pos[idx].y);
                     });
                     floatingAnimId = requestAnimationFrame(animate);
@@ -1926,55 +1993,47 @@
                 animate();
             }
 
-            function handleWordClick(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const word = e.currentTarget;
-
-                if (isFollowing && followTarget === word) {
-                    allWords.forEach(w => w.classList.remove('following'));
-                    isFollowing = false;
-                    followTarget = null;
-                    allWords.forEach((w, idx) => {
-                        w.style.transition = 'none';
-                        updateWordPosition(w, pos[idx].x, pos[idx].y);
-                        w.style.transform = '';
-                    });
-                    setTimeout(() => {
-                        allWords.forEach(w => w.style.transition = '');
-                        if (!isFollowing) {
-                            startFloating();
-                        }
-                    }, 50);
-                    return;
+            // 解除跟随，恢复漂浮
+            function unfollow() {
+                if (autoUnfollowTimer) {
+                    clearTimeout(autoUnfollowTimer);
+                    autoUnfollowTimer = null;
                 }
-
-                if (isFollowing && word !== followTarget) {
-                    allWords.forEach(w => w.classList.remove('following'));
-                    isFollowing = false;
-                    followTarget = null;
-                    allWords.forEach((w, idx) => {
-                        w.style.transition = 'none';
-                        updateWordPosition(w, pos[idx].x, pos[idx].y);
-                        w.style.transform = '';
-                    });
-                    setTimeout(() => {
-                        allWords.forEach(w => w.style.transition = '');
-                        doFollow(word);
-                    }, 50);
-                    return;
-                }
-
-                doFollow(word);
+                if (!isFollowing) return;
+                isFollowing = false;
+                followTarget = null;
+                // 移除跟随样式，随机散开（百分比保证在卡片内）
+                allWords.forEach((w, idx) => {
+                    w.classList.remove('following');
+                    w.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    pos[idx].x = 5 + Math.random() * 85;
+                    pos[idx].y = 5 + Math.random() * 85;
+                    updateWordPosition(w, pos[idx].x, pos[idx].y);
+                    w.style.transform = '';
+                });
+                setTimeout(() => {
+                    allWords.forEach(w => w.style.transition = '');
+                    startFloating();
+                }, 80);
             }
 
+            // 进入跟随模式（聚拢）
             function doFollow(word) {
+                if (isFollowing) {
+                    if (autoUnfollowTimer) {
+                        clearTimeout(autoUnfollowTimer);
+                        autoUnfollowTimer = null;
+                    }
+                    isFollowing = false;
+                    followTarget = null;
+                    allWords.forEach(w => w.classList.remove('following'));
+                }
                 if (floatingAnimId) {
                     cancelAnimationFrame(floatingAnimId);
                     floatingAnimId = null;
                 }
+
                 isFollowing = true;
-                isDragging = false;
                 followTarget = word;
                 updateCardRect();
 
@@ -1988,29 +2047,49 @@
                     w.classList.add('following');
                     w.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     const offset = (idx - 1) * spacing;
-                    const px = cx - wordWidth / 2 + offset;
-                    const py = cy - rect.height / 2;
-                    w.style.left = px + 'px';
-                    w.style.top = py + 'px';
-                    w.style.transform = 'scale(1.06)';
-                    const p = getPercentPosition(px, py);
+                    let left = cx - wordWidth / 2 + offset;
+                    let top = cy - rect.height / 2;
+                    // 边界限制（聚拢时也限制，防止溢出）
+                    setWordPosition(w, left, top);
+                    const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
                 });
 
-                document.addEventListener('mousemove', onDragMove);
-                document.addEventListener('touchmove', onDragMoveTouch, { passive: false });
-                document.addEventListener('mouseup', onDragEnd);
-                document.addEventListener('touchend', onDragEnd);
-                document.addEventListener('touchcancel', onDragEnd);
+                // 自动恢复定时器（2秒后解除跟随）
+                autoUnfollowTimer = setTimeout(() => {
+                    unfollow();
+                }, 2000);
             }
 
-            function onDragMove(e) {
+            // 辅助：从像素位置反算百分比（用于同步pos）
+            function getPercentPosition(px, py) {
+                if (!cardRect) updateCardRect();
+                const cardW = cardRect.width;
+                const cardH = cardRect.height;
+                const margin = 15;
+                const percentX = ((px - cardRect.left - margin) / (cardW - margin * 2)) * 100;
+                const percentY = ((py - cardRect.top - margin) / (cardH - margin * 2)) * 100;
+                return { x: Math.max(0, Math.min(100, percentX)), y: Math.max(0, Math.min(100, percentY)) };
+            }
+
+            // 指针事件
+            function onPointerDown(e) {
+                e.preventDefault();
+                const word = e.currentTarget;
+                doFollow(word);
+            }
+
+            function onPointerMove(e) {
                 if (!isFollowing || !followTarget) return;
                 isDragging = true;
                 e.preventDefault();
                 const cx = e.clientX;
                 const cy = e.clientY;
+                if (autoUnfollowTimer) {
+                    clearTimeout(autoUnfollowTimer);
+                    autoUnfollowTimer = null;
+                }
 
                 updateCardRect();
                 const wordWidth = followTarget.getBoundingClientRect().width;
@@ -2019,99 +2098,55 @@
 
                 allWords.forEach((w, idx) => {
                     const offset = (idx - 1) * spacing;
-                    const px = cx - centerOffset + offset;
-                    const py = cy - 25;
-                    w.style.left = px + 'px';
-                    w.style.top = py + 'px';
-                    w.style.transform = 'scale(1.06)';
-                    const p = getPercentPosition(px, py);
-                    pos[idx].x = Math.max(0, Math.min(100, p.x));
-                    pos[idx].y = Math.max(0, Math.min(100, p.y));
+                    let left = cx - centerOffset + offset;
+                    let top = cy - 25;
+                    setWordPosition(w, left, top);
+                    const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
+                    pos[idx].x = p.x;
+                    pos[idx].y = p.y;
                 });
             }
 
-            function onDragMoveTouch(e) {
-                if (!isFollowing || !followTarget) return;
-                isDragging = true;
-                e.preventDefault();
-                const touch = e.touches[0];
-                const cx = touch.clientX;
-                const cy = touch.clientY;
-
-                updateCardRect();
-                const wordWidth = followTarget.getBoundingClientRect().width;
-                const spacing = wordWidth * 1.2;
-                const centerOffset = wordWidth / 2;
-
-                allWords.forEach((w, idx) => {
-                    const offset = (idx - 1) * spacing;
-                    const px = cx - centerOffset + offset;
-                    const py = cy - 25;
-                    w.style.left = px + 'px';
-                    w.style.top = py + 'px';
-                    w.style.transform = 'scale(1.06)';
-                    const p = getPercentPosition(px, py);
-                    pos[idx].x = Math.max(0, Math.min(100, p.x));
-                    pos[idx].y = Math.max(0, Math.min(100, p.y));
-                });
-            }
-
-            function onDragEnd(e) {
+            function onPointerUp(e) {
                 if (!isFollowing) return;
-                document.removeEventListener('mousemove', onDragMove);
-                document.removeEventListener('touchmove', onDragMoveTouch);
-                document.removeEventListener('mouseup', onDragEnd);
-                document.removeEventListener('touchend', onDragEnd);
-                document.removeEventListener('touchcancel', onDragEnd);
-
-                allWords.forEach(w => {
-                    w.classList.remove('following');
-                    w.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                    const idx = allWords.indexOf(w);
-                    pos[idx].x = 5 + Math.random() * 85;
-                    pos[idx].y = 5 + Math.random() * 85;
-                    updateWordPosition(w, pos[idx].x, pos[idx].y);
-                    w.style.transform = '';
-                });
-
-                setTimeout(() => {
-                    allWords.forEach(w => w.style.transition = '');
-                    isFollowing = false;
-                    followTarget = null;
-                    isDragging = false;
-                    startFloating();
-                }, 80);
+                if (isDragging) {
+                    unfollow();
+                } else {
+                    if (!autoUnfollowTimer) {
+                        autoUnfollowTimer = setTimeout(() => {
+                            unfollow();
+                        }, 500);
+                    }
+                }
+                isDragging = false;
             }
 
+            // 绑定事件
             allWords.forEach(word => {
-                word.addEventListener('click', handleWordClick);
-                word.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    handleWordClick(e);
-                }, { passive: false });
+                word.addEventListener('pointerdown', onPointerDown);
             });
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+            document.addEventListener('pointercancel', onPointerUp);
 
+            // 窗口变化时更新
             window.addEventListener('resize', () => {
                 updateCardRect();
                 if (!isFollowing) {
-                    allWords.forEach((w, idx) => {
-                        updateWordPosition(w, pos[idx].x, pos[idx].y);
-                    });
+                    allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
                 }
             });
             window.addEventListener('scroll', () => {
                 updateCardRect();
                 if (!isFollowing) {
-                    allWords.forEach((w, idx) => {
-                        updateWordPosition(w, pos[idx].x, pos[idx].y);
-                    });
+                    allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
                 }
             });
 
             setTimeout(startFloating, 100);
 
             // ================================================================
-            //  原有功能代码（视频、头像、主题等） + 堆叠图片轮播
+            //  核心功能：视频、头像、堆叠图片、主题切换、天气组件（保持不变）
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
@@ -2288,8 +2323,13 @@
             const sakuraBox = $("#sakuraBox");
             const islandText = $("#islandText");
             const expandBtn = $("#expandBtn");
-            const themeToggle = $("#themeToggle");
-            const themeIcon = $("#themeIcon");
+            const statusThemeToggle = $("#statusThemeToggle");
+            const statusThemeIcon = $("#statusThemeIcon");
+            const weatherWidget = $("#weatherWidget");
+            const weatherIcon = $("#weatherIcon");
+            const weatherTemp = $("#weatherTemp");
+            const weatherDesc = $("#weatherDesc");
+            const weatherRefresh = $("#weatherRefresh");
 
             const videoPopup = $("#videoPopup");
             const popupVideo = $("#popupVideo");
@@ -2324,8 +2364,8 @@
             let viewerAutoPlayTimer = null;
             let isViewerInteracting = false;
 
-            // ---- 堆叠图片相关 ----
-            let stackImgs = []; // 存储所有图片元素
+            // ---- 堆叠图片 ----
+            let stackImgs = [];
 
             function buildStack() {
                 photoInner.innerHTML = '';
@@ -2357,41 +2397,22 @@
                         else img.classList.add('hidden');
                     }
                 });
-                // 更新查看器索引
                 slideIndex = activeIndex;
                 try { localStorage.setItem(STORAGE_PREFIX + 'slide_index', String(slideIndex)); } catch (e) {}
             }
 
-            // 轮播下一张
             function nextSlide() {
                 if (slideImages.length < 2) return;
-                const next = (slideIndex + 1) % slideImages.length;
-                updateStack(next);
+                updateStack((slideIndex + 1) % slideImages.length);
             }
-
-            // 初始化堆叠
             buildStack();
-
-            // 点击堆叠区域打开查看器
-            photoInner.addEventListener('click', function(e) {
-                e.stopPropagation();
-                openViewer(slideImages, slideIndex, '图片原图');
-            });
-
-            // 轮播定时器
-            if (slideImages.length > 1) {
-                slideTimer = setInterval(nextSlide, 3800);
-            }
-
-            // 加载存储的 slideIndex
+            photoInner.addEventListener('click', function(e) { e.stopPropagation();
+                openViewer(slideImages, slideIndex, '图片原图'); });
+            if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 3800);
             try {
                 const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
-                if (si !== null) {
-                    const idx = parseInt(si, 10);
-                    if (!isNaN(idx) && idx >= 0 && idx < slideImages.length) {
-                        updateStack(idx);
-                    }
-                }
+                if (si !== null) { const idx = parseInt(si, 10); if (!isNaN(idx) && idx >= 0 && idx < slideImages.length)
+                        updateStack(idx); }
             } catch (e) {}
 
             // ===== 主题切换 =====
@@ -2401,18 +2422,23 @@
                 html.classList.add('transitioning');
                 if (isDark) {
                     html.classList.remove('dark-mode');
-                    themeIcon.className = 'fa-solid fa-sun';
+                    statusThemeIcon.className = 'fa-regular fa-circle';
                     document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
                     showToastMsg('☀️ 已切换到浅色模式');
                 } else {
                     html.classList.add('dark-mode');
-                    themeIcon.className = 'fa-solid fa-circle';
+                    statusThemeIcon.className = 'fa-solid fa-circle';
                     document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C');
                     showToastMsg('🌕 已切换到深色模式');
                 }
                 setTimeout(() => html.classList.remove('transitioning'), 800);
             }
-            themeToggle.addEventListener('click', toggleTheme);
+            statusThemeToggle.addEventListener('click', toggleTheme);
+
+            (function initThemeIcon() {
+                const isDark = document.documentElement.classList.contains('dark-mode');
+                statusThemeIcon.className = isDark ? 'fa-solid fa-circle' : 'fa-regular fa-circle';
+            })();
 
             // ===== 工具函数 =====
             function formatTime(s) {
@@ -2447,33 +2473,27 @@
 
             function toggleControlsVisibility() {
                 const isHidden = videoControls.classList.contains('hidden');
-                if (isHidden) {
-                    videoControls.classList.remove("hidden");
+                if (isHidden) { videoControls.classList.remove("hidden");
                     centerPlayBtn.classList.remove("hidden");
-                    startAutoHideTimer();
-                } else {
-                    videoControls.classList.add("hidden");
+                    startAutoHideTimer(); } else { videoControls.classList.add("hidden");
                     centerPlayBtn.classList.add("hidden");
-                    clearTimeout(hideControlTimer);
-                }
+                    clearTimeout(hideControlTimer); }
             }
 
             function switchVideo(index) {
                 if (videoList.length === 0) return;
                 if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
-                    try {
-                        localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime));
-                    } catch (e) {}
+                    try { localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime)); } catch (
+                    e) {}
                 }
                 currentVideoIndex = (index + videoList.length) % videoList.length;
                 const src = videoList[currentVideoIndex];
                 mainVideo.src = src;
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
-                const savedTime = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) || 0;
-                if (savedTime > 0) {
-                    mainVideo.currentTime = savedTime;
-                }
+                const savedTime = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
+                    0;
+                if (savedTime > 0) mainVideo.currentTime = savedTime;
                 mainVideo.play().catch(() => showToastMsg("请手动播放"));
                 popupVideo.src = src;
                 updateCenterPlayBtn();
@@ -2483,11 +2503,7 @@
             }
 
             function toggleVideo() {
-                if (mainVideo.paused) {
-                    mainVideo.play().catch(() => showToastMsg("请点击播放"));
-                } else {
-                    mainVideo.pause();
-                }
+                if (mainVideo.paused) { mainVideo.play().catch(() => showToastMsg("请点击播放")); } else { mainVideo.pause(); }
                 updateCenterPlayBtn();
                 updatePlayBtnIcon();
                 if (!mainVideo.paused) showControls();
@@ -2517,21 +2533,17 @@
             function nextVideo() { switchVideo(currentVideoIndex + 1); }
 
             function updateMuteIcon() {
-                if (mainVideo.muted || mainVideo.volume <= 0) {
-                    videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i>`;
-                } else if (mainVideo.volume < 0.5) {
-                    videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-low"></i>`;
-                } else {
-                    videoMuteBtn.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
-                }
+                if (mainVideo.muted || mainVideo.volume <= 0) { videoMuteBtn.innerHTML =
+                        `<i class="fa-solid fa-volume-xmark"></i>`; } else if (mainVideo.volume < 0.5) { videoMuteBtn
+                        .innerHTML = `<i class="fa-solid fa-volume-low"></i>`; } else { videoMuteBtn.innerHTML =
+                        `<i class="fa-solid fa-volume-high"></i>`; }
             }
 
-            // ===== 初始化：加载存储的轮播状态 =====
+            // ===== 初始化视频 =====
             const savedVideoTime = loadCarouselState();
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
             if (avatarIndex >= avatarImages.length) avatarIndex = 0;
             if (slideIndex >= slideImages.length) slideIndex = 0;
-
             if (videoList.length > 0) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
@@ -2542,14 +2554,11 @@
             if (avatarImages.length > 0) {
                 avatarImg.src = avatarImages[avatarIndex % avatarImages.length];
             }
-            // 堆叠图片已初始化
 
             mainVideo.addEventListener('loadedmetadata', function() {
                 const saved = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
                     0;
-                if (saved > 0 && saved < mainVideo.duration) {
-                    mainVideo.currentTime = saved;
-                }
+                if (saved > 0 && saved < mainVideo.duration) mainVideo.currentTime = saved;
                 totTime.textContent = formatTime(mainVideo.duration);
                 updateCenterPlayBtn();
             });
@@ -2598,9 +2607,7 @@
                 return c[Math.floor(Math.random() * c.length)];
             }
 
-            function updateGlow() {
-                document.documentElement.style.setProperty('--glow-color', randomColor());
-            }
+            function updateGlow() { document.documentElement.style.setProperty('--glow-color', randomColor()); }
             glowInterval = setInterval(updateGlow, 1800);
             setTimeout(updateGlow, 50);
 
@@ -2611,7 +2618,6 @@
                 avatarImg.src = avatarImages[avatarIndex];
                 saveCarouselState();
             }
-
             if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 4500);
 
             // ===== 视频事件 =====
@@ -2646,53 +2652,39 @@
                     curTime.textContent = formatTime(mainVideo.currentTime);
                 }
             });
-
             progressTrack.addEventListener("click", (e) => {
                 const rect = progressTrack.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                 mainVideo.currentTime = r * mainVideo.duration;
                 showControls();
             });
-
-            mainVideo.addEventListener("play", () => {
-                updatePlayBtnIcon();
+            mainVideo.addEventListener("play", () => { updatePlayBtnIcon();
                 updateCenterPlayBtn();
-                showControls();
-                if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
-                    popupVideo.play().catch(() => {});
-                }
-            });
-            mainVideo.addEventListener("pause", () => {
-                updatePlayBtnIcon();
+                showControls(); if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
+                    popupVideo.play().catch(() => {}); } });
+            mainVideo.addEventListener("pause", () => { updatePlayBtnIcon();
                 centerPlayBtn.classList.remove('hidden');
                 centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
                 videoControls.classList.remove("hidden");
-                clearTimeout(hideControlTimer);
-                if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
-                    popupVideo.pause();
-                }
-            });
+                clearTimeout(hideControlTimer); if (videoPopup.classList.contains('active') && popupVideo.src ===
+                    mainVideo.src) { popupVideo.pause(); } });
             mainVideo.addEventListener("ended", function() { switchVideo(currentVideoIndex + 1); });
 
             let startX = 0,
                 startY = 0,
                 isSwiping = false;
-            videoBox.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
+            videoBox.addEventListener('touchstart', (e) => { const touch = e.touches[0];
                 startX = touch.clientX;
                 startY = touch.clientY;
-                isSwiping = true;
-            }, { passive: true });
+                isSwiping = true; }, { passive: true });
             videoBox.addEventListener('touchmove', (e) => {
                 if (!isSwiping) return;
                 const dx = e.touches[0].clientX - startX;
                 const dy = e.touches[0].clientY - startY;
-                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-                    e.preventDefault();
-                    if (dx < 0) { nextVideo();
+                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) { e.preventDefault(); if (dx < 0) { nextVideo
+                        ();
                         isSwiping = false; } else { prevVideo();
-                        isSwiping = false; }
-                }
+                        isSwiping = false; } }
             }, { passive: false });
             videoBox.addEventListener('touchend', () => { isSwiping = false; });
             videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
@@ -2700,12 +2692,10 @@
             let volDrag = false,
                 volStartY = 0,
                 volStartVal = 0;
-            videoMuteBtn.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
+            videoMuteBtn.addEventListener('touchstart', (e) => { e.stopPropagation();
                 volDrag = true;
                 volStartY = e.touches[0].clientY;
-                volStartVal = mainVideo.volume;
-            }, { passive: true });
+                volStartVal = mainVideo.volume; }, { passive: true });
             videoMuteBtn.addEventListener('touchmove', (e) => {
                 if (!volDrag) return;
                 e.preventDefault();
@@ -2716,13 +2706,11 @@
             }, { passive: false });
             videoMuteBtn.addEventListener('touchend', () => { volDrag = false; });
             videoMuteBtn.addEventListener('touchcancel', () => { volDrag = false; });
-            videoMuteBtn.onclick = (e) => {
-                if (volDrag) return;
+            videoMuteBtn.onclick = (e) => { if (volDrag) return;
                 e.stopPropagation();
                 mainVideo.muted = !mainVideo.muted;
                 updateMuteIcon();
-                showControls();
-            };
+                showControls(); };
 
             // ===== 弹出播放器 =====
             function togglePopupControls() {
@@ -2749,21 +2737,17 @@
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY);
             }
 
             function closePopup() {
                 videoPopup.classList.remove('active');
                 document.body.style.overflow = '';
                 mainVideo.muted = false;
-                if (!popupVideo.paused) {
-                    mainVideo.currentTime = popupVideo.currentTime;
-                    mainVideo.play().catch(() => {});
-                }
+                if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
+                    mainVideo.play().catch(() => {}); }
                 popupVideo.pause();
                 popupVideo.src = '';
                 updateMuteIcon();
@@ -2772,7 +2756,6 @@
                 popupControlsVisible = true;
                 clearTimeout(popupHideTimer);
             }
-
             popupVideo.removeAttribute('loop');
             popupVideo.addEventListener('ended', () => {
                 if (videoList.length > 0) {
@@ -2783,46 +2766,33 @@
                     popupControls.classList.remove("hidden");
                     popupClose.classList.remove("hidden");
                     clearTimeout(popupHideTimer);
-                    popupHideTimer = setTimeout(() => {
-                        popupControls.classList.add("hidden");
+                    popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                         popupClose.classList.add("hidden");
-                        popupControlsVisible = false;
-                    }, POPUP_HIDE_DELAY);
+                        popupControlsVisible = false; }, POPUP_HIDE_DELAY);
                 }
             });
             popupVideo.addEventListener('click', (e) => { e.stopPropagation();
                 togglePopupControls(); });
             popupClose.addEventListener('click', (e) => { e.stopPropagation();
                 closePopup(); });
-            videoPopup.addEventListener('click', (e) => {
-                if (e.target === videoPopup && popupControlsVisible) {
-                    popupControls.classList.add("hidden");
+            videoPopup.addEventListener('click', (e) => { if (e.target === videoPopup && popupControlsVisible) { popupControls
+                        .classList.add("hidden");
                     popupClose.classList.add("hidden");
                     popupControlsVisible = false;
-                    clearTimeout(popupHideTimer);
-                }
-            });
-            popupPlayBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (popupVideo.paused) popupVideo.play().catch(() => {});
-                else popupVideo.pause();
-                if (!popupVideo.paused) {
-                    mainVideo.currentTime = popupVideo.currentTime;
+                    clearTimeout(popupHideTimer); } });
+            popupPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); if (popupVideo.paused) popupVideo.play()
+                    .catch(() => {});
+                else popupVideo.pause(); if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
                     mainVideo.play().catch(() => {});
-                    mainVideo.muted = true;
-                } else mainVideo.pause();
+                    mainVideo.muted = true; } else mainVideo.pause();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
-            });
-            popupPrevBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+            popupPrevBtn.addEventListener('click', (e) => { e.stopPropagation();
                 prevVideo();
                 popupVideo.src = videoList[currentVideoIndex];
                 popupVideo.play().catch(() => {});
@@ -2831,14 +2801,10 @@
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
-            });
-            popupNextBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+            popupNextBtn.addEventListener('click', (e) => { e.stopPropagation();
                 nextVideo();
                 popupVideo.src = videoList[currentVideoIndex];
                 popupVideo.play().catch(() => {});
@@ -2847,14 +2813,10 @@
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
-            });
-            popupMuteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+            popupMuteBtn.addEventListener('click', (e) => { e.stopPropagation();
                 popupVideo.muted = !popupVideo.muted;
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
                     `<i class="fa-solid fa-volume-high"></i>`;
@@ -2862,15 +2824,11 @@
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
-            });
-            popupVideo.addEventListener('loadedmetadata', () => {
-                popupTotTime.textContent = formatTime(popupVideo.duration);
-            });
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+            popupVideo.addEventListener('loadedmetadata', () => { popupTotTime.textContent = formatTime(popupVideo
+                    .duration); });
             popupVideo.addEventListener('timeupdate', () => {
                 const p = (popupVideo.currentTime / popupVideo.duration) * 100;
                 popupProgressBar.style.width = p + "%";
@@ -2885,14 +2843,11 @@
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY);
             });
-            popupVideo.addEventListener('play', () => {
-                popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            popupVideo.addEventListener('play', () => { popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
                 mainVideo.currentTime = popupVideo.currentTime;
                 mainVideo.play().catch(() => {});
                 mainVideo.muted = true;
@@ -2900,25 +2855,18 @@
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
-            });
-            popupVideo.addEventListener('pause', () => {
-                popupPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+            popupVideo.addEventListener('pause', () => { popupPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
                 mainVideo.pause();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => {
-                    popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false;
-                }, POPUP_HIDE_DELAY);
-            });
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
 
             // ===== 图片查看器 =====
             function updateViewerCounter() {
@@ -2929,20 +2877,17 @@
             function startViewerAutoPlay() {
                 stopViewerAutoPlay();
                 if (!viewerGallery || viewerGallery.length <= 1) return;
-                viewerAutoPlayTimer = setInterval(() => {
-                    if (isViewerInteracting) return;
+                viewerAutoPlayTimer = setInterval(() => { if (isViewerInteracting) return;
                     viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
                     viewerImg.src = viewerGallery[viewerGalleryIndex];
-                    updateViewerCounter();
-                }, 3500);
+                    updateViewerCounter(); }, 3500);
             }
 
             function stopViewerAutoPlay() { if (viewerAutoPlayTimer) { clearInterval(viewerAutoPlayTimer);
                     viewerAutoPlayTimer = null; } }
 
-            function resetViewerAutoPlay() { stopViewerAutoPlay();
-                if (viewer.classList.contains('show') && viewerGallery && viewerGallery.length > 1)
-                startViewerAutoPlay(); }
+            function resetViewerAutoPlay() { stopViewerAutoPlay(); if (viewer.classList.contains('show') && viewerGallery &&
+                    viewerGallery.length > 1) startViewerAutoPlay(); }
 
             function openViewer(gallery, idx, alt) {
                 if (!gallery || gallery.length === 0) return;
@@ -3003,13 +2948,10 @@
                 setTimeout(() => { isViewerInteracting = false;
                     resetViewerAutoPlay(); }, 400);
             }, { passive: true });
-            viewer.addEventListener('wheel', (e) => {
-                if (!viewer.classList.contains('show')) return;
-                e.preventDefault();
-                if (e.deltaX > 30 || e.deltaY > 30) viewerNext();
+            viewer.addEventListener('wheel', (e) => { if (!viewer.classList.contains('show')) return;
+                e.preventDefault(); if (e.deltaX > 30 || e.deltaY > 30) viewerNext();
                 else if (e.deltaX < -30 || e.deltaY < -30) viewerPrev();
-                resetViewerAutoPlay();
-            }, { passive: false });
+                resetViewerAutoPlay(); }, { passive: false });
             document.addEventListener('keydown', (e) => {
                 if (!viewer.classList.contains('show')) return;
                 if (e.key === 'ArrowLeft') { e.preventDefault();
@@ -3051,42 +2993,29 @@
                     isJumping = false;
                     window.removeEventListener('beforeunload', onUnload);
                     document.removeEventListener('visibilitychange', onVis); };
-                const onVis = () => {
-                    if (!document.hidden && !unloaded) {
-                        if (document.body.contains(item)) { item.classList.remove("loading");
+                const onVis = () => { if (!document.hidden && !unloaded) { if (document.body.contains(item)) { item
+                            .classList.remove("loading");
                             item.innerHTML = orig; }
                         isJumping = false;
                         window.removeEventListener('beforeunload', onUnload);
-                        document.removeEventListener('visibilitychange', onVis);
-                    }
-                };
+                        document.removeEventListener('visibilitychange', onVis); } };
                 window.addEventListener('beforeunload', onUnload);
                 document.addEventListener('visibilitychange', onVis);
-                try {
-                    const win = window.open(config.scheme, '_blank');
-                    if (!win || win.closed) window.location.href = config.scheme;
-                } catch (e) {
-                    item.classList.remove("loading");
+                try { const win = window.open(config.scheme, '_blank'); if (!win || win.closed) window.location.href =
+                        config.scheme; } catch (e) { item.classList.remove("loading");
                     item.innerHTML = orig;
                     isJumping = false;
                     window.removeEventListener('beforeunload', onUnload);
-                    document.removeEventListener('visibilitychange', onVis);
-                    return;
-                }
-                setTimeout(() => {
-                    if (!unloaded && isJumping) {
-                        if (document.body.contains(item)) { item.classList.remove("loading");
+                    document.removeEventListener('visibilitychange', onVis); return; }
+                setTimeout(() => { if (!unloaded && isJumping) { if (document.body.contains(item)) { item.classList
+                            .remove("loading");
                             item.innerHTML = orig; }
                         isJumping = false;
                         window.removeEventListener('beforeunload', onUnload);
-                        document.removeEventListener('visibilitychange', onVis);
-                    }
-                }, 2800);
+                        document.removeEventListener('visibilitychange', onVis); } }, 2800);
             }
-            $$(".app-button").forEach(el => {
-                el.addEventListener("click", (e) => { e.stopPropagation();
-                    jumpToApp(el.dataset.app); });
-            });
+            $$(".app-button").forEach(el => { el.addEventListener("click", (e) => { e.stopPropagation();
+                    jumpToApp(el.dataset.app); }); });
 
             // ===== 复制车牌 =====
             $("#plate").addEventListener("click", async (e) => {
@@ -3111,8 +3040,9 @@
                     e.target.closest("#plate") || e.target.closest(".video-controls") ||
                     e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
                     e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
-                    e.target.closest(".center-play-btn") || e.target.closest(".theme-toggle") ||
-                    e.target.closest(".floating-word") || e.target.closest(".plate-photo")) return;
+                    e.target.closest(".center-play-btn") || e.target.closest(".status-theme-toggle") ||
+                    e.target.closest(".floating-word") || e.target.closest(".plate-photo") ||
+                    e.target.closest(".weather-widget")) return;
                 const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
                 const el = document.createElement("div");
                 el.className = "click-text-item";
@@ -3129,10 +3059,85 @@
                 const now = new Date();
                 const h = String(now.getHours()).padStart(2, "0");
                 const m = String(now.getMinutes()).padStart(2, "0");
-                $("#statusTime").textContent = h + ":" + m;
+                $("#statusTime").childNodes[0].nodeValue = h + ":" + m;
             }
             updateTime();
             setInterval(updateTime, 1000);
+
+            // ===== 🌤️ 天气组件 =====
+            const weatherStates = [
+                { icon: '☀️', temp: 28, desc: '晴' },
+                { icon: '⛅', temp: 24, desc: '多云' },
+                { icon: '🌤️', temp: 26, desc: '晴间多云' },
+                { icon: '☁️', temp: 22, desc: '阴' },
+                { icon: '🌦️', temp: 20, desc: '小雨' },
+                { icon: '🌧️', temp: 18, desc: '中雨' },
+                { icon: '❄️', temp: 2, desc: '雪' },
+                { icon: '🌫️', temp: 16, desc: '雾' },
+            ];
+
+            let currentWeather = null;
+            let weatherFetching = false;
+
+            function setWeather(weather) {
+                if (!weather) return;
+                currentWeather = weather;
+                weatherIcon.textContent = weather.icon;
+                weatherTemp.textContent = weather.temp + '°';
+                weatherDesc.textContent = weather.desc;
+            }
+
+            function getRandomWeather() {
+                return weatherStates[Math.floor(Math.random() * weatherStates.length)];
+            }
+
+            async function fetchWeather() {
+                if (weatherFetching) return;
+                weatherFetching = true;
+                weatherRefresh.classList.add('spinning');
+
+                try {
+                    const resp = await fetch('https://wttr.in/Nantong?format=j1', {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                        mode: 'cors'
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        const current = data.current_condition?.[0];
+                        if (current) {
+                            const temp = parseInt(current.temp_C, 10) || 24;
+                            const desc = current.weatherDesc?.[0]?.value || '晴';
+                            let icon = '☀️';
+                            const d = desc.toLowerCase();
+                            if (d.includes('雨')) icon = '🌧️';
+                            else if (d.includes('雪')) icon = '❄️';
+                            else if (d.includes('云') || d.includes('阴')) icon = '☁️';
+                            else if (d.includes('雾')) icon = '🌫️';
+                            else if (d.includes('晴')) icon = '☀️';
+                            setWeather({ icon, temp, desc: desc.slice(0, 4) });
+                            showToastMsg('🌤️ 天气已更新');
+                            weatherFetching = false;
+                            weatherRefresh.classList.remove('spinning');
+                            return;
+                        }
+                    }
+                } catch (e) {}
+
+                const w = getRandomWeather();
+                setWeather(w);
+                showToastMsg('🌤️ 天气已刷新');
+                weatherFetching = false;
+                weatherRefresh.classList.remove('spinning');
+            }
+
+            weatherWidget.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fetchWeather();
+            });
+
+            setWeather(getRandomWeather());
+            setTimeout(fetchWeather, 800);
 
             // ===== 启动 =====
             setTimeout(() => {
