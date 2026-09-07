@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -1604,12 +1605,12 @@
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <!-- ===== 天气组件（无刷新按钮） ===== -->
-                <div class="weather-widget" id="weatherWidget" title="点击刷新天气">
+                <!-- ===== 天气组件 ===== -->
+                <div class="weather-widget" id="weatherWidget" title="点击刷新天气（车牌归属地）">
                     <span class="weather-icon" id="weatherIcon">☀️</span>
-                    <span class="weather-temp" id="weatherTemp">28°</span>
+                    <span class="weather-temp" id="weatherTemp">--°</span>
                     <span class="weather-divider"></span>
-                    <span class="weather-desc" id="weatherDesc">晴</span>
+                    <span class="weather-desc" id="weatherDesc">加载中...</span>
                 </div>
 
                 <div class="profile-row">
@@ -3061,39 +3062,98 @@
             updateTime();
             setInterval(updateTime, 1000);
 
-            // ===== 🌤️ 天气组件 =====
-            const weatherStates = [
-                { icon: '☀️', temp: 28, desc: '晴' },
-                { icon: '⛅', temp: 24, desc: '多云' },
-                { icon: '🌤️', temp: 26, desc: '晴间多云' },
-                { icon: '☁️', temp: 22, desc: '阴' },
-                { icon: '🌦️', temp: 20, desc: '小雨' },
-                { icon: '🌧️', temp: 18, desc: '中雨' },
-                { icon: '❄️', temp: 2, desc: '雪' },
-                { icon: '🌫️', temp: 16, desc: '雾' },
-            ];
+            // ================================================================
+            //  🌤️ 天气组件：根据车牌归属地获取天气
+            // ================================================================
+            // 车牌省份映射 => 城市（苏 -> 江苏南京/南通，这里使用南通）
+            const PLATE_MAP = {
+                '苏': 'Nantong',
+                '京': 'Beijing',
+                '沪': 'Shanghai',
+                '粤': 'Guangzhou',
+                '浙': 'Hangzhou',
+                '豫': 'Zhengzhou',
+                '川': 'Chengdu',
+                '渝': 'Chongqing',
+                '鄂': 'Wuhan',
+                '湘': 'Changsha',
+                '皖': 'Hefei',
+                '鲁': 'Jinan',
+                '冀': 'Shijiazhuang',
+                '闽': 'Fuzhou',
+                '赣': 'Nanchang',
+                '晋': 'Taiyuan',
+                '辽': 'Shenyang',
+                '吉': 'Changchun',
+                '黑': 'Harbin',
+                '陕': 'Xi\'an',
+                '甘': 'Lanzhou',
+                '青': 'Xining',
+                '云': 'Kunming',
+                '贵': 'Guiyang',
+                '琼': 'Haikou',
+                '藏': 'Lhasa',
+                '桂': 'Nanning',
+                '蒙': 'Hohhot',
+                '宁': 'Yinchuan',
+                '新': 'Urumqi',
+                '津': 'Tianjin',
+                '港': 'HongKong',
+                '澳': 'Macau'
+            };
 
-            let currentWeather = null;
+            // 从车牌提取省份代码
+            function getPlateProvince(plate) {
+                const match = plate.match(/^([\u4e00-\u9fa5])/);
+                return match ? match[1] : null;
+            }
+
+            // 获取天气
             let weatherFetching = false;
 
             function setWeather(weather) {
                 if (!weather) return;
-                currentWeather = weather;
                 weatherIcon.textContent = weather.icon;
                 weatherTemp.textContent = weather.temp + '°';
                 weatherDesc.textContent = weather.desc;
             }
 
-            function getRandomWeather() {
-                return weatherStates[Math.floor(Math.random() * weatherStates.length)];
+            const weatherIconMap = {
+                '晴': '☀️',
+                '多云': '⛅',
+                '阴': '☁️',
+                '小雨': '🌦️',
+                '中雨': '🌧️',
+                '大雨': '🌧️',
+                '雪': '❄️',
+                '雾': '🌫️',
+                '霾': '🌫️'
+            };
+
+            function getWeatherIcon(desc) {
+                if (!desc) return '☀️';
+                const lower = desc.toLowerCase();
+                if (lower.includes('雨')) return '🌧️';
+                if (lower.includes('雪')) return '❄️';
+                if (lower.includes('雾') || lower.includes('霾')) return '🌫️';
+                if (lower.includes('云')) return '⛅';
+                if (lower.includes('阴')) return '☁️';
+                if (lower.includes('晴')) return '☀️';
+                return '☀️';
             }
 
             async function fetchWeather() {
                 if (weatherFetching) return;
                 weatherFetching = true;
+                weatherDesc.textContent = '更新中...';
 
                 try {
-                    const resp = await fetch('https://wttr.in/Nantong?format=j1', {
+                    // 获取车牌省份
+                    const plateText = document.getElementById('plate')?.textContent || '苏FA36165';
+                    const province = getPlateProvince(plateText);
+                    const city = PLATE_MAP[province] || 'Nantong';
+
+                    const resp = await fetch(`https://wttr.in/${city}?format=j1`, {
                         method: 'GET',
                         headers: { 'Accept': 'application/json' },
                         mode: 'cors'
@@ -3104,34 +3164,47 @@
                         if (current) {
                             const temp = parseInt(current.temp_C, 10) || 24;
                             const desc = current.weatherDesc?.[0]?.value || '晴';
-                            let icon = '☀️';
-                            const d = desc.toLowerCase();
-                            if (d.includes('雨')) icon = '🌧️';
-                            else if (d.includes('雪')) icon = '❄️';
-                            else if (d.includes('云') || d.includes('阴')) icon = '☁️';
-                            else if (d.includes('雾')) icon = '🌫️';
-                            else if (d.includes('晴')) icon = '☀️';
-                            setWeather({ icon, temp, desc: desc.slice(0, 4) });
-                            showToastMsg('🌤️ 天气已更新');
+                            // 取简短描述
+                            const shortDesc = desc.split(',')[0].trim().slice(0, 4);
+                            const icon = getWeatherIcon(shortDesc);
+                            setWeather({ icon, temp, desc: shortDesc });
+                            showToastMsg(`🌤️ ${city} 天气已更新`);
                             weatherFetching = false;
                             return;
                         }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    // 静默失败，使用模拟数据
+                }
 
+                // 降级：使用模拟数据
                 const w = getRandomWeather();
                 setWeather(w);
                 showToastMsg('🌤️ 天气已刷新');
                 weatherFetching = false;
             }
 
+            function getRandomWeather() {
+                const states = [
+                    { icon: '☀️', temp: 28, desc: '晴' },
+                    { icon: '⛅', temp: 24, desc: '多云' },
+                    { icon: '☁️', temp: 22, desc: '阴' },
+                    { icon: '🌦️', temp: 20, desc: '小雨' },
+                    { icon: '🌧️', temp: 18, desc: '中雨' }
+                ];
+                return states[Math.floor(Math.random() * states.length)];
+            }
+
+            // 点击天气组件刷新
             weatherWidget.addEventListener('click', (e) => {
                 e.stopPropagation();
                 fetchWeather();
             });
 
-            setWeather(getRandomWeather());
-            setTimeout(fetchWeather, 800);
+            // 初始加载显示占位，然后获取真实天气
+            setWeather({ icon: '⏳', temp: '--', desc: '加载中...' });
+            // 延迟一下确保页面完全加载
+            setTimeout(fetchWeather, 500);
 
             // ===== 启动 =====
             setTimeout(() => {
