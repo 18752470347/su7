@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== 样式（完整保留，并补全 .floating-word 的 position: fixed） ===== */
+        /* ===== 样式（完整保留） ===== */
         *,
         *::before,
         *::after {
@@ -555,7 +555,7 @@
             transform: translateZ(0);
         }
 
-        /* ===== 天气组件（调小并下移） ===== */
+        /* ===== 天气组件 ===== */
         .weather-widget {
             position: absolute;
             top: 18px;
@@ -1402,7 +1402,7 @@
             background: transparent;
         }
 
-        /* ===== 漂浮文字：必须 position: fixed，并确保 z-index 足够 ===== */
+        /* ===== 漂浮文字 ===== */
         .floating-word {
             position: fixed;
             font-size: 22px;
@@ -1425,7 +1425,7 @@
             cursor: grabbing;
         }
         .floating-word.following {
-            transition: all 0.05s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+            transition: none !important; /* 拖拽时无过渡延迟 */
             z-index: 1101;
             filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.18));
             cursor: grabbing;
@@ -1653,7 +1653,7 @@
             'use strict';
 
             // ================================================================
-            //  🌌 星空 + 流星雨系统（保持不变）
+            //  🌌 星空 + 流星雨系统（不变）
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
             const ctx = canvas.getContext('2d');
@@ -1872,13 +1872,14 @@
             let saveTimer = setInterval(saveCarouselState, 5000);
 
             // ================================================================
-            //  许红豆漂浮文字（修复溢出：添加边界限制）
+            //  许红豆漂浮文字（点击聚拢并拖拽，松开瞬间分散，边界反弹）
             // ================================================================
             const wordXu = document.getElementById('wordXu');
             const wordHong = document.getElementById('wordHong');
             const wordDou = document.getElementById('wordDou');
             const allWords = [wordXu, wordHong, wordDou];
             const mainCard = document.getElementById('mainCard');
+            // 速度（百分比/帧）
             const speeds = [{ x: 0.3, y: 0.2 }, { x: -0.25, y: 0.35 }, { x: 0.35, y: -0.25 }];
             let pos = [{ x: 8, y: 18 }, { x: 25, y: 55 }, { x: 70, y: 35 }];
             let isFollowing = false;
@@ -1887,27 +1888,23 @@
             let floatingAnimId = null;
             let cardRect = null;
             let speedFactor = 0.45;
-            let autoUnfollowTimer = null;
 
             function updateCardRect() { cardRect = mainCard.getBoundingClientRect(); }
             updateCardRect();
             window.addEventListener('resize', updateCardRect);
             window.addEventListener('scroll', updateCardRect);
 
-            // 核心：设置文字位置并强制限制在主卡片内
+            // 设置文字位置（像素坐标），并进行边界限制（确保在卡片内）
             function setWordPosition(word, left, top) {
                 if (!cardRect) updateCardRect();
-                const margin = 15;
-                // 获取文字自身尺寸（每次重新获取，以防变化）
+                const margin = 10;
                 const rect = word.getBoundingClientRect();
                 const w = rect.width || 30;
                 const h = rect.height || 30;
-                // 计算边界（相对于视口）
                 const minLeft = cardRect.left + margin;
                 const maxLeft = cardRect.right - margin - w;
                 const minTop = cardRect.top + margin;
                 const maxTop = cardRect.bottom - margin - h;
-                // 限制
                 left = Math.max(minLeft, Math.min(maxLeft, left));
                 top = Math.max(minTop, Math.min(maxTop, top));
                 word.style.left = left + 'px';
@@ -1917,7 +1914,7 @@
             // 通过百分比更新位置
             function updateWordPosition(word, percentX, percentY) {
                 if (!cardRect) updateCardRect();
-                const margin = 15;
+                const margin = 10;
                 const cardW = cardRect.width;
                 const cardH = cardRect.height;
                 const left = cardRect.left + margin + (percentX / 100) * (cardW - margin * 2);
@@ -1925,6 +1922,7 @@
                 setWordPosition(word, left, top);
             }
 
+            // 随机渐变色
             function randomGradient() {
                 const colors = [
                     ['#FF6B9E', '#FFD93D', '#6BCB77', '#4D96FF', '#9B59B6'],
@@ -1955,7 +1953,7 @@
             function initPositions() { allWords.forEach((word, idx) => updateWordPosition(word, pos[idx].x, pos[idx].y)); }
             initPositions();
 
-            // 开始自动漂浮
+            // 开始自动漂浮（带边界反弹）
             function startFloating() {
                 if (isFollowing) return;
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
@@ -1968,16 +1966,27 @@
                     updateCardRect();
                     allWords.forEach((word, idx) => {
                         if (word.classList.contains('following')) return;
+                        // 更新位置
                         pos[idx].x += speeds[idx].x * speedFactor;
                         pos[idx].y += speeds[idx].y * speedFactor;
-                        if (pos[idx].x < 1) { pos[idx].x = 1;
-                            speeds[idx].x = Math.abs(speeds[idx].x); } else if (pos[idx].x > 93) { pos[idx].x =
-                                93;
-                            speeds[idx].x = -Math.abs(speeds[idx].x); }
-                        if (pos[idx].y < 1) { pos[idx].y = 1;
-                            speeds[idx].y = Math.abs(speeds[idx].y); } else if (pos[idx].y > 93) { pos[idx].y =
-                                93;
-                            speeds[idx].y = -Math.abs(speeds[idx].y); }
+
+                        // 边界反弹（百分比边界 0~100）
+                        if (pos[idx].x < 0) {
+                            pos[idx].x = 0;
+                            speeds[idx].x = Math.abs(speeds[idx].x);
+                        } else if (pos[idx].x > 100) {
+                            pos[idx].x = 100;
+                            speeds[idx].x = -Math.abs(speeds[idx].x);
+                        }
+                        if (pos[idx].y < 0) {
+                            pos[idx].y = 0;
+                            speeds[idx].y = Math.abs(speeds[idx].y);
+                        } else if (pos[idx].y > 100) {
+                            pos[idx].y = 100;
+                            speeds[idx].y = -Math.abs(speeds[idx].y);
+                        }
+
+                        // 偶尔微调方向
                         if (Math.random() < 0.002) {
                             const angle = (Math.random() - 0.5) * 0.3;
                             const currentSpeed = Math.sqrt(speeds[idx].x * speeds[idx].x + speeds[idx].y * speeds[idx]
@@ -1986,6 +1995,7 @@
                             speeds[idx].x = Math.cos(newAngle) * currentSpeed;
                             speeds[idx].y = Math.sin(newAngle) * currentSpeed;
                         }
+
                         updateWordPosition(word, pos[idx].x, pos[idx].y);
                     });
                     floatingAnimId = requestAnimationFrame(animate);
@@ -1993,16 +2003,12 @@
                 animate();
             }
 
-            // 解除跟随，恢复漂浮
+            // 解除跟随，恢复漂浮（立即分散）
             function unfollow() {
-                if (autoUnfollowTimer) {
-                    clearTimeout(autoUnfollowTimer);
-                    autoUnfollowTimer = null;
-                }
                 if (!isFollowing) return;
                 isFollowing = false;
                 followTarget = null;
-                // 移除跟随样式，随机散开（百分比保证在卡片内）
+                // 移除跟随样式，随机散开
                 allWords.forEach((w, idx) => {
                     w.classList.remove('following');
                     w.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
@@ -2017,16 +2023,10 @@
                 }, 80);
             }
 
-            // 进入跟随模式（聚拢）
+            // 进入跟随模式（聚拢，并准备拖拽）
             function doFollow(word) {
                 if (isFollowing) {
-                    if (autoUnfollowTimer) {
-                        clearTimeout(autoUnfollowTimer);
-                        autoUnfollowTimer = null;
-                    }
-                    isFollowing = false;
-                    followTarget = null;
-                    allWords.forEach(w => w.classList.remove('following'));
+                    unfollow(); // 先解除旧的
                 }
                 if (floatingAnimId) {
                     cancelAnimationFrame(floatingAnimId);
@@ -2045,35 +2045,31 @@
 
                 allWords.forEach((w, idx) => {
                     w.classList.add('following');
-                    w.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    // 拖拽时无过渡，直接定位
+                    w.style.transition = 'none';
                     const offset = (idx - 1) * spacing;
                     let left = cx - wordWidth / 2 + offset;
                     let top = cy - rect.height / 2;
-                    // 边界限制（聚拢时也限制，防止溢出）
                     setWordPosition(w, left, top);
+                    // 同步百分比位置
                     const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
                 });
-
-                // 自动恢复定时器（2秒后解除跟随）
-                autoUnfollowTimer = setTimeout(() => {
-                    unfollow();
-                }, 2000);
             }
 
-            // 辅助：从像素位置反算百分比（用于同步pos）
+            // 辅助：从像素位置反算百分比
             function getPercentPosition(px, py) {
                 if (!cardRect) updateCardRect();
+                const margin = 10;
                 const cardW = cardRect.width;
                 const cardH = cardRect.height;
-                const margin = 15;
                 const percentX = ((px - cardRect.left - margin) / (cardW - margin * 2)) * 100;
                 const percentY = ((py - cardRect.top - margin) / (cardH - margin * 2)) * 100;
                 return { x: Math.max(0, Math.min(100, percentX)), y: Math.max(0, Math.min(100, percentY)) };
             }
 
-            // 指针事件
+            // ----- 指针事件 -----
             function onPointerDown(e) {
                 e.preventDefault();
                 const word = e.currentTarget;
@@ -2086,10 +2082,6 @@
                 e.preventDefault();
                 const cx = e.clientX;
                 const cy = e.clientY;
-                if (autoUnfollowTimer) {
-                    clearTimeout(autoUnfollowTimer);
-                    autoUnfollowTimer = null;
-                }
 
                 updateCardRect();
                 const wordWidth = followTarget.getBoundingClientRect().width;
@@ -2108,15 +2100,9 @@
             }
 
             function onPointerUp(e) {
-                if (!isFollowing) return;
-                if (isDragging) {
+                if (isFollowing) {
+                    // 松开立即分散
                     unfollow();
-                } else {
-                    if (!autoUnfollowTimer) {
-                        autoUnfollowTimer = setTimeout(() => {
-                            unfollow();
-                        }, 500);
-                    }
                 }
                 isDragging = false;
             }
