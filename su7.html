@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -14,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== 样式（完整保留） ===== */
+        /* ===== 样式 ===== */
         *,
         *::before,
         *::after {
@@ -50,32 +49,10 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        html {
-            width: 100%;
-            min-height: 100%;
-            background-color: #F2F2F7;
-            color: #1C1C1E;
-        }
-        body {
-            width: 100%;
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-x: hidden;
-            overflow-y: auto;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
-            background: #F2F2F7;
-            -webkit-touch-callout: none;
-            overscroll-behavior: none;
-            user-select: none;
-            margin: 0;
-            padding: 0;
-            color: #1C1C1E;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-overflow-scrolling: touch;
-            position: relative;
+            --weather-bg: rgba(255, 255, 255, 0.18);
+            --weather-border: rgba(255, 255, 255, 0.35);
+            --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            --weather-text: #1C1C1E;
         }
         html.dark-mode {
             --text-main: #F5F5F7;
@@ -98,6 +75,10 @@
             --popup-overlay: rgba(0, 0, 0, 0.92);
             --glow-color: #00D4FF;
             --sakura-color: rgba(255, 200, 216, 0.45);
+            --weather-bg: rgba(30, 30, 34, 0.5);
+            --weather-border: rgba(255, 255, 255, 0.08);
+            --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            --weather-text: #F5F5F7;
             background-color: #0A0A0C;
             color: #F5F5F7;
         }
@@ -239,27 +220,26 @@
             gap: 8px;
         }
 
-        /* ---- 状态栏中的主题切换按钮（满月） ---- */
+        /* ===== 切换按钮 - 太阳/满月样式 ===== */
         .status-theme-toggle {
-            width: 28px;
-            height: 28px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background: var(--glass-bg);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(12px) saturate(180%);
             -webkit-backdrop-filter: blur(12px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), inset 0 0 12px rgba(255, 255, 255, 0.06);
+            border: none;
+            box-shadow: 
+                0 0 0 1.5px rgba(255, 255, 255, 0.15),
+                0 4px 20px rgba(0, 0, 0, 0.06),
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
             color: var(--status-color);
-            font-size: 15px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.4s ease,
-                background 0.4s ease,
-                border-color 0.4s ease,
-                color 0.4s ease;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             flex-shrink: 0;
             position: relative;
             overflow: visible;
@@ -267,57 +247,91 @@
         .status-theme-toggle::before {
             content: '';
             position: absolute;
-            inset: -3px;
+            inset: -4px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, #00D4FF, #7B61FF, #FF6B9E, #FFD966, #00D4FF);
-            opacity: 0;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 200, 100, 0.0),
+                rgba(255, 200, 100, 0.15),
+                rgba(255, 200, 100, 0.0),
+                rgba(100, 200, 255, 0.15),
+                rgba(100, 200, 255, 0.0)
+            );
+            opacity: 0.6;
             z-index: -1;
-            transition: opacity 0.5s ease, transform 0.8s ease;
+            transition: all 0.8s ease;
             filter: blur(6px);
-            transform: scale(0.8);
+            transform: scale(0.9);
+            animation: ringOrbit 6s linear infinite;
+        }
+        @keyframes ringOrbit {
+            0% { transform: scale(0.9) rotate(0deg); }
+            100% { transform: scale(0.9) rotate(360deg); }
         }
         .status-theme-toggle:hover::before {
-            opacity: 0.25;
-            transform: scale(1.1);
-        }
-        .status-theme-toggle:active::before {
-            opacity: 0.4;
-            transform: scale(1.2);
+            opacity: 1;
+            transform: scale(1.1) rotate(20deg);
+            filter: blur(8px);
         }
         .status-theme-toggle::after {
             content: '';
             position: absolute;
-            inset: 2px;
+            inset: 3px;
             border-radius: 50%;
-            background: var(--bg-secondary);
-            z-index: -1;
-            transition: background 0.4s ease;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.3;
+            transition: opacity 0.4s ease;
         }
-        .status-theme-toggle:hover {
-            transform: scale(1.06) rotate(6deg);
-            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.08), inset 0 0 16px rgba(0, 212, 255, 0.04);
-            border-color: rgba(0, 212, 255, 0.15);
-        }
-        .status-theme-toggle:active {
-            transform: scale(0.84);
+        .status-theme-toggle:hover::after {
+            opacity: 0.6;
         }
         .status-theme-toggle i {
             position: relative;
-            z-index: 1;
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                color 0.4s ease;
-            font-size: 15px;
+            z-index: 2;
+            font-size: 18px;
             line-height: 1;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.0);
         }
         .status-theme-toggle:hover i {
-            transform: rotate(180deg) scale(1.05);
+            transform: rotate(180deg) scale(1.1);
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+        }
+        .status-theme-toggle:active {
+            transform: scale(0.85);
+        }
+        .status-theme-toggle:active i {
+            transform: rotate(360deg) scale(0.9);
         }
         html.dark-mode .status-theme-toggle {
-            border-color: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), inset 0 0 16px rgba(0, 212, 255, 0.03);
+            background: rgba(20, 20, 24, 0.5);
+            box-shadow: 
+                0 0 0 1.5px rgba(255, 255, 255, 0.06),
+                0 4px 24px rgba(0, 0, 0, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
         }
         html.dark-mode .status-theme-toggle::before {
-            opacity: 0.12;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 215, 0, 0.0),
+                rgba(255, 215, 0, 0.2),
+                rgba(255, 215, 0, 0.0),
+                rgba(255, 215, 0, 0.2),
+                rgba(255, 215, 0, 0.0)
+            );
+        }
+        html.dark-mode .status-theme-toggle i.fa-circle {
+            color: #FFD93D;
+            text-shadow: 0 0 30px rgba(255, 217, 61, 0.3);
+        }
+        .status-theme-toggle i.fa-sun {
+            color: #FFB800;
+            text-shadow: 0 0 20px rgba(255, 184, 0, 0.2);
+        }
+        html.dark-mode .status-theme-toggle i.fa-sun {
+            color: #FFB800;
+            text-shadow: 0 0 20px rgba(255, 184, 0, 0.2);
         }
 
         .dynamic-island {
@@ -418,7 +432,7 @@
             overflow: hidden;
             background: #0A0A0C;
             animation: cardSpringIn .6s var(--ease) 0.12s both;
-            border: 0.5px solid rgba(255, 255, 255, 0.04);
+            border: none !important;
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
             will-change: transform;
             position: relative;
@@ -541,66 +555,94 @@
             animation: cardSpringIn .6s var(--ease) 0.18s both;
             position: relative;
         }
+        /* ===== 主卡片纯透明 ===== */
         .main-card {
             width: 100%;
             padding: 12px 16px 22px;
             border-radius: 24px;
-            background: var(--bg-secondary);
-            border: 0.5px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             overflow: visible;
             position: relative;
             transform: translateZ(0);
         }
 
-        /* ===== 天气组件 ===== */
+        /* ===== 天气组件 - 超紧凑版，无刷新按钮 ===== */
         .weather-widget {
             position: absolute;
-            top: 18px;
-            left: 10px;
+            top: 22px;
+            left: 14px;
             z-index: 20;
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 10px 3px 6px;
-            border-radius: 16px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 0 16px rgba(255, 255, 255, 0.08);
+            gap: 3px;
+            padding: 2px 8px 2px 4px;
+            border-radius: 24px;
+            background: var(--weather-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--weather-border);
+            box-shadow: var(--weather-shadow);
             cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.4s ease,
-                background 0.4s ease,
-                border-color 0.4s ease;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform;
-            min-height: 28px;
+            min-height: 22px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            color: var(--weather-text);
+            max-width: 100px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .weather-widget::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 24px;
+            padding: 1px;
+            background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.1), transparent, rgba(255,255,255,0.1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
         }
         .weather-widget:hover {
             transform: scale(1.04);
-            box-shadow: 0 6px 24px rgba(0, 212, 255, 0.08), inset 0 0 20px rgba(0, 212, 255, 0.03);
-            border-color: rgba(0, 212, 255, 0.12);
+            box-shadow: 0 8px 40px rgba(0, 212, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border-color: rgba(0, 212, 255, 0.25);
         }
         .weather-widget:active {
-            transform: scale(0.92);
+            transform: scale(0.94);
         }
         .weather-widget .weather-icon {
-            font-size: 15px;
+            font-size: 13px;
             line-height: 1;
             flex-shrink: 0;
+            filter: drop-shadow(0 0 4px rgba(255, 217, 61, 0.2));
+            transition: transform 0.3s ease;
+        }
+        .weather-widget:hover .weather-icon {
+            transform: scale(1.08) rotate(-5deg);
         }
         .weather-widget .weather-temp {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
-            color: var(--text-main);
+            color: var(--weather-text);
             letter-spacing: 0.1px;
             line-height: 1.2;
             white-space: nowrap;
+        }
+        .weather-widget .weather-divider {
+            width: 1px;
+            height: 12px;
+            background: var(--weather-border);
+            opacity: 0.4;
+            flex-shrink: 0;
         }
         .weather-widget .weather-desc {
             font-size: 9px;
@@ -608,62 +650,48 @@
             color: var(--text-muted);
             line-height: 1.2;
             white-space: nowrap;
-            max-width: 30px;
+            max-width: 26px;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-        .weather-widget .weather-divider {
-            width: 1px;
-            height: 14px;
-            background: var(--glass-border);
-            opacity: 0.3;
-            flex-shrink: 0;
-        }
-        .weather-widget .weather-refresh {
-            font-size: 9px;
-            color: var(--text-muted);
-            opacity: 0.4;
-            transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            flex-shrink: 0;
-        }
-        .weather-widget:hover .weather-refresh {
-            opacity: 0.7;
-        }
-        .weather-widget .weather-refresh.spinning {
-            transform: rotate(360deg);
-            opacity: 0.8;
+            text-transform: capitalize;
         }
         html.dark-mode .weather-widget {
-            border-color: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 16px rgba(0, 212, 255, 0.02);
+            --weather-bg: rgba(30, 30, 34, 0.55);
+            --weather-border: rgba(255, 255, 255, 0.06);
+            --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        html.dark-mode .weather-widget::before {
+            background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.05), transparent, rgba(255,255,255,0.05), transparent);
         }
         html.dark-mode .weather-widget .weather-temp {
-            color: var(--text-main);
+            color: #F5F5F7;
+        }
+        html.dark-mode .weather-widget .weather-desc {
+            color: #8E8E93;
         }
         @media (max-width: 380px) {
             .weather-widget {
-                padding: 2px 8px 2px 4px;
-                min-height: 24px;
-                top: 14px;
-                left: 8px;
+                padding: 2px 6px 2px 3px;
+                min-height: 20px;
+                top: 18px;
+                left: 10px;
+                gap: 2px;
+                max-width: 80px;
             }
             .weather-widget .weather-icon {
-                font-size: 13px;
+                font-size: 11px;
             }
             .weather-widget .weather-temp {
-                font-size: 10px;
+                font-size: 9px;
             }
             .weather-widget .weather-desc {
                 font-size: 8px;
-                max-width: 22px;
-            }
-            .weather-widget .weather-refresh {
-                font-size: 8px;
+                max-width: 20px;
             }
             .status-theme-toggle {
-                width: 24px;
-                height: 24px;
-                font-size: 13px;
+                width: 28px;
+                height: 28px;
+                font-size: 15px;
             }
             .ios-status-left {
                 font-size: 12px;
@@ -676,6 +704,9 @@
             }
             .weather-widget .weather-divider {
                 display: none;
+            }
+            .weather-widget {
+                max-width: 60px;
             }
         }
 
@@ -1425,7 +1456,7 @@
             cursor: grabbing;
         }
         .floating-word.following {
-            transition: none !important; /* 拖拽时无过渡延迟 */
+            transition: none !important;
             z-index: 1101;
             filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.18));
             cursor: grabbing;
@@ -1530,7 +1561,7 @@
                 <span class="ios-status-left" id="statusTime">
                     09:41
                     <button class="status-theme-toggle" id="statusThemeToggle" aria-label="切换深色/浅色模式">
-                        <i class="fa-regular fa-circle" id="statusThemeIcon"></i>
+                        <i class="fa-regular fa-sun" id="statusThemeIcon"></i>
                     </button>
                 </span>
                 <div class="dynamic-island" id="dynamicIsland">
@@ -1573,13 +1604,12 @@
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <!-- ===== 天气组件 ===== -->
+                <!-- ===== 天气组件（无刷新按钮） ===== -->
                 <div class="weather-widget" id="weatherWidget" title="点击刷新天气">
                     <span class="weather-icon" id="weatherIcon">☀️</span>
                     <span class="weather-temp" id="weatherTemp">28°</span>
                     <span class="weather-divider"></span>
                     <span class="weather-desc" id="weatherDesc">晴</span>
-                    <span class="weather-refresh" id="weatherRefresh"><i class="fa-solid fa-rotate"></i></span>
                 </div>
 
                 <div class="profile-row">
@@ -1653,7 +1683,7 @@
             'use strict';
 
             // ================================================================
-            //  🌌 星空 + 流星雨系统（不变）
+            //  🌌 星空 + 流星雨系统
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
             const ctx = canvas.getContext('2d');
@@ -1879,7 +1909,6 @@
             const wordDou = document.getElementById('wordDou');
             const allWords = [wordXu, wordHong, wordDou];
             const mainCard = document.getElementById('mainCard');
-            // 速度（百分比/帧）
             const speeds = [{ x: 0.3, y: 0.2 }, { x: -0.25, y: 0.35 }, { x: 0.35, y: -0.25 }];
             let pos = [{ x: 8, y: 18 }, { x: 25, y: 55 }, { x: 70, y: 35 }];
             let isFollowing = false;
@@ -1894,7 +1923,6 @@
             window.addEventListener('resize', updateCardRect);
             window.addEventListener('scroll', updateCardRect);
 
-            // 设置文字位置（像素坐标），并进行边界限制（确保在卡片内）
             function setWordPosition(word, left, top) {
                 if (!cardRect) updateCardRect();
                 const margin = 10;
@@ -1911,7 +1939,6 @@
                 word.style.top = top + 'px';
             }
 
-            // 通过百分比更新位置
             function updateWordPosition(word, percentX, percentY) {
                 if (!cardRect) updateCardRect();
                 const margin = 10;
@@ -1922,7 +1949,6 @@
                 setWordPosition(word, left, top);
             }
 
-            // 随机渐变色
             function randomGradient() {
                 const colors = [
                     ['#FF6B9E', '#FFD93D', '#6BCB77', '#4D96FF', '#9B59B6'],
@@ -1953,7 +1979,6 @@
             function initPositions() { allWords.forEach((word, idx) => updateWordPosition(word, pos[idx].x, pos[idx].y)); }
             initPositions();
 
-            // 开始自动漂浮（带边界反弹）
             function startFloating() {
                 if (isFollowing) return;
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
@@ -1966,11 +1991,9 @@
                     updateCardRect();
                     allWords.forEach((word, idx) => {
                         if (word.classList.contains('following')) return;
-                        // 更新位置
                         pos[idx].x += speeds[idx].x * speedFactor;
                         pos[idx].y += speeds[idx].y * speedFactor;
 
-                        // 边界反弹（百分比边界 0~100）
                         if (pos[idx].x < 0) {
                             pos[idx].x = 0;
                             speeds[idx].x = Math.abs(speeds[idx].x);
@@ -1986,7 +2009,6 @@
                             speeds[idx].y = -Math.abs(speeds[idx].y);
                         }
 
-                        // 偶尔微调方向
                         if (Math.random() < 0.002) {
                             const angle = (Math.random() - 0.5) * 0.3;
                             const currentSpeed = Math.sqrt(speeds[idx].x * speeds[idx].x + speeds[idx].y * speeds[idx]
@@ -2003,12 +2025,10 @@
                 animate();
             }
 
-            // 解除跟随，恢复漂浮（立即分散）
             function unfollow() {
                 if (!isFollowing) return;
                 isFollowing = false;
                 followTarget = null;
-                // 移除跟随样式，随机散开
                 allWords.forEach((w, idx) => {
                     w.classList.remove('following');
                     w.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
@@ -2023,10 +2043,9 @@
                 }, 80);
             }
 
-            // 进入跟随模式（聚拢，并准备拖拽）
             function doFollow(word) {
                 if (isFollowing) {
-                    unfollow(); // 先解除旧的
+                    unfollow();
                 }
                 if (floatingAnimId) {
                     cancelAnimationFrame(floatingAnimId);
@@ -2045,20 +2064,17 @@
 
                 allWords.forEach((w, idx) => {
                     w.classList.add('following');
-                    // 拖拽时无过渡，直接定位
                     w.style.transition = 'none';
                     const offset = (idx - 1) * spacing;
                     let left = cx - wordWidth / 2 + offset;
                     let top = cy - rect.height / 2;
                     setWordPosition(w, left, top);
-                    // 同步百分比位置
                     const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
                 });
             }
 
-            // 辅助：从像素位置反算百分比
             function getPercentPosition(px, py) {
                 if (!cardRect) updateCardRect();
                 const margin = 10;
@@ -2069,7 +2085,6 @@
                 return { x: Math.max(0, Math.min(100, percentX)), y: Math.max(0, Math.min(100, percentY)) };
             }
 
-            // ----- 指针事件 -----
             function onPointerDown(e) {
                 e.preventDefault();
                 const word = e.currentTarget;
@@ -2101,13 +2116,11 @@
 
             function onPointerUp(e) {
                 if (isFollowing) {
-                    // 松开立即分散
                     unfollow();
                 }
                 isDragging = false;
             }
 
-            // 绑定事件
             allWords.forEach(word => {
                 word.addEventListener('pointerdown', onPointerDown);
             });
@@ -2115,7 +2128,6 @@
             document.addEventListener('pointerup', onPointerUp);
             document.addEventListener('pointercancel', onPointerUp);
 
-            // 窗口变化时更新
             window.addEventListener('resize', () => {
                 updateCardRect();
                 if (!isFollowing) {
@@ -2132,7 +2144,7 @@
             setTimeout(startFloating, 100);
 
             // ================================================================
-            //  核心功能：视频、头像、堆叠图片、主题切换、天气组件（保持不变）
+            //  核心功能：视频、头像、堆叠图片、主题切换、天气组件
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
@@ -2315,7 +2327,6 @@
             const weatherIcon = $("#weatherIcon");
             const weatherTemp = $("#weatherTemp");
             const weatherDesc = $("#weatherDesc");
-            const weatherRefresh = $("#weatherRefresh");
 
             const videoPopup = $("#videoPopup");
             const popupVideo = $("#popupVideo");
@@ -2408,7 +2419,7 @@
                 html.classList.add('transitioning');
                 if (isDark) {
                     html.classList.remove('dark-mode');
-                    statusThemeIcon.className = 'fa-regular fa-circle';
+                    statusThemeIcon.className = 'fa-regular fa-sun';
                     document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7');
                     showToastMsg('☀️ 已切换到浅色模式');
                 } else {
@@ -2423,7 +2434,7 @@
 
             (function initThemeIcon() {
                 const isDark = document.documentElement.classList.contains('dark-mode');
-                statusThemeIcon.className = isDark ? 'fa-solid fa-circle' : 'fa-regular fa-circle';
+                statusThemeIcon.className = isDark ? 'fa-solid fa-circle' : 'fa-regular fa-sun';
             })();
 
             // ===== 工具函数 =====
@@ -3080,7 +3091,6 @@
             async function fetchWeather() {
                 if (weatherFetching) return;
                 weatherFetching = true;
-                weatherRefresh.classList.add('spinning');
 
                 try {
                     const resp = await fetch('https://wttr.in/Nantong?format=j1', {
@@ -3104,7 +3114,6 @@
                             setWeather({ icon, temp, desc: desc.slice(0, 4) });
                             showToastMsg('🌤️ 天气已更新');
                             weatherFetching = false;
-                            weatherRefresh.classList.remove('spinning');
                             return;
                         }
                     }
@@ -3114,7 +3123,6 @@
                 setWeather(w);
                 showToastMsg('🌤️ 天气已刷新');
                 weatherFetching = false;
-                weatherRefresh.classList.remove('spinning');
             }
 
             weatherWidget.addEventListener('click', (e) => {
