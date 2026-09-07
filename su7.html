@@ -1869,7 +1869,7 @@
             });
 
             // ================================================================
-            //  轮播进度 localStorage 存储
+            //  轮播进度 localStorage 存储（仅用于头像和堆叠图片）
             // ================================================================
             const STORAGE_PREFIX = 'su7_carousel_';
 
@@ -1878,9 +1878,6 @@
                     localStorage.setItem(STORAGE_PREFIX + 'video_index', String(currentVideoIndex));
                     localStorage.setItem(STORAGE_PREFIX + 'avatar_index', String(avatarIndex));
                     localStorage.setItem(STORAGE_PREFIX + 'slide_index', String(slideIndex));
-                    if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
-                        localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime));
-                    }
                 } catch (e) {}
             }
 
@@ -1892,11 +1889,6 @@
                     if (ai !== null) avatarIndex = parseInt(ai, 10) || 0;
                     const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
                     if (si !== null) slideIndex = parseInt(si, 10) || 0;
-                    const vt = localStorage.getItem(STORAGE_PREFIX + 'video_time');
-                    if (vt !== null) {
-                        const t = parseFloat(vt);
-                        if (!isNaN(t) && t > 0) return t;
-                    }
                 } catch (e) {}
                 return 0;
             }
@@ -2480,18 +2472,12 @@
 
             function switchVideo(index) {
                 if (videoList.length === 0) return;
-                if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
-                    try { localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime)); } catch (
-                    e) {}
-                }
                 currentVideoIndex = (index + videoList.length) % videoList.length;
                 const src = videoList[currentVideoIndex];
                 mainVideo.src = src;
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
-                const savedTime = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
-                    0;
-                if (savedTime > 0) mainVideo.currentTime = savedTime;
+                totTime.textContent = formatTime(mainVideo.duration);
                 mainVideo.play().catch(() => showToastMsg("请手动播放"));
                 popupVideo.src = src;
                 updateCenterPlayBtn();
@@ -2538,27 +2524,27 @@
             }
 
             // ===== 初始化视频 =====
-            const savedVideoTime = loadCarouselState();
+            // 不再加载存储的视频进度，每次从头开始
+            currentVideoIndex = 0;
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
             if (avatarIndex >= avatarImages.length) avatarIndex = 0;
             if (slideIndex >= slideImages.length) slideIndex = 0;
+
             if (videoList.length > 0) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
-                if (savedVideoTime > 0 && savedVideoTime < (mainVideo.duration || Infinity)) {
-                    mainVideo.currentTime = savedVideoTime;
-                }
+                // 始终从头播放
+                mainVideo.currentTime = 0;
             }
             if (avatarImages.length > 0) {
                 avatarImg.src = avatarImages[avatarIndex % avatarImages.length];
             }
 
             mainVideo.addEventListener('loadedmetadata', function() {
-                const saved = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
-                    0;
-                if (saved > 0 && saved < mainVideo.duration) mainVideo.currentTime = saved;
                 totTime.textContent = formatTime(mainVideo.duration);
                 updateCenterPlayBtn();
+                // 强制从头开始
+                mainVideo.currentTime = 0;
             });
 
             // ===== 樱花 =====
@@ -2636,20 +2622,15 @@
             expandBtn.onclick = (e) => { e.stopPropagation();
                 openPopup(); };
 
+            // 不再保存视频进度
             mainVideo.addEventListener('timeupdate', function() {
-                if (mainVideo.duration > 0 && !isNaN(mainVideo.currentTime)) {
-                    try {
-                        localStorage.setItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex, String(mainVideo
-                            .currentTime));
-                        localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime));
-                    } catch (e) {}
-                }
                 if (mainVideo.duration > 0) {
                     const p = (mainVideo.currentTime / mainVideo.duration) * 100;
                     progressFill.style.width = p + "%";
                     curTime.textContent = formatTime(mainVideo.currentTime);
                 }
             });
+
             progressTrack.addEventListener("click", (e) => {
                 const rect = progressTrack.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -3065,9 +3046,8 @@
             // ================================================================
             //  🌤️ 天气组件：根据车牌归属地获取天气
             // ================================================================
-            // 车牌省份映射 => 城市（苏 -> 江苏南京/南通，这里使用南通）
             const PLATE_MAP = {
-                '苏': 'Nantong',
+                '苏': '南通',
                 '京': 'Beijing',
                 '沪': 'Shanghai',
                 '粤': 'Guangzhou',
@@ -3102,13 +3082,11 @@
                 '澳': 'Macau'
             };
 
-            // 从车牌提取省份代码
             function getPlateProvince(plate) {
                 const match = plate.match(/^([\u4e00-\u9fa5])/);
                 return match ? match[1] : null;
             }
 
-            // 获取天气
             let weatherFetching = false;
 
             function setWeather(weather) {
@@ -3117,18 +3095,6 @@
                 weatherTemp.textContent = weather.temp + '°';
                 weatherDesc.textContent = weather.desc;
             }
-
-            const weatherIconMap = {
-                '晴': '☀️',
-                '多云': '⛅',
-                '阴': '☁️',
-                '小雨': '🌦️',
-                '中雨': '🌧️',
-                '大雨': '🌧️',
-                '雪': '❄️',
-                '雾': '🌫️',
-                '霾': '🌫️'
-            };
 
             function getWeatherIcon(desc) {
                 if (!desc) return '☀️';
@@ -3148,7 +3114,6 @@
                 weatherDesc.textContent = '更新中...';
 
                 try {
-                    // 获取车牌省份
                     const plateText = document.getElementById('plate')?.textContent || '苏FA36165';
                     const province = getPlateProvince(plateText);
                     const city = PLATE_MAP[province] || 'Nantong';
@@ -3164,7 +3129,6 @@
                         if (current) {
                             const temp = parseInt(current.temp_C, 10) || 24;
                             const desc = current.weatherDesc?.[0]?.value || '晴';
-                            // 取简短描述
                             const shortDesc = desc.split(',')[0].trim().slice(0, 4);
                             const icon = getWeatherIcon(shortDesc);
                             setWeather({ icon, temp, desc: shortDesc });
@@ -3173,18 +3137,8 @@
                             return;
                         }
                     }
-                } catch (e) {
-                    // 静默失败，使用模拟数据
-                }
+                } catch (e) {}
 
-                // 降级：使用模拟数据
-                const w = getRandomWeather();
-                setWeather(w);
-                showToastMsg('🌤️ 天气已刷新');
-                weatherFetching = false;
-            }
-
-            function getRandomWeather() {
                 const states = [
                     { icon: '☀️', temp: 28, desc: '晴' },
                     { icon: '⛅', temp: 24, desc: '多云' },
@@ -3192,18 +3146,18 @@
                     { icon: '🌦️', temp: 20, desc: '小雨' },
                     { icon: '🌧️', temp: 18, desc: '中雨' }
                 ];
-                return states[Math.floor(Math.random() * states.length)];
+                const w = states[Math.floor(Math.random() * states.length)];
+                setWeather(w);
+                showToastMsg('🌤️ 天气已刷新');
+                weatherFetching = false;
             }
 
-            // 点击天气组件刷新
             weatherWidget.addEventListener('click', (e) => {
                 e.stopPropagation();
                 fetchWeather();
             });
 
-            // 初始加载显示占位，然后获取真实天气
             setWeather({ icon: '⏳', temp: '--', desc: '加载中...' });
-            // 延迟一下确保页面完全加载
             setTimeout(fetchWeather, 500);
 
             // ===== 启动 =====
@@ -3212,25 +3166,15 @@
                 centerPlayBtn.classList.remove('hidden');
                 updateCenterPlayBtn();
                 if (!mainVideo.paused) startAutoHideTimer();
-                const saved = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex)) ||
-                    0;
-                if (saved > 0 && mainVideo.duration && saved < mainVideo.duration) {
-                    mainVideo.currentTime = saved;
-                }
+                // 确保从头开始
+                mainVideo.currentTime = 0;
             }, 500);
 
             document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureSakura(); });
 
-            // ===== 页面卸载时保存 =====
+            // ===== 页面卸载时保存（仅头像和堆叠图片） =====
             window.addEventListener('beforeunload', () => {
                 saveCarouselState();
-                if (mainVideo && mainVideo.duration && !isNaN(mainVideo.currentTime)) {
-                    try {
-                        localStorage.setItem(STORAGE_PREFIX + 'video_time_' + currentVideoIndex, String(mainVideo
-                            .currentTime));
-                        localStorage.setItem(STORAGE_PREFIX + 'video_time', String(mainVideo.currentTime));
-                    } catch (e) {}
-                }
                 if (glowInterval) clearInterval(glowInterval);
                 if (sakuraInterval) clearInterval(sakuraInterval);
                 if (islandInterval) clearInterval(islandInterval);
