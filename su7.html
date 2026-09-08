@@ -1267,8 +1267,8 @@
             flex: 0 0 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px 8px;          /* 调整间距，左右对齐 */
-            padding: 0;              /* 去掉内边距，与卡片对齐 */
+            gap: 12px 8px;
+            padding: 0;
             min-height: 100px;
         }
         .apps-page[data-page="1"] {
@@ -3118,6 +3118,7 @@
                     mainVideo.src) { popupVideo.pause(); } });
             mainVideo.addEventListener("ended", function() { switchVideo(currentVideoIndex + 1); });
 
+            // ----- 主视频滑动切换 -----
             let startX = 0,
                 startY = 0,
                 isSwiping = false;
@@ -3136,6 +3137,58 @@
             }, { passive: false });
             videoBox.addEventListener('touchend', () => { isSwiping = false; });
             videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
+
+            // ----- 弹窗视频滑动切换 -----
+            let popupStartX = 0,
+                popupStartY = 0,
+                popupIsSwiping = false;
+            const popupInner = document.getElementById('popupInner');
+
+            popupInner.addEventListener('touchstart', function(e) {
+                // 只响应视频区域滑动，避免与进度条等冲突
+                if (e.target.closest('.popup-controls') || e.target.closest('.popup-close')) return;
+                const touch = e.touches[0];
+                popupStartX = touch.clientX;
+                popupStartY = touch.clientY;
+                popupIsSwiping = true;
+            }, { passive: true });
+
+            popupInner.addEventListener('touchmove', function(e) {
+                if (!popupIsSwiping) return;
+                if (e.target.closest('.popup-controls') || e.target.closest('.popup-close')) return;
+                const dx = e.touches[0].clientX - popupStartX;
+                const dy = e.touches[0].clientY - popupStartY;
+                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                    e.preventDefault();
+                    if (dx < 0) {
+                        // 左滑 -> 下一个
+                        nextVideo();
+                        // 同步弹窗视频
+                        popupVideo.src = videoList[currentVideoIndex];
+                        popupVideo.currentTime = 0;
+                        if (!mainVideo.paused) {
+                            popupVideo.play().catch(() => {});
+                        }
+                        popupIsSwiping = false;
+                    } else {
+                        // 右滑 -> 上一个
+                        prevVideo();
+                        popupVideo.src = videoList[currentVideoIndex];
+                        popupVideo.currentTime = 0;
+                        if (!mainVideo.paused) {
+                            popupVideo.play().catch(() => {});
+                        }
+                        popupIsSwiping = false;
+                    }
+                }
+            }, { passive: false });
+
+            popupInner.addEventListener('touchend', function(e) {
+                popupIsSwiping = false;
+            });
+            popupInner.addEventListener('touchcancel', function(e) {
+                popupIsSwiping = false;
+            });
 
             let volDrag = false,
                 volStartY = 0,
