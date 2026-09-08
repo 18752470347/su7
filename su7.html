@@ -335,6 +335,289 @@
             text-shadow: 0 0 20px rgba(255, 184, 0, 0.2);
         }
 
+        /* ===== 流星雨开关按钮 ===== */
+        .status-meteor-toggle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: none;
+            box-shadow: 
+                0 0 0 1.5px rgba(255, 255, 255, 0.08),
+                0 4px 16px rgba(0, 0, 0, 0.04),
+                inset 0 0 20px rgba(255, 255, 255, 0.02);
+            color: var(--status-color);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-shrink: 0;
+            position: relative;
+            overflow: visible;
+            margin-right: 4px;
+        }
+        .status-meteor-toggle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 215, 0, 0.0),
+                rgba(255, 215, 0, 0.12),
+                rgba(255, 215, 0, 0.0),
+                rgba(100, 200, 255, 0.12),
+                rgba(100, 200, 255, 0.0)
+            );
+            opacity: 0;
+            z-index: -1;
+            transition: all 0.6s ease;
+            filter: blur(4px);
+            transform: scale(0.8);
+        }
+        .status-meteor-toggle:hover::before {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+        .status-meteor-toggle::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.2;
+            transition: opacity 0.4s ease;
+        }
+        .status-meteor-toggle:hover::after {
+            opacity: 0.5;
+        }
+        .status-meteor-toggle i {
+            position: relative;
+            z-index: 2;
+            font-size: 15px;
+            line-height: 1;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.0);
+        }
+        .status-meteor-toggle:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+        .status-meteor-toggle:active {
+            transform: scale(0.85);
+        }
+        .status-meteor-toggle:active i {
+            transform: rotate(360deg) scale(0.9);
+        }
+        .status-meteor-toggle.active {
+            background: rgba(255, 215, 0, 0.08);
+            box-shadow: 
+                0 0 0 1.5px rgba(255, 215, 0, 0.2),
+                0 4px 20px rgba(255, 215, 0, 0.08),
+                inset 0 0 30px rgba(255, 215, 0, 0.03);
+        }
+        .status-meteor-toggle.active::before {
+            opacity: 0.8;
+            transform: scale(1.1);
+        }
+        .status-meteor-toggle.active i {
+            color: #FFD93D;
+            text-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
+        }
+        .status-meteor-toggle.active:hover i {
+            text-shadow: 0 0 30px rgba(255, 217, 61, 0.5);
+        }
+        .status-meteor-toggle.inactive {
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .status-meteor-toggle.inactive i {
+            color: #8E8E93;
+            opacity: 0.5;
+        }
+        .status-meteor-toggle.inactive:hover i {
+            opacity: 0.8;
+        }
+        html.dark-mode .status-meteor-toggle {
+            background: rgba(20, 20, 24, 0.4);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        html.dark-mode .status-meteor-toggle.active {
+            background: rgba(255, 215, 0, 0.06);
+            box-shadow: 0 0 0 1.5px rgba(255, 215, 0, 0.15), 0 4px 24px rgba(255, 215, 0, 0.06);
+        }
+        html.dark-mode .status-meteor-toggle.active i {
+            color: #FFD93D;
+            text-shadow: 0 0 30px rgba(255, 217, 61, 0.25);
+        }
+        html.dark-mode .status-meteor-toggle.inactive i {
+            color: #6E6E73;
+            opacity: 0.4;
+        }
+
+        /* ===== 许红豆文字开关按钮 ===== */
+        .status-word-toggle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: none;
+            box-shadow: 
+                0 0 0 1.5px rgba(255, 255, 255, 0.08),
+                0 4px 16px rgba(0, 0, 0, 0.04),
+                inset 0 0 20px rgba(255, 255, 255, 0.02);
+            color: var(--status-color);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-shrink: 0;
+            position: relative;
+            overflow: visible;
+            margin-right: 4px;
+        }
+        .status-word-toggle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 100, 150, 0.0),
+                rgba(255, 100, 150, 0.12),
+                rgba(255, 100, 150, 0.0),
+                rgba(100, 150, 255, 0.12),
+                rgba(100, 150, 255, 0.0)
+            );
+            opacity: 0;
+            z-index: -1;
+            transition: all 0.6s ease;
+            filter: blur(4px);
+            transform: scale(0.8);
+        }
+        .status-word-toggle:hover::before {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+        .status-word-toggle::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.2;
+            transition: opacity 0.4s ease;
+        }
+        .status-word-toggle:hover::after {
+            opacity: 0.5;
+        }
+        .status-word-toggle i {
+            position: relative;
+            z-index: 2;
+            font-size: 15px;
+            line-height: 1;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.0);
+        }
+        .status-word-toggle:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+        .status-word-toggle:active {
+            transform: scale(0.85);
+        }
+        .status-word-toggle:active i {
+            transform: rotate(360deg) scale(0.9);
+        }
+        .status-word-toggle.active {
+            background: rgba(255, 100, 150, 0.08);
+            box-shadow: 
+                0 0 0 1.5px rgba(255, 100, 150, 0.2),
+                0 4px 20px rgba(255, 100, 150, 0.08),
+                inset 0 0 30px rgba(255, 100, 150, 0.03);
+        }
+        .status-word-toggle.active::before {
+            opacity: 0.8;
+            transform: scale(1.1);
+        }
+        .status-word-toggle.active i {
+            color: #FF6B9E;
+            text-shadow: 0 0 20px rgba(255, 107, 158, 0.3);
+        }
+        .status-word-toggle.active:hover i {
+            text-shadow: 0 0 30px rgba(255, 107, 158, 0.5);
+        }
+        .status-word-toggle.inactive {
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .status-word-toggle.inactive i {
+            color: #8E8E93;
+            opacity: 0.5;
+        }
+        .status-word-toggle.inactive:hover i {
+            opacity: 0.8;
+        }
+        html.dark-mode .status-word-toggle {
+            background: rgba(20, 20, 24, 0.4);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        html.dark-mode .status-word-toggle.active {
+            background: rgba(255, 100, 150, 0.06);
+            box-shadow: 0 0 0 1.5px rgba(255, 100, 150, 0.15), 0 4px 24px rgba(255, 100, 150, 0.06);
+        }
+        html.dark-mode .status-word-toggle.active i {
+            color: #FF6B9E;
+            text-shadow: 0 0 30px rgba(255, 107, 158, 0.25);
+        }
+        html.dark-mode .status-word-toggle.inactive i {
+            color: #6E6E73;
+            opacity: 0.4;
+        }
+        @media (max-width: 380px) {
+            .status-meteor-toggle,
+            .status-word-toggle {
+                width: 26px;
+                height: 26px;
+                font-size: 12px;
+                margin-right: 2px;
+            }
+            .status-meteor-toggle i,
+            .status-word-toggle i {
+                font-size: 13px;
+            }
+            .status-theme-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 15px;
+            }
+            .ios-status-left {
+                font-size: 12px;
+                gap: 5px;
+            }
+        }
+        @media (max-width: 360px) {
+            .status-meteor-toggle,
+            .status-word-toggle {
+                width: 24px;
+                height: 24px;
+                font-size: 11px;
+                margin-right: 1px;
+            }
+            .status-meteor-toggle i,
+            .status-word-toggle i {
+                font-size: 11px;
+            }
+        }
+
         .dynamic-island {
             display: inline-flex;
             align-items: center;
@@ -571,7 +854,7 @@
             transform: translateZ(0);
         }
 
-        /* ===== 天气组件 - 超紧凑版，无刷新按钮 ===== */
+        /* ===== 天气组件 - 超紧凑版 ===== */
         .weather-widget {
             position: absolute;
             top: 22px;
@@ -688,26 +971,6 @@
             .weather-widget .weather-desc {
                 font-size: 8px;
                 max-width: 20px;
-            }
-            .status-theme-toggle {
-                width: 28px;
-                height: 28px;
-                font-size: 15px;
-            }
-            .ios-status-left {
-                font-size: 12px;
-                gap: 5px;
-            }
-        }
-        @media (max-width: 360px) {
-            .weather-widget .weather-desc {
-                display: none;
-            }
-            .weather-widget .weather-divider {
-                display: none;
-            }
-            .weather-widget {
-                max-width: 60px;
             }
         }
 
@@ -1004,8 +1267,8 @@
             flex: 0 0 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 14px 6px;
-            padding: 0 2px;
+            gap: 12px 8px;          /* 调整间距，左右对齐 */
+            padding: 0;              /* 去掉内边距，与卡片对齐 */
             min-height: 100px;
         }
         .apps-page[data-page="1"] {
@@ -1386,7 +1649,8 @@
                 font-size: 8px;
             }
             .apps-page {
-                gap: 10px 4px;
+                gap: 10px 6px;
+                padding: 0;
             }
             .dynamic-island {
                 height: 28px;
@@ -1519,6 +1783,13 @@
                 opacity: 0.8;
             }
         }
+
+        /* ----- 隐藏状态：文字不可见且不接收事件 ----- */
+        .floating-word.hidden-words {
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: visibility 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -1569,6 +1840,14 @@
                     <span class="island-text-scroll" id="islandText">❤️ 刘亦菲</span>
                 </div>
                 <div class="ios-status-right">
+                    <!-- ===== 流星雨开关 ===== -->
+                    <button class="status-meteor-toggle active" id="meteorToggle" aria-label="切换流星雨" title="点击开关流星雨">
+                        <i class="fa-solid fa-meteor" id="meteorToggleIcon"></i>
+                    </button>
+                    <!-- ===== 许红豆文字开关 ===== -->
+                    <button class="status-word-toggle active" id="wordToggle" aria-label="切换许红豆文字" title="点击显示/隐藏许红豆文字">
+                        <i class="fa-regular fa-comment" id="wordToggleIcon"></i>
+                    </button>
                     <svg class="signal-icon" viewBox="0 0 18 12">
                         <rect x="1" y="8" width="3" height="4" rx="0.5" />
                         <rect x="5" y="5" width="3" height="7" rx="0.5" />
@@ -1691,6 +1970,17 @@
             let w, h;
             let animFrameId = null;
 
+            // 流星雨开关状态（默认开启）
+            let meteorEnabled = true;
+            const METEOR_STORAGE_KEY = 'meteor_enabled';
+
+            try {
+                const saved = localStorage.getItem(METEOR_STORAGE_KEY);
+                if (saved !== null) {
+                    meteorEnabled = saved === 'true';
+                }
+            } catch (e) {}
+
             function resizeCanvas() {
                 w = canvas.width = window.innerWidth;
                 h = canvas.height = window.innerHeight;
@@ -1749,14 +2039,13 @@
             }
             for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
 
-            // ----- 流星系统（限定在主卡片内） -----
+            // ----- 流星系统 -----
             let meteors = [];
             let meteorSpawnCounter = 0;
-            const METEOR_SPAWN_INTERVAL_MIN = 5; // 更频繁生成
+            const METEOR_SPAWN_INTERVAL_MIN = 5;
             const METEOR_SPAWN_INTERVAL_MAX = 15;
-            const MAX_METEORS = 14; // 同时10-15颗
+            const MAX_METEORS = 14;
 
-            // 获取主卡片位置
             let cardRect = null;
 
             function updateCardRectForMeteors() {
@@ -1772,39 +2061,35 @@
             class CardMeteor {
                 constructor() {
                     if (!cardRect) {
-                        // 如果卡片位置未知，用默认值
                         this.x = Math.random() * w;
                         this.y = Math.random() * h;
                     } else {
-                        // 从卡片边缘进入
                         const side = Math.floor(Math.random() * 4);
                         const margin = 10;
                         const pad = 20;
                         switch (side) {
-                            case 0: // top
+                            case 0:
                                 this.x = cardRect.left + pad + Math.random() * (cardRect.width - pad * 2);
                                 this.y = cardRect.top - margin;
                                 break;
-                            case 1: // right
+                            case 1:
                                 this.x = cardRect.right + margin;
                                 this.y = cardRect.top + pad + Math.random() * (cardRect.height - pad * 2);
                                 break;
-                            case 2: // bottom
+                            case 2:
                                 this.x = cardRect.left + pad + Math.random() * (cardRect.width - pad * 2);
                                 this.y = cardRect.bottom + margin;
                                 break;
-                            case 3: // left
+                            case 3:
                                 this.x = cardRect.left - margin;
                                 this.y = cardRect.top + pad + Math.random() * (cardRect.height - pad * 2);
                                 break;
                         }
                     }
-                    // 速度 4-8（慢速）
                     const speed = 4 + Math.random() * 4;
                     const angle = Math.random() * Math.PI * 2;
                     this.vx = Math.cos(angle) * speed;
                     this.vy = Math.sin(angle) * speed;
-                    // 如果卡片存在，方向偏向卡片中心
                     if (cardRect) {
                         const cx = cardRect.left + cardRect.width / 2;
                         const cy = cardRect.top + cardRect.height / 2;
@@ -1823,7 +2108,7 @@
                             this.vy = Math.sin(newAngle) * speed;
                         }
                     }
-                    this.tailLength = 30 + Math.random() * 50; // 更短尾巴，适合卡片内
+                    this.tailLength = 30 + Math.random() * 50;
                     this.life = 1.0;
                     this.decay = 0.003 + Math.random() * 0.004;
                     this.hue = 200 + Math.random() * 30;
@@ -1836,7 +2121,6 @@
                     this.x += this.vx;
                     this.y += this.vy;
                     this.life -= this.decay;
-                    // 检查是否超出卡片边界（如果卡片存在）
                     if (cardRect) {
                         const margin = 50;
                         const outOfBounds = this.x < cardRect.left - margin ||
@@ -1848,7 +2132,6 @@
                             return false;
                         }
                     } else {
-                        // 没有卡片，全局边界
                         if (this.x < -100 || this.x > w + 100 || this.y < -100 || this.y > h + 100) {
                             this.life = 0;
                             return false;
@@ -1918,32 +2201,35 @@
                 time += 1;
                 ctx.clearRect(0, 0, w, h);
 
-                // 绘制星星
                 for (const star of stars) {
                     star.draw(time);
                 }
 
-                // 更新卡片位置（每次动画帧更新，适应滚动/缩放）
                 updateCardRectForMeteors();
 
-                // 生成流星 - 更频繁，数量更多
-                meteorSpawnCounter++;
-                const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
-                    Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN));
-                if (meteorSpawnCounter > interval && meteors.length < MAX_METEORS) {
-                    meteors.push(new CardMeteor());
-                    meteorSpawnCounter = 0;
-                }
-
-                // 更新和绘制流星
-                for (let i = meteors.length - 1; i >= 0; i--) {
-                    const m = meteors[i];
-                    const alive = m.update();
-                    if (!alive) {
-                        meteors.splice(i, 1);
-                    } else {
-                        m.draw();
+                if (meteorEnabled) {
+                    meteorSpawnCounter++;
+                    const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
+                        Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN));
+                    if (meteorSpawnCounter > interval && meteors.length < MAX_METEORS) {
+                        meteors.push(new CardMeteor());
+                        meteorSpawnCounter = 0;
                     }
+
+                    for (let i = meteors.length - 1; i >= 0; i--) {
+                        const m = meteors[i];
+                        const alive = m.update();
+                        if (!alive) {
+                            meteors.splice(i, 1);
+                        } else {
+                            m.draw();
+                        }
+                    }
+                } else {
+                    if (meteors.length > 0) {
+                        meteors = [];
+                    }
+                    meteorSpawnCounter = 0;
                 }
 
                 animFrameId = requestAnimationFrame(animate);
@@ -1959,6 +2245,101 @@
                 }
                 updateCardRectForMeteors();
             });
+
+            // ================================================================
+            //  🔘 流星雨开关控制
+            // ================================================================
+            const meteorToggle = document.getElementById('meteorToggle');
+            const meteorToggleIcon = document.getElementById('meteorToggleIcon');
+
+            function updateMeteorToggleUI() {
+                if (meteorEnabled) {
+                    meteorToggle.classList.remove('inactive');
+                    meteorToggle.classList.add('active');
+                    meteorToggleIcon.style.color = '#FFD93D';
+                    meteorToggleIcon.style.textShadow = '0 0 20px rgba(255,217,61,0.3)';
+                    meteorToggle.title = '点击关闭流星雨';
+                } else {
+                    meteorToggle.classList.remove('active');
+                    meteorToggle.classList.add('inactive');
+                    meteorToggleIcon.style.color = '#8E8E93';
+                    meteorToggleIcon.style.textShadow = 'none';
+                    meteorToggle.title = '点击开启流星雨';
+                }
+                try {
+                    localStorage.setItem(METEOR_STORAGE_KEY, String(meteorEnabled));
+                } catch (e) {}
+            }
+
+            function toggleMeteor() {
+                meteorEnabled = !meteorEnabled;
+                if (!meteorEnabled) {
+                    meteors = [];
+                    meteorSpawnCounter = 0;
+                }
+                updateMeteorToggleUI();
+                showToastMsg(meteorEnabled ? '🌠 流星雨已开启' : '🌠 流星雨已关闭');
+            }
+
+            meteorToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleMeteor();
+            });
+            updateMeteorToggleUI();
+
+            // ================================================================
+            //  🔘 许红豆文字开关控制
+            // ================================================================
+            const wordToggle = document.getElementById('wordToggle');
+            const wordToggleIcon = document.getElementById('wordToggleIcon');
+            const floatingWords = document.querySelectorAll('.floating-word');
+            const WORD_STORAGE_KEY = 'words_visible';
+
+            let wordsVisible = true;
+            try {
+                const saved = localStorage.getItem(WORD_STORAGE_KEY);
+                if (saved !== null) {
+                    wordsVisible = saved === 'true';
+                }
+            } catch (e) {}
+
+            function updateWordsVisibility() {
+                floatingWords.forEach(el => {
+                    if (wordsVisible) {
+                        el.classList.remove('hidden-words');
+                    } else {
+                        el.classList.add('hidden-words');
+                    }
+                });
+                if (wordsVisible) {
+                    wordToggle.classList.remove('inactive');
+                    wordToggle.classList.add('active');
+                    wordToggleIcon.style.color = '#FF6B9E';
+                    wordToggleIcon.style.textShadow = '0 0 20px rgba(255,107,158,0.3)';
+                    wordToggle.title = '点击隐藏许红豆文字';
+                } else {
+                    wordToggle.classList.remove('active');
+                    wordToggle.classList.add('inactive');
+                    wordToggleIcon.style.color = '#8E8E93';
+                    wordToggleIcon.style.textShadow = 'none';
+                    wordToggle.title = '点击显示许红豆文字';
+                }
+                try {
+                    localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible));
+                } catch (e) {}
+            }
+
+            function toggleWords() {
+                wordsVisible = !wordsVisible;
+                updateWordsVisibility();
+                showToastMsg(wordsVisible ? '📝 许红豆文字已显示' : '📝 许红豆文字已隐藏');
+            }
+
+            wordToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleWords();
+            });
+            updateWordsVisibility();
 
             // ================================================================
             //  轮播进度 localStorage 存储（仅用于头像和堆叠图片）
@@ -2616,7 +2997,6 @@
             }
 
             // ===== 初始化视频 =====
-            // 每次从头开始
             currentVideoIndex = 0;
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
             if (avatarIndex >= avatarImages.length) avatarIndex = 0;
@@ -3110,7 +3490,9 @@
                     e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
                     e.target.closest(".center-play-btn") || e.target.closest(".status-theme-toggle") ||
                     e.target.closest(".floating-word") || e.target.closest(".plate-photo") ||
-                    e.target.closest(".weather-widget")) return;
+                    e.target.closest(".weather-widget") ||
+                    e.target.closest(".status-meteor-toggle") ||
+                    e.target.closest(".status-word-toggle")) return;
                 const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
                 const el = document.createElement("div");
                 el.className = "click-text-item";
@@ -3260,9 +3642,13 @@
 
             document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureSakura(); });
 
-            // ===== 页面卸载时保存（仅头像和堆叠图片） =====
+            // ===== 页面卸载时保存 =====
             window.addEventListener('beforeunload', () => {
                 saveCarouselState();
+                try {
+                    localStorage.setItem(METEOR_STORAGE_KEY, String(meteorEnabled));
+                    localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible));
+                } catch (e) {}
                 if (glowInterval) clearInterval(glowInterval);
                 if (sakuraInterval) clearInterval(sakuraInterval);
                 if (islandInterval) clearInterval(islandInterval);
