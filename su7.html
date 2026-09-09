@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== 样式 ===== */
+        /* ===== 全局重置 & 变量 ===== */
         *,
         *::before,
         *::after {
@@ -130,9 +130,6 @@
             pointer-events: none;
             display: block;
         }
-        .liquid-bg {
-            display: none;
-        }
         .sakura-container {
             position: fixed;
             inset: 0;
@@ -194,6 +191,14 @@
             z-index: 2;
             animation: pageSpringIn .7s var(--spring) both;
             gap: 12px;
+            margin: 0 auto; /* 桌面端居中 */
+        }
+        /* 桌面端大屏幕适配：略微增大最大宽度 */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 520px;
+                padding: 20px 24px;
+            }
         }
         .status-bar-container {
             width: 100%;
@@ -335,7 +340,7 @@
             text-shadow: 0 0 20px rgba(255, 184, 0, 0.2);
         }
 
-        /* ===== 流星雨开关按钮 ===== */
+        /* ===== 流星雨开关 ===== */
         .status-meteor-toggle {
             width: 30px;
             height: 30px;
@@ -459,7 +464,7 @@
             opacity: 0.4;
         }
 
-        /* ===== 许红豆文字开关按钮 ===== */
+        /* ===== 许红豆文字开关 ===== */
         .status-word-toggle {
             width: 30px;
             height: 30px;
@@ -839,7 +844,6 @@
             animation: cardSpringIn .6s var(--ease) 0.18s both;
             position: relative;
         }
-        /* ===== 主卡片纯透明 ===== */
         .main-card {
             width: 100%;
             padding: 12px 16px 22px;
@@ -854,7 +858,7 @@
             transform: translateZ(0);
         }
 
-        /* ===== 天气组件 - 超紧凑版 ===== */
+        /* ===== 天气组件 ===== */
         .weather-widget {
             position: absolute;
             top: 22px;
@@ -1784,7 +1788,7 @@
             }
         }
 
-        /* ----- 隐藏状态：文字不可见且不接收事件 ----- */
+        /* ----- 隐藏状态 ----- */
         .floating-word.hidden-words {
             visibility: hidden !important;
             pointer-events: none !important;
@@ -1840,11 +1844,9 @@
                     <span class="island-text-scroll" id="islandText">❤️ 刘亦菲</span>
                 </div>
                 <div class="ios-status-right">
-                    <!-- ===== 流星雨开关 ===== -->
                     <button class="status-meteor-toggle active" id="meteorToggle" aria-label="切换流星雨" title="点击开关流星雨">
                         <i class="fa-solid fa-meteor" id="meteorToggleIcon"></i>
                     </button>
-                    <!-- ===== 许红豆文字开关 ===== -->
                     <button class="status-word-toggle active" id="wordToggle" aria-label="切换许红豆文字" title="点击显示/隐藏许红豆文字">
                         <i class="fa-regular fa-comment" id="wordToggleIcon"></i>
                     </button>
@@ -1884,7 +1886,6 @@
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <!-- ===== 天气组件 ===== -->
                 <div class="weather-widget" id="weatherWidget" title="点击刷新天气（车牌归属地）">
                     <span class="weather-icon" id="weatherIcon">☀️</span>
                     <span class="weather-temp" id="weatherTemp">--°</span>
@@ -1970,15 +1971,11 @@
             let w, h;
             let animFrameId = null;
 
-            // 流星雨开关状态（默认开启）
             let meteorEnabled = true;
             const METEOR_STORAGE_KEY = 'meteor_enabled';
-
             try {
                 const saved = localStorage.getItem(METEOR_STORAGE_KEY);
-                if (saved !== null) {
-                    meteorEnabled = saved === 'true';
-                }
+                if (saved !== null) meteorEnabled = saved === 'true';
             } catch (e) {}
 
             function resizeCanvas() {
@@ -1994,7 +1991,6 @@
 
             const stars = [];
             const STAR_COUNT = 380;
-
             class Star {
                 constructor() {
                     this.x = Math.random() * w;
@@ -2039,20 +2035,16 @@
             }
             for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
 
-            // ----- 流星系统 -----
             let meteors = [];
             let meteorSpawnCounter = 0;
-            const METEOR_SPAWN_INTERVAL_MIN = 5;
-            const METEOR_SPAWN_INTERVAL_MAX = 15;
-            const MAX_METEORS = 14;
-
+            const METEOR_SPAWN_INTERVAL_MIN = 5,
+                METEOR_SPAWN_INTERVAL_MAX = 15,
+                MAX_METEORS = 14;
             let cardRect = null;
 
             function updateCardRectForMeteors() {
                 const card = document.getElementById('mainCard');
-                if (card) {
-                    cardRect = card.getBoundingClientRect();
-                }
+                if (card) cardRect = card.getBoundingClientRect();
             }
             updateCardRectForMeteors();
             window.addEventListener('resize', updateCardRectForMeteors);
@@ -2065,8 +2057,8 @@
                         this.y = Math.random() * h;
                     } else {
                         const side = Math.floor(Math.random() * 4);
-                        const margin = 10;
-                        const pad = 20;
+                        const margin = 10,
+                            pad = 20;
                         switch (side) {
                             case 0:
                                 this.x = cardRect.left + pad + Math.random() * (cardRect.width - pad * 2);
@@ -2093,13 +2085,13 @@
                     if (cardRect) {
                         const cx = cardRect.left + cardRect.width / 2;
                         const cy = cardRect.top + cardRect.height / 2;
-                        const dx = cx - this.x;
-                        const dy = cy - this.y;
+                        const dx = cx - this.x,
+                            dy = cy - this.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
                         if (dist > 10) {
                             const bias = 0.3 + Math.random() * 0.3;
                             const targetAngle = Math.atan2(dy, dx);
-                            const currentAngle = Math.atan2(this.vy, this.vx);
+                            let currentAngle = Math.atan2(this.vy, this.vx);
                             let diff = targetAngle - currentAngle;
                             while (diff > Math.PI) diff -= 2 * Math.PI;
                             while (diff < -Math.PI) diff += 2 * Math.PI;
@@ -2116,18 +2108,14 @@
                     this.lightness = 85 + Math.random() * 15;
                     this.size = 1.2 + Math.random() * 1.8;
                 }
-
                 update() {
                     this.x += this.vx;
                     this.y += this.vy;
                     this.life -= this.decay;
                     if (cardRect) {
                         const margin = 50;
-                        const outOfBounds = this.x < cardRect.left - margin ||
-                            this.x > cardRect.right + margin ||
-                            this.y < cardRect.top - margin ||
-                            this.y > cardRect.bottom + margin;
-                        if (outOfBounds) {
+                        if (this.x < cardRect.left - margin || this.x > cardRect.right + margin ||
+                            this.y < cardRect.top - margin || this.y > cardRect.bottom + margin) {
                             this.life = 0;
                             return false;
                         }
@@ -2139,25 +2127,20 @@
                     }
                     return this.life > 0;
                 }
-
                 draw() {
                     const dark = isDarkMode();
                     const lifeFactor = Math.max(0, this.life);
                     const alpha = lifeFactor * (dark ? 0.9 : 1.1);
-
                     const tailX = this.x - this.vx * this.tailLength * 0.5;
                     const tailY = this.y - this.vy * this.tailLength * 0.5;
-
                     const grad = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
-                    const hue = this.hue + 10;
-                    const sat = this.saturation;
-                    const light = this.lightness;
-
+                    const hue = this.hue + 10,
+                        sat = this.saturation,
+                        light = this.lightness;
                     grad.addColorStop(0, `hsla(${hue}, ${sat}%, ${light + 5}%, ${alpha * 0.95})`);
                     grad.addColorStop(0.15, `hsla(${hue}, ${sat}%, ${light}%, ${alpha * 0.8})`);
                     grad.addColorStop(0.5, `hsla(${this.hue}, ${sat - 10}%, ${light - 10}%, ${alpha * 0.4})`);
                     grad.addColorStop(1, `hsla(${this.hue - 10}, ${sat - 20}%, ${light - 25}%, 0)`);
-
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(tailX, tailY);
@@ -2165,12 +2148,8 @@
                     ctx.lineWidth = this.size * lifeFactor * 1.2 + 0.3;
                     ctx.lineCap = 'round';
                     ctx.stroke();
-
                     const glowSize = this.size * (3 + lifeFactor * 2);
-                    const glowGrad = ctx.createRadialGradient(
-                        this.x, this.y, 0,
-                        this.x, this.y, glowSize
-                    );
+                    const glowGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowSize);
                     const glowAlpha = alpha * (dark ? 0.35 : 0.4);
                     glowGrad.addColorStop(0, `hsla(${hue + 10}, 100%, 98%, ${glowAlpha})`);
                     glowGrad.addColorStop(0.3, `hsla(${hue + 5}, 90%, 90%, ${glowAlpha * 0.5})`);
@@ -2179,12 +2158,10 @@
                     ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
                     ctx.fillStyle = glowGrad;
                     ctx.fill();
-
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size * lifeFactor * 0.7 + 0.3, 0, Math.PI * 2);
                     ctx.fillStyle = `hsla(${hue + 15}, 100%, 100%, ${alpha * 0.95})`;
                     ctx.fill();
-
                     if (lifeFactor > 0.3) {
                         ctx.beginPath();
                         ctx.arc(this.x - this.size * 0.15, this.y - this.size * 0.15, this.size * 0.2 * lifeFactor, 0, Math
@@ -2200,13 +2177,8 @@
             function animate() {
                 time += 1;
                 ctx.clearRect(0, 0, w, h);
-
-                for (const star of stars) {
-                    star.draw(time);
-                }
-
+                for (const star of stars) star.draw(time);
                 updateCardRectForMeteors();
-
                 if (meteorEnabled) {
                     meteorSpawnCounter++;
                     const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
@@ -2215,40 +2187,26 @@
                         meteors.push(new CardMeteor());
                         meteorSpawnCounter = 0;
                     }
-
                     for (let i = meteors.length - 1; i >= 0; i--) {
                         const m = meteors[i];
-                        const alive = m.update();
-                        if (!alive) {
-                            meteors.splice(i, 1);
-                        } else {
-                            m.draw();
-                        }
+                        if (!m.update()) { meteors.splice(i, 1); } else { m.draw(); }
                     }
                 } else {
-                    if (meteors.length > 0) {
-                        meteors = [];
-                    }
+                    if (meteors.length > 0) meteors = [];
                     meteorSpawnCounter = 0;
                 }
-
                 animFrameId = requestAnimationFrame(animate);
             }
-
             animate();
 
             window.addEventListener('resize', () => {
                 resizeCanvas();
-                for (const star of stars) {
-                    star.x = Math.random() * w;
-                    star.y = Math.random() * h;
-                }
+                for (const star of stars) { star.x = Math.random() * w;
+                    star.y = Math.random() * h; }
                 updateCardRectForMeteors();
             });
 
-            // ================================================================
-            //  🔘 流星雨开关控制
-            // ================================================================
+            // ===== 流星雨开关 =====
             const meteorToggle = document.getElementById('meteorToggle');
             const meteorToggleIcon = document.getElementById('meteorToggleIcon');
 
@@ -2266,50 +2224,35 @@
                     meteorToggleIcon.style.textShadow = 'none';
                     meteorToggle.title = '点击开启流星雨';
                 }
-                try {
-                    localStorage.setItem(METEOR_STORAGE_KEY, String(meteorEnabled));
-                } catch (e) {}
+                try { localStorage.setItem(METEOR_STORAGE_KEY, String(meteorEnabled)); } catch (e) {}
             }
 
             function toggleMeteor() {
                 meteorEnabled = !meteorEnabled;
-                if (!meteorEnabled) {
-                    meteors = [];
-                    meteorSpawnCounter = 0;
-                }
+                if (!meteorEnabled) { meteors = [];
+                    meteorSpawnCounter = 0; }
                 updateMeteorToggleUI();
                 showToastMsg(meteorEnabled ? '🌠 流星雨已开启' : '🌠 流星雨已关闭');
             }
-
-            meteorToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                toggleMeteor();
-            });
+            meteorToggle.addEventListener('click', function(e) { e.stopPropagation();
+                toggleMeteor(); });
             updateMeteorToggleUI();
 
-            // ================================================================
-            //  🔘 许红豆文字开关控制
-            // ================================================================
+            // ===== 许红豆文字开关 =====
             const wordToggle = document.getElementById('wordToggle');
             const wordToggleIcon = document.getElementById('wordToggleIcon');
             const floatingWords = document.querySelectorAll('.floating-word');
             const WORD_STORAGE_KEY = 'words_visible';
-
             let wordsVisible = true;
             try {
                 const saved = localStorage.getItem(WORD_STORAGE_KEY);
-                if (saved !== null) {
-                    wordsVisible = saved === 'true';
-                }
+                if (saved !== null) wordsVisible = saved === 'true';
             } catch (e) {}
 
             function updateWordsVisibility() {
                 floatingWords.forEach(el => {
-                    if (wordsVisible) {
-                        el.classList.remove('hidden-words');
-                    } else {
-                        el.classList.add('hidden-words');
-                    }
+                    if (wordsVisible) el.classList.remove('hidden-words');
+                    else el.classList.add('hidden-words');
                 });
                 if (wordsVisible) {
                     wordToggle.classList.remove('inactive');
@@ -2324,9 +2267,7 @@
                     wordToggleIcon.style.textShadow = 'none';
                     wordToggle.title = '点击显示许红豆文字';
                 }
-                try {
-                    localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible));
-                } catch (e) {}
+                try { localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible)); } catch (e) {}
             }
 
             function toggleWords() {
@@ -2334,15 +2275,12 @@
                 updateWordsVisibility();
                 showToastMsg(wordsVisible ? '📝 许红豆文字已显示' : '📝 许红豆文字已隐藏');
             }
-
-            wordToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                toggleWords();
-            });
+            wordToggle.addEventListener('click', function(e) { e.stopPropagation();
+                toggleWords(); });
             updateWordsVisibility();
 
             // ================================================================
-            //  轮播进度 localStorage 存储（仅用于头像和堆叠图片）
+            //  轮播进度 localStorage 存储（头像、堆叠图片）
             // ================================================================
             const STORAGE_PREFIX = 'su7_carousel_';
 
@@ -2368,7 +2306,7 @@
             let saveTimer = setInterval(saveCarouselState, 5000);
 
             // ================================================================
-            //  许红豆漂浮文字（点击聚拢并拖拽，松开瞬间分散，边界反弹）
+            //  许红豆漂浮文字（点击聚拢、拖拽、分散、边界反弹）
             // ================================================================
             const wordXu = document.getElementById('wordXu');
             const wordHong = document.getElementById('wordHong');
@@ -2377,12 +2315,12 @@
             const mainCard = document.getElementById('mainCard');
             const speeds = [{ x: 0.3, y: 0.2 }, { x: -0.25, y: 0.35 }, { x: 0.35, y: -0.25 }];
             let pos = [{ x: 8, y: 18 }, { x: 25, y: 55 }, { x: 70, y: 35 }];
-            let isFollowing = false;
-            let followTarget = null;
-            let isDragging = false;
-            let floatingAnimId = null;
-            let cardRectForWords = null;
-            let speedFactor = 0.45;
+            let isFollowing = false,
+                followTarget = null,
+                isDragging = false,
+                floatingAnimId = null,
+                cardRectForWords = null,
+                speedFactor = 0.45;
 
             function updateCardRectForWords() { cardRectForWords = mainCard.getBoundingClientRect(); }
             updateCardRectForWords();
@@ -2393,12 +2331,12 @@
                 if (!cardRectForWords) updateCardRectForWords();
                 const margin = 10;
                 const rect = word.getBoundingClientRect();
-                const w = rect.width || 30;
-                const h = rect.height || 30;
-                const minLeft = cardRectForWords.left + margin;
-                const maxLeft = cardRectForWords.right - margin - w;
-                const minTop = cardRectForWords.top + margin;
-                const maxTop = cardRectForWords.bottom - margin - h;
+                const w = rect.width || 30,
+                    h = rect.height || 30;
+                const minLeft = cardRectForWords.left + margin,
+                    maxLeft = cardRectForWords.right - margin - w;
+                const minTop = cardRectForWords.top + margin,
+                    maxTop = cardRectForWords.bottom - margin - h;
                 left = Math.max(minLeft, Math.min(maxLeft, left));
                 top = Math.max(minTop, Math.min(maxTop, top));
                 word.style.left = left + 'px';
@@ -2407,9 +2345,9 @@
 
             function updateWordPosition(word, percentX, percentY) {
                 if (!cardRectForWords) updateCardRectForWords();
-                const margin = 10;
-                const cardW = cardRectForWords.width;
-                const cardH = cardRectForWords.height;
+                const margin = 10,
+                    cardW = cardRectForWords.width,
+                    cardH = cardRectForWords.height;
                 const left = cardRectForWords.left + margin + (percentX / 100) * (cardW - margin * 2);
                 const top = cardRectForWords.top + margin + (percentY / 100) * (cardH - margin * 2);
                 setWordPosition(word, left, top);
@@ -2429,8 +2367,7 @@
 
             function randomizeColors() {
                 allWords.forEach(word => {
-                    const charEls = word.querySelectorAll('.char');
-                    charEls.forEach(el => {
+                    word.querySelectorAll('.char').forEach(el => {
                         const grad = randomGradient();
                         el.style.background = grad;
                         el.style.backgroundSize = '300% 300%';
@@ -2450,31 +2387,20 @@
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
 
                 function animateWords() {
-                    if (isFollowing) {
-                        floatingAnimId = requestAnimationFrame(animateWords);
-                        return;
-                    }
+                    if (isFollowing) { floatingAnimId = requestAnimationFrame(animateWords); return; }
                     updateCardRectForWords();
                     allWords.forEach((word, idx) => {
                         if (word.classList.contains('following')) return;
                         pos[idx].x += speeds[idx].x * speedFactor;
                         pos[idx].y += speeds[idx].y * speedFactor;
-
-                        if (pos[idx].x < 0) {
-                            pos[idx].x = 0;
-                            speeds[idx].x = Math.abs(speeds[idx].x);
-                        } else if (pos[idx].x > 100) {
-                            pos[idx].x = 100;
-                            speeds[idx].x = -Math.abs(speeds[idx].x);
-                        }
-                        if (pos[idx].y < 0) {
-                            pos[idx].y = 0;
-                            speeds[idx].y = Math.abs(speeds[idx].y);
-                        } else if (pos[idx].y > 100) {
-                            pos[idx].y = 100;
-                            speeds[idx].y = -Math.abs(speeds[idx].y);
-                        }
-
+                        if (pos[idx].x < 0) { pos[idx].x = 0;
+                            speeds[idx].x = Math.abs(speeds[idx].x); } else if (pos[idx].x > 100) { pos[idx].x =
+                                100;
+                            speeds[idx].x = -Math.abs(speeds[idx].x); }
+                        if (pos[idx].y < 0) { pos[idx].y = 0;
+                            speeds[idx].y = Math.abs(speeds[idx].y); } else if (pos[idx].y > 100) { pos[idx].y =
+                                100;
+                            speeds[idx].y = -Math.abs(speeds[idx].y); }
                         if (Math.random() < 0.002) {
                             const angle = (Math.random() - 0.5) * 0.3;
                             const currentSpeed = Math.sqrt(speeds[idx].x * speeds[idx].x + speeds[idx].y * speeds[idx]
@@ -2483,7 +2409,6 @@
                             speeds[idx].x = Math.cos(newAngle) * currentSpeed;
                             speeds[idx].y = Math.sin(newAngle) * currentSpeed;
                         }
-
                         updateWordPosition(word, pos[idx].x, pos[idx].y);
                     });
                     floatingAnimId = requestAnimationFrame(animateWords);
@@ -2503,37 +2428,28 @@
                     updateWordPosition(w, pos[idx].x, pos[idx].y);
                     w.style.transform = '';
                 });
-                setTimeout(() => {
-                    allWords.forEach(w => w.style.transition = '');
-                    startFloating();
-                }, 80);
+                setTimeout(() => { allWords.forEach(w => w.style.transition = '');
+                    startFloating(); }, 80);
             }
 
             function doFollow(word) {
-                if (isFollowing) {
-                    unfollow();
-                }
-                if (floatingAnimId) {
-                    cancelAnimationFrame(floatingAnimId);
-                    floatingAnimId = null;
-                }
-
+                if (isFollowing) unfollow();
+                if (floatingAnimId) { cancelAnimationFrame(floatingAnimId);
+                    floatingAnimId = null; }
                 isFollowing = true;
                 followTarget = word;
                 updateCardRectForWords();
-
                 const rect = word.getBoundingClientRect();
-                const cx = rect.left + rect.width / 2;
-                const cy = rect.top + rect.height / 2;
-                const wordWidth = rect.width;
-                const spacing = wordWidth * 1.2;
-
+                const cx = rect.left + rect.width / 2,
+                    cy = rect.top + rect.height / 2;
+                const wordWidth = rect.width,
+                    spacing = wordWidth * 1.2;
                 allWords.forEach((w, idx) => {
                     w.classList.add('following');
                     w.style.transition = 'none';
                     const offset = (idx - 1) * spacing;
-                    let left = cx - wordWidth / 2 + offset;
-                    let top = cy - rect.height / 2;
+                    let left = cx - wordWidth / 2 + offset,
+                        top = cy - rect.height / 2;
                     setWordPosition(w, left, top);
                     const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
@@ -2543,36 +2459,31 @@
 
             function getPercentPosition(px, py) {
                 if (!cardRectForWords) updateCardRectForWords();
-                const margin = 10;
-                const cardW = cardRectForWords.width;
-                const cardH = cardRectForWords.height;
+                const margin = 10,
+                    cardW = cardRectForWords.width,
+                    cardH = cardRectForWords.height;
                 const percentX = ((px - cardRectForWords.left - margin) / (cardW - margin * 2)) * 100;
                 const percentY = ((py - cardRectForWords.top - margin) / (cardH - margin * 2)) * 100;
                 return { x: Math.max(0, Math.min(100, percentX)), y: Math.max(0, Math.min(100, percentY)) };
             }
 
-            function onPointerDown(e) {
-                e.preventDefault();
-                const word = e.currentTarget;
-                doFollow(word);
-            }
+            function onPointerDown(e) { e.preventDefault();
+                doFollow(e.currentTarget); }
 
             function onPointerMove(e) {
                 if (!isFollowing || !followTarget) return;
                 isDragging = true;
                 e.preventDefault();
-                const cx = e.clientX;
-                const cy = e.clientY;
-
+                const cx = e.clientX,
+                    cy = e.clientY;
                 updateCardRectForWords();
-                const wordWidth = followTarget.getBoundingClientRect().width;
-                const spacing = wordWidth * 1.2;
-                const centerOffset = wordWidth / 2;
-
+                const wordWidth = followTarget.getBoundingClientRect().width,
+                    spacing = wordWidth * 1.2,
+                    centerOffset = wordWidth / 2;
                 allWords.forEach((w, idx) => {
                     const offset = (idx - 1) * spacing;
-                    let left = cx - centerOffset + offset;
-                    let top = cy - 25;
+                    let left = cx - centerOffset + offset,
+                        top = cy - 25;
                     setWordPosition(w, left, top);
                     const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
@@ -2581,9 +2492,7 @@
             }
 
             function onPointerUp(e) {
-                if (isFollowing) {
-                    unfollow();
-                }
+                if (isFollowing) unfollow();
                 isDragging = false;
             }
 
@@ -2596,15 +2505,11 @@
 
             window.addEventListener('resize', () => {
                 updateCardRectForWords();
-                if (!isFollowing) {
-                    allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
-                }
+                if (!isFollowing) allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
             });
             window.addEventListener('scroll', () => {
                 updateCardRectForWords();
-                if (!isFollowing) {
-                    allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
-                }
+                if (!isFollowing) allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
             });
 
             setTimeout(startFloating, 100);
@@ -3145,7 +3050,6 @@
             const popupInner = document.getElementById('popupInner');
 
             popupInner.addEventListener('touchstart', function(e) {
-                // 只响应视频区域滑动，避免与进度条等冲突
                 if (e.target.closest('.popup-controls') || e.target.closest('.popup-close')) return;
                 const touch = e.touches[0];
                 popupStartX = touch.clientX;
@@ -3161,34 +3065,23 @@
                 if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
                     e.preventDefault();
                     if (dx < 0) {
-                        // 左滑 -> 下一个
                         nextVideo();
-                        // 同步弹窗视频
                         popupVideo.src = videoList[currentVideoIndex];
                         popupVideo.currentTime = 0;
-                        if (!mainVideo.paused) {
-                            popupVideo.play().catch(() => {});
-                        }
+                        if (!mainVideo.paused) popupVideo.play().catch(() => {});
                         popupIsSwiping = false;
                     } else {
-                        // 右滑 -> 上一个
                         prevVideo();
                         popupVideo.src = videoList[currentVideoIndex];
                         popupVideo.currentTime = 0;
-                        if (!mainVideo.paused) {
-                            popupVideo.play().catch(() => {});
-                        }
+                        if (!mainVideo.paused) popupVideo.play().catch(() => {});
                         popupIsSwiping = false;
                     }
                 }
             }, { passive: false });
 
-            popupInner.addEventListener('touchend', function(e) {
-                popupIsSwiping = false;
-            });
-            popupInner.addEventListener('touchcancel', function(e) {
-                popupIsSwiping = false;
-            });
+            popupInner.addEventListener('touchend', function(e) { popupIsSwiping = false; });
+            popupInner.addEventListener('touchcancel', function(e) { popupIsSwiping = false; });
 
             let volDrag = false,
                 volStartY = 0,
