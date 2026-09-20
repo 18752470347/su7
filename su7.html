@@ -61,17 +61,16 @@
             -moz-osx-font-smoothing: grayscale;
             -webkit-tap-highlight-color: transparent;
         }
-        /* ---- 跨平台字体栈：Android(系统字体)/iOS(PingFang)/电脑端(微软雅黑) 一致渲染 ---- */
         html, body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
         }
         body {
-            /* iOS Safari 横竖屏自动放大文字修复 */
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
-            /* 移动端(安卓Chrome/iOS)下拉刷新、橡皮筋与页面拖拽冲突修复 */
             overscroll-behavior-y: none;
             -webkit-overflow-scrolling: touch;
+            min-height: 100vh;
+            min-height: 100dvh;
         }
         :root {
             --text-main: #1C1C1E;
@@ -179,18 +178,15 @@
             outline: none;
         }
 
-        /* ===== [跨平台适配] 触屏交互基础 ===== */
-        /* 禁止 iOS 长按弹出系统菜单（查看器图片会单独放开） */
+        /* ===== 触屏交互基础 ===== */
         img, video, button, .app-button, .plate, .avatar, .weather-widget {
             -webkit-touch-callout: none;
         }
-        /* 消除移动端双击缩放的 300ms 点击延迟 */
         button, .app-button, .plate, .avatar, .weather-widget, .status-btn,
         .status-theme-toggle, .status-meteor-toggle, .status-word-toggle,
         .center-play-btn, .btn-expand {
             touch-action: manipulation;
         }
-        /* 查看器内图片保留长按手势（自定义长按保存逻辑） */
         .viewer-img { -webkit-touch-callout: default; }
 
         /* ===== 星空画布 ===== */
@@ -203,6 +199,7 @@
             z-index: 0;
             pointer-events: none;
             display: block;
+            contain: strict;
         }
         .sakura-container {
             position: fixed;
@@ -211,6 +208,7 @@
             pointer-events: none;
             overflow: hidden;
             transform: translateZ(0);
+            contain: layout style paint;
         }
         .sakura {
             position: absolute;
@@ -301,7 +299,7 @@
             gap: 10px;
         }
 
-        /* ===== 状态栏按钮 - 全新精致风格 ===== */
+        /* ===== 状态栏按钮 ===== */
         .status-btn {
             width: 34px;
             height: 34px;
@@ -370,7 +368,7 @@
             transform: rotate(360deg) scale(0.9);
         }
 
-        /* 主题切换按钮 - 太阳/月亮 */
+        /* 主题切换按钮 */
         .status-theme-toggle {
             width: 34px;
             height: 34px;
@@ -851,6 +849,7 @@
             background: #0A0A0C;
             overflow: hidden;
             touch-action: pan-y;
+            overscroll-behavior: contain;
         }
         .video-box video {
             display: block;
@@ -861,7 +860,7 @@
             background: #0A0A0C;
         }
 
-        /* 中央播放按钮 - 精致玻璃态 */
+        /* 中央播放按钮 */
         .center-play-btn {
             position: absolute;
             top: 50%;
@@ -901,7 +900,7 @@
             transform: translate(-50%, -50%) scale(0.8);
         }
 
-        /* 视频控制栏 - 全新精致设计 */
+        /* 视频控制栏 */
         .video-controls {
             position: absolute;
             bottom: 0;
@@ -1028,7 +1027,6 @@
         .main-card:hover {
             box-shadow: var(--shadow-medium);
         }
-        /* 卡片顶部光效 */
         .main-card::before {
             content: '';
             position: absolute;
@@ -1178,7 +1176,7 @@
             align-items: center;
         }
 
-        /* 头像 - 精致光晕 */
+        /* 头像 */
         .avatar {
             position: relative;
             width: var(--avatar-size);
@@ -1300,7 +1298,7 @@
             transform: scale(1.02);
         }
 
-        /* 车牌照片 - 堆叠效果 */
+        /* 车牌照片 */
         .plate-photo {
             width: var(--plate-size);
             flex-shrink: 0;
@@ -1337,6 +1335,7 @@
                 opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform, opacity;
             backface-visibility: hidden;
+            background: rgba(128, 128, 128, 0.08);
         }
         .stack-img.active {
             transform: scale(1) translateY(0);
@@ -1365,7 +1364,7 @@
             pointer-events: none;
         }
 
-        /* 车牌 - 精致设计 */
+        /* 车牌 */
         .plate {
             padding: 4px 16px;
             border-radius: 8px;
@@ -1409,7 +1408,7 @@
             transform: scale(0.92);
         }
 
-        /* 名字 - 渐变文字 */
+        /* 名字 */
         .name {
             font-size: 13px;
             font-weight: 700;
@@ -1489,7 +1488,7 @@
             display: none;
         }
 
-        /* 应用按钮 - 全新精致设计 */
+        /* 应用按钮 */
         .app-button {
             --icon-color: #00D4FF;
             display: flex;
@@ -1999,7 +1998,7 @@
             transition: none;
             text-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
             letter-spacing: 3px;
-            will-change: transform, left, top;
+            will-change: left, top;
             user-select: none;
             -webkit-user-select: none;
             filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.03));
@@ -2082,7 +2081,7 @@
         @media (min-width: 1024px) {
             .app-container { max-width: 600px; }
         }
-        /* ===== 横屏手机（矮高度）收紧 ===== */
+        /* ===== 横屏手机 ===== */
         @media (orientation: landscape) and (max-height: 500px) {
             .app-container { padding-top: 10px; padding-bottom: 10px; gap: 10px; }
             .main-card { padding: 12px 16px 16px; }
@@ -2187,7 +2186,7 @@
         }
     </style>
     <script>
-        // 主题跟随系统：首屏按 localStorage 偏好，其次系统深色模式，避免闪烁
+        // 主题跟随系统
         (function () {
             try {
                 var k = 'plate_theme_mode';
@@ -2276,7 +2275,8 @@ self.addEventListener('fetch', function (e) {
     <div class="video-popup" id="videoPopup">
         <div class="popup-inner" id="popupInner">
             <button class="popup-close" id="popupClose"><i class="fa-solid fa-xmark"></i></button>
-            <video id="popupVideo" playsinline webkit-playsinline preload="metadata"></video>
+            <video id="popupVideo" playsinline webkit-playsinline preload="metadata"
+                   controlslist="nodownload noremoteplayback" disablepictureinpicture oncontextmenu="return false"></video>
             <div class="popup-controls" id="popupControls">
                 <button id="popupPrevBtn" class="popup-nav-btn"><i class="fa-solid fa-backward-step"></i></button>
                 <button id="popupPlayBtn"><i class="fa-solid fa-play"></i></button>
@@ -2322,7 +2322,9 @@ self.addEventListener('fetch', function (e) {
 
         <div class="video-player-container" id="videoCard">
             <div class="video-box" id="videoBox">
-                <video id="mainVideo" src="" playsinline webkit-playsinline autoplay preload="auto"></video>
+                <!-- ⚠️ 已移除 autoplay：改为手动点击播放 -->
+                <video id="mainVideo" src="" playsinline webkit-playsinline preload="metadata"
+                       controlslist="nodownload noremoteplayback" disablepictureinpicture oncontextmenu="return false"></video>
                 <button class="center-play-btn" id="centerPlayBtn" aria-label="播放/暂停">
                     <i class="fa-solid fa-play"></i>
                 </button>
@@ -2425,10 +2427,23 @@ self.addEventListener('fetch', function (e) {
             'use strict';
 
             // ================================================================
+            //  ⚡ 性能参数（适配小米 17 Pro / 安卓 Chrome 高刷屏 / 桌面端）
+            // ================================================================
+            const TARGET_FPS = 30;                       // 星空+流星目标帧率（防发烫掉帧）
+            const FRAME_INTERVAL = 1000 / TARGET_FPS;
+            const STAR_COUNT = 380;
+            const METEOR_SPAWN_INTERVAL_MIN = 10;
+            const METEOR_SPAWN_INTERVAL_MAX = 30;
+            const MAX_METEORS = 10;
+            const SAKURA_INTERVAL_MS = 320;
+            const SAKURA_MAX = 10;
+            const STACK_PRELOAD_COUNT = 6;
+
+            // ================================================================
             //  🌌 星空 + 流星雨系统（流星限定在主卡片区域内）
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
             let w, h;
             let animFrameId = null;
 
@@ -2443,15 +2458,39 @@ self.addEventListener('fetch', function (e) {
                 w = canvas.width = window.innerWidth;
                 h = canvas.height = window.innerHeight;
             }
-            window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
 
             function isDarkMode() {
                 return document.documentElement.classList.contains('dark-mode');
             }
 
+            // ---- 星星光晕精灵缓存：避免每帧为每颗星创建径向渐变（主要发热源）----
+            const starSpriteCache = new Map();
+            function getStarSprite(hue, sat) {
+                const hh = Math.round(hue / 15) * 15;
+                const ss = Math.round(sat / 20) * 20;
+                const key = hh + '_' + ss;
+                let c = starSpriteCache.get(key);
+                if (c) return c;
+                const S = 64, R = 32;
+                c = document.createElement('canvas');
+                c.width = S;
+                c.height = S;
+                const cc = c.getContext('2d');
+                const g = cc.createRadialGradient(R, R, 0, R, R, R);
+                g.addColorStop(0, 'hsla(' + hh + ',' + ss + '%,100%,1)');
+                g.addColorStop(0.22, 'hsla(' + hh + ',' + ss + '%,92%,0.55)');
+                g.addColorStop(0.55, 'hsla(' + hh + ',' + ss + '%,88%,0.16)');
+                g.addColorStop(1, 'hsla(' + hh + ',' + ss + '%,85%,0)');
+                cc.fillStyle = g;
+                cc.beginPath();
+                cc.arc(R, R, R, 0, Math.PI * 2);
+                cc.fill();
+                starSpriteCache.set(key, c);
+                return c;
+            }
+
             const stars = [];
-            const STAR_COUNT = 380;
             class Star {
                 constructor() {
                     this.x = Math.random() * w;
@@ -2462,45 +2501,31 @@ self.addEventListener('fetch', function (e) {
                     this.twinkleOffset = Math.random() * Math.PI * 2;
                     this.hue = 200 + Math.random() * 40;
                     this.saturation = 50 + Math.random() * 40;
+                    this.sprite = getStarSprite(this.hue, this.saturation);
+                    this.hueInt = this.hue | 0;
+                    this.satInt = this.saturation | 0;
                 }
-                draw(time) {
-                    const dark = isDarkMode();
+                draw(time, dark) {
                     const brightnessScale = dark ? 1.2 : 1.8;
-                    const opacity = this.baseBrightness * brightnessScale *
+                    let opacity = this.baseBrightness * brightnessScale *
                         (0.55 + 0.45 * Math.sin(time * this.twinkleSpeed + this.twinkleOffset));
-                    const finalOpacity = Math.min(1, Math.max(0, opacity));
+                    if (opacity <= 0.035) return;
+                    if (opacity > 1) opacity = 1;
                     const size = this.size * (dark ? 1.1 : 0.9);
-                    if (size > 1.2) {
-                        const glowSize = size * (3 + Math.random() * 2);
-                        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowSize);
-                        const glowOpacity = finalOpacity * 0.2;
-                        grad.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, 90%, ${glowOpacity})`);
-                        grad.addColorStop(1, `hsla(${this.hue}, ${this.saturation}%, 80%, 0)`);
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
-                        ctx.fillStyle = grad;
-                        ctx.fill();
-                    }
+                    const glowR = size * 3.2;
+                    ctx.globalAlpha = opacity * 0.5;
+                    ctx.drawImage(this.sprite, this.x - glowR, this.y - glowR, glowR * 2, glowR * 2);
+                    ctx.globalAlpha = opacity;
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
-                    const light = dark ? 92 : 95;
-                    ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${light}%, ${finalOpacity})`;
+                    ctx.fillStyle = 'hsl(' + this.hueInt + ',' + this.satInt + '%,' + (dark ? 92 : 95) + '%)';
                     ctx.fill();
-                    if (size > 0.8 && finalOpacity > 0.3) {
-                        ctx.beginPath();
-                        ctx.arc(this.x - size * 0.2, this.y - size * 0.2, size * 0.15, 0, Math.PI * 2);
-                        ctx.fillStyle = `hsla(${this.hue + 20}, 100%, 98%, ${finalOpacity * 0.4})`;
-                        ctx.fill();
-                    }
                 }
             }
             for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
 
             let meteors = [];
             let meteorSpawnCounter = 0;
-            const METEOR_SPAWN_INTERVAL_MIN = 5,
-                METEOR_SPAWN_INTERVAL_MAX = 15,
-                MAX_METEORS = 14;
             let cardRect = null;
 
             function updateCardRectForMeteors() {
@@ -2508,8 +2533,21 @@ self.addEventListener('fetch', function (e) {
                 if (card) cardRect = card.getBoundingClientRect();
             }
             updateCardRectForMeteors();
-            window.addEventListener('resize', updateCardRectForMeteors);
-            window.addEventListener('scroll', updateCardRectForMeteors);
+
+            // ---- 视口变化统一节流 ----
+            let viewportPending = false;
+            function onViewportChange() {
+                if (viewportPending) return;
+                viewportPending = true;
+                requestAnimationFrame(function () {
+                    viewportPending = false;
+                    updateCardRectForMeteors();
+                    updateCardRectForWords();
+                });
+            }
+            window.addEventListener('resize', onViewportChange, { passive: true });
+            window.addEventListener('scroll', onViewportChange, { passive: true });
+            window.addEventListener('orientationchange', onViewportChange, { passive: true });
 
             class CardMeteor {
                 constructor() {
@@ -2634,16 +2672,27 @@ self.addEventListener('fetch', function (e) {
             }
 
             let time = 0;
+            let lastFrameTs = 0;
 
-            function animate() {
-                time += 1;
+            function animate(now) {
+                animFrameId = requestAnimationFrame(animate);
+                if (now === undefined) now = performance.now();
+                if (lastFrameTs === 0) { lastFrameTs = now; return; }
+                const delta = now - lastFrameTs;
+                if (delta < FRAME_INTERVAL) return;   // 限帧
+                lastFrameTs = now;
+                const step = Math.min(3, delta / 16.67);
+
+                time += step;
+                const dark = isDarkMode();
                 ctx.clearRect(0, 0, w, h);
-                for (const star of stars) star.draw(time);
-                updateCardRectForMeteors();
+
+                for (let i = 0; i < stars.length; i++) stars[i].draw(time, dark);
+
                 if (meteorEnabled) {
-                    meteorSpawnCounter++;
-                    const interval = Math.floor(METEOR_SPAWN_INTERVAL_MIN +
-                        Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN));
+                    meteorSpawnCounter += step;
+                    const interval = METEOR_SPAWN_INTERVAL_MIN +
+                        Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN);
                     if (meteorSpawnCounter > interval && meteors.length < MAX_METEORS) {
                         meteors.push(new CardMeteor());
                         meteorSpawnCounter = 0;
@@ -2652,20 +2701,26 @@ self.addEventListener('fetch', function (e) {
                         const m = meteors[i];
                         if (!m.update()) { meteors.splice(i, 1); } else { m.draw(); }
                     }
-                } else {
-                    if (meteors.length > 0) meteors = [];
+                } else if (meteors.length > 0) {
+                    meteors = [];
                     meteorSpawnCounter = 0;
                 }
-                animFrameId = requestAnimationFrame(animate);
+                ctx.globalAlpha = 1;
             }
-            animate();
+            animFrameId = requestAnimationFrame(animate);
 
-            window.addEventListener('resize', () => {
-                resizeCanvas();
-                for (const star of stars) { star.x = Math.random() * w;
-                    star.y = Math.random() * h; }
-                updateCardRectForMeteors();
-            });
+            let resizeTimer = null;
+            window.addEventListener('resize', function () {
+                if (resizeTimer) clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function () {
+                    resizeCanvas();
+                    for (let i = 0; i < stars.length; i++) {
+                        stars[i].x = Math.random() * w;
+                        stars[i].y = Math.random() * h;
+                    }
+                    updateCardRectForMeteors();
+                }, 200);
+            }, { passive: true });
 
             // ===== 流星雨开关 =====
             const meteorToggle = document.getElementById('meteorToggle');
@@ -2741,7 +2796,7 @@ self.addEventListener('fetch', function (e) {
             updateWordsVisibility();
 
             // ================================================================
-            //  轮播进度 localStorage 存储（头像、堆叠图片）
+            //  轮播进度 localStorage 存储
             // ================================================================
             const STORAGE_PREFIX = 'su7_carousel_';
 
@@ -2756,7 +2811,7 @@ self.addEventListener('fetch', function (e) {
             let saveTimer = setInterval(saveCarouselState, 5000);
 
             // ================================================================
-            //  许红豆漂浮文字（点击聚拢、拖拽、分散、边界反弹）
+            //  许红豆漂浮文字
             // ================================================================
             const wordXu = document.getElementById('wordXu');
             const wordHong = document.getElementById('wordHong');
@@ -2772,35 +2827,43 @@ self.addEventListener('fetch', function (e) {
                 cardRectForWords = null,
                 speedFactor = 0.45;
 
-            function updateCardRectForWords() { cardRectForWords = mainCard.getBoundingClientRect(); }
-            updateCardRectForWords();
-            window.addEventListener('resize', updateCardRectForWords);
-            window.addEventListener('scroll', updateCardRectForWords);
+            let wordSizes = [{ w: 30, h: 34 }, { w: 30, h: 34 }, { w: 30, h: 34 }];
 
-            function setWordPosition(word, left, top) {
+            function measureWordSizes() {
+                for (let i = 0; i < allWords.length; i++) {
+                    const r = allWords[i].getBoundingClientRect();
+                    wordSizes[i] = { w: r.width || 30, h: r.height || 34 };
+                }
+            }
+
+            function updateCardRectForWords() {
+                if (mainCard) cardRectForWords = mainCard.getBoundingClientRect();
+            }
+            updateCardRectForWords();
+            measureWordSizes();
+
+            function setWordPosition(word, left, top, idx) {
                 if (!cardRectForWords) updateCardRectForWords();
                 const margin = 10;
-                const rect = word.getBoundingClientRect();
-                const w = rect.width || 30,
-                    h = rect.height || 30;
+                const sz = wordSizes[idx] || { w: 30, h: 34 };
                 const minLeft = cardRectForWords.left + margin,
-                    maxLeft = cardRectForWords.right - margin - w;
+                    maxLeft = cardRectForWords.right - margin - sz.w;
                 const minTop = cardRectForWords.top + margin,
-                    maxTop = cardRectForWords.bottom - margin - h;
+                    maxTop = cardRectForWords.bottom - margin - sz.h;
                 left = Math.max(minLeft, Math.min(maxLeft, left));
                 top = Math.max(minTop, Math.min(maxTop, top));
                 word.style.left = left + 'px';
                 word.style.top = top + 'px';
             }
 
-            function updateWordPosition(word, percentX, percentY) {
+            function updateWordPosition(word, percentX, percentY, idx) {
                 if (!cardRectForWords) updateCardRectForWords();
                 const margin = 10,
                     cardW = cardRectForWords.width,
                     cardH = cardRectForWords.height;
                 const left = cardRectForWords.left + margin + (percentX / 100) * (cardW - margin * 2);
                 const top = cardRectForWords.top + margin + (percentY / 100) * (cardH - margin * 2);
-                setWordPosition(word, left, top);
+                setWordPosition(word, left, top, idx);
             }
 
             function randomGradient() {
@@ -2815,7 +2878,9 @@ self.addEventListener('fetch', function (e) {
                 return `linear-gradient(135deg, ${c[0]}, ${c[1]}, ${c[2]}, ${c[3]}, ${c[4]})`;
             }
 
+            let colorTimer = null;
             function randomizeColors() {
+                if (document.hidden) return;
                 allWords.forEach(word => {
                     word.querySelectorAll('.char').forEach(el => {
                         const grad = randomGradient();
@@ -2827,9 +2892,12 @@ self.addEventListener('fetch', function (e) {
                 });
             }
             randomizeColors();
-            setInterval(randomizeColors, 5000);
+            colorTimer = setInterval(randomizeColors, 5000);
 
-            function initPositions() { allWords.forEach((word, idx) => updateWordPosition(word, pos[idx].x, pos[idx].y)); }
+            function initPositions() {
+                measureWordSizes();
+                allWords.forEach((word, idx) => updateWordPosition(word, pos[idx].x, pos[idx].y, idx));
+            }
             initPositions();
 
             function startFloating() {
@@ -2838,9 +2906,10 @@ self.addEventListener('fetch', function (e) {
 
                 function animateWords() {
                     if (isFollowing) { floatingAnimId = requestAnimationFrame(animateWords); return; }
-                    updateCardRectForWords();
-                    allWords.forEach((word, idx) => {
-                        if (word.classList.contains('following')) return;
+                    if (document.hidden) { floatingAnimId = requestAnimationFrame(animateWords); return; }
+                    for (let idx = 0; idx < allWords.length; idx++) {
+                        const word = allWords[idx];
+                        if (word.classList.contains('following')) continue;
                         pos[idx].x += speeds[idx].x * speedFactor;
                         pos[idx].y += speeds[idx].y * speedFactor;
                         if (pos[idx].x < 0) { pos[idx].x = 0;
@@ -2859,8 +2928,8 @@ self.addEventListener('fetch', function (e) {
                             speeds[idx].x = Math.cos(newAngle) * currentSpeed;
                             speeds[idx].y = Math.sin(newAngle) * currentSpeed;
                         }
-                        updateWordPosition(word, pos[idx].x, pos[idx].y);
-                    });
+                        updateWordPosition(word, pos[idx].x, pos[idx].y, idx);
+                    }
                     floatingAnimId = requestAnimationFrame(animateWords);
                 }
                 animateWords();
@@ -2875,7 +2944,7 @@ self.addEventListener('fetch', function (e) {
                     w.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     pos[idx].x = 5 + Math.random() * 85;
                     pos[idx].y = 5 + Math.random() * 85;
-                    updateWordPosition(w, pos[idx].x, pos[idx].y);
+                    updateWordPosition(w, pos[idx].x, pos[idx].y, idx);
                     w.style.transform = '';
                 });
                 setTimeout(() => { allWords.forEach(w => w.style.transition = '');
@@ -2889,6 +2958,7 @@ self.addEventListener('fetch', function (e) {
                 isFollowing = true;
                 followTarget = word;
                 updateCardRectForWords();
+                measureWordSizes();
                 const rect = word.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2,
                     cy = rect.top + rect.height / 2;
@@ -2900,7 +2970,7 @@ self.addEventListener('fetch', function (e) {
                     const offset = (idx - 1) * spacing;
                     let left = cx - wordWidth / 2 + offset,
                         top = cy - rect.height / 2;
-                    setWordPosition(w, left, top);
+                    setWordPosition(w, left, top, idx);
                     const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
@@ -2926,15 +2996,16 @@ self.addEventListener('fetch', function (e) {
                 e.preventDefault();
                 const cx = e.clientX,
                     cy = e.clientY;
-                updateCardRectForWords();
-                const wordWidth = followTarget.getBoundingClientRect().width,
-                    spacing = wordWidth * 1.2,
+                if (!cardRectForWords) updateCardRectForWords();
+                const wordWidth = wordSizes[allWords.indexOf(followTarget)] ?
+                    wordSizes[allWords.indexOf(followTarget)].w : 30;
+                const spacing = wordWidth * 1.2,
                     centerOffset = wordWidth / 2;
                 allWords.forEach((w, idx) => {
                     const offset = (idx - 1) * spacing;
                     let left = cx - centerOffset + offset,
                         top = cy - 25;
-                    setWordPosition(w, left, top);
+                    setWordPosition(w, left, top, idx);
                     const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
@@ -2949,18 +3020,9 @@ self.addEventListener('fetch', function (e) {
             allWords.forEach(word => {
                 word.addEventListener('pointerdown', onPointerDown);
             });
-            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointermove', onPointerMove, { passive: false });
             document.addEventListener('pointerup', onPointerUp);
             document.addEventListener('pointercancel', onPointerUp);
-
-            window.addEventListener('resize', () => {
-                updateCardRectForWords();
-                if (!isFollowing) allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
-            });
-            window.addEventListener('scroll', () => {
-                updateCardRectForWords();
-                if (!isFollowing) allWords.forEach((w, idx) => updateWordPosition(w, pos[idx].x, pos[idx].y));
-            });
 
             setTimeout(startFloating, 100);
 
@@ -2969,6 +3031,7 @@ self.addEventListener('fetch', function (e) {
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/12.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
@@ -2981,7 +3044,9 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-09-04_121903_004.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/9.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/10.mp4",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/11.mp4",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/11.mp4", 
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/13.mp4",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/14.mp4",
             ];
             const avatarImages = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg",
@@ -2996,6 +3061,14 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/9.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/10.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/11.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/12.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/13.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/14.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/15.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/16.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/17.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/18.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/19.jpg",
             ];
             const slideImages = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
@@ -3104,6 +3177,53 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/99.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/100.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/101.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/102.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/103.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/104.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/105.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/106.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/107.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/108.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/109.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/110.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/111.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/112.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/113.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/114.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/115.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/116.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/117.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/118.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/119.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/120.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/121.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/122.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/123.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/124.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/125.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/126.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/127.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/128.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/129.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/130.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/131.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/132.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/133.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/134.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/135.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/136.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/137.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/138.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/139.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/140.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/141.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/142.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/143.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/144.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/145.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/146.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/147.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/148.jpg",
             ];
             const APP_CONFIG = {
                 custom1: { scheme: "anywhere://open?sid=0444", name: "LX Music" },
@@ -3208,9 +3328,10 @@ self.addEventListener('fetch', function (e) {
                     try {
                         updateCardRectForWords();
                         updateCardRectForMeteors();
+                        measureWordSizes();
                         if (!isFollowing) {
                             allWords.forEach(function (w, idx) {
-                                updateWordPosition(w, pos[idx].x, pos[idx].y);
+                                updateWordPosition(w, pos[idx].x, pos[idx].y, idx);
                             });
                         }
                     } catch (e) {}
@@ -3218,42 +3339,22 @@ self.addEventListener('fetch', function (e) {
             }
 
             // ================================================================
-            //  声音解锁（现在默认就带声音，这里只保留兜底逻辑）
+            //  ▶️ 手动播放辅助函数（主副视频共用，保证声音同步开启）
             // ================================================================
-            let soundUnlocked = true; // 默认已解锁
-            function unlockSound() {
-                mainVideo.muted = false;
-                if (mainVideo.volume <= 0) mainVideo.volume = 1;
-                updateMuteIcon();
-            }
-
-            // ================================================================
-            //  自动播放尝试 + 兜底绑定首次交互
-            // ================================================================
-            function tryAutoPlay(videoEl) {
+            function playWithSound(videoEl) {
                 if (!videoEl) return;
                 videoEl.muted = false;
                 if (videoEl.volume <= 0) videoEl.volume = 1;
                 var p = videoEl.play();
                 if (p && typeof p.catch === 'function') {
                     p.catch(function () {
-                        // 被浏览器拦截，绑定一次用户交互后重试
-                        var tryPlay = function () {
-                            videoEl.muted = false;
-                            if (videoEl.volume <= 0) videoEl.volume = 1;
-                            videoEl.play().catch(function () {});
-                            document.removeEventListener('click', tryPlay);
-                            document.removeEventListener('touchstart', tryPlay);
-                            document.removeEventListener('keydown', tryPlay);
-                        };
-                        document.addEventListener('click', tryPlay, { once: true });
-                        document.addEventListener('touchstart', tryPlay, { once: true });
-                        document.addEventListener('keydown', tryPlay, { once: true });
+                        // 极少数情况下浏览器仍需用户手势，此时不再静音兜底
+                        showToastMsg('请再次点击播放按钮');
                     });
                 }
             }
 
-            // ---- 堆叠图片 ----
+            // ---- 堆叠图片（懒加载）----
             let stackImgs = [];
 
             function buildStack() {
@@ -3261,21 +3362,37 @@ self.addEventListener('fetch', function (e) {
                 stackImgs = [];
                 slideImages.forEach((url, idx) => {
                     const img = document.createElement('img');
-                    img.src = url;
-                    img.loading = 'lazy';
-                    img.decoding = 'async';
                     img.className = 'stack-img';
                     img.dataset.index = idx;
                     img.alt = '堆叠图片';
                     img.draggable = false;
+                    img.decoding = 'async';
+                    if (idx < STACK_PRELOAD_COUNT) {
+                        img.src = url;
+                    } else {
+                        img.dataset.src = url;
+                    }
                     photoInner.appendChild(img);
                     stackImgs.push(img);
                 });
                 updateStack(0);
             }
 
+            function ensureStackLoaded(activeIndex) {
+                const len = stackImgs.length;
+                for (let d = 0; d < 5; d++) {
+                    const i = (activeIndex + d) % len;
+                    const img = stackImgs[i];
+                    if (img && !img.getAttribute('src') && img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                }
+            }
+
             function updateStack(activeIndex) {
                 const len = stackImgs.length;
+                ensureStackLoaded(activeIndex);
                 stackImgs.forEach((img, idx) => {
                     img.classList.remove('active', 'pile', 'pile2', 'pile3', 'hidden');
                     if (idx === activeIndex) {
@@ -3385,9 +3502,8 @@ self.addEventListener('fetch', function (e) {
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
                 totTime.textContent = formatTime(mainVideo.duration);
-                mainVideo.muted = false;
-                if (mainVideo.volume <= 0) mainVideo.volume = 1;
-                tryAutoPlay(mainVideo);
+                // 用户主动切换 → 带声音播放（与弹窗视频行为一致）
+                playWithSound(mainVideo);
                 popupVideo.src = src;
                 updateCenterPlayBtn();
                 updatePlayBtnIcon();
@@ -3397,9 +3513,8 @@ self.addEventListener('fetch', function (e) {
 
             function toggleVideo() {
                 if (mainVideo.paused) {
-                    mainVideo.muted = false;
-                    if (mainVideo.volume <= 0) mainVideo.volume = 1;
-                    mainVideo.play().catch(() => showToastMsg("请点击播放"));
+                    // 手动点击播放：视频与声音一起播放
+                    playWithSound(mainVideo);
                 } else {
                     mainVideo.pause();
                 }
@@ -3438,7 +3553,7 @@ self.addEventListener('fetch', function (e) {
                         `<i class="fa-solid fa-volume-high"></i>`; }
             }
 
-            // ===== 初始化视频 =====
+            // ===== 初始化视频（手动播放：只加载，不自动播放）=====
             currentVideoIndex = 0;
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
             if (avatarIndex >= avatarImages.length) avatarIndex = 0;
@@ -3448,8 +3563,11 @@ self.addEventListener('fetch', function (e) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
                 mainVideo.currentTime = 0;
-                // 直接尝试自动播放（不静音）
-                tryAutoPlay(mainVideo);
+                // ❌ 不自动播放，等待用户点击
+                mainVideo.muted = false;
+                if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                updateCenterPlayBtn();
+                updatePlayBtnIcon();
             }
             if (avatarImages.length > 0) {
                 avatarImg.src = avatarImages[avatarIndex % avatarImages.length];
@@ -3458,11 +3576,15 @@ self.addEventListener('fetch', function (e) {
             mainVideo.addEventListener('loadedmetadata', function() {
                 totTime.textContent = formatTime(mainVideo.duration);
                 updateCenterPlayBtn();
-                mainVideo.currentTime = 0;
+                updatePlayBtnIcon();
             });
 
             // ===== 樱花 =====
+            let sakuraCount = 0;
+
             function createSakura() {
+                if (document.hidden) return;
+                if (sakuraCount >= SAKURA_MAX) return;
                 const el = document.createElement("div");
                 el.className = "sakura";
                 const size = Math.random() * 8 + 3;
@@ -3474,13 +3596,19 @@ self.addEventListener('fetch', function (e) {
                 const dur = Math.random() * 5 + 4;
                 el.style.animation = `sakuraFall ${dur}s linear forwards`;
                 sakuraBox.appendChild(el);
-                setTimeout(() => { if (el.parentNode) el.remove(); }, dur * 1000 + 100);
+                sakuraCount++;
+                setTimeout(() => {
+                    if (el.parentNode) el.remove();
+                    sakuraCount = Math.max(0, sakuraCount - 1);
+                }, dur * 1000 + 100);
             }
 
             function ensureSakura() {
                 if (sakuraInterval) clearInterval(sakuraInterval);
+                sakuraInterval = null;
+                if (document.hidden) return;
                 for (let i = 0; i < 3; i++) setTimeout(createSakura, i * 80);
-                sakuraInterval = setInterval(createSakura, 200);
+                sakuraInterval = setInterval(createSakura, SAKURA_INTERVAL_MS);
             }
             ensureSakura();
 
@@ -3489,6 +3617,7 @@ self.addEventListener('fetch', function (e) {
             let tidx = 0;
 
             function rollIsland() {
+                if (document.hidden) return;
                 tidx = (tidx + 1) % textPool.length;
                 islandText.textContent = textPool[tidx];
                 islandText.style.animation = 'none';
@@ -3505,13 +3634,16 @@ self.addEventListener('fetch', function (e) {
                 return c[Math.floor(Math.random() * c.length)];
             }
 
-            function updateGlow() { document.documentElement.style.setProperty('--glow-color', randomColor()); }
+            function updateGlow() {
+                if (document.hidden) return;
+                document.documentElement.style.setProperty('--glow-color', randomColor());
+            }
             glowInterval = setInterval(updateGlow, 1800);
             setTimeout(updateGlow, 50);
 
             // ===== 头像轮播 =====
             function nextAvatar() {
-                if (avatarImages.length < 2) return;
+                if (avatarImages.length < 2 || document.hidden) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
                 avatarImg.src = avatarImages[avatarIndex];
                 saveCarouselState();
@@ -3574,10 +3706,13 @@ self.addEventListener('fetch', function (e) {
                 if (!isSwiping) return;
                 const dx = e.touches[0].clientX - startX;
                 const dy = e.touches[0].clientY - startY;
-                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) { e.preventDefault(); if (dx < 0) { nextVideo
-                        ();
-                        isSwiping = false; } else { prevVideo();
-                        isSwiping = false; } }
+                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+                    e.preventDefault();
+                }
+                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                    if (dx < 0) { nextVideo(); isSwiping = false; }
+                    else { prevVideo(); isSwiping = false; }
+                }
             }, { passive: false });
             videoBox.addEventListener('touchend', () => { isSwiping = false; });
             videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
@@ -3607,17 +3742,13 @@ self.addEventListener('fetch', function (e) {
                         nextVideo();
                         popupVideo.src = videoList[currentVideoIndex];
                         popupVideo.currentTime = 0;
-                        popupVideo.muted = false;
-                        if (popupVideo.volume <= 0) popupVideo.volume = 1;
-                        popupVideo.play().catch(() => {});
+                        playWithSound(popupVideo);
                         popupIsSwiping = false;
                     } else {
                         prevVideo();
                         popupVideo.src = videoList[currentVideoIndex];
                         popupVideo.currentTime = 0;
-                        popupVideo.muted = false;
-                        if (popupVideo.volume <= 0) popupVideo.volume = 1;
-                        popupVideo.play().catch(() => {});
+                        playWithSound(popupVideo);
                         popupIsSwiping = false;
                     }
                 }
@@ -3646,7 +3777,6 @@ self.addEventListener('fetch', function (e) {
             videoMuteBtn.addEventListener('touchcancel', () => { volDrag = false; });
             videoMuteBtn.onclick = (e) => { if (volDrag) return;
                 e.stopPropagation();
-                soundUnlocked = true;
                 mainVideo.muted = !mainVideo.muted;
                 updateMuteIcon();
                 showControls(); };
@@ -3666,8 +3796,12 @@ self.addEventListener('fetch', function (e) {
                 popupVideo.currentTime = mainVideo.currentTime;
                 popupVideo.muted = false;
                 if (popupVideo.volume <= 0) popupVideo.volume = 1;
-                if (!mainVideo.paused) popupVideo.play().catch(() => {});
-                else popupVideo.pause();
+                // 主视频在播放，则弹窗视频也带声音继续播放；否则保持暂停等待用户点击
+                if (!mainVideo.paused) {
+                    popupVideo.play().catch(() => {});
+                } else {
+                    popupVideo.pause();
+                }
                 videoPopup.classList.add('active');
                 lockScroll();
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
@@ -3700,8 +3834,7 @@ self.addEventListener('fetch', function (e) {
                 if (videoList.length > 0) {
                     switchVideo(currentVideoIndex + 1);
                     popupVideo.src = videoList[currentVideoIndex];
-                    popupVideo.muted = false;
-                    popupVideo.play().catch(() => {});
+                    playWithSound(popupVideo);
                     popupControlsVisible = true;
                     popupControls.classList.remove("hidden");
                     popupClose.classList.remove("hidden");
@@ -3720,9 +3853,13 @@ self.addEventListener('fetch', function (e) {
                     popupClose.classList.add("hidden");
                     popupControlsVisible = false;
                     clearTimeout(popupHideTimer); } });
-            popupPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); if (popupVideo.paused) popupVideo.play()
-                    .catch(() => {});
-                else popupVideo.pause(); if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
+            popupPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); 
+                if (popupVideo.paused) {
+                    playWithSound(popupVideo);
+                } else {
+                    popupVideo.pause();
+                }
+                if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
                     mainVideo.play().catch(() => {}); } else mainVideo.pause();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
@@ -3734,8 +3871,7 @@ self.addEventListener('fetch', function (e) {
             popupPrevBtn.addEventListener('click', (e) => { e.stopPropagation();
                 prevVideo();
                 popupVideo.src = videoList[currentVideoIndex];
-                popupVideo.muted = false;
-                popupVideo.play().catch(() => {});
+                playWithSound(popupVideo);
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3746,8 +3882,7 @@ self.addEventListener('fetch', function (e) {
             popupNextBtn.addEventListener('click', (e) => { e.stopPropagation();
                 nextVideo();
                 popupVideo.src = videoList[currentVideoIndex];
-                popupVideo.muted = false;
-                popupVideo.play().catch(() => {});
+                playWithSound(popupVideo);
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3788,7 +3923,7 @@ self.addEventListener('fetch', function (e) {
             });
             popupVideo.addEventListener('play', () => { popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
                 mainVideo.currentTime = popupVideo.currentTime;
-                mainVideo.play().catch(() => {});
+                if (mainVideo.paused) mainVideo.play().catch(() => {});
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3815,7 +3950,7 @@ self.addEventListener('fetch', function (e) {
             function startViewerAutoPlay() {
                 stopViewerAutoPlay();
                 if (!viewerGallery || viewerGallery.length <= 1) return;
-                viewerAutoPlayTimer = setInterval(() => { if (isViewerInteracting) return;
+                viewerAutoPlayTimer = setInterval(() => { if (isViewerInteracting || document.hidden) return;
                     viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
                     viewerImg.src = viewerGallery[viewerGalleryIndex];
                     updateViewerCounter(); }, 3500);
@@ -4015,10 +4150,10 @@ self.addEventListener('fetch', function (e) {
             setInterval(updateTime, 1000);
 
             // ================================================================
-            //  🌤️ 天气组件：根据车牌归属地获取天气
+            //  🌤️ 天气组件：wttr.in（根据车牌归属地获取天气）
             // ================================================================
             const PLATE_MAP = {
-                '苏': 'Nantong',
+                '苏': '南通',
                 '京': 'Beijing',
                 '沪': 'Shanghai',
                 '粤': 'Guangzhou',
@@ -4137,16 +4272,39 @@ self.addEventListener('fetch', function (e) {
             setWeather({ icon: '⏳', temp: '--', desc: '加载中...' });
             setTimeout(fetchWeather, 500);
 
-            // ===== 启动 =====
+            // ===== 启动（显示播放按钮，等待用户手动点击）=====
             setTimeout(() => {
                 videoControls.classList.remove('hidden');
                 centerPlayBtn.classList.remove('hidden');
                 updateCenterPlayBtn();
+                updatePlayBtnIcon();
                 updateMuteIcon();
-                if (!mainVideo.paused) startAutoHideTimer();
-            }, 500);
+            }, 300);
 
-            document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureSakura(); });
+            // ===== 低频刷新卡片 rect =====
+            setInterval(function () {
+                if (document.hidden) return;
+                updateCardRectForMeteors();
+                updateCardRectForWords();
+                if (!isFollowing && wordsVisible) measureWordSizes();
+            }, 1000);
+
+            // ===== 页面可见性：后台时停掉动画与定时器 =====
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) {
+                    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+                    if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
+                } else {
+                    if (!animFrameId) { lastFrameTs = 0; animFrameId = requestAnimationFrame(animate); }
+                    ensureSakura();
+                    updateCardRectForMeteors();
+                    updateCardRectForWords();
+                    measureWordSizes();
+                    if (!isFollowing) {
+                        allWords.forEach(function (w, idx) { updateWordPosition(w, pos[idx].x, pos[idx].y, idx); });
+                    }
+                }
+            });
 
             // ===== 页面卸载时保存 =====
             window.addEventListener('beforeunload', () => {
@@ -4160,6 +4318,7 @@ self.addEventListener('fetch', function (e) {
                 if (islandInterval) clearInterval(islandInterval);
                 if (avatarTimer) clearInterval(avatarTimer);
                 if (slideTimer) clearInterval(slideTimer);
+                if (colorTimer) clearInterval(colorTimer);
                 if (saveTimer) clearInterval(saveTimer);
                 stopViewerAutoPlay();
                 if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -4175,7 +4334,7 @@ self.addEventListener('fetch', function (e) {
                 var k = e.key;
                 if (typeof videoPopup !== 'undefined' && videoPopup && videoPopup.classList.contains('active')) {
                     if (k === 'Escape') { closePopup(); return; }
-                    if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (popupVideo.paused) { popupVideo.play().catch(function(){}); } else { popupVideo.pause(); } return; }
+                    if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (popupVideo.paused) { playWithSound(popupVideo); } else { popupVideo.pause(); } return; }
                     return;
                 }
                 if (k === 'ArrowLeft') { e.preventDefault(); prevVideo(); }
