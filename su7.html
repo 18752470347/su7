@@ -1967,7 +1967,7 @@
             background: transparent;
         }
 
-        /* ---- aspect-ratio 兼容回退：老 iOS Safari / 老安卓 Chrome 不支持时，用 padding 撑出比例，防止视频框/照片框/播放键高度塌陷为 0 ---- */
+        /* ---- aspect-ratio 兼容回退 ---- */
         @supports not (aspect-ratio: 1 / 1) {
             .video-box {
                 height: 0;
@@ -2078,18 +2078,18 @@
             transition: visibility 0.3s ease;
         }
 
-        /* ===== [本次新增] 大屏断点：宽屏更舒展，避免两侧过度留白 ===== */
+        /* ===== 大屏断点 ===== */
         @media (min-width: 1024px) {
             .app-container { max-width: 600px; }
         }
-        /* ===== [本次新增] 横屏手机（矮高度）单独收紧，避免卡片被压缩错位 ===== */
+        /* ===== 横屏手机（矮高度）收紧 ===== */
         @media (orientation: landscape) and (max-height: 500px) {
             .app-container { padding-top: 10px; padding-bottom: 10px; gap: 10px; }
             .main-card { padding: 12px 16px 16px; }
             .apps-scroll-wrapper { margin-top: 10px; }
             .video-player-container { max-height: 46vh; }
         }
-        /* ===== [本次新增] 启动遮罩（首屏 loading，资源就绪后淡出）===== */
+        /* ===== 启动遮罩 ===== */
         #boot-mask {
             position: fixed; inset: 0; z-index: 99999;
             background: var(--bg-primary, #F2F2F7);
@@ -2102,15 +2102,13 @@
             animation: bootspin .8s linear infinite;
         }
         @keyframes bootspin { to { transform: rotate(360deg); } }
-        /* ===== [本次新增] 低端机毛玻璃性能降级（JS 检测低核/低内存后加 .low-perf）===== */
+        /* ===== 低端机毛玻璃性能降级 ===== */
         html.low-perf .main-card,
         html.low-perf .video-popup,
         html.low-perf .viewer { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
         html.low-perf .sakura { display: none !important; }
 
-        /* ===== [跨平台适配新增] 触屏设备禁用 hover 粘滞效果 =====
-           移动端点击后 :hover 状态会一直卡住，这里统一覆盖为默认态。
-           桌面端（鼠标悬停）不受影响。 */
+        /* ===== 触屏设备禁用 hover 粘滞 ===== */
         @media (hover: none), (pointer: coarse) {
             .app-button:hover .app-icon-wrap {
                 transform: none;
@@ -2164,7 +2162,7 @@
             }
         }
 
-        /* ===== [跨平台适配新增] 滚动锁定（iOS 用 position:fixed 技巧）===== */
+        /* ===== 滚动锁定 ===== */
         body.scroll-locked {
             position: fixed;
             left: 0;
@@ -2176,7 +2174,7 @@
             overflow: hidden;
         }
 
-        /* ===== [跨平台适配新增] 桌面端键盘焦点可见（无障碍）===== */
+        /* ===== 桌面端键盘焦点可见 ===== */
         @media (hover: hover) and (pointer: fine) {
             button:focus-visible,
             .app-button:focus-visible,
@@ -2189,7 +2187,7 @@
         }
     </style>
     <script>
-        // [本次新增] 主题跟随系统：首屏按 localStorage 偏好，其次系统深色模式，避免闪烁
+        // 主题跟随系统：首屏按 localStorage 偏好，其次系统深色模式，避免闪烁
         (function () {
             try {
                 var k = 'plate_theme_mode';
@@ -2205,8 +2203,7 @@
             } catch (e) {}
         })();
     </script>
-<script id="pwa-sw-src" type="text/plain">// [本次新增] 苏FA36165 个人主页 Service Worker
-// 策略：外壳(页面/manifest) 网络优先回退缓存；COS 图片/视频 运行时缓存(先返回缓存再后台更新)
+<script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
 var VERSION = 'su-fa36165-v1';
 var SHELL = './';
 var CORE = ['./'];
@@ -2228,7 +2225,6 @@ self.addEventListener('fetch', function (e) {
     if (req.method !== 'GET') return;
     var url = new URL(req.url);
 
-    // 导航/页面：网络优先，失败回退到缓存的 index
     if (req.mode === 'navigate') {
         e.respondWith(
             fetch(req).then(function (res) {
@@ -2242,7 +2238,6 @@ self.addEventListener('fetch', function (e) {
         return;
     }
 
-    // 静态资源(图片/视频/字体/样式)：缓存优先 + 后台更新(stale-while-revalidate)
     if (req.destination === 'image' || req.destination === 'video' || req.destination === 'font' ||
         req.destination === 'style' || req.destination === 'script' || /\.jpg|\.jpeg|\.png|\.webp|\.mp4|\.webm/i.test(url.pathname)) {
         e.respondWith(
@@ -2327,7 +2322,7 @@ self.addEventListener('fetch', function (e) {
 
         <div class="video-player-container" id="videoCard">
             <div class="video-box" id="videoBox">
-                <video id="mainVideo" src="" playsinline webkit-playsinline muted preload="metadata"></video>
+                <video id="mainVideo" src="" playsinline webkit-playsinline autoplay preload="auto"></video>
                 <button class="center-play-btn" id="centerPlayBtn" aria-label="播放/暂停">
                     <i class="fa-solid fa-play"></i>
                 </button>
@@ -2974,7 +2969,6 @@ self.addEventListener('fetch', function (e) {
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/12.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/5.mp4",
@@ -2988,8 +2982,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/9.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/10.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/11.mp4",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/13.mp4",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/14.mp4",
             ];
             const avatarImages = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260822152043_404_1539.jpg",
@@ -3004,14 +2996,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/9.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/10.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/11.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/12.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/13.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/14.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/15.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/16.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/17.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/18.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/19.jpg",
             ];
             const slideImages = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
@@ -3120,53 +3104,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/99.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/100.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/101.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/102.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/103.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/104.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/105.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/106.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/107.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/108.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/109.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/110.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/111.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/112.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/113.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/114.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/115.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/116.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/117.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/118.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/119.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/120.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/121.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/122.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/123.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/124.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/125.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/126.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/127.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/128.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/129.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/130.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/131.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/132.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/133.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/134.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/135.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/136.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/137.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/138.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/139.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/140.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/141.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/142.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/143.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/144.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/145.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/146.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/147.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/148.jpg",
             ];
             const APP_CONFIG = {
                 custom1: { scheme: "anywhere://open?sid=0444", name: "LX Music" },
@@ -3246,7 +3183,7 @@ self.addEventListener('fetch', function (e) {
             let isViewerInteracting = false;
 
             // ================================================================
-            //  [跨平台适配新增] 滚动锁定（iOS Safari 用 position:fixed 技巧）
+            //  滚动锁定（iOS Safari 用 position:fixed 技巧）
             // ================================================================
             let _scrollLockY = 0;
             let _isScrollLocked = false;
@@ -3267,7 +3204,6 @@ self.addEventListener('fetch', function (e) {
                 document.body.classList.remove('scroll-locked');
                 document.body.style.top = '';
                 window.scrollTo(0, _scrollLockY);
-                // 解锁后重新校准漂浮文字 / 流星雨的定位基准
                 setTimeout(function () {
                     try {
                         updateCardRectForWords();
@@ -3282,15 +3218,39 @@ self.addEventListener('fetch', function (e) {
             }
 
             // ================================================================
-            //  [跨平台适配新增] 声音解锁（iOS/Android 自动播放静音策略）
+            //  声音解锁（现在默认就带声音，这里只保留兜底逻辑）
             // ================================================================
-            let soundUnlocked = false;
+            let soundUnlocked = true; // 默认已解锁
             function unlockSound() {
-                if (soundUnlocked) return;
-                soundUnlocked = true;
                 mainVideo.muted = false;
                 if (mainVideo.volume <= 0) mainVideo.volume = 1;
                 updateMuteIcon();
+            }
+
+            // ================================================================
+            //  自动播放尝试 + 兜底绑定首次交互
+            // ================================================================
+            function tryAutoPlay(videoEl) {
+                if (!videoEl) return;
+                videoEl.muted = false;
+                if (videoEl.volume <= 0) videoEl.volume = 1;
+                var p = videoEl.play();
+                if (p && typeof p.catch === 'function') {
+                    p.catch(function () {
+                        // 被浏览器拦截，绑定一次用户交互后重试
+                        var tryPlay = function () {
+                            videoEl.muted = false;
+                            if (videoEl.volume <= 0) videoEl.volume = 1;
+                            videoEl.play().catch(function () {});
+                            document.removeEventListener('click', tryPlay);
+                            document.removeEventListener('touchstart', tryPlay);
+                            document.removeEventListener('keydown', tryPlay);
+                        };
+                        document.addEventListener('click', tryPlay, { once: true });
+                        document.addEventListener('touchstart', tryPlay, { once: true });
+                        document.addEventListener('keydown', tryPlay, { once: true });
+                    });
+                }
             }
 
             // ---- 堆叠图片 ----
@@ -3425,7 +3385,9 @@ self.addEventListener('fetch', function (e) {
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
                 totTime.textContent = formatTime(mainVideo.duration);
-                mainVideo.play().catch(() => {});
+                mainVideo.muted = false;
+                if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                tryAutoPlay(mainVideo);
                 popupVideo.src = src;
                 updateCenterPlayBtn();
                 updatePlayBtnIcon();
@@ -3435,8 +3397,8 @@ self.addEventListener('fetch', function (e) {
 
             function toggleVideo() {
                 if (mainVideo.paused) {
-                    // 用户手势内解锁声音，iOS 才允许出声播放
-                    unlockSound();
+                    mainVideo.muted = false;
+                    if (mainVideo.volume <= 0) mainVideo.volume = 1;
                     mainVideo.play().catch(() => showToastMsg("请点击播放"));
                 } else {
                     mainVideo.pause();
@@ -3486,6 +3448,8 @@ self.addEventListener('fetch', function (e) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
                 mainVideo.currentTime = 0;
+                // 直接尝试自动播放（不静音）
+                tryAutoPlay(mainVideo);
             }
             if (avatarImages.length > 0) {
                 avatarImg.src = avatarImages[avatarIndex % avatarImages.length];
@@ -3643,13 +3607,17 @@ self.addEventListener('fetch', function (e) {
                         nextVideo();
                         popupVideo.src = videoList[currentVideoIndex];
                         popupVideo.currentTime = 0;
-                        if (!mainVideo.paused) popupVideo.play().catch(() => {});
+                        popupVideo.muted = false;
+                        if (popupVideo.volume <= 0) popupVideo.volume = 1;
+                        popupVideo.play().catch(() => {});
                         popupIsSwiping = false;
                     } else {
                         prevVideo();
                         popupVideo.src = videoList[currentVideoIndex];
                         popupVideo.currentTime = 0;
-                        if (!mainVideo.paused) popupVideo.play().catch(() => {});
+                        popupVideo.muted = false;
+                        if (popupVideo.volume <= 0) popupVideo.volume = 1;
+                        popupVideo.play().catch(() => {});
                         popupIsSwiping = false;
                     }
                 }
@@ -3696,7 +3664,8 @@ self.addEventListener('fetch', function (e) {
                 if (!src) return;
                 popupVideo.src = src;
                 popupVideo.currentTime = mainVideo.currentTime;
-                mainVideo.muted = true;
+                popupVideo.muted = false;
+                if (popupVideo.volume <= 0) popupVideo.volume = 1;
                 if (!mainVideo.paused) popupVideo.play().catch(() => {});
                 else popupVideo.pause();
                 videoPopup.classList.add('active');
@@ -3716,7 +3685,6 @@ self.addEventListener('fetch', function (e) {
             function closePopup() {
                 videoPopup.classList.remove('active');
                 unlockScroll();
-                mainVideo.muted = false;
                 if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
                     mainVideo.play().catch(() => {}); }
                 popupVideo.pause();
@@ -3732,6 +3700,7 @@ self.addEventListener('fetch', function (e) {
                 if (videoList.length > 0) {
                     switchVideo(currentVideoIndex + 1);
                     popupVideo.src = videoList[currentVideoIndex];
+                    popupVideo.muted = false;
                     popupVideo.play().catch(() => {});
                     popupControlsVisible = true;
                     popupControls.classList.remove("hidden");
@@ -3754,8 +3723,7 @@ self.addEventListener('fetch', function (e) {
             popupPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); if (popupVideo.paused) popupVideo.play()
                     .catch(() => {});
                 else popupVideo.pause(); if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
-                    mainVideo.play().catch(() => {});
-                    mainVideo.muted = true; } else mainVideo.pause();
+                    mainVideo.play().catch(() => {}); } else mainVideo.pause();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3766,8 +3734,8 @@ self.addEventListener('fetch', function (e) {
             popupPrevBtn.addEventListener('click', (e) => { e.stopPropagation();
                 prevVideo();
                 popupVideo.src = videoList[currentVideoIndex];
+                popupVideo.muted = false;
                 popupVideo.play().catch(() => {});
-                mainVideo.muted = true;
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3778,8 +3746,8 @@ self.addEventListener('fetch', function (e) {
             popupNextBtn.addEventListener('click', (e) => { e.stopPropagation();
                 nextVideo();
                 popupVideo.src = videoList[currentVideoIndex];
+                popupVideo.muted = false;
                 popupVideo.play().catch(() => {});
-                mainVideo.muted = true;
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3821,7 +3789,6 @@ self.addEventListener('fetch', function (e) {
             popupVideo.addEventListener('play', () => { popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
                 mainVideo.currentTime = popupVideo.currentTime;
                 mainVideo.play().catch(() => {});
-                mainVideo.muted = true;
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -4049,11 +4016,9 @@ self.addEventListener('fetch', function (e) {
 
             // ================================================================
             //  🌤️ 天气组件：根据车牌归属地获取天气
-            //  [跨平台修复] wttr.in 只认英文/拼音城市名，这里全部改为英文；
-            //  并同时匹配中英文天气描述关键词。
             // ================================================================
             const PLATE_MAP = {
-                '苏': '南通',
+                '苏': 'Nantong',
                 '京': 'Beijing',
                 '沪': 'Shanghai',
                 '粤': 'Guangzhou',
@@ -4102,7 +4067,6 @@ self.addEventListener('fetch', function (e) {
                 weatherDesc.textContent = weather.desc;
             }
 
-            // 中英文双语匹配
             function getWeatherIcon(desc) {
                 if (!desc) return '☀️';
                 const d = String(desc).toLowerCase();
@@ -4152,7 +4116,6 @@ self.addEventListener('fetch', function (e) {
                     }
                 } catch (e) {}
 
-                // 网络失败时回退到本地随机模拟，保证界面不空白
                 const states = [
                     { icon: '☀️', temp: 28, desc: '晴' },
                     { icon: '⛅', temp: 24, desc: '多云' },
@@ -4203,28 +4166,25 @@ self.addEventListener('fetch', function (e) {
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
-            // ===== [本次新增] 键盘快捷键（桌面端）：←/→ 切视频，空格 播放暂停，T 切主题，Esc 关弹窗 =====
+            // ===== 键盘快捷键（桌面端）=====
             document.addEventListener('keydown', function (e) {
                 var t = e.target || {};
                 var tag = (t.tagName || '').toLowerCase();
                 if (tag === 'input' || tag === 'textarea' || t.isContentEditable) return;
-                // 图片查看器打开时交给它原有的方向键/Esc 处理
                 if (typeof viewer !== 'undefined' && viewer && viewer.classList.contains('show')) return;
                 var k = e.key;
-                // 视频弹窗打开时
                 if (typeof videoPopup !== 'undefined' && videoPopup && videoPopup.classList.contains('active')) {
                     if (k === 'Escape') { closePopup(); return; }
                     if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (popupVideo.paused) { popupVideo.play().catch(function(){}); } else { popupVideo.pause(); } return; }
                     return;
                 }
-                // 主页面
                 if (k === 'ArrowLeft') { e.preventDefault(); prevVideo(); }
                 else if (k === 'ArrowRight') { e.preventDefault(); nextVideo(); }
                 else if ((k === ' ' || k === 'Spacebar')) { if (tag === 'button') return; e.preventDefault(); toggleVideo(); }
                 else if (k === 't' || k === 'T') { toggleTheme(); }
             });
 
-            // ===== [本次新增] 低端机检测：低核心/低内存则降级毛玻璃、停樱花粒子 =====
+            // ===== 低端机检测 =====
             (function () {
                 try {
                     var low = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
@@ -4233,7 +4193,7 @@ self.addEventListener('fetch', function (e) {
                 } catch (e) {}
             })();
 
-            // ===== [本次新增] 启动遮罩：资源就绪或超时后淡出移除 =====
+            // ===== 启动遮罩 =====
             (function () {
                 try {
                     if (document.getElementById('boot-mask')) return;
@@ -4252,9 +4212,7 @@ self.addEventListener('fetch', function (e) {
                 } catch (e) {}
             })();
 
-            // ===== PWA(单文件版)：内联 manifest 生成 Blob 清单 =====
-            // [跨平台修复] Service Worker 不能用 Blob URL 注册（浏览器强制要求同源脚本），
-            // 原注册逻辑在所有平台都会失败，此处仅保留 manifest 注入，移除无效的 SW 注册。
+            // ===== PWA manifest 注入 =====
             try {
                 var _mEl = document.getElementById('pwa-manifest');
                 if (_mEl) {
