@@ -8,7 +8,11 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆与天气。" /><meta property="og:type" content="website" /><meta property="og:title" content="苏FA36165 · 许红豆" /><meta property="og:description" content="个人主页：星空、视频轮播、车牌记忆与天气。" /><meta property="og:image" content="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png" />
+    <meta name="description" content="苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆与天气。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="苏FA36165 · 许红豆" />
+    <meta property="og:description" content="个人主页：星空、视频轮播、车牌记忆与天气。" />
+    <meta property="og:image" content="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <script type="application/json" id="pwa-manifest">{
   "name": "苏FA36165 · 许红豆",
@@ -174,6 +178,20 @@
             border: none;
             outline: none;
         }
+
+        /* ===== [跨平台适配] 触屏交互基础 ===== */
+        /* 禁止 iOS 长按弹出系统菜单（查看器图片会单独放开） */
+        img, video, button, .app-button, .plate, .avatar, .weather-widget {
+            -webkit-touch-callout: none;
+        }
+        /* 消除移动端双击缩放的 300ms 点击延迟 */
+        button, .app-button, .plate, .avatar, .weather-widget, .status-btn,
+        .status-theme-toggle, .status-meteor-toggle, .status-word-toggle,
+        .center-play-btn, .btn-expand {
+            touch-action: manipulation;
+        }
+        /* 查看器内图片保留长按手势（自定义长按保存逻辑） */
+        .viewer-img { -webkit-touch-callout: default; }
 
         /* ===== 星空画布 ===== */
         #particles-canvas {
@@ -1950,7 +1968,7 @@
         }
 
         /* ---- aspect-ratio 兼容回退：老 iOS Safari / 老安卓 Chrome 不支持时，用 padding 撑出比例，防止视频框/照片框/播放键高度塌陷为 0 ---- */
-        @supports not (aspect-ratio: 1) {
+        @supports not (aspect-ratio: 1 / 1) {
             .video-box {
                 height: 0;
                 padding-bottom: 56.25%;
@@ -2089,7 +2107,86 @@
         html.low-perf .video-popup,
         html.low-perf .viewer { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
         html.low-perf .sakura { display: none !important; }
-        
+
+        /* ===== [跨平台适配新增] 触屏设备禁用 hover 粘滞效果 =====
+           移动端点击后 :hover 状态会一直卡住，这里统一覆盖为默认态。
+           桌面端（鼠标悬停）不受影响。 */
+        @media (hover: none), (pointer: coarse) {
+            .app-button:hover .app-icon-wrap {
+                transform: none;
+                box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), var(--shadow-soft);
+            }
+            .app-button:hover .app-icon-wrap::after { opacity: 0; }
+            .app-button:hover .app-label { color: var(--text-sub); }
+
+            .status-btn:hover::before { opacity: 0; }
+            .status-btn:hover::after { opacity: 0.2; }
+            .status-btn:hover i { transform: none; text-shadow: none; }
+
+            .status-theme-toggle:hover::before { opacity: 0.4; transform: scale(0.9) rotate(0deg); filter: blur(6px); }
+            .status-theme-toggle:hover::after { opacity: 0.2; }
+            .status-theme-toggle:hover i { transform: none; text-shadow: none; }
+
+            .status-meteor-toggle:hover::before,
+            .status-word-toggle:hover::before { opacity: 0; transform: scale(0.8); }
+            .status-meteor-toggle:hover::after,
+            .status-word-toggle:hover::after { opacity: 0.15; }
+            .status-meteor-toggle:hover i,
+            .status-word-toggle:hover i { transform: none; }
+
+            .weather-widget:hover {
+                transform: none;
+                box-shadow: var(--weather-shadow);
+                border-color: var(--weather-border);
+            }
+            .weather-widget:hover .weather-icon { transform: none; }
+
+            .plate:hover { transform: none; box-shadow: 0 3px 20px rgba(0, 212, 255, 0.18); }
+            .main-card:hover { box-shadow: var(--glass-shadow); }
+            .video-player-container:hover { box-shadow: var(--shadow-medium); }
+            .avatar img:hover { transform: none; }
+            .plate-photo-inner:hover { transform: none; box-shadow: var(--shadow-medium); }
+            .progress-track:hover { height: 3px; }
+            .popup-progress-wrap:hover { height: 3px; }
+            .viewer-close:hover,
+            .popup-close:hover { background: rgba(255, 255, 255, 0.06); transform: none; }
+            .center-play-btn:hover {
+                transform: translate(-50%, -50%);
+                background: rgba(255, 255, 255, 0.12);
+                border-color: rgba(255, 255, 255, 0.20);
+                box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            }
+            .controls-row button:hover,
+            .btn-expand:hover,
+            .popup-controls button:hover {
+                background: rgba(255, 255, 255, 0.04);
+                transform: none;
+            }
+        }
+
+        /* ===== [跨平台适配新增] 滚动锁定（iOS 用 position:fixed 技巧）===== */
+        body.scroll-locked {
+            position: fixed;
+            left: 0;
+            right: 0;
+            width: 100%;
+            overflow: hidden;
+        }
+        html.scroll-locked {
+            overflow: hidden;
+        }
+
+        /* ===== [跨平台适配新增] 桌面端键盘焦点可见（无障碍）===== */
+        @media (hover: hover) and (pointer: fine) {
+            button:focus-visible,
+            .app-button:focus-visible,
+            .plate:focus-visible,
+            .avatar:focus-visible,
+            .weather-widget:focus-visible {
+                outline: 2px solid #00D4FF;
+                outline-offset: 2px;
+            }
+        }
     </style>
     <script>
         // [本次新增] 主题跟随系统：首屏按 localStorage 偏好，其次系统深色模式，避免闪烁
@@ -2203,7 +2300,7 @@ self.addEventListener('fetch', function (e) {
         <div class="status-bar-container">
             <div class="ios-status-bar">
                 <span class="ios-status-left" id="statusTime">
-                    09:41
+                    <span id="statusClock">09:41</span>
                     <button class="status-theme-toggle" id="statusThemeToggle" aria-label="切换深色/浅色模式">
                         <i class="fa-regular fa-sun" id="statusThemeIcon"></i>
                     </button>
@@ -2230,7 +2327,7 @@ self.addEventListener('fetch', function (e) {
 
         <div class="video-player-container" id="videoCard">
             <div class="video-box" id="videoBox">
-                <video id="mainVideo" src="" playsinline webkit-playsinline preload="metadata"></video>
+                <video id="mainVideo" src="" playsinline webkit-playsinline muted preload="metadata"></video>
                 <button class="center-play-btn" id="centerPlayBtn" aria-label="播放/暂停">
                     <i class="fa-solid fa-play"></i>
                 </button>
@@ -2661,17 +2758,6 @@ self.addEventListener('fetch', function (e) {
                 } catch (e) {}
             }
 
-            function loadCarouselState() {
-                try {
-                    const vi = localStorage.getItem(STORAGE_PREFIX + 'video_index');
-                    if (vi !== null) currentVideoIndex = parseInt(vi, 10) || 0;
-                    const ai = localStorage.getItem(STORAGE_PREFIX + 'avatar_index');
-                    if (ai !== null) avatarIndex = parseInt(ai, 10) || 0;
-                    const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
-                    if (si !== null) slideIndex = parseInt(si, 10) || 0;
-                } catch (e) {}
-                return 0;
-            }
             let saveTimer = setInterval(saveCarouselState, 5000);
 
             // ================================================================
@@ -3101,6 +3187,54 @@ self.addEventListener('fetch', function (e) {
             let viewerAutoPlayTimer = null;
             let isViewerInteracting = false;
 
+            // ================================================================
+            //  [跨平台适配新增] 滚动锁定（iOS Safari 用 position:fixed 技巧）
+            // ================================================================
+            let _scrollLockY = 0;
+            let _isScrollLocked = false;
+
+            function lockScroll() {
+                if (_isScrollLocked) return;
+                _isScrollLocked = true;
+                _scrollLockY = window.scrollY || window.pageYOffset || 0;
+                document.documentElement.classList.add('scroll-locked');
+                document.body.classList.add('scroll-locked');
+                document.body.style.top = (-_scrollLockY) + 'px';
+            }
+
+            function unlockScroll() {
+                if (!_isScrollLocked) return;
+                _isScrollLocked = false;
+                document.documentElement.classList.remove('scroll-locked');
+                document.body.classList.remove('scroll-locked');
+                document.body.style.top = '';
+                window.scrollTo(0, _scrollLockY);
+                // 解锁后重新校准漂浮文字 / 流星雨的定位基准
+                setTimeout(function () {
+                    try {
+                        updateCardRectForWords();
+                        updateCardRectForMeteors();
+                        if (!isFollowing) {
+                            allWords.forEach(function (w, idx) {
+                                updateWordPosition(w, pos[idx].x, pos[idx].y);
+                            });
+                        }
+                    } catch (e) {}
+                }, 30);
+            }
+
+            // ================================================================
+            //  [跨平台适配新增] 声音解锁（iOS/Android 自动播放静音策略）
+            // ================================================================
+            let soundUnlocked = false;
+            function unlockSound() {
+                if (soundUnlocked) return;
+                soundUnlocked = true;
+                mainVideo.muted = false;
+                if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                updateMuteIcon();
+            }
+
             // ---- 堆叠图片 ----
             let stackImgs = [];
 
@@ -3159,15 +3293,21 @@ self.addEventListener('fetch', function (e) {
                 const html = document.documentElement;
                 const isDark = html.classList.contains('dark-mode');
                 html.classList.add('transitioning');
+                const metaTheme = document.querySelector('meta[name="theme-color"]');
+                const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
                 if (isDark) {
                     html.classList.remove('dark-mode');
                     statusThemeIcon.className = 'fa-regular fa-sun';
-                    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F2F2F7'); document.querySelector('meta[name="color-scheme"]').setAttribute('content','light');try{localStorage.setItem('plate_theme_mode','light');}catch(e){}
+                    if (metaTheme) metaTheme.setAttribute('content', '#F2F2F7');
+                    if (metaColorScheme) metaColorScheme.setAttribute('content', 'light');
+                    try { localStorage.setItem('plate_theme_mode', 'light'); } catch (e) {}
                     showToastMsg('☀️ 已切换到浅色模式');
                 } else {
                     html.classList.add('dark-mode');
                     statusThemeIcon.className = 'fa-solid fa-circle';
-                    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0A0A0C'); document.querySelector('meta[name="color-scheme"]').setAttribute('content','dark');try{localStorage.setItem('plate_theme_mode','dark');}catch(e){}
+                    if (metaTheme) metaTheme.setAttribute('content', '#0A0A0C');
+                    if (metaColorScheme) metaColorScheme.setAttribute('content', 'dark');
+                    try { localStorage.setItem('plate_theme_mode', 'dark'); } catch (e) {}
                     showToastMsg('🌕 已切换到深色模式');
                 }
                 setTimeout(() => html.classList.remove('transitioning'), 800);
@@ -3227,7 +3367,7 @@ self.addEventListener('fetch', function (e) {
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
                 totTime.textContent = formatTime(mainVideo.duration);
-                mainVideo.play().catch(() => showToastMsg("请手动播放"));
+                mainVideo.play().catch(() => {});
                 popupVideo.src = src;
                 updateCenterPlayBtn();
                 updatePlayBtnIcon();
@@ -3236,7 +3376,13 @@ self.addEventListener('fetch', function (e) {
             }
 
             function toggleVideo() {
-                if (mainVideo.paused) { mainVideo.play().catch(() => showToastMsg("请点击播放")); } else { mainVideo.pause(); }
+                if (mainVideo.paused) {
+                    // 用户手势内解锁声音，iOS 才允许出声播放
+                    unlockSound();
+                    mainVideo.play().catch(() => showToastMsg("请点击播放"));
+                } else {
+                    mainVideo.pause();
+                }
                 updateCenterPlayBtn();
                 updatePlayBtnIcon();
                 if (!mainVideo.paused) showControls();
@@ -3467,12 +3613,14 @@ self.addEventListener('fetch', function (e) {
                 const dy = volStartY - e.touches[0].clientY;
                 let v = Math.max(0, Math.min(1, volStartVal + dy / 800));
                 mainVideo.volume = v;
+                mainVideo.muted = v <= 0;
                 updateMuteIcon();
             }, { passive: false });
-            videoMuteBtn.addEventListener('touchend', () => { volDrag = false; });
+            videoMuteBtn.addEventListener('touchend', () => { volDrag = false; setTimeout(() => volDrag = false, 50); });
             videoMuteBtn.addEventListener('touchcancel', () => { volDrag = false; });
             videoMuteBtn.onclick = (e) => { if (volDrag) return;
                 e.stopPropagation();
+                soundUnlocked = true;
                 mainVideo.muted = !mainVideo.muted;
                 updateMuteIcon();
                 showControls(); };
@@ -3494,7 +3642,7 @@ self.addEventListener('fetch', function (e) {
                 if (!mainVideo.paused) popupVideo.play().catch(() => {});
                 else popupVideo.pause();
                 videoPopup.classList.add('active');
-                document.body.style.overflow = 'hidden';
+                lockScroll();
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
                     `<i class="fa-solid fa-volume-high"></i>`;
                 popupTotTime.textContent = formatTime(popupVideo.duration);
@@ -3509,7 +3657,7 @@ self.addEventListener('fetch', function (e) {
 
             function closePopup() {
                 videoPopup.classList.remove('active');
-                document.body.style.overflow = '';
+                unlockScroll();
                 mainVideo.muted = false;
                 if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
                     mainVideo.play().catch(() => {}); }
@@ -3662,7 +3810,7 @@ self.addEventListener('fetch', function (e) {
                 viewerImg.src = viewerGallery[viewerGalleryIndex];
                 viewerImg.alt = alt || "原图";
                 viewer.classList.add("show");
-                document.body.style.overflow = "hidden";
+                lockScroll();
                 viewerHint.textContent = '左右滑动切换 · 长按保存';
                 updateViewerCounter();
                 if (viewerGallery.length > 1) setTimeout(() => { if (viewer.classList.contains('show'))
@@ -3672,7 +3820,7 @@ self.addEventListener('fetch', function (e) {
 
             function closeViewer() { stopViewerAutoPlay();
                 viewer.classList.remove("show");
-                document.body.style.overflow = "";
+                unlockScroll();
                 isViewerInteracting = false;
                 setTimeout(() => { if (!viewer.classList.contains("show")) viewerImg.src = ""; }, 250); }
 
@@ -3786,13 +3934,20 @@ self.addEventListener('fetch', function (e) {
             $("#plate").addEventListener("click", async (e) => {
                 e.stopPropagation();
                 const txt = "苏FA36165";
-                try { await navigator.clipboard.writeText(txt); } catch {
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(txt);
+                    } else {
+                        throw new Error('fallback');
+                    }
+                } catch {
                     const inp = document.createElement("input");
                     inp.value = txt;
                     inp.style.cssText = "position:fixed;opacity:0;";
                     document.body.appendChild(inp);
                     inp.select();
-                    document.execCommand("copy");
+                    inp.setSelectionRange(0, 99999);
+                    try { document.execCommand("copy"); } catch (err) {}
                     inp.remove();
                 }
                 showToastMsg("车牌号已复制");
@@ -3815,27 +3970,32 @@ self.addEventListener('fetch', function (e) {
                 el.className = "click-text-item";
                 el.textContent = txt;
                 el.style.animation = 'popFloatGrad 4.8s var(--ease) forwards';
-                el.style.left = (e.clientX - 40) + "px";
-                el.style.top = (e.clientY - 20) + "px";
+                const px = (e.clientX !== undefined && e.clientX !== 0) ? e.clientX : (window.innerWidth / 2);
+                const py = (e.clientY !== undefined && e.clientY !== 0) ? e.clientY : (window.innerHeight / 2);
+                el.style.left = (px - 40) + "px";
+                el.style.top = (py - 20) + "px";
                 document.body.appendChild(el);
                 setTimeout(() => { if (el.parentNode) el.remove(); }, 4800);
             });
 
             // ===== 状态栏时间 =====
+            const statusClock = document.getElementById('statusClock');
             function updateTime() {
                 const now = new Date();
                 const h = String(now.getHours()).padStart(2, "0");
                 const m = String(now.getMinutes()).padStart(2, "0");
-                $("#statusTime").childNodes[0].nodeValue = h + ":" + m;
+                if (statusClock) statusClock.textContent = h + ":" + m;
             }
             updateTime();
             setInterval(updateTime, 1000);
 
             // ================================================================
             //  🌤️ 天气组件：根据车牌归属地获取天气
+            //  [跨平台修复] wttr.in 只认英文/拼音城市名，这里全部改为英文；
+            //  并同时匹配中英文天气描述关键词。
             // ================================================================
             const PLATE_MAP = {
-                '苏': '南通',
+                '苏': 'Nantong',
                 '京': 'Beijing',
                 '沪': 'Shanghai',
                 '粤': 'Guangzhou',
@@ -3854,7 +4014,7 @@ self.addEventListener('fetch', function (e) {
                 '辽': 'Shenyang',
                 '吉': 'Changchun',
                 '黑': 'Harbin',
-                '陕': 'Xi\'an',
+                '陕': 'Xian',
                 '甘': 'Lanzhou',
                 '青': 'Xining',
                 '云': 'Kunming',
@@ -3866,7 +4026,7 @@ self.addEventListener('fetch', function (e) {
                 '宁': 'Yinchuan',
                 '新': 'Urumqi',
                 '津': 'Tianjin',
-                '港': 'HongKong',
+                '港': 'Hong Kong',
                 '澳': 'Macau'
             };
 
@@ -3884,15 +4044,17 @@ self.addEventListener('fetch', function (e) {
                 weatherDesc.textContent = weather.desc;
             }
 
+            // 中英文双语匹配
             function getWeatherIcon(desc) {
                 if (!desc) return '☀️';
-                const lower = desc.toLowerCase();
-                if (lower.includes('雨')) return '🌧️';
-                if (lower.includes('雪')) return '❄️';
-                if (lower.includes('雾') || lower.includes('霾')) return '🌫️';
-                if (lower.includes('云')) return '⛅';
-                if (lower.includes('阴')) return '☁️';
-                if (lower.includes('晴')) return '☀️';
+                const d = String(desc).toLowerCase();
+                if (/雷|thunder|storm/.test(d)) return '⛈️';
+                if (/雨|rain|drizzle|shower/.test(d)) return '🌧️';
+                if (/雪|snow|sleet|blizzard|ice/.test(d)) return '❄️';
+                if (/雾|霾|fog|mist|haze/.test(d)) return '🌫️';
+                if (/多云|局部云|partly|cloudy/.test(d)) return '⛅';
+                if (/阴|overcast/.test(d)) return '☁️';
+                if (/晴|clear|sunny/.test(d)) return '☀️';
                 return '☀️';
             }
 
@@ -3902,31 +4064,37 @@ self.addEventListener('fetch', function (e) {
                 weatherDesc.textContent = '更新中...';
 
                 try {
-                    const plateText = document.getElementById('plate')?.textContent || '苏FA36165';
+                    const plateText = document.getElementById('plate') ? document.getElementById('plate').textContent : '苏FA36165';
                     const province = getPlateProvince(plateText);
                     const city = PLATE_MAP[province] || 'Nantong';
 
-                    const resp = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' },
-                        mode: 'cors'
-                    });
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+                    const resp = await fetch(
+                        'https://wttr.in/' + encodeURIComponent(city) + '?format=j1&lang=zh',
+                        { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal }
+                    );
+                    clearTimeout(timeoutId);
+
                     if (resp.ok) {
                         const data = await resp.json();
-                        const current = data.current_condition?.[0];
+                        const current = data.current_condition && data.current_condition[0];
                         if (current) {
                             const temp = parseInt(current.temp_C, 10) || 24;
-                            const desc = current.weatherDesc?.[0]?.value || '晴';
-                            const shortDesc = desc.split(',')[0].trim().slice(0, 4);
-                            const icon = getWeatherIcon(shortDesc);
-                            setWeather({ icon, temp, desc: shortDesc });
-                            showToastMsg(`🌤️ ${city} 天气已更新`);
+                            const descZh = (current.lang_zh && current.lang_zh[0] && current.lang_zh[0].value) ||
+                                (current.weatherDesc && current.weatherDesc[0] && current.weatherDesc[0].value) || '晴';
+                            const shortDesc = String(descZh).split(',')[0].trim().slice(0, 4);
+                            const icon = getWeatherIcon(shortDesc || descZh);
+                            setWeather({ icon, temp, desc: shortDesc || '晴' });
+                            showToastMsg('🌤️ ' + city + ' 天气已更新');
                             weatherFetching = false;
                             return;
                         }
                     }
                 } catch (e) {}
 
+                // 网络失败时回退到本地随机模拟，保证界面不空白
                 const states = [
                     { icon: '☀️', temp: 28, desc: '晴' },
                     { icon: '⛅', temp: 24, desc: '多云' },
@@ -3953,8 +4121,8 @@ self.addEventListener('fetch', function (e) {
                 videoControls.classList.remove('hidden');
                 centerPlayBtn.classList.remove('hidden');
                 updateCenterPlayBtn();
+                updateMuteIcon();
                 if (!mainVideo.paused) startAutoHideTimer();
-                mainVideo.currentTime = 0;
             }, 500);
 
             document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureSakura(); });
@@ -3977,7 +4145,6 @@ self.addEventListener('fetch', function (e) {
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
-        
             // ===== [本次新增] 键盘快捷键（桌面端）：←/→ 切视频，空格 播放暂停，T 切主题，Esc 关弹窗 =====
             document.addEventListener('keydown', function (e) {
                 var t = e.target || {};
@@ -3998,8 +4165,6 @@ self.addEventListener('fetch', function (e) {
                 else if ((k === ' ' || k === 'Spacebar')) { if (tag === 'button') return; e.preventDefault(); toggleVideo(); }
                 else if (k === 't' || k === 'T') { toggleTheme(); }
             });
-
-            
 
             // ===== [本次新增] 低端机检测：低核心/低内存则降级毛玻璃、停樱花粒子 =====
             (function () {
@@ -4029,8 +4194,9 @@ self.addEventListener('fetch', function (e) {
                 } catch (e) {}
             })();
 
-            // ===== [本次新增] PWA：注册 Service Worker（仅 https/localhost 生效，失败静默）=====
-            // ===== PWA(单文件版)：内联 manifest 生成 Blob 清单 + 内联 SW 经 Blob 注册（仅 https/localhost，失败静默）=====
+            // ===== PWA(单文件版)：内联 manifest 生成 Blob 清单 =====
+            // [跨平台修复] Service Worker 不能用 Blob URL 注册（浏览器强制要求同源脚本），
+            // 原注册逻辑在所有平台都会失败，此处仅保留 manifest 注入，移除无效的 SW 注册。
             try {
                 var _mEl = document.getElementById('pwa-manifest');
                 if (_mEl) {
@@ -4041,20 +4207,6 @@ self.addEventListener('fetch', function (e) {
                     document.head.appendChild(_mLink);
                 }
             } catch (e) {}
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function () {
-                    try {
-                        var proto = location.protocol;
-                        if (proto === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-                            var _swEl = document.getElementById('pwa-sw-src');
-                            if (_swEl) {
-                                var _swBlob = new Blob([_swEl.textContent], { type: 'application/javascript' });
-                                navigator.serviceWorker.register(URL.createObjectURL(_swBlob)).catch(function () {});
-                            }
-                        }
-                    } catch (e) {}
-                });
-            }
 
 })();
     </script>
