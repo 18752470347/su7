@@ -183,7 +183,7 @@
             -webkit-touch-callout: none;
         }
         button, .app-button, .plate, .avatar, .weather-widget, .status-btn,
-        .status-theme-toggle, .status-meteor-toggle, .status-word-toggle,
+        .status-theme-toggle, .status-meteor-toggle, .status-word-toggle, .status-sakura-toggle,
         .center-play-btn, .btn-expand {
             touch-action: manipulation;
         }
@@ -467,6 +467,121 @@
             text-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
         }
 
+        /* 樱花飘落开关按钮 */
+        .status-sakura-toggle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            color: var(--status-color);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            flex-shrink: 0;
+            position: relative;
+            overflow: visible;
+            margin-left: 4px;
+        }
+        .status-sakura-toggle::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(255, 150, 200, 0.0), rgba(255, 150, 200, 0.12), rgba(255, 150, 200, 0.0), rgba(255, 200, 150, 0.12), rgba(255, 200, 150, 0.0));
+            opacity: 0;
+            z-index: -1;
+            transition: all 0.6s ease;
+            filter: blur(4px);
+            transform: scale(0.8);
+        }
+        .status-sakura-toggle:hover::before {
+            opacity: 0.5;
+            transform: scale(1.15);
+        }
+        .status-sakura-toggle::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.15;
+            transition: opacity 0.4s ease;
+        }
+        .status-sakura-toggle:hover::after {
+            opacity: 0.4;
+        }
+        .status-sakura-toggle i {
+            position: relative;
+            z-index: 2;
+            font-size: 15px;
+            line-height: 1;
+            transition: var(--transition-smooth);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0);
+        }
+        .status-sakura-toggle:hover i {
+            transform: scale(1.1) rotate(10deg);
+        }
+        .status-sakura-toggle:active {
+            transform: scale(0.85);
+        }
+        .status-sakura-toggle:active i {
+            transform: rotate(360deg) scale(0.9);
+        }
+        .status-sakura-toggle.active {
+            background: rgba(255, 150, 200, 0.08);
+            border-color: rgba(255, 150, 200, 0.2);
+            box-shadow: 0 4px 20px rgba(255, 150, 200, 0.06), inset 0 0 30px rgba(255, 150, 200, 0.02);
+        }
+        .status-sakura-toggle.active::before {
+            opacity: 0.6;
+            transform: scale(1.1);
+        }
+        .status-sakura-toggle.active i {
+            color: #FF8AB4;
+            text-shadow: 0 0 20px rgba(255, 138, 180, 0.3);
+        }
+        .status-sakura-toggle.active:hover i {
+            text-shadow: 0 0 30px rgba(255, 138, 180, 0.5);
+        }
+        .status-sakura-toggle.inactive {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+        .status-sakura-toggle.inactive i {
+            color: #8E8E93;
+            opacity: 0.4;
+        }
+        .status-sakura-toggle.inactive:hover i {
+            opacity: 0.7;
+        }
+        html.dark-mode .status-sakura-toggle {
+            background: rgba(20, 20, 24, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        html.dark-mode .status-sakura-toggle.active {
+            background: rgba(255, 150, 200, 0.06);
+            border-color: rgba(255, 150, 200, 0.15);
+            box-shadow: 0 4px 24px rgba(255, 150, 200, 0.06);
+        }
+        html.dark-mode .status-sakura-toggle.active i {
+            color: #FF8AB4;
+            text-shadow: 0 0 30px rgba(255, 138, 180, 0.25);
+        }
+        html.dark-mode .status-sakura-toggle.inactive i {
+            color: #6E6E73;
+            opacity: 0.3;
+        }
+
         /* 流星雨按钮 */
         .status-meteor-toggle {
             width: 34px;
@@ -700,14 +815,16 @@
         @media (max-width: 380px) {
             .status-meteor-toggle,
             .status-word-toggle,
-            .status-theme-toggle {
+            .status-theme-toggle,
+            .status-sakura-toggle {
                 width: 28px;
                 height: 28px;
                 font-size: 13px;
             }
             .status-meteor-toggle i,
             .status-word-toggle i,
-            .status-theme-toggle i {
+            .status-theme-toggle i,
+            .status-sakura-toggle i {
                 font-size: 13px;
             }
             .ios-status-left {
@@ -718,14 +835,16 @@
         @media (max-width: 360px) {
             .status-meteor-toggle,
             .status-word-toggle,
-            .status-theme-toggle {
+            .status-theme-toggle,
+            .status-sakura-toggle {
                 width: 26px;
                 height: 26px;
                 font-size: 12px;
             }
             .status-meteor-toggle i,
             .status-word-toggle i,
-            .status-theme-toggle i {
+            .status-theme-toggle i,
+            .status-sakura-toggle i {
                 font-size: 12px;
             }
         }
@@ -2124,6 +2243,10 @@
             .status-theme-toggle:hover::after { opacity: 0.2; }
             .status-theme-toggle:hover i { transform: none; text-shadow: none; }
 
+            .status-sakura-toggle:hover::before { opacity: 0; transform: scale(0.8); }
+            .status-sakura-toggle:hover::after { opacity: 0.15; }
+            .status-sakura-toggle:hover i { transform: none; }
+
             .status-meteor-toggle:hover::before,
             .status-word-toggle:hover::before { opacity: 0; transform: scale(0.8); }
             .status-meteor-toggle:hover::after,
@@ -2181,6 +2304,10 @@
             .avatar:focus-visible,
             .weather-widget:focus-visible {
                 outline: 2px solid #00D4FF;
+                outline-offset: 2px;
+            }
+            .status-sakura-toggle:focus-visible {
+                outline: 2px solid #FF8AB4;
                 outline-offset: 2px;
             }
         }
@@ -2299,6 +2426,10 @@ self.addEventListener('fetch', function (e) {
                     <button class="status-theme-toggle" id="statusThemeToggle" aria-label="切换深色/浅色模式">
                         <i class="fa-regular fa-sun" id="statusThemeIcon"></i>
                     </button>
+                    <!-- 樱花飘落开关：放在主题按钮后面 -->
+                    <button class="status-sakura-toggle active" id="sakuraToggle" aria-label="切换樱花飘落" title="点击开关樱花飘落">
+                        <i class="fa-solid fa-leaf" id="sakuraToggleIcon"></i>
+                    </button>
                 </span>
                 <div class="dynamic-island" id="dynamicIsland">
                     <span class="island-text-scroll" id="islandText">❤️ 刘亦菲</span>
@@ -2322,7 +2453,6 @@ self.addEventListener('fetch', function (e) {
 
         <div class="video-player-container" id="videoCard">
             <div class="video-box" id="videoBox">
-                <!-- ⚠️ 已移除 autoplay：改为手动点击播放 -->
                 <video id="mainVideo" src="" playsinline webkit-playsinline preload="metadata"
                        controlslist="nodownload noremoteplayback" disablepictureinpicture oncontextmenu="return false"></video>
                 <button class="center-play-btn" id="centerPlayBtn" aria-label="播放/暂停">
@@ -2751,6 +2881,63 @@ self.addEventListener('fetch', function (e) {
             meteorToggle.addEventListener('click', function(e) { e.stopPropagation();
                 toggleMeteor(); });
             updateMeteorToggleUI();
+
+            // ===== 樱花飘落开关 =====
+            const sakuraToggle = document.getElementById('sakuraToggle');
+            const sakuraToggleIcon = document.getElementById('sakuraToggleIcon');
+            const SAKURA_STORAGE_KEY = 'sakura_enabled';
+            let sakuraEnabled = true;
+            try {
+                const saved = localStorage.getItem(SAKURA_STORAGE_KEY);
+                if (saved !== null) sakuraEnabled = saved === 'true';
+            } catch (e) {}
+
+            function updateSakuraToggleUI() {
+                if (sakuraEnabled) {
+                    sakuraToggle.classList.remove('inactive');
+                    sakuraToggle.classList.add('active');
+                    sakuraToggleIcon.style.color = '#FF8AB4';
+                    sakuraToggleIcon.style.textShadow = '0 0 20px rgba(255,138,180,0.3)';
+                    sakuraToggle.title = '点击关闭樱花飘落';
+                } else {
+                    sakuraToggle.classList.remove('active');
+                    sakuraToggle.classList.add('inactive');
+                    sakuraToggleIcon.style.color = '#8E8E93';
+                    sakuraToggleIcon.style.textShadow = 'none';
+                    sakuraToggle.title = '点击开启樱花飘落';
+                }
+                try { localStorage.setItem(SAKURA_STORAGE_KEY, String(sakuraEnabled)); } catch (e) {}
+            }
+
+            // ★ 应用樱花开关状态（关闭时清除定时器和已存在的花瓣）
+            function applySakuraState() {
+                if (!sakuraEnabled) {
+                    if (sakuraInterval) {
+                        clearInterval(sakuraInterval);
+                        sakuraInterval = null;
+                    }
+                    var sakuraBoxEl = document.getElementById('sakuraBox');
+                    if (sakuraBoxEl) {
+                        var existing = sakuraBoxEl.querySelectorAll('.sakura');
+                        for (var i = 0; i < existing.length; i++) {
+                            if (existing[i].parentNode) existing[i].parentNode.removeChild(existing[i]);
+                        }
+                    }
+                    sakuraCount = 0;
+                } else {
+                    if (typeof ensureSakura === 'function') ensureSakura();
+                }
+            }
+
+            function toggleSakura() {
+                sakuraEnabled = !sakuraEnabled;
+                updateSakuraToggleUI();
+                applySakuraState();
+                showToastMsg(sakuraEnabled ? '🌸 樱花飘落已开启' : '🌸 樱花飘落已关闭');
+            }
+            sakuraToggle.addEventListener('click', function(e) { e.stopPropagation();
+                toggleSakura(); });
+            updateSakuraToggleUI();
 
             // ===== 许红豆文字开关 =====
             const wordToggle = document.getElementById('wordToggle');
@@ -3294,6 +3481,7 @@ self.addEventListener('fetch', function (e) {
             let viewerGalleryIndex = 0;
             let glowInterval = null;
             let sakuraInterval = null;
+            let sakuraCount = 0;
             let islandInterval = null;
             let popupControlsVisible = false;
             let isJumping = false;
@@ -3302,9 +3490,8 @@ self.addEventListener('fetch', function (e) {
             let viewerAutoPlayTimer = null;
             let isViewerInteracting = false;
 
-            // ★ 主副视频互斥状态（避免声音重叠）
-            let isPopupMode = false;                // 弹窗是否处于激活状态
-            let mainWasPlayingBeforePopup = false;  // 打开弹窗之前主视频是否在播放
+            let isPopupMode = false;
+            let mainWasPlayingBeforePopup = false;
 
             // ================================================================
             //  滚动锁定
@@ -3343,7 +3530,7 @@ self.addEventListener('fetch', function (e) {
             }
 
             // ================================================================
-            //  ▶️ 手动播放辅助函数（主副视频共用，保证声音同步开启）
+            //  ▶️ 手动播放辅助函数
             // ================================================================
             function playWithSound(videoEl) {
                 if (!videoEl) return;
@@ -3498,7 +3685,7 @@ self.addEventListener('fetch', function (e) {
             }
 
             // ================================================================
-            //  🔀 切换视频（核心互斥逻辑：弹窗模式下由弹窗播放，主视频静默同步进度）
+            //  🔀 切换视频
             // ================================================================
             function switchVideo(index) {
                 if (videoList.length === 0) return;
@@ -3511,14 +3698,12 @@ self.addEventListener('fetch', function (e) {
                 totTime.textContent = formatTime(mainVideo.duration);
 
                 if (isPopupMode) {
-                    // ⚠️ 弹窗模式：主视频保持暂停且静音，避免与弹窗声音重叠
                     mainVideo.pause();
                     mainVideo.muted = true;
                     popupVideo.src = src;
                     popupVideo.currentTime = 0;
                     playWithSound(popupVideo);
                 } else {
-                    // 正常模式：主视频带声音播放
                     mainVideo.muted = false;
                     if (mainVideo.volume <= 0) mainVideo.volume = 1;
                     playWithSound(mainVideo);
@@ -3572,7 +3757,7 @@ self.addEventListener('fetch', function (e) {
                         `<i class="fa-solid fa-volume-high"></i>`; }
             }
 
-            // ===== 初始化视频（手动播放：只加载，不自动播放）=====
+            // ===== 初始化视频 =====
             currentVideoIndex = 0;
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
             if (avatarIndex >= avatarImages.length) avatarIndex = 0;
@@ -3598,8 +3783,6 @@ self.addEventListener('fetch', function (e) {
             });
 
             // ===== 樱花 =====
-            let sakuraCount = 0;
-
             function createSakura() {
                 if (document.hidden) return;
                 if (sakuraCount >= SAKURA_MAX) return;
@@ -3624,11 +3807,11 @@ self.addEventListener('fetch', function (e) {
             function ensureSakura() {
                 if (sakuraInterval) clearInterval(sakuraInterval);
                 sakuraInterval = null;
-                if (document.hidden) return;
+                if (document.hidden || !sakuraEnabled) return;
                 for (let i = 0; i < 3; i++) setTimeout(createSakura, i * 80);
                 sakuraInterval = setInterval(createSakura, SAKURA_INTERVAL_MS);
             }
-            ensureSakura();
+            if (sakuraEnabled) ensureSakura();
 
             // ===== 灵动岛 =====
             const textPool = ["❤️ 刘亦菲", "苏FA36165", "Xiaomi SU7 Pro", "许红豆"];
@@ -3701,10 +3884,8 @@ self.addEventListener('fetch', function (e) {
                 showControls();
             });
 
-            // ⚠️ 主视频 play 事件：确保弹窗视频暂停（互斥）
             mainVideo.addEventListener("play", () => {
                 if (isPopupMode) {
-                    // 弹窗模式：主视频不应该播放，主动暂停
                     mainVideo.pause();
                     mainVideo.muted = true;
                     return;
@@ -3714,7 +3895,6 @@ self.addEventListener('fetch', function (e) {
                 showControls();
             });
 
-            // ⚠️ 主视频 pause 事件
             mainVideo.addEventListener("pause", () => {
                 updatePlayBtnIcon();
                 centerPlayBtn.classList.remove('hidden');
@@ -3823,7 +4003,6 @@ self.addEventListener('fetch', function (e) {
                 mainWasPlayingBeforePopup = !mainVideo.paused;
                 isPopupMode = true;
 
-                // ★ 暂停主视频，避免声音重叠
                 mainVideo.pause();
 
                 popupVideo.src = src;
@@ -3853,27 +4032,22 @@ self.addEventListener('fetch', function (e) {
                 }, POPUP_HIDE_DELAY);
             }
 
-            // ★★★ 关闭弹窗：主视频从弹窗进度继续播放，绝不重新从头播放 ★★★
             function closePopup() {
                 const wasPlaying = !popupVideo.paused;
                 const time = popupVideo.currentTime;
                 const targetTime = (isFinite(time) && time > 0) ? time : 0;
 
-                // 1. 先关闭弹窗状态标记，防止 timeupdate 继续同步
                 isPopupMode = false;
 
-                // 2. 弹窗视频先暂停（不立即清 src，避免干扰主视频 seek）
                 popupVideo.pause();
 
                 videoPopup.classList.remove('active');
                 unlockScroll();
 
-                // 3. 恢复主视频音量设置
                 mainVideo.muted = false;
                 if (mainVideo.volume <= 0) mainVideo.volume = 1;
                 updateMuteIcon();
 
-                // 4. 同步进度并继续播放（关键：等待 seeked 完成）
                 const resumePlay = function () {
                     mainVideo.removeEventListener('seeked', resumePlay);
                     if (wasPlaying) {
@@ -3883,13 +4057,11 @@ self.addEventListener('fetch', function (e) {
                     updatePlayBtnIcon();
                 };
 
-                // 如果主视频已在目标进度附近，直接播放
                 if (Math.abs(mainVideo.currentTime - targetTime) < 0.15) {
                     if (wasPlaying) playWithSound(mainVideo);
                     updateCenterPlayBtn();
                     updatePlayBtnIcon();
                 } else {
-                    // ★ 关键修复：等 seek 完成后再 play，避免从头开始
                     mainVideo.addEventListener('seeked', resumePlay, { once: true });
                     try {
                         mainVideo.currentTime = targetTime;
@@ -3899,7 +4071,6 @@ self.addEventListener('fetch', function (e) {
                     }
                 }
 
-                // 5. 延迟清空弹窗视频源，避免与主视频 seek 冲突
                 setTimeout(function () {
                     popupVideo.pause();
                     popupVideo.removeAttribute('src');
@@ -3990,7 +4161,6 @@ self.addEventListener('fetch', function (e) {
             popupVideo.addEventListener('loadedmetadata', () => { popupTotTime.textContent = formatTime(popupVideo
                     .duration); });
 
-            // ⚠️ 弹窗进度更新：仅在弹窗模式同步主视频 currentTime（不播放）
             popupVideo.addEventListener('timeupdate', () => {
                 if (!isPopupMode) return;
                 if (popupVideo.duration > 0) {
@@ -4029,7 +4199,6 @@ self.addEventListener('fetch', function (e) {
                     popupControlsVisible = false; }, POPUP_HIDE_DELAY);
             });
 
-            // ★ 弹窗 pause：仅在弹窗仍激活时处理 UI 隐藏
             popupVideo.addEventListener('pause', () => {
                 popupPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
                 if (!videoPopup.classList.contains('active')) return;
@@ -4222,6 +4391,7 @@ self.addEventListener('fetch', function (e) {
                     e.target.closest(".video-popup") || e.target.closest(".btn-expand") ||
                     e.target.closest(".dynamic-island") || e.target.closest(".app-icon-wrap") ||
                     e.target.closest(".center-play-btn") || e.target.closest(".status-theme-toggle") ||
+                    e.target.closest(".status-sakura-toggle") ||
                     e.target.closest(".floating-word") || e.target.closest(".plate-photo") ||
                     e.target.closest(".weather-widget") ||
                     e.target.closest(".status-meteor-toggle") ||
@@ -4397,7 +4567,12 @@ self.addEventListener('fetch', function (e) {
                     if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
                 } else {
                     if (!animFrameId) { lastFrameTs = 0; animFrameId = requestAnimationFrame(animate); }
-                    ensureSakura();
+                    // 樱花：仅在开启状态下恢复
+                    if (sakuraEnabled) {
+                        ensureSakura();
+                    } else {
+                        if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
+                    }
                     updateCardRectForMeteors();
                     updateCardRectForWords();
                     measureWordSizes();
@@ -4413,6 +4588,7 @@ self.addEventListener('fetch', function (e) {
                 try {
                     localStorage.setItem(METEOR_STORAGE_KEY, String(meteorEnabled));
                     localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible));
+                    localStorage.setItem(SAKURA_STORAGE_KEY, String(sakuraEnabled));
                 } catch (e) {}
                 if (glowInterval) clearInterval(glowInterval);
                 if (sakuraInterval) clearInterval(sakuraInterval);
