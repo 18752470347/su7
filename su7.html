@@ -2429,7 +2429,7 @@ self.addEventListener('fetch', function (e) {
             // ================================================================
             //  ⚡ 性能参数（适配小米 17 Pro / 安卓 Chrome 高刷屏 / 桌面端）
             // ================================================================
-            const TARGET_FPS = 30;                       // 星空+流星目标帧率（防发烫掉帧）
+            const TARGET_FPS = 30;
             const FRAME_INTERVAL = 1000 / TARGET_FPS;
             const STAR_COUNT = 380;
             const METEOR_SPAWN_INTERVAL_MIN = 10;
@@ -2440,7 +2440,7 @@ self.addEventListener('fetch', function (e) {
             const STACK_PRELOAD_COUNT = 6;
 
             // ================================================================
-            //  🌌 星空 + 流星雨系统（流星限定在主卡片区域内）
+            //  🌌 星空 + 流星雨系统
             // ================================================================
             const canvas = document.getElementById('particles-canvas');
             const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
@@ -2464,7 +2464,6 @@ self.addEventListener('fetch', function (e) {
                 return document.documentElement.classList.contains('dark-mode');
             }
 
-            // ---- 星星光晕精灵缓存：避免每帧为每颗星创建径向渐变（主要发热源）----
             const starSpriteCache = new Map();
             function getStarSprite(hue, sat) {
                 const hh = Math.round(hue / 15) * 15;
@@ -2534,7 +2533,6 @@ self.addEventListener('fetch', function (e) {
             }
             updateCardRectForMeteors();
 
-            // ---- 视口变化统一节流 ----
             let viewportPending = false;
             function onViewportChange() {
                 if (viewportPending) return;
@@ -2679,7 +2677,7 @@ self.addEventListener('fetch', function (e) {
                 if (now === undefined) now = performance.now();
                 if (lastFrameTs === 0) { lastFrameTs = now; return; }
                 const delta = now - lastFrameTs;
-                if (delta < FRAME_INTERVAL) return;   // 限帧
+                if (delta < FRAME_INTERVAL) return;
                 lastFrameTs = now;
                 const step = Math.min(3, delta / 16.67);
 
@@ -3030,7 +3028,7 @@ self.addEventListener('fetch', function (e) {
             //  核心功能：视频、头像、堆叠图片、主题切换、天气组件
             // ================================================================
             const videoList = [
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-29_125335_129.mp4",
+                https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/15.mp4
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/12.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152900_815.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-08-31_152927_535.mp4",
@@ -3044,7 +3042,7 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/%E5%BE%AE%E4%BF%A1%E8%A7%86%E9%A2%912026-09-04_121903_004.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/9.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/10.mp4",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/11.mp4", 
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/11.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/13.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/14.mp4",
             ];
@@ -3069,6 +3067,8 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/17.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/18.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/19.jpg",
+
+                
             ];
             const slideImages = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
@@ -3302,8 +3302,12 @@ self.addEventListener('fetch', function (e) {
             let viewerAutoPlayTimer = null;
             let isViewerInteracting = false;
 
+            // ★ 主副视频互斥状态（避免声音重叠）
+            let isPopupMode = false;                // 弹窗是否处于激活状态
+            let mainWasPlayingBeforePopup = false;  // 打开弹窗之前主视频是否在播放
+
             // ================================================================
-            //  滚动锁定（iOS Safari 用 position:fixed 技巧）
+            //  滚动锁定
             // ================================================================
             let _scrollLockY = 0;
             let _isScrollLocked = false;
@@ -3348,7 +3352,6 @@ self.addEventListener('fetch', function (e) {
                 var p = videoEl.play();
                 if (p && typeof p.catch === 'function') {
                     p.catch(function () {
-                        // 极少数情况下浏览器仍需用户手势，此时不再静音兜底
                         showToastMsg('请再次点击播放按钮');
                     });
                 }
@@ -3494,17 +3497,34 @@ self.addEventListener('fetch', function (e) {
                     clearTimeout(hideControlTimer); }
             }
 
+            // ================================================================
+            //  🔀 切换视频（核心互斥逻辑：弹窗模式下由弹窗播放，主视频静默同步进度）
+            // ================================================================
             function switchVideo(index) {
                 if (videoList.length === 0) return;
                 currentVideoIndex = (index + videoList.length) % videoList.length;
                 const src = videoList[currentVideoIndex];
+
                 mainVideo.src = src;
                 progressFill.style.width = '0%';
                 curTime.textContent = '00:00';
                 totTime.textContent = formatTime(mainVideo.duration);
-                // 用户主动切换 → 带声音播放（与弹窗视频行为一致）
-                playWithSound(mainVideo);
-                popupVideo.src = src;
+
+                if (isPopupMode) {
+                    // ⚠️ 弹窗模式：主视频保持暂停且静音，避免与弹窗声音重叠
+                    mainVideo.pause();
+                    mainVideo.muted = true;
+                    popupVideo.src = src;
+                    popupVideo.currentTime = 0;
+                    playWithSound(popupVideo);
+                } else {
+                    // 正常模式：主视频带声音播放
+                    mainVideo.muted = false;
+                    if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                    playWithSound(mainVideo);
+                    popupVideo.src = src;
+                }
+
                 updateCenterPlayBtn();
                 updatePlayBtnIcon();
                 showControls();
@@ -3513,7 +3533,6 @@ self.addEventListener('fetch', function (e) {
 
             function toggleVideo() {
                 if (mainVideo.paused) {
-                    // 手动点击播放：视频与声音一起播放
                     playWithSound(mainVideo);
                 } else {
                     mainVideo.pause();
@@ -3563,7 +3582,6 @@ self.addEventListener('fetch', function (e) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
                 mainVideo.currentTime = 0;
-                // ❌ 不自动播放，等待用户点击
                 mainVideo.muted = false;
                 if (mainVideo.volume <= 0) mainVideo.volume = 1;
                 updateCenterPlayBtn();
@@ -3682,17 +3700,32 @@ self.addEventListener('fetch', function (e) {
                 mainVideo.currentTime = r * mainVideo.duration;
                 showControls();
             });
-            mainVideo.addEventListener("play", () => { updatePlayBtnIcon();
+
+            // ⚠️ 主视频 play 事件：确保弹窗视频暂停（互斥）
+            mainVideo.addEventListener("play", () => {
+                if (isPopupMode) {
+                    // 弹窗模式：主视频不应该播放，主动暂停
+                    mainVideo.pause();
+                    mainVideo.muted = true;
+                    return;
+                }
+                updatePlayBtnIcon();
                 updateCenterPlayBtn();
-                showControls(); if (videoPopup.classList.contains('active') && popupVideo.src === mainVideo.src) {
-                    popupVideo.play().catch(() => {}); } });
-            mainVideo.addEventListener("pause", () => { updatePlayBtnIcon();
+                showControls();
+            });
+
+            // ⚠️ 主视频 pause 事件
+            mainVideo.addEventListener("pause", () => {
+                updatePlayBtnIcon();
                 centerPlayBtn.classList.remove('hidden');
                 centerPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
                 videoControls.classList.remove("hidden");
-                clearTimeout(hideControlTimer); if (videoPopup.classList.contains('active') && popupVideo.src ===
-                    mainVideo.src) { popupVideo.pause(); } });
-            mainVideo.addEventListener("ended", function() { switchVideo(currentVideoIndex + 1); });
+                clearTimeout(hideControlTimer);
+            });
+
+            mainVideo.addEventListener("ended", function() {
+                if (!isPopupMode) switchVideo(currentVideoIndex + 1);
+            });
 
             // ----- 主视频滑动切换 -----
             let startX = 0,
@@ -3740,15 +3773,9 @@ self.addEventListener('fetch', function (e) {
                     e.preventDefault();
                     if (dx < 0) {
                         nextVideo();
-                        popupVideo.src = videoList[currentVideoIndex];
-                        popupVideo.currentTime = 0;
-                        playWithSound(popupVideo);
                         popupIsSwiping = false;
                     } else {
                         prevVideo();
-                        popupVideo.src = videoList[currentVideoIndex];
-                        popupVideo.currentTime = 0;
-                        playWithSound(popupVideo);
                         popupIsSwiping = false;
                     }
                 }
@@ -3792,58 +3819,107 @@ self.addEventListener('fetch', function (e) {
             function openPopup() {
                 const src = mainVideo.src;
                 if (!src) return;
+
+                mainWasPlayingBeforePopup = !mainVideo.paused;
+                isPopupMode = true;
+
+                // ★ 暂停主视频，避免声音重叠
+                mainVideo.pause();
+
                 popupVideo.src = src;
                 popupVideo.currentTime = mainVideo.currentTime;
                 popupVideo.muted = false;
                 if (popupVideo.volume <= 0) popupVideo.volume = 1;
-                // 主视频在播放，则弹窗视频也带声音继续播放；否则保持暂停等待用户点击
-                if (!mainVideo.paused) {
-                    popupVideo.play().catch(() => {});
-                } else {
-                    popupVideo.pause();
-                }
+
                 videoPopup.classList.add('active');
                 lockScroll();
+
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
                     `<i class="fa-solid fa-volume-high"></i>`;
                 popupTotTime.textContent = formatTime(popupVideo.duration);
+
+                if (mainWasPlayingBeforePopup) {
+                    playWithSound(popupVideo);
+                }
+
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => {
+                    popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false; }, POPUP_HIDE_DELAY);
+                    popupControlsVisible = false;
+                }, POPUP_HIDE_DELAY);
             }
 
+            // ★★★ 关闭弹窗：主视频从弹窗进度继续播放，绝不重新从头播放 ★★★
             function closePopup() {
+                const wasPlaying = !popupVideo.paused;
+                const time = popupVideo.currentTime;
+                const targetTime = (isFinite(time) && time > 0) ? time : 0;
+
+                // 1. 先关闭弹窗状态标记，防止 timeupdate 继续同步
+                isPopupMode = false;
+
+                // 2. 弹窗视频先暂停（不立即清 src，避免干扰主视频 seek）
+                popupVideo.pause();
+
                 videoPopup.classList.remove('active');
                 unlockScroll();
-                if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
-                    mainVideo.play().catch(() => {}); }
-                popupVideo.pause();
-                popupVideo.src = '';
+
+                // 3. 恢复主视频音量设置
+                mainVideo.muted = false;
+                if (mainVideo.volume <= 0) mainVideo.volume = 1;
                 updateMuteIcon();
+
+                // 4. 同步进度并继续播放（关键：等待 seeked 完成）
+                const resumePlay = function () {
+                    mainVideo.removeEventListener('seeked', resumePlay);
+                    if (wasPlaying) {
+                        playWithSound(mainVideo);
+                    }
+                    updateCenterPlayBtn();
+                    updatePlayBtnIcon();
+                };
+
+                // 如果主视频已在目标进度附近，直接播放
+                if (Math.abs(mainVideo.currentTime - targetTime) < 0.15) {
+                    if (wasPlaying) playWithSound(mainVideo);
+                    updateCenterPlayBtn();
+                    updatePlayBtnIcon();
+                } else {
+                    // ★ 关键修复：等 seek 完成后再 play，避免从头开始
+                    mainVideo.addEventListener('seeked', resumePlay, { once: true });
+                    try {
+                        mainVideo.currentTime = targetTime;
+                    } catch (err) {
+                        mainVideo.removeEventListener('seeked', resumePlay);
+                        if (wasPlaying) playWithSound(mainVideo);
+                    }
+                }
+
+                // 5. 延迟清空弹窗视频源，避免与主视频 seek 冲突
+                setTimeout(function () {
+                    popupVideo.pause();
+                    popupVideo.removeAttribute('src');
+                    try { popupVideo.load(); } catch (e) {}
+                }, 120);
+
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 popupControlsVisible = true;
                 clearTimeout(popupHideTimer);
             }
+
             popupVideo.removeAttribute('loop');
+
             popupVideo.addEventListener('ended', () => {
-                if (videoList.length > 0) {
+                if (videoList.length > 0 && isPopupMode) {
                     switchVideo(currentVideoIndex + 1);
-                    popupVideo.src = videoList[currentVideoIndex];
-                    playWithSound(popupVideo);
-                    popupControlsVisible = true;
-                    popupControls.classList.remove("hidden");
-                    popupClose.classList.remove("hidden");
-                    clearTimeout(popupHideTimer);
-                    popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
-                        popupClose.classList.add("hidden");
-                        popupControlsVisible = false; }, POPUP_HIDE_DELAY);
                 }
             });
+
             popupVideo.addEventListener('click', (e) => { e.stopPropagation();
                 togglePopupControls(); });
             popupClose.addEventListener('click', (e) => { e.stopPropagation();
@@ -3853,43 +3929,52 @@ self.addEventListener('fetch', function (e) {
                     popupClose.classList.add("hidden");
                     popupControlsVisible = false;
                     clearTimeout(popupHideTimer); } });
-            popupPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); 
+
+            popupPlayBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (popupVideo.paused) {
                     playWithSound(popupVideo);
                 } else {
                     popupVideo.pause();
                 }
-                if (!popupVideo.paused) { mainVideo.currentTime = popupVideo.currentTime;
-                    mainVideo.play().catch(() => {}); } else mainVideo.pause();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => {
+                    popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
-            popupPrevBtn.addEventListener('click', (e) => { e.stopPropagation();
+                    popupControlsVisible = false;
+                }, POPUP_HIDE_DELAY);
+            });
+
+            popupPrevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 prevVideo();
-                popupVideo.src = videoList[currentVideoIndex];
-                playWithSound(popupVideo);
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => {
+                    popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
-            popupNextBtn.addEventListener('click', (e) => { e.stopPropagation();
+                    popupControlsVisible = false;
+                }, POPUP_HIDE_DELAY);
+            });
+            popupNextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 nextVideo();
-                popupVideo.src = videoList[currentVideoIndex];
-                playWithSound(popupVideo);
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
-                popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
+                popupHideTimer = setTimeout(() => {
+                    popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+                    popupControlsVisible = false;
+                }, POPUP_HIDE_DELAY);
+            });
+
             popupMuteBtn.addEventListener('click', (e) => { e.stopPropagation();
                 popupVideo.muted = !popupVideo.muted;
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
@@ -3901,14 +3986,23 @@ self.addEventListener('fetch', function (e) {
                 popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
                     popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+
             popupVideo.addEventListener('loadedmetadata', () => { popupTotTime.textContent = formatTime(popupVideo
                     .duration); });
+
+            // ⚠️ 弹窗进度更新：仅在弹窗模式同步主视频 currentTime（不播放）
             popupVideo.addEventListener('timeupdate', () => {
-                const p = (popupVideo.currentTime / popupVideo.duration) * 100;
-                popupProgressBar.style.width = p + "%";
-                popupCurTime.textContent = formatTime(popupVideo.currentTime);
-                if (!popupVideo.paused) mainVideo.currentTime = popupVideo.currentTime;
+                if (!isPopupMode) return;
+                if (popupVideo.duration > 0) {
+                    const p = (popupVideo.currentTime / popupVideo.duration) * 100;
+                    popupProgressBar.style.width = p + "%";
+                    popupCurTime.textContent = formatTime(popupVideo.currentTime);
+                }
+                if (!isNaN(popupVideo.currentTime)) {
+                    mainVideo.currentTime = popupVideo.currentTime;
+                }
             });
+
             popupProgressWrap.addEventListener('click', (e) => {
                 const rect = popupProgressWrap.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -3921,25 +4015,32 @@ self.addEventListener('fetch', function (e) {
                     popupClose.classList.add("hidden");
                     popupControlsVisible = false; }, POPUP_HIDE_DELAY);
             });
-            popupVideo.addEventListener('play', () => { popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-                mainVideo.currentTime = popupVideo.currentTime;
-                if (mainVideo.paused) mainVideo.play().catch(() => {});
+
+            popupVideo.addEventListener('play', () => {
+                popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+                if (!mainVideo.paused) mainVideo.pause();
+                mainVideo.muted = true;
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
                 popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
-            popupVideo.addEventListener('pause', () => { popupPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
-                mainVideo.pause();
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY);
+            });
+
+            // ★ 弹窗 pause：仅在弹窗仍激活时处理 UI 隐藏
+            popupVideo.addEventListener('pause', () => {
+                popupPlayBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+                if (!videoPopup.classList.contains('active')) return;
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
                 clearTimeout(popupHideTimer);
                 popupHideTimer = setTimeout(() => { popupControls.classList.add("hidden");
                     popupClose.classList.add("hidden");
-                    popupControlsVisible = false; }, POPUP_HIDE_DELAY); });
+                    popupControlsVisible = false; }, POPUP_HIDE_DELAY);
+            });
 
             // ===== 图片查看器 =====
             function updateViewerCounter() {
@@ -4150,7 +4251,7 @@ self.addEventListener('fetch', function (e) {
             setInterval(updateTime, 1000);
 
             // ================================================================
-            //  🌤️ 天气组件：wttr.in（根据车牌归属地获取天气）
+            //  🌤️ 天气组件：wttr.in
             // ================================================================
             const PLATE_MAP = {
                 '苏': '南通',
@@ -4272,7 +4373,7 @@ self.addEventListener('fetch', function (e) {
             setWeather({ icon: '⏳', temp: '--', desc: '加载中...' });
             setTimeout(fetchWeather, 500);
 
-            // ===== 启动（显示播放按钮，等待用户手动点击）=====
+            // ===== 启动 =====
             setTimeout(() => {
                 videoControls.classList.remove('hidden');
                 centerPlayBtn.classList.remove('hidden');
@@ -4289,7 +4390,7 @@ self.addEventListener('fetch', function (e) {
                 if (!isFollowing && wordsVisible) measureWordSizes();
             }, 1000);
 
-            // ===== 页面可见性：后台时停掉动画与定时器 =====
+            // ===== 页面可见性 =====
             document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
                     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
@@ -4325,7 +4426,7 @@ self.addEventListener('fetch', function (e) {
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
-            // ===== 键盘快捷键（桌面端）=====
+            // ===== 键盘快捷键 =====
             document.addEventListener('keydown', function (e) {
                 var t = e.target || {};
                 var tag = (t.tagName || '').toLowerCase();
