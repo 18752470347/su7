@@ -110,6 +110,9 @@
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
             --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             --transition-bounce: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* ★ 新增：状态栏按钮统一尺寸与间距变量 */
+            --status-btn-size: 34px;
+            --status-btn-gap: 8px;
         }
         html.dark-mode {
             --text-main: #F5F5F7;
@@ -288,6 +291,7 @@
             min-height: 38px;
             padding: 0 2px;
         }
+        /* ★ 左区域：统一间距 */
         .ios-status-left {
             flex: 1;
             text-align: left;
@@ -296,13 +300,20 @@
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--status-btn-gap);
+            min-width: 0;
         }
 
-        /* ===== 状态栏按钮 ===== */
-        .status-btn {
-            width: 34px;
-            height: 34px;
+        /* ===== 状态栏按钮（统一尺寸/间距/字体） ===== */
+        .status-btn,
+        .status-theme-toggle,
+        .status-sakura-toggle,
+        .status-meteor-toggle,
+        .status-word-toggle {
+            width: var(--status-btn-size);
+            height: var(--status-btn-size);
+            min-width: var(--status-btn-size);
+            min-height: var(--status-btn-size);
             border-radius: 50%;
             background: var(--glass-bg);
             backdrop-filter: blur(16px) saturate(180%);
@@ -310,7 +321,6 @@
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
             color: var(--status-color);
-            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -319,133 +329,121 @@
             flex-shrink: 0;
             position: relative;
             overflow: visible;
+            /* ★ 统一去掉各自 margin，由父容器 gap 控制间距 */
+            margin: 0;
         }
-        .status-btn::before {
+
+        /* 各按钮图标统一字号 */
+        .status-btn i,
+        .status-theme-toggle i,
+        .status-sakura-toggle i,
+        .status-meteor-toggle i,
+        .status-word-toggle i {
+            position: relative;
+            z-index: 2;
+            font-size: 15px;
+            line-height: 1;
+            transition: var(--transition-smooth);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0);
+        }
+        .status-theme-toggle i {
+            font-size: 16px;
+        }
+
+        /* 悬停通用 */
+        .status-btn:hover i,
+        .status-theme-toggle:hover i,
+        .status-sakura-toggle:hover i,
+        .status-meteor-toggle:hover i,
+        .status-word-toggle:hover i {
+            transform: scale(1.1) rotate(8deg);
+            text-shadow: 0 0 24px rgba(255, 255, 255, 0.12);
+        }
+        .status-theme-toggle:hover i {
+            transform: rotate(180deg) scale(1.1);
+        }
+        .status-btn:active,
+        .status-theme-toggle:active,
+        .status-sakura-toggle:active,
+        .status-meteor-toggle:active,
+        .status-word-toggle:active {
+            transform: scale(0.85);
+        }
+        .status-btn:active i,
+        .status-theme-toggle:active i,
+        .status-sakura-toggle:active i,
+        .status-meteor-toggle:active i,
+        .status-word-toggle:active i {
+            transform: rotate(360deg) scale(0.9);
+        }
+
+        /* 各按钮 ::before 光晕 */
+        .status-btn::before,
+        .status-theme-toggle::before,
+        .status-sakura-toggle::before,
+        .status-meteor-toggle::before,
+        .status-word-toggle::before {
             content: '';
             position: absolute;
             inset: -4px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.08), transparent, rgba(255, 255, 255, 0.08), transparent);
             opacity: 0;
             z-index: -1;
             transition: all 0.6s ease;
-            filter: blur(6px);
+            filter: blur(4px);
             transform: scale(0.8);
+            pointer-events: none;
         }
-        .status-btn:hover::before {
-            opacity: 0.6;
-            transform: scale(1.2);
+        .status-btn:hover::before,
+        .status-theme-toggle:hover::before,
+        .status-sakura-toggle:hover::before,
+        .status-meteor-toggle:hover::before,
+        .status-word-toggle:hover::before {
+            opacity: 0.5;
+            transform: scale(1.15);
         }
-        .status-btn::after {
+
+        /* 各按钮 ::after 高光 */
+        .status-btn::after,
+        .status-theme-toggle::after,
+        .status-sakura-toggle::after,
+        .status-meteor-toggle::after,
+        .status-word-toggle::after {
             content: '';
             position: absolute;
             inset: 2px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
             pointer-events: none;
-            opacity: 0.2;
+            opacity: 0.18;
             transition: opacity 0.4s ease;
         }
-        .status-btn:hover::after {
-            opacity: 0.5;
-        }
-        .status-btn i {
-            position: relative;
-            z-index: 2;
-            font-size: 16px;
-            line-height: 1;
-            transition: var(--transition-smooth);
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0);
-        }
-        .status-btn:hover i {
-            transform: scale(1.12) rotate(8deg);
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.10);
-        }
-        .status-btn:active {
-            transform: scale(0.85);
-        }
-        .status-btn:active i {
-            transform: rotate(360deg) scale(0.9);
+        .status-btn:hover::after,
+        .status-theme-toggle:hover::after,
+        .status-sakura-toggle:hover::after,
+        .status-meteor-toggle:hover::after,
+        .status-word-toggle:hover::after {
+            opacity: 0.45;
         }
 
-        /* 主题切换按钮 */
-        .status-theme-toggle {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            color: var(--status-color);
-            font-size: 17px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            flex-shrink: 0;
-            position: relative;
-            overflow: visible;
-        }
+        /* --- 主题切换按钮 --- */
         .status-theme-toggle::before {
-            content: '';
-            position: absolute;
-            inset: -5px;
-            border-radius: 50%;
             background: conic-gradient(from 0deg, rgba(255, 200, 100, 0.0), rgba(255, 200, 100, 0.15), rgba(255, 200, 100, 0.0), rgba(100, 200, 255, 0.15), rgba(100, 200, 255, 0.0));
             opacity: 0.4;
-            z-index: -1;
-            transition: all 0.8s ease;
             filter: blur(6px);
             transform: scale(0.9);
             animation: ringOrbit 6s linear infinite;
         }
         @keyframes ringOrbit {
-            0% {
-                transform: scale(0.9) rotate(0deg);
-            }
-            100% {
-                transform: scale(0.9) rotate(360deg);
-            }
+            0% { transform: scale(0.9) rotate(0deg); }
+            100% { transform: scale(0.9) rotate(360deg); }
         }
         .status-theme-toggle:hover::before {
             opacity: 0.8;
             transform: scale(1.15) rotate(20deg);
             filter: blur(8px);
         }
-        .status-theme-toggle::after {
-            content: '';
-            position: absolute;
-            inset: 3px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-            pointer-events: none;
-            opacity: 0.2;
-            transition: opacity 0.4s ease;
-        }
-        .status-theme-toggle:hover::after {
-            opacity: 0.5;
-        }
-        .status-theme-toggle i {
-            position: relative;
-            z-index: 2;
-            font-size: 17px;
-            line-height: 1;
-            transition: var(--transition-smooth);
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0);
-        }
-        .status-theme-toggle:hover i {
-            transform: rotate(180deg) scale(1.1);
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
-        }
-        .status-theme-toggle:active {
-            transform: scale(0.85);
-        }
-        .status-theme-toggle:active i {
-            transform: rotate(360deg) scale(0.9);
-        }
+        .status-theme-toggle::after { inset: 3px; }
         html.dark-mode .status-theme-toggle {
             background: rgba(20, 20, 24, 0.5);
             border-color: rgba(255, 255, 255, 0.06);
@@ -462,107 +460,29 @@
             color: #FFB800;
             text-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
         }
-        html.dark-mode .status-theme-toggle i.fa-sun {
-            color: #FFB800;
-            text-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
-        }
 
-        /* 樱花飘落开关按钮 */
-        .status-sakura-toggle {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            color: var(--status-color);
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            flex-shrink: 0;
-            position: relative;
-            overflow: visible;
-            margin-left: 4px;
-        }
+        /* --- 樱花开关 --- */
         .status-sakura-toggle::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
             background: conic-gradient(from 0deg, rgba(255, 150, 200, 0.0), rgba(255, 150, 200, 0.12), rgba(255, 150, 200, 0.0), rgba(255, 200, 150, 0.12), rgba(255, 200, 150, 0.0));
-            opacity: 0;
-            z-index: -1;
-            transition: all 0.6s ease;
-            filter: blur(4px);
-            transform: scale(0.8);
-        }
-        .status-sakura-toggle:hover::before {
-            opacity: 0.5;
-            transform: scale(1.15);
-        }
-        .status-sakura-toggle::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-            opacity: 0.15;
-            transition: opacity 0.4s ease;
-        }
-        .status-sakura-toggle:hover::after {
-            opacity: 0.4;
-        }
-        .status-sakura-toggle i {
-            position: relative;
-            z-index: 2;
-            font-size: 15px;
-            line-height: 1;
-            transition: var(--transition-smooth);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0);
-        }
-        .status-sakura-toggle:hover i {
-            transform: scale(1.1) rotate(10deg);
-        }
-        .status-sakura-toggle:active {
-            transform: scale(0.85);
-        }
-        .status-sakura-toggle:active i {
-            transform: rotate(360deg) scale(0.9);
         }
         .status-sakura-toggle.active {
             background: rgba(255, 150, 200, 0.08);
             border-color: rgba(255, 150, 200, 0.2);
             box-shadow: 0 4px 20px rgba(255, 150, 200, 0.06), inset 0 0 30px rgba(255, 150, 200, 0.02);
         }
-        .status-sakura-toggle.active::before {
-            opacity: 0.6;
-            transform: scale(1.1);
-        }
+        .status-sakura-toggle.active::before { opacity: 0.6; transform: scale(1.1); }
         .status-sakura-toggle.active i {
             color: #FF8AB4;
             text-shadow: 0 0 20px rgba(255, 138, 180, 0.3);
         }
-        .status-sakura-toggle.active:hover i {
-            text-shadow: 0 0 30px rgba(255, 138, 180, 0.5);
-        }
+        .status-sakura-toggle.active:hover i { text-shadow: 0 0 30px rgba(255, 138, 180, 0.5); }
         .status-sakura-toggle.inactive {
             background: rgba(255, 255, 255, 0.04);
             border-color: rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
         }
-        .status-sakura-toggle.inactive i {
-            color: #8E8E93;
-            opacity: 0.4;
-        }
-        .status-sakura-toggle.inactive:hover i {
-            opacity: 0.7;
-        }
+        .status-sakura-toggle.inactive i { color: #8E8E93; opacity: 0.4; }
+        .status-sakura-toggle.inactive:hover i { opacity: 0.7; }
         html.dark-mode .status-sakura-toggle {
             background: rgba(20, 20, 24, 0.4);
             border-color: rgba(255, 255, 255, 0.05);
@@ -577,107 +497,30 @@
             color: #FF8AB4;
             text-shadow: 0 0 30px rgba(255, 138, 180, 0.25);
         }
-        html.dark-mode .status-sakura-toggle.inactive i {
-            color: #6E6E73;
-            opacity: 0.3;
-        }
+        html.dark-mode .status-sakura-toggle.inactive i { color: #6E6E73; opacity: 0.3; }
 
-        /* 流星雨按钮 */
-        .status-meteor-toggle {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            color: var(--status-color);
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            flex-shrink: 0;
-            position: relative;
-            overflow: visible;
-            margin-right: 2px;
-        }
+        /* --- 流星雨开关 --- */
         .status-meteor-toggle::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
             background: conic-gradient(from 0deg, rgba(255, 215, 0, 0.0), rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.0), rgba(100, 200, 255, 0.12), rgba(100, 200, 255, 0.0));
-            opacity: 0;
-            z-index: -1;
-            transition: all 0.6s ease;
-            filter: blur(4px);
-            transform: scale(0.8);
-        }
-        .status-meteor-toggle:hover::before {
-            opacity: 0.5;
-            transform: scale(1.15);
-        }
-        .status-meteor-toggle::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-            opacity: 0.15;
-            transition: opacity 0.4s ease;
-        }
-        .status-meteor-toggle:hover::after {
-            opacity: 0.4;
-        }
-        .status-meteor-toggle i {
-            position: relative;
-            z-index: 2;
-            font-size: 15px;
-            line-height: 1;
-            transition: var(--transition-smooth);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0);
-        }
-        .status-meteor-toggle:hover i {
-            transform: scale(1.1) rotate(10deg);
-        }
-        .status-meteor-toggle:active {
-            transform: scale(0.85);
-        }
-        .status-meteor-toggle:active i {
-            transform: rotate(360deg) scale(0.9);
         }
         .status-meteor-toggle.active {
             background: rgba(255, 215, 0, 0.08);
             border-color: rgba(255, 215, 0, 0.2);
             box-shadow: 0 4px 20px rgba(255, 215, 0, 0.06), inset 0 0 30px rgba(255, 215, 0, 0.02);
         }
-        .status-meteor-toggle.active::before {
-            opacity: 0.6;
-            transform: scale(1.1);
-        }
+        .status-meteor-toggle.active::before { opacity: 0.6; transform: scale(1.1); }
         .status-meteor-toggle.active i {
             color: #FFD93D;
             text-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
         }
-        .status-meteor-toggle.active:hover i {
-            text-shadow: 0 0 30px rgba(255, 217, 61, 0.5);
-        }
+        .status-meteor-toggle.active:hover i { text-shadow: 0 0 30px rgba(255, 217, 61, 0.5); }
         .status-meteor-toggle.inactive {
             background: rgba(255, 255, 255, 0.04);
             border-color: rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
         }
-        .status-meteor-toggle.inactive i {
-            color: #8E8E93;
-            opacity: 0.4;
-        }
-        .status-meteor-toggle.inactive:hover i {
-            opacity: 0.7;
-        }
+        .status-meteor-toggle.inactive i { color: #8E8E93; opacity: 0.4; }
+        .status-meteor-toggle.inactive:hover i { opacity: 0.7; }
         html.dark-mode .status-meteor-toggle {
             background: rgba(20, 20, 24, 0.4);
             border-color: rgba(255, 255, 255, 0.05);
@@ -692,107 +535,30 @@
             color: #FFD93D;
             text-shadow: 0 0 30px rgba(255, 217, 61, 0.25);
         }
-        html.dark-mode .status-meteor-toggle.inactive i {
-            color: #6E6E73;
-            opacity: 0.3;
-        }
+        html.dark-mode .status-meteor-toggle.inactive i { color: #6E6E73; opacity: 0.3; }
 
-        /* 许红豆文字开关 */
-        .status-word-toggle {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            color: var(--status-color);
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            flex-shrink: 0;
-            position: relative;
-            overflow: visible;
-            margin-right: 2px;
-        }
+        /* --- 许红豆文字开关 --- */
         .status-word-toggle::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
             background: conic-gradient(from 0deg, rgba(255, 100, 150, 0.0), rgba(255, 100, 150, 0.12), rgba(255, 100, 150, 0.0), rgba(100, 150, 255, 0.12), rgba(100, 150, 255, 0.0));
-            opacity: 0;
-            z-index: -1;
-            transition: all 0.6s ease;
-            filter: blur(4px);
-            transform: scale(0.8);
-        }
-        .status-word-toggle:hover::before {
-            opacity: 0.5;
-            transform: scale(1.15);
-        }
-        .status-word-toggle::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-            opacity: 0.15;
-            transition: opacity 0.4s ease;
-        }
-        .status-word-toggle:hover::after {
-            opacity: 0.4;
-        }
-        .status-word-toggle i {
-            position: relative;
-            z-index: 2;
-            font-size: 15px;
-            line-height: 1;
-            transition: var(--transition-smooth);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0);
-        }
-        .status-word-toggle:hover i {
-            transform: scale(1.1) rotate(10deg);
-        }
-        .status-word-toggle:active {
-            transform: scale(0.85);
-        }
-        .status-word-toggle:active i {
-            transform: rotate(360deg) scale(0.9);
         }
         .status-word-toggle.active {
             background: rgba(255, 100, 150, 0.08);
             border-color: rgba(255, 100, 150, 0.2);
             box-shadow: 0 4px 20px rgba(255, 100, 150, 0.06), inset 0 0 30px rgba(255, 100, 150, 0.02);
         }
-        .status-word-toggle.active::before {
-            opacity: 0.6;
-            transform: scale(1.1);
-        }
+        .status-word-toggle.active::before { opacity: 0.6; transform: scale(1.1); }
         .status-word-toggle.active i {
             color: #FF6B9E;
             text-shadow: 0 0 20px rgba(255, 107, 158, 0.3);
         }
-        .status-word-toggle.active:hover i {
-            text-shadow: 0 0 30px rgba(255, 107, 158, 0.5);
-        }
+        .status-word-toggle.active:hover i { text-shadow: 0 0 30px rgba(255, 107, 158, 0.5); }
         .status-word-toggle.inactive {
             background: rgba(255, 255, 255, 0.04);
             border-color: rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
         }
-        .status-word-toggle.inactive i {
-            color: #8E8E93;
-            opacity: 0.4;
-        }
-        .status-word-toggle.inactive:hover i {
-            opacity: 0.7;
-        }
+        .status-word-toggle.inactive i { color: #8E8E93; opacity: 0.4; }
+        .status-word-toggle.inactive:hover i { opacity: 0.7; }
         html.dark-mode .status-word-toggle {
             background: rgba(20, 20, 24, 0.4);
             border-color: rgba(255, 255, 255, 0.05);
@@ -807,46 +573,37 @@
             color: #FF6B9E;
             text-shadow: 0 0 30px rgba(255, 107, 158, 0.25);
         }
-        html.dark-mode .status-word-toggle.inactive i {
-            color: #6E6E73;
-            opacity: 0.3;
-        }
+        html.dark-mode .status-word-toggle.inactive i { color: #6E6E73; opacity: 0.3; }
 
+        /* ★ 小屏统一缩放：4 个按钮一起变小，间距一起变小 */
         @media (max-width: 380px) {
-            .status-meteor-toggle,
-            .status-word-toggle,
-            .status-theme-toggle,
-            .status-sakura-toggle {
-                width: 28px;
-                height: 28px;
-                font-size: 13px;
+            :root {
+                --status-btn-size: 28px;
+                --status-btn-gap: 6px;
             }
-            .status-meteor-toggle i,
-            .status-word-toggle i,
+            .status-btn i,
             .status-theme-toggle i,
-            .status-sakura-toggle i {
+            .status-sakura-toggle i,
+            .status-meteor-toggle i,
+            .status-word-toggle i {
                 font-size: 13px;
             }
-            .ios-status-left {
-                font-size: 12px;
-                gap: 6px;
-            }
+            .status-theme-toggle i { font-size: 13px; }
+            .ios-status-left { font-size: 12px; }
         }
         @media (max-width: 360px) {
-            .status-meteor-toggle,
-            .status-word-toggle,
-            .status-theme-toggle,
-            .status-sakura-toggle {
-                width: 26px;
-                height: 26px;
-                font-size: 12px;
+            :root {
+                --status-btn-size: 26px;
+                --status-btn-gap: 5px;
             }
-            .status-meteor-toggle i,
-            .status-word-toggle i,
+            .status-btn i,
             .status-theme-toggle i,
-            .status-sakura-toggle i {
+            .status-sakura-toggle i,
+            .status-meteor-toggle i,
+            .status-word-toggle i {
                 font-size: 12px;
             }
+            .status-theme-toggle i { font-size: 12px; }
         }
 
         /* ===== 灵动岛 ===== */
@@ -866,7 +623,8 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             flex-shrink: 0;
-            margin: 0 6px;
+            /* ★ 两侧留白与按钮间距一致，视觉更整齐 */
+            margin: 0 var(--status-btn-gap);
             overflow: hidden;
             pointer-events: none;
             position: relative;
@@ -900,41 +658,24 @@
             animation: textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite;
         }
         @keyframes textShine {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         @keyframes scrollUp {
-            0% {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            10% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            90% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
+            0% { transform: translateY(100%); opacity: 0; }
+            10% { transform: translateY(0); opacity: 1; }
+            90% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
         }
 
+        /* ★ 右区域：统一间距 */
         .ios-status-right {
             flex: 1;
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 4px;
+            gap: var(--status-btn-gap);
         }
         .signal-icon {
             width: 18px;
@@ -942,6 +683,7 @@
             fill: var(--status-color);
             flex-shrink: 0;
             opacity: 0.8;
+            margin-left: 2px;
         }
 
         /* ===== 视频播放器 ===== */
@@ -2235,24 +1977,22 @@
             .app-button:hover .app-icon-wrap::after { opacity: 0; }
             .app-button:hover .app-label { color: var(--text-sub); }
 
-            .status-btn:hover::before { opacity: 0; }
-            .status-btn:hover::after { opacity: 0.2; }
-            .status-btn:hover i { transform: none; text-shadow: none; }
-
-            .status-theme-toggle:hover::before { opacity: 0.4; transform: scale(0.9) rotate(0deg); filter: blur(6px); }
-            .status-theme-toggle:hover::after { opacity: 0.2; }
-            .status-theme-toggle:hover i { transform: none; text-shadow: none; }
-
-            .status-sakura-toggle:hover::before { opacity: 0; transform: scale(0.8); }
-            .status-sakura-toggle:hover::after { opacity: 0.15; }
-            .status-sakura-toggle:hover i { transform: none; }
-
+            .status-btn:hover::before,
+            .status-sakura-toggle:hover::before,
             .status-meteor-toggle:hover::before,
             .status-word-toggle:hover::before { opacity: 0; transform: scale(0.8); }
+            .status-btn:hover::after,
+            .status-sakura-toggle:hover::after,
             .status-meteor-toggle:hover::after,
-            .status-word-toggle:hover::after { opacity: 0.15; }
+            .status-word-toggle:hover::after { opacity: 0.18; }
+            .status-btn:hover i,
+            .status-sakura-toggle:hover i,
             .status-meteor-toggle:hover i,
-            .status-word-toggle:hover i { transform: none; }
+            .status-word-toggle:hover i { transform: none; text-shadow: none; }
+
+            .status-theme-toggle:hover::before { opacity: 0.4; transform: scale(0.9) rotate(0deg); filter: blur(6px); }
+            .status-theme-toggle:hover::after { opacity: 0.18; }
+            .status-theme-toggle:hover i { transform: none; text-shadow: none; }
 
             .weather-widget:hover {
                 transform: none;
@@ -4567,7 +4307,6 @@ self.addEventListener('fetch', function (e) {
                     if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
                 } else {
                     if (!animFrameId) { lastFrameTs = 0; animFrameId = requestAnimationFrame(animate); }
-                    // 樱花：仅在开启状态下恢复
                     if (sakuraEnabled) {
                         ensureSakura();
                     } else {
