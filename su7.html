@@ -208,7 +208,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ===== 主容器：适配安卓谷歌浏览器，可滚动 ===== */
+        /* ===== 主容器：顶部留白，适配安卓 ===== */
         .app-container {
             display: flex;
             flex-direction: column;
@@ -218,7 +218,7 @@
             max-width: 480px;
             min-height: 100vh;
             min-height: 100dvh;
-            padding: 4px 14px 20px;
+            padding: calc(var(--safe-top) + 20px) 16px 24px;
             position: relative;
             z-index: 2;
             animation: pageSpringIn .8s var(--spring) both;
@@ -229,7 +229,7 @@
         @media (min-width: 768px) {
             .app-container {
                 max-width: 520px;
-                padding: 12px 24px 24px;
+                padding: 40px 24px 32px;
             }
         }
 
@@ -237,7 +237,7 @@
         .status-bar-container {
             width: 100%;
             flex-shrink: 0;
-            padding: calc(var(--safe-top) + 2px) 0 2px;
+            padding: 0 0 4px;
         }
         .ios-status-bar {
             width: 100%;
@@ -908,7 +908,7 @@
 
         /* ===== 响应式微调 ===== */
         @media (max-width: 380px) {
-            .app-container { padding: 2px 10px 16px; }
+            .app-container { padding: calc(var(--safe-top) + 16px) 10px 20px; }
             .main-card { padding: 10px 10px 12px; }
             :root { --avatar-size: 56px; --plate-size: 68px; }
             .plate { font-size: 13px; padding: 2px 10px; }
@@ -935,7 +935,7 @@
 
         /* 横屏手机适配 */
         @media (orientation: landscape) and (max-height: 500px) {
-            .app-container { max-width: 620px; padding: 4px 16px 16px; }
+            .app-container { max-width: 620px; padding: 20px 16px 16px; }
             .main-card { padding: 8px 12px; }
             .video-player-container { max-height: 40vh; }
             .profile-row { padding-top: 6px; }
@@ -1031,7 +1031,7 @@
         @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
             .app-container {
                 max-width: 560px;
-                padding: 18px 28px 24px;
+                padding: 48px 28px 32px;
             }
             .video-player-container {
                 border-radius: 20px;
@@ -1130,9 +1130,10 @@
             }
             .app-container {
                 overscroll-behavior: auto;
+                padding-top: calc(var(--safe-top) + 18px);
             }
             .main-card-container {
-                padding-bottom: 12px;
+                padding-bottom: 16px;
             }
         }
 
@@ -1180,7 +1181,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v3';
+var VERSION = 'su-fa36165-v4';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -2164,7 +2165,7 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/61.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/62.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/63.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%BA%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/67.jpg",
