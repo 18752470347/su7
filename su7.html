@@ -2,22 +2,22 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1" />
     <meta name="theme-color" content="#F2F2F7" />
     <meta name="color-scheme" content="light" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆与天气。" />
+    <meta name="description" content="苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆。" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="苏FA36165 · 许红豆" />
-    <meta property="og:description" content="个人主页：星空、视频轮播、车牌记忆与天气。" />
+    <meta property="og:description" content="个人主页：星空、视频轮播、车牌记忆。" />
     <meta property="og:image" content="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <script type="application/json" id="pwa-manifest">{
   "name": "苏FA36165 · 许红豆",
   "short_name": "苏FA36165",
-  "description": "苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆与天气。",
+  "description": "苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -65,8 +65,8 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* 禁止页面滚动 */
-            touch-action: pan-y; /* 允许垂直手势但页面不滚动 */
+            overflow: hidden;
+            touch-action: pan-y;
             overscroll-behavior: none;
             position: fixed;
             background: #F2F2F7;
@@ -593,47 +593,7 @@
             pointer-events: none;
         }
 
-        /* ===== 天气组件 ===== */
-        .weather-widget {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            z-index: 20;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px 3px 6px;
-            border-radius: 24px;
-            background: var(--weather-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--weather-border);
-            box-shadow: var(--weather-shadow);
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            min-height: 24px;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            color: var(--weather-text);
-            max-width: 110px;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        .weather-widget:hover { transform: scale(1.05); }
-        .weather-widget:active { transform: scale(0.94); }
-        .weather-widget .weather-icon { font-size: 14px; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 0 4px rgba(255, 217, 61, 0.15)); }
-        .weather-widget .weather-temp { font-size: 11px; font-weight: 700; color: var(--weather-text); letter-spacing: 0.1px; line-height: 1.2; white-space: nowrap; }
-        .weather-widget .weather-divider { width: 1px; height: 12px; background: var(--weather-border); opacity: 0.3; flex-shrink: 0; }
-        .weather-widget .weather-desc { font-size: 10px; font-weight: 500; color: var(--text-muted); line-height: 1.2; white-space: nowrap; max-width: 28px; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
-        html.dark-mode .weather-widget { --weather-bg: rgba(30, 30, 34, 0.55); --weather-border: rgba(255, 255, 255, 0.06); }
-        html.dark-mode .weather-widget .weather-temp { color: #F5F5F7; }
-        html.dark-mode .weather-widget .weather-desc { color: #8E8E93; }
-        @media (max-width: 380px) {
-            .weather-widget { padding: 2px 8px 2px 4px; min-height: 20px; top: 8px; left: 8px; gap: 3px; max-width: 85px; }
-            .weather-widget .weather-icon { font-size: 12px; }
-            .weather-widget .weather-temp { font-size: 10px; }
-            .weather-widget .weather-desc { font-size: 9px; max-width: 22px; }
-        }
+        /* ===== 天气组件：已移除 ===== */
 
         /* ===== 个人信息区域 ===== */
         .profile-row {
@@ -1087,7 +1047,6 @@
             .app-button:hover .app-icon-wrap { transform: none; }
             .app-button:hover .app-icon-wrap::after { opacity: 0; }
             .app-button:hover .app-label { color: var(--text-sub); }
-            .weather-widget:hover { transform: none; }
             .plate:hover { transform: none; }
             .main-card:hover { box-shadow: var(--glass-shadow); }
             .avatar img:hover { transform: none; }
@@ -1096,6 +1055,163 @@
             .popup-progress-wrap:hover { height: 3px; }
             .center-play-btn:hover { transform: translate(-50%, -50%); }
             .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(255, 255, 255, 0.04); transform: none; }
+        }
+
+        /* ===== 电脑端适配：优化鼠标操作与布局 ===== */
+        @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+            .app-container {
+                max-width: 560px;
+                padding: 18px 28px 22px;
+                border-radius: 32px;
+                margin: 0 auto;
+            }
+            .video-player-container {
+                border-radius: 20px;
+                max-height: 280px;
+            }
+            .video-box {
+                aspect-ratio: 16 / 9;
+            }
+            .main-card {
+                padding: 18px 22px 20px;
+                border-radius: 28px;
+            }
+            .app-icon-wrap {
+                width: 56px;
+                height: 56px;
+                font-size: 22px;
+                border-radius: 18px;
+            }
+            .app-label {
+                font-size: 11px;
+            }
+            .apps-page {
+                gap: 12px 10px;
+                min-height: 100px;
+            }
+            :root {
+                --avatar-size: 80px;
+                --plate-size: 96px;
+            }
+            .plate {
+                font-size: 17px;
+                padding: 5px 20px;
+            }
+            .name {
+                font-size: 14px;
+            }
+            .subtitle {
+                font-size: 12px;
+            }
+            .profile-row {
+                gap: 16px;
+                padding-top: 24px;
+            }
+            .weather-widget {
+                display: none; /* 已移除天气组件，隐藏 */
+            }
+            .dynamic-island {
+                height: 38px;
+                padding: 0 22px;
+                font-size: 13px;
+                min-width: 70px;
+            }
+            .island-text-scroll {
+                font-size: 13px;
+            }
+            .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                min-height: 40px;
+            }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i {
+                font-size: 18px;
+            }
+            .status-theme-toggle i {
+                font-size: 20px;
+            }
+            .center-play-btn {
+                max-width: 80px;
+                min-width: 52px;
+                font-size: clamp(22px, 4.5vw, 36px);
+            }
+            .controls-row button {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .btn-expand {
+                width: 34px;
+                height: 34px;
+                font-size: 16px;
+            }
+            .controls-time {
+                font-size: 13px;
+            }
+            .main-card-container {
+                margin-top: 8px;
+            }
+            .apps-scroll-wrapper {
+                margin-top: 14px;
+            }
+            .plate-photo-inner {
+                border-radius: 16px;
+            }
+            .stack-img {
+                border-radius: 16px;
+            }
+            .avatar-ring {
+                inset: -6px;
+            }
+            .avatar-ring-2 {
+                inset: -11px;
+            }
+            .floating-word {
+                font-size: 26px;
+            }
+        }
+
+        /* ===== 安卓手机：禁止下拉查看全部内容（overscroll-behavior 已设，加强锁定） ===== */
+        @media (max-width: 767px) {
+            html, body {
+                overscroll-behavior: none;
+                touch-action: pan-y;
+            }
+            .app-container {
+                overscroll-behavior: none;
+            }
+        }
+
+        /* ===== 移除天气组件相关样式 ===== */
+        .weather-widget {
+            display: none !important;
+        }
+
+        /* 启动遮罩 */
+        #boot-mask {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F2F2F7;
+            transition: opacity 0.5s ease;
+        }
+        html.dark-mode #boot-mask {
+            background: #0A0A0C;
+        }
+        .boot-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid rgba(128, 128, 128, 0.15);
+            border-top-color: #34C759;
+            animation: bootSpin 0.8s linear infinite;
+        }
+        @keyframes bootSpin {
+            to { transform: rotate(360deg); }
         }
     </style>
     <script>
@@ -1116,7 +1232,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v1';
+var VERSION = 'su-fa36165-v2';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -1263,12 +1379,7 @@ self.addEventListener('fetch', function (e) {
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <div class="weather-widget" id="weatherWidget" title="点击刷新天气（车牌归属地）">
-                    <span class="weather-icon" id="weatherIcon">☀️</span>
-                    <span class="weather-temp" id="weatherTemp">--°</span>
-                    <span class="weather-divider"></span>
-                    <span class="weather-desc" id="weatherDesc">加载中...</span>
-                </div>
+                <!-- 天气组件已移除 -->
 
                 <div class="profile-row">
                     <div class="profile-left">
@@ -1996,7 +2107,7 @@ self.addEventListener('fetch', function (e) {
             setTimeout(startFloating, 100);
 
             // ================================================================
-            //  核心功能：视频、头像、堆叠图片、主题切换、天气组件
+            //  核心功能：视频、头像、堆叠图片、主题切换
             // ================================================================
             const videoList = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/15.mp4",
@@ -2233,10 +2344,7 @@ self.addEventListener('fetch', function (e) {
             const expandBtn = $("#expandBtn");
             const statusThemeToggle = $("#statusThemeToggle");
             const statusThemeIcon = $("#statusThemeIcon");
-            const weatherWidget = $("#weatherWidget");
-            const weatherIcon = $("#weatherIcon");
-            const weatherTemp = $("#weatherTemp");
-            const weatherDesc = $("#weatherDesc");
+            // 天气组件已移除，不获取相关元素
 
             const videoPopup = $("#videoPopup");
             const popupVideo = $("#popupVideo");
@@ -3203,127 +3311,8 @@ self.addEventListener('fetch', function (e) {
             setInterval(updateTime, 1000);
 
             // ================================================================
-            //  🌤️ 天气组件：wttr.in
+            //  🌤️ 天气组件：已完全移除
             // ================================================================
-            const PLATE_MAP = {
-                '苏': '南通',
-                '京': 'Beijing',
-                '沪': 'Shanghai',
-                '粤': 'Guangzhou',
-                '浙': 'Hangzhou',
-                '豫': 'Zhengzhou',
-                '川': 'Chengdu',
-                '渝': 'Chongqing',
-                '鄂': 'Wuhan',
-                '湘': 'Changsha',
-                '皖': 'Hefei',
-                '鲁': 'Jinan',
-                '冀': 'Shijiazhuang',
-                '闽': 'Fuzhou',
-                '赣': 'Nanchang',
-                '晋': 'Taiyuan',
-                '辽': 'Shenyang',
-                '吉': 'Changchun',
-                '黑': 'Harbin',
-                '陕': 'Xian',
-                '甘': 'Lanzhou',
-                '青': 'Xining',
-                '云': 'Kunming',
-                '贵': 'Guiyang',
-                '琼': 'Haikou',
-                '藏': 'Lhasa',
-                '桂': 'Nanning',
-                '蒙': 'Hohhot',
-                '宁': 'Yinchuan',
-                '新': 'Urumqi',
-                '津': 'Tianjin',
-                '港': 'Hong Kong',
-                '澳': 'Macau'
-            };
-
-            function getPlateProvince(plate) {
-                const match = plate.match(/^([\u4e00-\u9fa5])/);
-                return match ? match[1] : null;
-            }
-
-            let weatherFetching = false;
-
-            function setWeather(weather) {
-                if (!weather) return;
-                weatherIcon.textContent = weather.icon;
-                weatherTemp.textContent = weather.temp + '°';
-                weatherDesc.textContent = weather.desc;
-            }
-
-            function getWeatherIcon(desc) {
-                if (!desc) return '☀️';
-                const d = String(desc).toLowerCase();
-                if (/雷|thunder|storm/.test(d)) return '⛈️';
-                if (/雨|rain|drizzle|shower/.test(d)) return '🌧️';
-                if (/雪|snow|sleet|blizzard|ice/.test(d)) return '❄️';
-                if (/雾|霾|fog|mist|haze/.test(d)) return '🌫️';
-                if (/多云|局部云|partly|cloudy/.test(d)) return '⛅';
-                if (/阴|overcast/.test(d)) return '☁️';
-                if (/晴|clear|sunny/.test(d)) return '☀️';
-                return '☀️';
-            }
-
-            async function fetchWeather() {
-                if (weatherFetching) return;
-                weatherFetching = true;
-                weatherDesc.textContent = '更新中...';
-
-                try {
-                    const plateText = document.getElementById('plate') ? document.getElementById('plate').textContent : '苏FA36165';
-                    const province = getPlateProvince(plateText);
-                    const city = PLATE_MAP[province] || 'Nantong';
-
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-                    const resp = await fetch(
-                        'https://wttr.in/' + encodeURIComponent(city) + '?format=j1&lang=zh',
-                        { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal }
-                    );
-                    clearTimeout(timeoutId);
-
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        const current = data.current_condition && data.current_condition[0];
-                        if (current) {
-                            const temp = parseInt(current.temp_C, 10) || 24;
-                            const descZh = (current.lang_zh && current.lang_zh[0] && current.lang_zh[0].value) ||
-                                (current.weatherDesc && current.weatherDesc[0] && current.weatherDesc[0].value) || '晴';
-                            const shortDesc = String(descZh).split(',')[0].trim().slice(0, 4);
-                            const icon = getWeatherIcon(shortDesc || descZh);
-                            setWeather({ icon, temp, desc: shortDesc || '晴' });
-                            showToastMsg('🌤️ ' + city + ' 天气已更新');
-                            weatherFetching = false;
-                            return;
-                        }
-                    }
-                } catch (e) {}
-
-                const states = [
-                    { icon: '☀️', temp: 28, desc: '晴' },
-                    { icon: '⛅', temp: 24, desc: '多云' },
-                    { icon: '☁️', temp: 22, desc: '阴' },
-                    { icon: '🌦️', temp: 20, desc: '小雨' },
-                    { icon: '🌧️', temp: 18, desc: '中雨' }
-                ];
-                const w = states[Math.floor(Math.random() * states.length)];
-                setWeather(w);
-                showToastMsg('🌤️ 天气已刷新');
-                weatherFetching = false;
-            }
-
-            weatherWidget.addEventListener('click', (e) => {
-                e.stopPropagation();
-                fetchWeather();
-            });
-
-            setWeather({ icon: '⏳', temp: '--', desc: '加载中...' });
-            setTimeout(fetchWeather, 500);
 
             // ===== 启动 =====
             setTimeout(() => {
@@ -3441,7 +3430,7 @@ self.addEventListener('fetch', function (e) {
                 }
             } catch (e) {}
 
-})();
+        })();
     </script>
 </body>
 </html>
