@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
     <meta name="theme-color" content="#F2F2F7" />
     <meta name="color-scheme" content="light" />
     <meta name="format-detection" content="telephone=no" />
@@ -64,12 +64,12 @@
         html, body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
-            touch-action: pan-y;
-            overscroll-behavior: none;
-            position: fixed;
+            min-height: 100%;
             background: #F2F2F7;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
         }
         :root {
             --text-main: #1C1C1E;
@@ -96,21 +96,16 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
-            --weather-bg: rgba(255, 255, 255, 0.18);
-            --weather-border: rgba(255, 255, 255, 0.35);
-            --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            --weather-text: #1C1C1E;
             --card-radius: 24px;
             --icon-radius: 16px;
-            --avatar-size: 68px;
-            --plate-size: 82px;
+            --avatar-size: 64px;
+            --plate-size: 76px;
             --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.06);
             --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.10);
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
             --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            --transition-bounce: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            --status-btn-size: 34px;
-            --status-btn-gap: 8px;
+            --status-btn-size: 32px;
+            --status-btn-gap: 7px;
         }
         html.dark-mode {
             --text-main: #F5F5F7;
@@ -133,10 +128,6 @@
             --popup-overlay: rgba(0, 0, 0, 0.92);
             --glow-color: #00D4FF;
             --sakura-color: rgba(255, 200, 216, 0.45);
-            --weather-bg: rgba(30, 30, 34, 0.5);
-            --weather-border: rgba(255, 255, 255, 0.08);
-            --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            --weather-text: #F5F5F7;
             --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
             --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.4);
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -151,20 +142,6 @@
             background: rgba(255, 200, 216, 0.45);
             box-shadow: 0 0 20px rgba(255, 200, 216, 0.15);
         }
-        html.transitioning {
-            transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        html.transitioning * {
-            transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                fill 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
         button,
         img,
         video {
@@ -178,10 +155,10 @@
             border: none;
             outline: none;
         }
-        img, video, button, .app-button, .plate, .avatar, .weather-widget {
+        img, video, button, .app-button, .plate, .avatar {
             -webkit-touch-callout: none;
         }
-        button, .app-button, .plate, .avatar, .weather-widget, .status-btn,
+        button, .app-button, .plate, .avatar, .status-btn,
         .status-theme-toggle, .status-meteor-toggle, .status-word-toggle, .status-sakura-toggle,
         .center-play-btn, .btn-expand {
             touch-action: manipulation;
@@ -231,28 +208,28 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ===== 主容器：铺满视口，内部按比例分布 ===== */
+        /* ===== 主容器：适配安卓谷歌浏览器，可滚动 ===== */
         .app-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 100%;
             max-width: 480px;
-            height: 100vh;
-            height: 100dvh;
-            padding: 4px 14px 8px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 4px 14px 20px;
             position: relative;
             z-index: 2;
             animation: pageSpringIn .8s var(--spring) both;
             margin: 0 auto;
-            overflow: hidden;
             gap: 0;
+            overflow: visible;
         }
         @media (min-width: 768px) {
             .app-container {
                 max-width: 520px;
-                padding: 12px 24px 16px;
+                padding: 12px 24px 24px;
             }
         }
 
@@ -270,7 +247,7 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--status-color);
-            min-height: 34px;
+            min-height: 32px;
             padding: 0 2px;
         }
         .ios-status-left {
@@ -278,7 +255,7 @@
             text-align: left;
             font-weight: 600;
             letter-spacing: 0.2px;
-            font-size: 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: var(--status-btn-gap);
@@ -317,11 +294,11 @@
         .status-word-toggle i {
             position: relative;
             z-index: 2;
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1;
             transition: var(--transition-smooth);
         }
-        .status-theme-toggle i { font-size: 16px; }
+        .status-theme-toggle i { font-size: 15px; }
         .status-btn:hover i,
         .status-theme-toggle:hover i,
         .status-sakura-toggle:hover i,
@@ -364,7 +341,7 @@
 
         @media (max-width: 380px) {
             :root { --status-btn-size: 28px; --status-btn-gap: 6px; }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 12px; }
             .ios-status-left { font-size: 12px; }
         }
 
@@ -373,9 +350,9 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 32px;
-            padding: 0 16px;
-            min-width: 55px;
+            height: 30px;
+            padding: 0 14px;
+            min-width: 50px;
             background: var(--island-bg);
             border-radius: 22px;
             color: var(--island-text);
@@ -417,7 +394,7 @@
         }
         .signal-icon { width: 18px; height: 12px; fill: var(--status-color); flex-shrink: 0; opacity: 0.8; margin-left: 2px; }
 
-        /* ===== 视频播放器：固定高度比例 ===== */
+        /* ===== 视频播放器 ===== */
         .video-player-container {
             width: 100%;
             flex: 0 0 auto;
@@ -429,7 +406,7 @@
             box-shadow: var(--shadow-medium);
             position: relative;
             transition: var(--transition-smooth);
-            margin-top: 2px;
+            margin-top: 4px;
         }
         .video-box {
             position: relative;
@@ -452,17 +429,17 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 20%;
+            width: 18%;
             aspect-ratio: 1 / 1;
-            max-width: 72px;
-            min-width: 40px;
+            max-width: 64px;
+            min-width: 38px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(12px) saturate(180%);
             -webkit-backdrop-filter: blur(12px) saturate(180%);
             border: 2px solid rgba(255, 255, 255, 0.20);
             color: #fff;
-            font-size: clamp(18px, 4.5vw, 32px);
+            font-size: clamp(16px, 4vw, 28px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -479,7 +456,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 8px 12px 10px;
+            padding: 6px 10px 8px;
             background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.80) 100%);
             z-index: 3;
             transition: opacity 0.4s ease, transform 0.4s ease;
@@ -493,7 +470,7 @@
             background: rgba(255, 255, 255, 0.15);
             border-radius: 99px;
             cursor: pointer;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             position: relative;
             transition: height 0.2s ease;
         }
@@ -506,16 +483,16 @@
             transition: width 0.08s linear;
             box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
         }
-        .controls-row { display: flex; align-items: center; gap: 8px; }
+        .controls-row { display: flex; align-items: center; gap: 6px; }
         .controls-row button {
             color: rgba(255, 255, 255, 0.85);
-            font-size: 15px;
+            font-size: 14px;
             padding: 4px;
             opacity: 0.85;
             transition: all 0.2s ease;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -526,22 +503,22 @@
         .controls-time {
             margin-left: auto;
             color: rgba(255, 255, 255, 0.85);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             letter-spacing: 0.3px;
         }
         .btn-expand {
             color: rgba(255, 255, 255, 0.75);
-            font-size: 13px;
+            font-size: 12px;
             padding: 4px;
             opacity: 0.8;
             transition: all 0.2s ease;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -550,23 +527,21 @@
         .btn-expand:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
         .btn-expand:active { opacity: 0.4; transform: scale(0.88); }
 
-        /* ===== 主卡片：自适应高度，压缩内容 ===== */
+        /* ===== 主卡片 ===== */
         .main-card-container {
             width: 100%;
             flex: 1 1 auto;
-            min-height: 0;
             animation: cardSpringIn .7s var(--ease) 0.16s both;
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            margin-top: 4px;
+            justify-content: flex-start;
+            margin-top: 8px;
+            padding-bottom: 8px;
         }
         .main-card {
             width: 100%;
-            height: 100%;
-            max-height: 100%;
-            padding: 10px 14px 12px;
+            padding: 12px 14px 16px;
             border-radius: var(--card-radius);
             background: var(--glass-bg);
             backdrop-filter: blur(24px) saturate(180%);
@@ -577,8 +552,9 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
+            justify-content: flex-start;
             transition: var(--transition-smooth);
+            gap: 4px;
         }
         .main-card:hover { box-shadow: var(--shadow-medium); }
         .main-card::before {
@@ -593,8 +569,6 @@
             pointer-events: none;
         }
 
-        /* ===== 天气组件：已移除 ===== */
-
         /* ===== 个人信息区域 ===== */
         .profile-row {
             display: grid;
@@ -603,7 +577,7 @@
             gap: 8px;
             width: 100%;
             flex-shrink: 0;
-            padding-top: 18px;
+            padding-top: 10px;
         }
         .profile-left {
             min-width: 0;
@@ -616,7 +590,7 @@
             width: var(--avatar-size);
             height: var(--avatar-size);
             border-radius: 50%;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             cursor: zoom-in;
             flex-shrink: 0;
         }
@@ -698,9 +672,9 @@
         .stack-img.hidden { transform: scale(0.65) translateY(32px); opacity: 0; z-index: 1; pointer-events: none; }
 
         .plate {
-            padding: 3px 14px; border-radius: 8px;
+            padding: 3px 12px; border-radius: 8px;
             background: var(--plate-bg); color: #fff;
-            font-size: 15px; font-weight: 700; letter-spacing: 2px;
+            font-size: 14px; font-weight: 700; letter-spacing: 2px;
             box-shadow: 0 3px 20px rgba(0, 212, 255, 0.18);
             border: 0.5px solid rgba(255, 255, 255, 0.10);
             cursor: pointer; transition: var(--transition-smooth);
@@ -716,7 +690,7 @@
         .plate:active { transform: scale(0.92); }
 
         .name {
-            font-size: 12px; font-weight: 700; text-align: center; margin-top: 4px;
+            font-size: 11px; font-weight: 700; text-align: center; margin-top: 3px;
             background: var(--name-gradient); background-size: 300% 100%;
             -webkit-background-clip: text; background-clip: text; color: transparent;
             animation: textGradient 3.2s ease-in-out infinite;
@@ -725,7 +699,7 @@
         }
         @keyframes textGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .subtitle {
-            font-size: 10px; font-weight: 600; text-align: center; margin-top: 1px;
+            font-size: 9px; font-weight: 600; text-align: center; margin-top: 1px;
             background: var(--sub-gradient); background-size: 300% 100%;
             -webkit-background-clip: text; background-clip: text; color: transparent;
             animation: textGradientSub 3.8s ease-in-out infinite;
@@ -738,7 +712,7 @@
             width: 100%;
             overflow: visible;
             position: relative;
-            margin-top: 8px;
+            margin-top: 6px;
             z-index: 10;
             flex-shrink: 0;
         }
@@ -747,24 +721,24 @@
             flex: 0 0 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px 6px;
+            gap: 7px 5px;
             padding: 0;
-            min-height: 80px;
+            min-height: 72px;
         }
         .app-button {
             --icon-color: #00D4FF;
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
             background: transparent; cursor: pointer; transition: var(--transition-smooth);
             position: relative; z-index: 10; border-radius: 12px; padding: 2px 0;
         }
         .app-button:active { transform: scale(0.90); }
         .app-icon-wrap {
-            position: relative; width: 48px; height: 48px;
+            position: relative; width: 44px; height: 44px;
             display: flex; align-items: center; justify-content: center;
             border-radius: var(--icon-radius);
             background: var(--icon-bg);
             box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), var(--shadow-soft);
-            font-size: 20px; color: var(--icon-color);
+            font-size: 18px; color: var(--icon-color);
             backdrop-filter: blur(14px) saturate(170%);
             -webkit-backdrop-filter: blur(14px) saturate(170%);
             border: 1px solid var(--glass-border);
@@ -781,7 +755,7 @@
         .app-button:active .app-icon-wrap { transform: scale(0.88); }
         .app-button.loading .app-icon-wrap { opacity: 0.6; transform: scale(0.95); }
         .app-label {
-            font-size: 9px; font-weight: 500; color: var(--text-sub);
+            font-size: 8px; font-weight: 500; color: var(--text-sub);
             text-align: center; line-height: 1.2; letter-spacing: 0.2px;
             transition: var(--transition-smooth);
         }
@@ -934,45 +908,45 @@
 
         /* ===== 响应式微调 ===== */
         @media (max-width: 380px) {
-            .app-container { padding: 2px 10px 6px; }
-            .main-card { padding: 8px 10px 10px; }
-            :root { --avatar-size: 58px; --plate-size: 72px; }
+            .app-container { padding: 2px 10px 16px; }
+            .main-card { padding: 10px 10px 12px; }
+            :root { --avatar-size: 56px; --plate-size: 68px; }
             .plate { font-size: 13px; padding: 2px 10px; }
-            .name { font-size: 11px; }
-            .subtitle { font-size: 9px; }
-            .app-icon-wrap { width: 42px; height: 42px; font-size: 17px; }
-            .app-label { font-size: 8px; }
-            .apps-page { gap: 6px 4px; min-height: 70px; }
-            .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 45px; }
-            .center-play-btn { min-width: 34px; font-size: clamp(14px, 4vw, 28px); }
-            .profile-row { gap: 4px; padding-top: 14px; }
-            .video-controls { padding: 6px 10px 8px; }
-            .controls-row button { width: 26px; height: 26px; font-size: 13px; }
+            .name { font-size: 10px; }
+            .subtitle { font-size: 8px; }
+            .app-icon-wrap { width: 40px; height: 40px; font-size: 16px; }
+            .app-label { font-size: 7px; }
+            .apps-page { gap: 6px 4px; min-height: 66px; }
+            .dynamic-island { height: 26px; font-size: 10px; padding: 0 10px; min-width: 40px; }
+            .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 24px); }
+            .profile-row { gap: 4px; padding-top: 6px; }
+            .video-controls { padding: 5px 8px 6px; }
+            .controls-row button { width: 24px; height: 24px; font-size: 12px; }
         }
         @media (max-width: 360px) {
-            :root { --plate-size: 64px; --avatar-size: 52px; }
-            .main-card { padding: 6px 8px 8px; }
-            .app-icon-wrap { width: 38px; height: 38px; font-size: 15px; }
+            :root { --plate-size: 60px; --avatar-size: 50px; }
+            .main-card { padding: 8px 8px 10px; }
+            .app-icon-wrap { width: 36px; height: 36px; font-size: 14px; }
             .app-label { font-size: 7px; }
-            .apps-page { gap: 5px 3px; min-height: 64px; }
+            .apps-page { gap: 5px 3px; min-height: 60px; }
             .plate { font-size: 12px; padding: 2px 8px; }
             .name { font-size: 10px; }
         }
 
         /* 横屏手机适配 */
         @media (orientation: landscape) and (max-height: 500px) {
-            .app-container { max-width: 620px; padding: 4px 16px; }
+            .app-container { max-width: 620px; padding: 4px 16px 16px; }
             .main-card { padding: 8px 12px; }
             .video-player-container { max-height: 40vh; }
-            .profile-row { padding-top: 10px; }
+            .profile-row { padding-top: 6px; }
             .apps-scroll-wrapper { margin-top: 4px; }
-            .app-icon-wrap { width: 40px; height: 40px; font-size: 16px; }
-            .app-label { font-size: 8px; }
-            .apps-page { gap: 5px 4px; min-height: 64px; }
-            .plate-photo { --plate-size: 64px; }
-            .avatar { --avatar-size: 52px; }
+            .app-icon-wrap { width: 38px; height: 38px; font-size: 15px; }
+            .app-label { font-size: 7px; }
+            .apps-page { gap: 5px 4px; min-height: 58px; }
+            .plate-photo { --plate-size: 60px; }
+            .avatar { --avatar-size: 48px; }
             .name { font-size: 10px; }
-            .subtitle { font-size: 9px; }
+            .subtitle { font-size: 8px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -995,7 +969,7 @@
 
         /* ===== 漂浮文字 ===== */
         .floating-word {
-            position: fixed; font-size: 22px; font-weight: 900;
+            position: fixed; font-size: 20px; font-weight: 900;
             font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
             cursor: grab; z-index: 1100; pointer-events: auto;
             transition: none; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
@@ -1032,10 +1006,6 @@
         @keyframes trailPulse { 0% { transform: scale(0.7); opacity: 0.2; } 100% { transform: scale(1.5); opacity: 0.6; } }
         .floating-word.hidden-words { visibility: hidden !important; pointer-events: none !important; transition: visibility 0.3s ease; }
 
-        /* 滚动锁定 */
-        body.scroll-locked { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
-        html.scroll-locked { overflow: hidden; }
-
         /* 低端机毛玻璃降级 */
         html.low-perf .main-card,
         html.low-perf .video-popup,
@@ -1057,13 +1027,11 @@
             .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(255, 255, 255, 0.04); transform: none; }
         }
 
-        /* ===== 电脑端适配：优化鼠标操作与布局 ===== */
+        /* ===== 电脑端适配 ===== */
         @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
             .app-container {
                 max-width: 560px;
-                padding: 18px 28px 22px;
-                border-radius: 32px;
-                margin: 0 auto;
+                padding: 18px 28px 24px;
             }
             .video-player-container {
                 border-radius: 20px;
@@ -1073,63 +1041,60 @@
                 aspect-ratio: 16 / 9;
             }
             .main-card {
-                padding: 18px 22px 20px;
+                padding: 16px 20px 20px;
                 border-radius: 28px;
             }
             .app-icon-wrap {
-                width: 56px;
-                height: 56px;
-                font-size: 22px;
+                width: 52px;
+                height: 52px;
+                font-size: 20px;
                 border-radius: 18px;
             }
             .app-label {
-                font-size: 11px;
+                font-size: 10px;
             }
             .apps-page {
                 gap: 12px 10px;
-                min-height: 100px;
+                min-height: 92px;
             }
             :root {
-                --avatar-size: 80px;
-                --plate-size: 96px;
+                --avatar-size: 76px;
+                --plate-size: 92px;
             }
             .plate {
-                font-size: 17px;
-                padding: 5px 20px;
+                font-size: 16px;
+                padding: 4px 18px;
             }
             .name {
-                font-size: 14px;
+                font-size: 13px;
             }
             .subtitle {
-                font-size: 12px;
+                font-size: 11px;
             }
             .profile-row {
                 gap: 16px;
-                padding-top: 24px;
-            }
-            .weather-widget {
-                display: none; /* 已移除天气组件，隐藏 */
+                padding-top: 16px;
             }
             .dynamic-island {
-                height: 38px;
-                padding: 0 22px;
-                font-size: 13px;
-                min-width: 70px;
+                height: 36px;
+                padding: 0 20px;
+                font-size: 12px;
+                min-width: 64px;
             }
             .island-text-scroll {
-                font-size: 13px;
+                font-size: 12px;
             }
             .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
-                min-height: 40px;
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                min-height: 38px;
             }
             .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i {
-                font-size: 18px;
+                font-size: 17px;
             }
             .status-theme-toggle i {
-                font-size: 20px;
+                font-size: 19px;
             }
             .center-play-btn {
                 max-width: 80px;
@@ -1137,55 +1102,38 @@
                 font-size: clamp(22px, 4.5vw, 36px);
             }
             .controls-row button {
-                width: 36px;
-                height: 36px;
-                font-size: 18px;
-            }
-            .btn-expand {
                 width: 34px;
                 height: 34px;
-                font-size: 16px;
+                font-size: 17px;
+            }
+            .btn-expand {
+                width: 32px;
+                height: 32px;
+                font-size: 15px;
             }
             .controls-time {
-                font-size: 13px;
-            }
-            .main-card-container {
-                margin-top: 8px;
+                font-size: 12px;
             }
             .apps-scroll-wrapper {
-                margin-top: 14px;
-            }
-            .plate-photo-inner {
-                border-radius: 16px;
-            }
-            .stack-img {
-                border-radius: 16px;
-            }
-            .avatar-ring {
-                inset: -6px;
-            }
-            .avatar-ring-2 {
-                inset: -11px;
+                margin-top: 12px;
             }
             .floating-word {
-                font-size: 26px;
+                font-size: 24px;
             }
         }
 
-        /* ===== 安卓手机：禁止下拉查看全部内容（overscroll-behavior 已设，加强锁定） ===== */
+        /* ===== 安卓谷歌浏览器适配 ===== */
         @media (max-width: 767px) {
             html, body {
-                overscroll-behavior: none;
+                overscroll-behavior: auto;
                 touch-action: pan-y;
             }
             .app-container {
-                overscroll-behavior: none;
+                overscroll-behavior: auto;
             }
-        }
-
-        /* ===== 移除天气组件相关样式 ===== */
-        .weather-widget {
-            display: none !important;
+            .main-card-container {
+                padding-bottom: 12px;
+            }
         }
 
         /* 启动遮罩 */
@@ -1232,7 +1180,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v2';
+var VERSION = 'su-fa36165-v3';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -1379,8 +1327,6 @@ self.addEventListener('fetch', function (e) {
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <!-- 天气组件已移除 -->
-
                 <div class="profile-row">
                     <div class="profile-left">
                         <div class="avatar" id="avatar">
@@ -2218,7 +2164,7 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/61.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/62.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/63.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%BA%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/67.jpg",
@@ -2344,7 +2290,6 @@ self.addEventListener('fetch', function (e) {
             const expandBtn = $("#expandBtn");
             const statusThemeToggle = $("#statusThemeToggle");
             const statusThemeIcon = $("#statusThemeIcon");
-            // 天气组件已移除，不获取相关元素
 
             const videoPopup = $("#videoPopup");
             const popupVideo = $("#popupVideo");
@@ -2382,42 +2327,6 @@ self.addEventListener('fetch', function (e) {
 
             let isPopupMode = false;
             let mainWasPlayingBeforePopup = false;
-
-            // ================================================================
-            //  滚动锁定
-            // ================================================================
-            let _scrollLockY = 0;
-            let _isScrollLocked = false;
-
-            function lockScroll() {
-                if (_isScrollLocked) return;
-                _isScrollLocked = true;
-                _scrollLockY = window.scrollY || window.pageYOffset || 0;
-                document.documentElement.classList.add('scroll-locked');
-                document.body.classList.add('scroll-locked');
-                document.body.style.top = (-_scrollLockY) + 'px';
-            }
-
-            function unlockScroll() {
-                if (!_isScrollLocked) return;
-                _isScrollLocked = false;
-                document.documentElement.classList.remove('scroll-locked');
-                document.body.classList.remove('scroll-locked');
-                document.body.style.top = '';
-                window.scrollTo(0, _scrollLockY);
-                setTimeout(function () {
-                    try {
-                        updateCardRectForWords();
-                        updateCardRectForMeteors();
-                        measureWordSizes();
-                        if (!isFollowing) {
-                            allWords.forEach(function (w, idx) {
-                                updateWordPosition(w, pos[idx].x, pos[idx].y, idx);
-                            });
-                        }
-                    } catch (e) {}
-                }, 30);
-            }
 
             // ================================================================
             //  ▶️ 手动播放辅助函数
@@ -2901,7 +2810,6 @@ self.addEventListener('fetch', function (e) {
                 if (popupVideo.volume <= 0) popupVideo.volume = 1;
 
                 videoPopup.classList.add('active');
-                lockScroll();
 
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
                     `<i class="fa-solid fa-volume-high"></i>`;
@@ -2932,7 +2840,6 @@ self.addEventListener('fetch', function (e) {
                 popupVideo.pause();
 
                 videoPopup.classList.remove('active');
-                unlockScroll();
 
                 mainVideo.muted = false;
                 if (mainVideo.volume <= 0) mainVideo.volume = 1;
@@ -3130,7 +3037,6 @@ self.addEventListener('fetch', function (e) {
                 viewerImg.src = viewerGallery[viewerGalleryIndex];
                 viewerImg.alt = alt || "原图";
                 viewer.classList.add("show");
-                lockScroll();
                 viewerHint.textContent = '左右滑动切换 · 长按保存';
                 updateViewerCounter();
                 if (viewerGallery.length > 1) setTimeout(() => { if (viewer.classList.contains('show'))
@@ -3140,7 +3046,6 @@ self.addEventListener('fetch', function (e) {
 
             function closeViewer() { stopViewerAutoPlay();
                 viewer.classList.remove("show");
-                unlockScroll();
                 isViewerInteracting = false;
                 setTimeout(() => { if (!viewer.classList.contains("show")) viewerImg.src = ""; }, 250); }
 
@@ -3283,7 +3188,6 @@ self.addEventListener('fetch', function (e) {
                     e.target.closest(".center-play-btn") || e.target.closest(".status-theme-toggle") ||
                     e.target.closest(".status-sakura-toggle") ||
                     e.target.closest(".floating-word") || e.target.closest(".plate-photo") ||
-                    e.target.closest(".weather-widget") ||
                     e.target.closest(".status-meteor-toggle") ||
                     e.target.closest(".status-word-toggle")) return;
                 const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
@@ -3309,10 +3213,6 @@ self.addEventListener('fetch', function (e) {
             }
             updateTime();
             setInterval(updateTime, 1000);
-
-            // ================================================================
-            //  🌤️ 天气组件：已完全移除
-            // ================================================================
 
             // ===== 启动 =====
             setTimeout(() => {
