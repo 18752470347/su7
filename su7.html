@@ -64,12 +64,12 @@
         html, body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
             width: 100%;
-            min-height: 100%;
-            background: #F2F2F7;
-            overflow-x: hidden;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            height: 100%;
+            overflow: hidden;
             touch-action: pan-y;
+            overscroll-behavior: none;
+            position: fixed;
+            background: #F2F2F7;
         }
         :root {
             --text-main: #1C1C1E;
@@ -98,14 +98,14 @@
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
             --card-radius: 24px;
             --icon-radius: 16px;
-            --avatar-size: 64px;
-            --plate-size: 76px;
+            --avatar-size: 72px;
+            --plate-size: 86px;
             --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.06);
             --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.10);
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
             --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            --status-btn-size: 32px;
-            --status-btn-gap: 7px;
+            --status-btn-size: 34px;
+            --status-btn-gap: 8px;
         }
         html.dark-mode {
             --text-main: #F5F5F7;
@@ -141,6 +141,20 @@
         html.dark-mode .sakura {
             background: rgba(255, 200, 216, 0.45);
             box-shadow: 0 0 20px rgba(255, 200, 216, 0.15);
+        }
+        html.transitioning {
+            transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        html.transitioning * {
+            transition: background-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                border-color 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                fill 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                -webkit-backdrop-filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         button,
         img,
@@ -208,28 +222,28 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ===== 主容器：顶部留白，适配安卓 ===== */
+        /* ===== 主容器：铺满视口，消除底部空白 ===== */
         .app-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
             width: 100%;
             max-width: 480px;
-            min-height: 100vh;
-            min-height: 100dvh;
-            padding: calc(var(--safe-top) + 20px) 16px 24px;
+            height: 100vh;
+            height: 100dvh;
+            padding: calc(var(--safe-top) + 14px) 16px calc(var(--safe-bottom) + 14px);
             position: relative;
             z-index: 2;
             animation: pageSpringIn .8s var(--spring) both;
             margin: 0 auto;
+            overflow: hidden;
             gap: 0;
-            overflow: visible;
         }
         @media (min-width: 768px) {
             .app-container {
                 max-width: 520px;
-                padding: 40px 24px 32px;
+                padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
             }
         }
 
@@ -237,7 +251,7 @@
         .status-bar-container {
             width: 100%;
             flex-shrink: 0;
-            padding: 0 0 4px;
+            padding: 0 0 2px;
         }
         .ios-status-bar {
             width: 100%;
@@ -247,7 +261,7 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--status-color);
-            min-height: 32px;
+            min-height: 34px;
             padding: 0 2px;
         }
         .ios-status-left {
@@ -255,7 +269,7 @@
             text-align: left;
             font-weight: 600;
             letter-spacing: 0.2px;
-            font-size: 13px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             gap: var(--status-btn-gap);
@@ -294,11 +308,11 @@
         .status-word-toggle i {
             position: relative;
             z-index: 2;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1;
             transition: var(--transition-smooth);
         }
-        .status-theme-toggle i { font-size: 15px; }
+        .status-theme-toggle i { font-size: 16px; }
         .status-btn:hover i,
         .status-theme-toggle:hover i,
         .status-sakura-toggle:hover i,
@@ -340,8 +354,8 @@
         .status-word-toggle.inactive i { color: #8E8E93; opacity: 0.4; }
 
         @media (max-width: 380px) {
-            :root { --status-btn-size: 28px; --status-btn-gap: 6px; }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 12px; }
+            :root { --status-btn-size: 30px; --status-btn-gap: 6px; }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
             .ios-status-left { font-size: 12px; }
         }
 
@@ -350,9 +364,9 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 30px;
-            padding: 0 14px;
-            min-width: 50px;
+            height: 32px;
+            padding: 0 16px;
+            min-width: 55px;
             background: var(--island-bg);
             border-radius: 22px;
             color: var(--island-text);
@@ -429,17 +443,17 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 18%;
+            width: 20%;
             aspect-ratio: 1 / 1;
-            max-width: 64px;
-            min-width: 38px;
+            max-width: 72px;
+            min-width: 44px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(12px) saturate(180%);
             -webkit-backdrop-filter: blur(12px) saturate(180%);
             border: 2px solid rgba(255, 255, 255, 0.20);
             color: #fff;
-            font-size: clamp(16px, 4vw, 28px);
+            font-size: clamp(18px, 4.5vw, 32px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -456,7 +470,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 6px 10px 8px;
+            padding: 8px 12px 10px;
             background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.80) 100%);
             z-index: 3;
             transition: opacity 0.4s ease, transform 0.4s ease;
@@ -470,7 +484,7 @@
             background: rgba(255, 255, 255, 0.15);
             border-radius: 99px;
             cursor: pointer;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             position: relative;
             transition: height 0.2s ease;
         }
@@ -483,16 +497,16 @@
             transition: width 0.08s linear;
             box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
         }
-        .controls-row { display: flex; align-items: center; gap: 6px; }
+        .controls-row { display: flex; align-items: center; gap: 8px; }
         .controls-row button {
             color: rgba(255, 255, 255, 0.85);
-            font-size: 14px;
+            font-size: 15px;
             padding: 4px;
             opacity: 0.85;
             transition: all 0.2s ease;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -503,22 +517,22 @@
         .controls-time {
             margin-left: auto;
             color: rgba(255, 255, 255, 0.85);
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             letter-spacing: 0.3px;
         }
         .btn-expand {
             color: rgba(255, 255, 255, 0.75);
-            font-size: 12px;
+            font-size: 13px;
             padding: 4px;
             opacity: 0.8;
             transition: all 0.2s ease;
             border-radius: 50%;
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -527,21 +541,24 @@
         .btn-expand:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
         .btn-expand:active { opacity: 0.4; transform: scale(0.88); }
 
-        /* ===== 主卡片 ===== */
+        /* ===== 主卡片：flex-grow 撑满剩余空间 ===== */
         .main-card-container {
             width: 100%;
             flex: 1 1 auto;
+            min-height: 0;
             animation: cardSpringIn .7s var(--ease) 0.16s both;
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            margin-top: 8px;
-            padding-bottom: 8px;
+            justify-content: center;
+            margin-top: 6px;
+            padding-bottom: 4px;
         }
         .main-card {
             width: 100%;
-            padding: 12px 14px 16px;
+            height: 100%;
+            max-height: 100%;
+            padding: 14px 16px 16px;
             border-radius: var(--card-radius);
             background: var(--glass-bg);
             backdrop-filter: blur(24px) saturate(180%);
@@ -552,9 +569,9 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: space-evenly;
             transition: var(--transition-smooth);
-            gap: 4px;
+            gap: 2px;
         }
         .main-card:hover { box-shadow: var(--shadow-medium); }
         .main-card::before {
@@ -574,10 +591,10 @@
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
             align-items: start;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
             flex-shrink: 0;
-            padding-top: 10px;
+            padding-top: 8px;
         }
         .profile-left {
             min-width: 0;
@@ -590,7 +607,7 @@
             width: var(--avatar-size);
             height: var(--avatar-size);
             border-radius: 50%;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             cursor: zoom-in;
             flex-shrink: 0;
         }
@@ -672,13 +689,13 @@
         .stack-img.hidden { transform: scale(0.65) translateY(32px); opacity: 0; z-index: 1; pointer-events: none; }
 
         .plate {
-            padding: 3px 12px; border-radius: 8px;
+            padding: 4px 14px; border-radius: 8px;
             background: var(--plate-bg); color: #fff;
-            font-size: 14px; font-weight: 700; letter-spacing: 2px;
+            font-size: 15px; font-weight: 700; letter-spacing: 2px;
             box-shadow: 0 3px 20px rgba(0, 212, 255, 0.18);
             border: 0.5px solid rgba(255, 255, 255, 0.10);
             cursor: pointer; transition: var(--transition-smooth);
-            position: relative; overflow: hidden; margin-top: 2px;
+            position: relative; overflow: hidden; margin-top: 3px;
         }
         .plate::after {
             content: ''; position: absolute; inset: 0;
@@ -690,7 +707,7 @@
         .plate:active { transform: scale(0.92); }
 
         .name {
-            font-size: 11px; font-weight: 700; text-align: center; margin-top: 3px;
+            font-size: 12px; font-weight: 700; text-align: center; margin-top: 4px;
             background: var(--name-gradient); background-size: 300% 100%;
             -webkit-background-clip: text; background-clip: text; color: transparent;
             animation: textGradient 3.2s ease-in-out infinite;
@@ -699,7 +716,7 @@
         }
         @keyframes textGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .subtitle {
-            font-size: 9px; font-weight: 600; text-align: center; margin-top: 1px;
+            font-size: 10px; font-weight: 600; text-align: center; margin-top: 2px;
             background: var(--sub-gradient); background-size: 300% 100%;
             -webkit-background-clip: text; background-clip: text; color: transparent;
             animation: textGradientSub 3.8s ease-in-out infinite;
@@ -712,7 +729,7 @@
             width: 100%;
             overflow: visible;
             position: relative;
-            margin-top: 6px;
+            margin-top: 10px;
             z-index: 10;
             flex-shrink: 0;
         }
@@ -721,24 +738,24 @@
             flex: 0 0 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 7px 5px;
+            gap: 10px 8px;
             padding: 0;
-            min-height: 72px;
+            min-height: 88px;
         }
         .app-button {
             --icon-color: #00D4FF;
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
             background: transparent; cursor: pointer; transition: var(--transition-smooth);
             position: relative; z-index: 10; border-radius: 12px; padding: 2px 0;
         }
         .app-button:active { transform: scale(0.90); }
         .app-icon-wrap {
-            position: relative; width: 44px; height: 44px;
+            position: relative; width: 52px; height: 52px;
             display: flex; align-items: center; justify-content: center;
             border-radius: var(--icon-radius);
             background: var(--icon-bg);
             box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), var(--shadow-soft);
-            font-size: 18px; color: var(--icon-color);
+            font-size: 22px; color: var(--icon-color);
             backdrop-filter: blur(14px) saturate(170%);
             -webkit-backdrop-filter: blur(14px) saturate(170%);
             border: 1px solid var(--glass-border);
@@ -755,7 +772,7 @@
         .app-button:active .app-icon-wrap { transform: scale(0.88); }
         .app-button.loading .app-icon-wrap { opacity: 0.6; transform: scale(0.95); }
         .app-label {
-            font-size: 8px; font-weight: 500; color: var(--text-sub);
+            font-size: 9px; font-weight: 500; color: var(--text-sub);
             text-align: center; line-height: 1.2; letter-spacing: 0.2px;
             transition: var(--transition-smooth);
         }
@@ -908,45 +925,45 @@
 
         /* ===== 响应式微调 ===== */
         @media (max-width: 380px) {
-            .app-container { padding: calc(var(--safe-top) + 16px) 10px 20px; }
-            .main-card { padding: 10px 10px 12px; }
-            :root { --avatar-size: 56px; --plate-size: 68px; }
-            .plate { font-size: 13px; padding: 2px 10px; }
-            .name { font-size: 10px; }
-            .subtitle { font-size: 8px; }
-            .app-icon-wrap { width: 40px; height: 40px; font-size: 16px; }
-            .app-label { font-size: 7px; }
-            .apps-page { gap: 6px 4px; min-height: 66px; }
-            .dynamic-island { height: 26px; font-size: 10px; padding: 0 10px; min-width: 40px; }
-            .center-play-btn { min-width: 32px; font-size: clamp(14px, 4vw, 24px); }
-            .profile-row { gap: 4px; padding-top: 6px; }
-            .video-controls { padding: 5px 8px 6px; }
-            .controls-row button { width: 24px; height: 24px; font-size: 12px; }
+            .app-container { padding: calc(var(--safe-top) + 10px) 12px calc(var(--safe-bottom) + 10px); }
+            .main-card { padding: 10px 12px 12px; }
+            :root { --avatar-size: 62px; --plate-size: 76px; }
+            .plate { font-size: 13px; padding: 3px 12px; }
+            .name { font-size: 11px; }
+            .subtitle { font-size: 9px; }
+            .app-icon-wrap { width: 46px; height: 46px; font-size: 19px; }
+            .app-label { font-size: 8px; }
+            .apps-page { gap: 8px 6px; min-height: 80px; }
+            .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 45px; }
+            .center-play-btn { min-width: 38px; font-size: clamp(16px, 4.5vw, 28px); }
+            .profile-row { gap: 6px; padding-top: 6px; }
+            .video-controls { padding: 6px 10px 8px; }
+            .controls-row button { width: 26px; height: 26px; font-size: 13px; }
         }
         @media (max-width: 360px) {
-            :root { --plate-size: 60px; --avatar-size: 50px; }
-            .main-card { padding: 8px 8px 10px; }
-            .app-icon-wrap { width: 36px; height: 36px; font-size: 14px; }
+            :root { --plate-size: 68px; --avatar-size: 56px; }
+            .main-card { padding: 8px 10px 10px; }
+            .app-icon-wrap { width: 42px; height: 42px; font-size: 17px; }
             .app-label { font-size: 7px; }
-            .apps-page { gap: 5px 3px; min-height: 60px; }
-            .plate { font-size: 12px; padding: 2px 8px; }
+            .apps-page { gap: 6px 5px; min-height: 72px; }
+            .plate { font-size: 12px; padding: 2px 10px; }
             .name { font-size: 10px; }
         }
 
         /* 横屏手机适配 */
         @media (orientation: landscape) and (max-height: 500px) {
-            .app-container { max-width: 620px; padding: 20px 16px 16px; }
+            .app-container { max-width: 620px; padding: calc(var(--safe-top) + 8px) 16px calc(var(--safe-bottom) + 8px); }
             .main-card { padding: 8px 12px; }
-            .video-player-container { max-height: 40vh; }
-            .profile-row { padding-top: 6px; }
-            .apps-scroll-wrapper { margin-top: 4px; }
-            .app-icon-wrap { width: 38px; height: 38px; font-size: 15px; }
-            .app-label { font-size: 7px; }
-            .apps-page { gap: 5px 4px; min-height: 58px; }
-            .plate-photo { --plate-size: 60px; }
-            .avatar { --avatar-size: 48px; }
+            .video-player-container { max-height: 38vh; }
+            .profile-row { padding-top: 4px; }
+            .apps-scroll-wrapper { margin-top: 6px; }
+            .app-icon-wrap { width: 42px; height: 42px; font-size: 18px; }
+            .app-label { font-size: 8px; }
+            .apps-page { gap: 6px 5px; min-height: 70px; }
+            .plate-photo { --plate-size: 64px; }
+            .avatar { --avatar-size: 52px; }
             .name { font-size: 10px; }
-            .subtitle { font-size: 8px; }
+            .subtitle { font-size: 9px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -969,7 +986,7 @@
 
         /* ===== 漂浮文字 ===== */
         .floating-word {
-            position: fixed; font-size: 20px; font-weight: 900;
+            position: fixed; font-size: 22px; font-weight: 900;
             font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
             cursor: grab; z-index: 1100; pointer-events: auto;
             transition: none; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
@@ -1006,6 +1023,10 @@
         @keyframes trailPulse { 0% { transform: scale(0.7); opacity: 0.2; } 100% { transform: scale(1.5); opacity: 0.6; } }
         .floating-word.hidden-words { visibility: hidden !important; pointer-events: none !important; transition: visibility 0.3s ease; }
 
+        /* 滚动锁定 */
+        body.scroll-locked { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
+        html.scroll-locked { overflow: hidden; }
+
         /* 低端机毛玻璃降级 */
         html.low-perf .main-card,
         html.low-perf .video-popup,
@@ -1031,109 +1052,94 @@
         @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
             .app-container {
                 max-width: 560px;
-                padding: 48px 28px 32px;
+                padding: calc(var(--safe-top) + 32px) 28px calc(var(--safe-bottom) + 32px);
             }
             .video-player-container {
                 border-radius: 20px;
-                max-height: 280px;
+                max-height: 300px;
             }
             .video-box {
                 aspect-ratio: 16 / 9;
             }
             .main-card {
-                padding: 16px 20px 20px;
+                padding: 20px 24px 24px;
                 border-radius: 28px;
             }
             .app-icon-wrap {
-                width: 52px;
-                height: 52px;
-                font-size: 20px;
-                border-radius: 18px;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+                border-radius: 20px;
             }
             .app-label {
-                font-size: 10px;
-            }
-            .apps-page {
-                gap: 12px 10px;
-                min-height: 92px;
-            }
-            :root {
-                --avatar-size: 76px;
-                --plate-size: 92px;
-            }
-            .plate {
-                font-size: 16px;
-                padding: 4px 18px;
-            }
-            .name {
-                font-size: 13px;
-            }
-            .subtitle {
                 font-size: 11px;
             }
-            .profile-row {
-                gap: 16px;
-                padding-top: 16px;
+            .apps-page {
+                gap: 16px 12px;
+                min-height: 108px;
             }
-            .dynamic-island {
-                height: 36px;
-                padding: 0 20px;
-                font-size: 12px;
-                min-width: 64px;
+            :root {
+                --avatar-size: 88px;
+                --plate-size: 108px;
             }
-            .island-text-scroll {
-                font-size: 12px;
+            .plate {
+                font-size: 18px;
+                padding: 6px 22px;
             }
-            .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-                min-height: 38px;
-            }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i {
-                font-size: 17px;
-            }
-            .status-theme-toggle i {
-                font-size: 19px;
-            }
-            .center-play-btn {
-                max-width: 80px;
-                min-width: 52px;
-                font-size: clamp(22px, 4.5vw, 36px);
-            }
-            .controls-row button {
-                width: 34px;
-                height: 34px;
-                font-size: 17px;
-            }
-            .btn-expand {
-                width: 32px;
-                height: 32px;
+            .name {
                 font-size: 15px;
             }
+            .subtitle {
+                font-size: 13px;
+            }
+            .profile-row {
+                gap: 20px;
+                padding-top: 18px;
+            }
+            .dynamic-island {
+                height: 40px;
+                padding: 0 24px;
+                font-size: 14px;
+                min-width: 76px;
+            }
+            .island-text-scroll {
+                font-size: 14px;
+            }
+            .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
+                min-height: 42px;
+            }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i {
+                font-size: 19px;
+            }
+            .status-theme-toggle i {
+                font-size: 21px;
+            }
+            .center-play-btn {
+                max-width: 88px;
+                min-width: 56px;
+                font-size: clamp(24px, 4.5vw, 40px);
+            }
+            .controls-row button {
+                width: 38px;
+                height: 38px;
+                font-size: 19px;
+            }
+            .btn-expand {
+                width: 36px;
+                height: 36px;
+                font-size: 17px;
+            }
             .controls-time {
-                font-size: 12px;
+                font-size: 14px;
             }
             .apps-scroll-wrapper {
-                margin-top: 12px;
+                margin-top: 16px;
             }
             .floating-word {
-                font-size: 24px;
-            }
-        }
-
-        /* ===== 安卓谷歌浏览器适配 ===== */
-        @media (max-width: 767px) {
-            html, body {
-                overscroll-behavior: auto;
-                touch-action: pan-y;
-            }
-            .app-container {
-                overscroll-behavior: auto;
-                padding-top: calc(var(--safe-top) + 18px);
-            }
-            .main-card-container {
-                padding-bottom: 16px;
+                font-size: 28px;
             }
         }
 
@@ -1181,7 +1187,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v4';
+var VERSION = 'su-fa36165-v5';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -2811,6 +2817,7 @@ self.addEventListener('fetch', function (e) {
                 if (popupVideo.volume <= 0) popupVideo.volume = 1;
 
                 videoPopup.classList.add('active');
+                lockScroll();
 
                 popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
                     `<i class="fa-solid fa-volume-high"></i>`;
@@ -2841,6 +2848,7 @@ self.addEventListener('fetch', function (e) {
                 popupVideo.pause();
 
                 videoPopup.classList.remove('active');
+                unlockScroll();
 
                 mainVideo.muted = false;
                 if (mainVideo.volume <= 0) mainVideo.volume = 1;
@@ -3038,6 +3046,7 @@ self.addEventListener('fetch', function (e) {
                 viewerImg.src = viewerGallery[viewerGalleryIndex];
                 viewerImg.alt = alt || "原图";
                 viewer.classList.add("show");
+                lockScroll();
                 viewerHint.textContent = '左右滑动切换 · 长按保存';
                 updateViewerCounter();
                 if (viewerGallery.length > 1) setTimeout(() => { if (viewer.classList.contains('show'))
@@ -3047,6 +3056,7 @@ self.addEventListener('fetch', function (e) {
 
             function closeViewer() { stopViewerAutoPlay();
                 viewer.classList.remove("show");
+                unlockScroll();
                 isViewerInteracting = false;
                 setTimeout(() => { if (!viewer.classList.contains("show")) viewerImg.src = ""; }, 250); }
 
