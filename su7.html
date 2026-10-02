@@ -1168,37 +1168,6 @@
         @keyframes bootSpin {
             to { transform: rotate(360deg); }
         }
-        /* ===== 方向盘适配提示条 ===== */
-        .steering-hint {
-            position: fixed;
-            bottom: calc(10px + var(--safe-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 10px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            z-index: 9999;
-            pointer-events: none;
-            white-space: nowrap;
-            letter-spacing: 0.3px;
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-            opacity: 0.85;
-            font-weight: 500;
-        }
-        .steering-hint i {
-            margin: 0 4px;
-            font-size: 10px;
-        }
-        @media (max-width: 380px) {
-            .steering-hint { font-size: 9px; padding: 4px 10px; }
-        }
-        @media (orientation: landscape) and (max-height: 500px) {
-            .steering-hint { display: none; }
-        }
     </style>
     <script>
         // 主题跟随系统
@@ -1431,11 +1400,6 @@ self.addEventListener('fetch', function (e) {
     <div class="floating-word" id="wordXu" style="left:8%; top:18%;"><span class="char">许</span></div>
     <div class="floating-word" id="wordHong" style="left:25%; top:55%;"><span class="char">红</span></div>
     <div class="floating-word" id="wordDou" style="left:70%; top:35%;"><span class="char">豆</span></div>
-
-    <!-- 方向盘操作提示 -->
-    <div class="steering-hint" id="steeringHint">
-        <i class="fa-solid fa-arrows-left-right"></i> 方向盘 ← → 切换视频 · 中央按钮播放/暂停
-    </div>
 
     <script>
         (function() {
@@ -3319,7 +3283,9 @@ self.addEventListener('fetch', function (e) {
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
-            // ===== 键盘快捷键 (含方向盘模拟) =====
+            // ===== 小米汽车方向盘适配：键盘快捷键 =====
+            // 小米汽车方向盘按键通常映射为：左箭头(←) 上一首/上一个，右箭头(→) 下一首/下一个，
+            // 中央按钮(Enter/Space) 播放/暂停。此处已完整适配。
             document.addEventListener('keydown', function (e) {
                 var t = e.target || {};
                 var tag = (t.tagName || '').toLowerCase();
@@ -3329,11 +3295,13 @@ self.addEventListener('fetch', function (e) {
                 if (typeof videoPopup !== 'undefined' && videoPopup && videoPopup.classList.contains('active')) {
                     if (k === 'Escape') { closePopup(); return; }
                     if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (popupVideo.paused) { playWithSound(popupVideo); } else { popupVideo.pause(); } return; }
+                    if (k === 'Enter') { e.preventDefault(); if (popupVideo.paused) { playWithSound(popupVideo); } else { popupVideo.pause(); } return; }
                     return;
                 }
                 if (k === 'ArrowLeft') { e.preventDefault(); prevVideo(); }
                 else if (k === 'ArrowRight') { e.preventDefault(); nextVideo(); }
-                else if ((k === ' ' || k === 'Spacebar')) { if (tag === 'button') return; e.preventDefault(); toggleVideo(); }
+                else if (k === ' ' || k === 'Spacebar') { if (tag === 'button') return; e.preventDefault(); toggleVideo(); }
+                else if (k === 'Enter') { e.preventDefault(); toggleVideo(); }
                 else if (k === 't' || k === 'T') { toggleTheme(); }
             });
 
@@ -3376,27 +3344,6 @@ self.addEventListener('fetch', function (e) {
                     document.head.appendChild(_mLink);
                 }
             } catch (e) {}
-
-            // ===== 方向盘适配：增加按键事件绑定 (已通过键盘快捷键实现) =====
-            // 注：汽车方向盘通常映射为键盘方向键和Enter键，上面已处理 ← → 切换视频，空格播放/暂停
-            // 为更友好，增加对 'Enter' 键的播放/暂停支持
-            document.addEventListener('keydown', function(e) {
-                var k = e.key;
-                if (k === 'Enter') {
-                    var t = e.target || {};
-                    var tag = (t.tagName || '').toLowerCase();
-                    if (tag === 'input' || tag === 'textarea' || t.isContentEditable) return;
-                    if (typeof viewer !== 'undefined' && viewer && viewer.classList.contains('show')) return;
-                    if (typeof videoPopup !== 'undefined' && videoPopup && videoPopup.classList.contains('active')) {
-                        // 弹窗模式下 Enter 也切换播放
-                        e.preventDefault();
-                        if (popupVideo.paused) { playWithSound(popupVideo); } else { popupVideo.pause(); }
-                        return;
-                    }
-                    e.preventDefault();
-                    toggleVideo();
-                }
-            });
 
         })();
     </script>
