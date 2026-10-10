@@ -250,12 +250,6 @@
             gap: 0;
             flex: 1 0 auto;
         }
-        @media (min-width: 768px) {
-            .app-container {
-                max-width: 520px;
-                padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
-            }
-        }
 
         /* ===== 状态栏区域 ===== */
         .status-bar-container {
@@ -362,12 +356,6 @@
         .status-word-toggle.active { background: rgba(255, 100, 150, 0.08); border-color: rgba(255, 100, 150, 0.2); }
         .status-word-toggle.active i { color: #FF6B9E; }
         .status-word-toggle.inactive i { color: #8E8E93; opacity: 0.4; }
-
-        @media (max-width: 380px) {
-            :root { --status-btn-size: 30px; --status-btn-gap: 6px; }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
-            .ios-status-left { font-size: 12px; }
-        }
 
         /* ===== 灵动岛 ===== */
         .dynamic-island {
@@ -551,7 +539,7 @@
         .btn-expand:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
         .btn-expand:active { opacity: 0.4; transform: scale(0.88); }
 
-        /* ===== 主卡片：可伸展，不锁死高度 ===== */
+        /* ===== 主卡片 ===== */
         .main-card-container {
             width: 100%;
             flex: 0 0 auto;
@@ -731,7 +719,7 @@
         }
         @keyframes textGradientSub { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* ===== 应用图标 ===== */
+        /* ===== 应用图标（去除方框） ===== */
         .apps-scroll-wrapper {
             width: 100%;
             overflow: visible;
@@ -756,15 +744,12 @@
             position: relative; z-index: 10;
             border-radius: 14px;
             padding: 4px 2px 6px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-        }
-        html.dark-mode .app-button {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.04);
+            /* 去除方框背景 */
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+            box-shadow: none;
         }
         .app-button:active { transform: scale(0.90); }
         .app-icon-wrap {
@@ -884,9 +869,6 @@
             filter: drop-shadow(0 2px 12px rgba(255, 138, 76, 0.35));
         }
         .app-button.loading .vpn-svg { opacity: 0.3; }
-        @media (max-width: 380px) { .vpn-svg { width: 26px; height: 26px; } }
-        @media (max-width: 360px) { .vpn-svg { width: 24px; height: 24px; } }
-        @media (min-width: 768px) and (hover: hover) and (pointer: fine) { .vpn-svg { width: 34px; height: 34px; } }
 
         /* ===== Toast ===== */
         .toast {
@@ -1033,59 +1015,14 @@
             color: rgba(255, 255, 255, 0.75); letter-spacing: 0.3px;
         }
 
-        /* ===== 响应式微调 ===== */
-        @media (max-width: 380px) {
-            .app-container { padding: calc(var(--safe-top) + 10px) 12px calc(var(--safe-bottom) + 20px); }
-            .main-card { padding: 10px 12px 12px; }
-            :root { --avatar-size: 62px; --plate-size: 76px; }
-            .plate { font-size: 13px; padding: 3px 12px; }
-            .name { font-size: 11px; }
-            .subtitle { font-size: 9px; }
-            .app-icon-wrap { width: 46px; height: 46px; font-size: 19px; }
-            .app-label { font-size: 8px; }
-            .apps-page { gap: 8px 6px; min-height: 80px; }
-            .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 45px; }
-            .center-play-btn { min-width: 38px; font-size: clamp(16px, 4.5vw, 28px); }
-            .profile-row { gap: 6px; padding-top: 6px; }
-            .video-controls { padding: 6px 10px 8px; }
-            .controls-row button { width: 26px; height: 26px; font-size: 13px; }
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(128,128,128,0.25); 
+            border-radius: 10px;
+            transition: background 0.3s ease;
         }
-        @media (max-width: 360px) {
-            :root { --plate-size: 68px; --avatar-size: 56px; }
-            .main-card { padding: 8px 10px 10px; }
-            .app-icon-wrap { width: 42px; height: 42px; font-size: 17px; }
-            .app-label { font-size: 7px; }
-            .apps-page { gap: 6px 5px; min-height: 72px; }
-            .plate { font-size: 12px; padding: 2px 10px; }
-            .name { font-size: 10px; }
-        }
-
-        /* 横屏手机适配 */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .app-container { max-width: 620px; padding: calc(var(--safe-top) + 8px) 16px calc(var(--safe-bottom) + 16px); }
-            .main-card { padding: 8px 12px; }
-            .video-player-container { max-height: 38vh; }
-            .profile-row { padding-top: 4px; }
-            .apps-scroll-wrapper { margin-top: 6px; }
-            .app-icon-wrap { width: 42px; height: 42px; font-size: 18px; }
-            .app-label { font-size: 8px; }
-            .apps-page { gap: 6px 5px; min-height: 70px; }
-            .plate-photo { --plate-size: 64px; }
-            .avatar { --avatar-size: 52px; }
-            .name { font-size: 10px; }
-            .subtitle { font-size: 9px; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-            .sakura { display: none; }
-        }
-        ::-webkit-scrollbar { width: 6px; height: 6px; background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.45); }
         ::-webkit-scrollbar-track { background: transparent; }
 
         /* 兼容回退 */
@@ -1160,36 +1097,234 @@
             .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(255, 255, 255, 0.04); transform: none; }
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .sakura { display: none; }
+        }
+
         /* ===== 电脑端适配 ===== */
         @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
             .app-container {
-                max-width: 560px;
-                padding: calc(var(--safe-top) + 32px) 28px calc(var(--safe-bottom) + 32px);
+                max-width: 640px;
+                padding: 40px 28px 56px;
             }
-            .video-player-container { border-radius: 20px; }
-            .video-box { aspect-ratio: 16 / 9; }
-            .main-card { padding: 20px 24px 24px; border-radius: 28px; }
-            .app-icon-wrap { width: 60px; height: 60px; font-size: 24px; border-radius: 20px; }
-            .app-label { font-size: 11px; }
-            .apps-page { gap: 16px 12px; min-height: 108px; }
-            :root { --avatar-size: 88px; --plate-size: 108px; }
-            .plate { font-size: 18px; padding: 6px 22px; }
-            .name { font-size: 15px; }
-            .subtitle { font-size: 13px; }
-            .profile-row { gap: 20px; padding-top: 18px; }
-            .dynamic-island { height: 40px; padding: 0 24px; font-size: 14px; min-width: 76px; }
-            .island-text-scroll { font-size: 14px; }
+            .video-player-container {
+                border-radius: 22px;
+                max-height: 340px;
+            }
+            .video-box {
+                aspect-ratio: 16 / 9;
+            }
+            .main-card {
+                padding: 28px 32px 32px;
+                border-radius: 28px;
+                gap: 6px;
+            }
+            .profile-row {
+                gap: 28px;
+                padding-top: 20px;
+            }
+            :root {
+                --avatar-size: 96px;
+                --plate-size: 120px;
+            }
+            .avatar {
+                margin-bottom: 12px;
+            }
+            .plate {
+                font-size: 20px;
+                padding: 8px 26px;
+                margin-top: 8px;
+                letter-spacing: 3px;
+            }
+            .name {
+                font-size: 16px;
+                margin-top: 8px;
+            }
+            .subtitle {
+                font-size: 14px;
+                margin-top: 6px;
+                line-height: 1.6;
+            }
+            .apps-scroll-wrapper {
+                margin-top: 24px;
+            }
+            .apps-page {
+                gap: 22px 16px;
+                min-height: 130px;
+            }
+            .app-button {
+                padding: 8px 4px 10px;
+                border-radius: 18px;
+                gap: 6px;
+            }
+            .app-icon-wrap {
+                width: 68px;
+                height: 68px;
+                font-size: 28px;
+                border-radius: 22px;
+            }
+            .vpn-svg {
+                width: 40px;
+                height: 40px;
+            }
+            .app-label {
+                font-size: 12px;
+                margin-top: 4px;
+            }
+            .dynamic-island {
+                height: 42px;
+                padding: 0 28px;
+                font-size: 15px;
+                min-width: 86px;
+            }
+            .island-text-scroll {
+                font-size: 15px;
+            }
             .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
-                width: 42px; height: 42px; min-width: 42px; min-height: 42px;
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                min-height: 44px;
             }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 19px; }
-            .status-theme-toggle i { font-size: 21px; }
-            .center-play-btn { max-width: 88px; min-width: 56px; font-size: clamp(24px, 4.5vw, 40px); }
-            .controls-row button { width: 38px; height: 38px; font-size: 19px; }
-            .btn-expand { width: 36px; height: 36px; font-size: 17px; }
-            .controls-time { font-size: 14px; }
-            .apps-scroll-wrapper { margin-top: 16px; }
-            .floating-word { font-size: 28px; }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i {
+                font-size: 20px;
+            }
+            .status-theme-toggle i { font-size: 22px; }
+            .ios-status-left { font-size: 16px; }
+            .center-play-btn {
+                max-width: 96px;
+                min-width: 64px;
+                font-size: clamp(28px, 4.5vw, 44px);
+            }
+            .controls-row button {
+                width: 42px;
+                height: 42px;
+                font-size: 20px;
+            }
+            .btn-expand {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .controls-time {
+                font-size: 15px;
+                gap: 10px;
+            }
+            .progress-track {
+                height: 4px;
+                margin-bottom: 10px;
+            }
+            .progress-track:hover { height: 6px; }
+            .video-controls {
+                padding: 14px 20px 16px;
+            }
+            .floating-word {
+                font-size: 34px;
+            }
+            .popup-inner {
+                max-width: 1000px;
+                border-radius: 20px;
+            }
+            .popup-inner video {
+                max-height: 78vh;
+            }
+            .popup-controls {
+                padding: 16px 22px 18px;
+                gap: 12px;
+            }
+            .popup-controls button {
+                width: 42px;
+                height: 42px;
+                font-size: 19px;
+            }
+            .popup-progress-wrap {
+                height: 4px;
+            }
+            .popup-progress-wrap:hover { height: 6px; }
+            .popup-time {
+                font-size: 13px;
+                min-width: 100px;
+            }
+            .popup-close {
+                width: 46px;
+                height: 46px;
+                font-size: 20px;
+                top: 16px;
+                right: 16px;
+            }
+            .viewer-img {
+                max-width: 80vw;
+                max-height: 82vh;
+            }
+            .viewer-close {
+                width: 52px;
+                height: 52px;
+                font-size: 22px;
+            }
+            .toast {
+                font-size: 15px;
+                padding: 12px 28px;
+                border-radius: 16px;
+                bottom: 50px;
+            }
+            ::-webkit-scrollbar { width: 12px; }
+            ::-webkit-scrollbar-thumb { 
+                background: rgba(128,128,128,0.3); 
+                border-radius: 6px;
+                border: 3px solid transparent;
+                background-clip: content-box;
+            }
+            ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); background-clip: content-box; }
+        }
+
+        /* 大屏电脑（1440px+） */
+        @media (min-width: 1440px) and (hover: hover) and (pointer: fine) {
+            .app-container {
+                max-width: 720px;
+                padding: 56px 32px 72px;
+            }
+            .video-player-container {
+                max-height: 380px;
+            }
+            .main-card {
+                padding: 36px 40px 40px;
+            }
+            :root {
+                --avatar-size: 108px;
+                --plate-size: 136px;
+            }
+            .app-icon-wrap {
+                width: 76px;
+                height: 76px;
+                font-size: 32px;
+                border-radius: 24px;
+            }
+            .vpn-svg {
+                width: 46px;
+                height: 46px;
+            }
+            .app-label {
+                font-size: 13px;
+            }
+            .apps-page {
+                gap: 28px 20px;
+                min-height: 150px;
+            }
+            .plate {
+                font-size: 22px;
+                padding: 10px 32px;
+            }
+            .name {
+                font-size: 18px;
+            }
+            .subtitle {
+                font-size: 15px;
+            }
         }
 
         /* 启动遮罩 */
@@ -3341,7 +3476,7 @@ self.addEventListener('fetch', function (e) {
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
-            // ===== 小米汽车方向盘适配：键盘快捷键 =====
+            // ===== 键盘快捷键（电脑端优化） =====
             document.addEventListener('keydown', function (e) {
                 var t = e.target || {};
                 var tag = (t.tagName || '').toLowerCase();
