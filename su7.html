@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#F2F2F7" />
     <meta name="color-scheme" content="light" />
     <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="description" content="苏FA36165 · 许红豆的个人主页 —— 星空、视频轮播、车牌记忆。" />
@@ -13,7 +14,6 @@
     <meta property="og:title" content="苏FA36165 · 许红豆" />
     <meta property="og:description" content="个人主页：星空、视频轮播、车牌记忆。" />
     <meta property="og:image" content="https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png" />
-    <meta name="mobile-web-app-capable" content="yes" />
     <script type="application/json" id="pwa-manifest">{
   "name": "苏FA36165 · 许红豆",
   "short_name": "苏FA36165",
@@ -80,6 +80,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
+            /* Android Chrome 动态视口修复 */
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
         :root {
             --text-main: #1C1C1E;
@@ -116,6 +118,8 @@
             --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             --status-btn-size: 34px;
             --status-btn-gap: 8px;
+            /* Android Chrome 动态视口高度 */
+            --vh: 1vh;
         }
         html.dark-mode {
             --text-main: #F5F5F7;
@@ -232,7 +236,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ===== 主容器：铺满视口，允许滚动 ===== */
+        /* ===== 主容器（Android Chrome 优化） ===== */
         .app-container {
             display: flex;
             flex-direction: column;
@@ -240,15 +244,16 @@
             justify-content: flex-start;
             width: 100%;
             max-width: 480px;
-            min-height: 100vh;
-            min-height: 100dvh;
-            padding: calc(var(--safe-top) + 14px) 16px calc(var(--safe-bottom) + 24px);
+            min-height: calc(var(--vh, 1vh) * 100);
+            padding: calc(var(--safe-top) + 14px) 16px calc(var(--safe-bottom) + 32px);
             position: relative;
             z-index: 2;
             animation: pageSpringIn .8s var(--spring) both;
             margin: 0 auto;
             gap: 0;
             flex: 1 0 auto;
+            /* 防止过度滚动 */
+            overscroll-behavior-y: contain;
         }
 
         /* ===== 状态栏区域 ===== */
@@ -304,6 +309,9 @@
             position: relative;
             overflow: visible;
             margin: 0;
+            /* 触摸优化 */
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .status-btn i,
         .status-theme-toggle i,
@@ -317,12 +325,6 @@
             transition: var(--transition-smooth);
         }
         .status-theme-toggle i { font-size: 16px; }
-        .status-btn:hover i,
-        .status-theme-toggle:hover i,
-        .status-sakura-toggle:hover i,
-        .status-meteor-toggle:hover i,
-        .status-word-toggle:hover i { transform: scale(1.1) rotate(8deg); }
-        .status-theme-toggle:hover i { transform: rotate(180deg) scale(1.1); }
         .status-btn:active,
         .status-theme-toggle:active,
         .status-sakura-toggle:active,
@@ -435,6 +437,9 @@
             height: 100%;
             object-fit: cover;
             background: #0A0A0C;
+            /* Android 视频渲染优化 */
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
         .center-play-btn {
             position: absolute;
@@ -459,8 +464,8 @@
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+            -webkit-tap-highlight-color: transparent;
         }
-        .center-play-btn:hover { transform: translate(-50%, -50%) scale(1.06); }
         .center-play-btn:active { transform: translate(-50%, -50%) scale(0.88); }
         .center-play-btn.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.8); }
         .video-controls {
@@ -485,15 +490,23 @@
             margin-bottom: 6px;
             position: relative;
             transition: height 0.2s ease;
+            /* 增大触摸区域 */
+            padding: 6px 0;
+            margin-top: -6px;
+            box-sizing: content-box;
         }
         .progress-track:hover { height: 4px; }
         .progress-fill {
-            height: 100%;
+            height: 3px;
             border-radius: inherit;
             background: linear-gradient(90deg, #00D4FF, #7B61FF, #FF6B9E);
             width: 0%;
             transition: width 0.08s linear;
             box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
         }
         .controls-row { display: flex; align-items: center; gap: 8px; }
         .controls-row button {
@@ -503,14 +516,14 @@
             opacity: 0.85;
             transition: all 0.2s ease;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.04);
+            -webkit-tap-highlight-color: transparent;
         }
-        .controls-row button:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
         .controls-row button:active { opacity: 0.5; transform: scale(0.88); }
         .controls-time {
             margin-left: auto;
@@ -529,14 +542,14 @@
             opacity: 0.8;
             transition: all 0.2s ease;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 34px;
+            height: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.04);
+            -webkit-tap-highlight-color: transparent;
         }
-        .btn-expand:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
         .btn-expand:active { opacity: 0.4; transform: scale(0.88); }
 
         /* ===== 主卡片 ===== */
@@ -568,7 +581,6 @@
             transition: var(--transition-smooth);
             gap: 2px;
         }
-        .main-card:hover { box-shadow: var(--shadow-medium); }
         .main-card::before {
             content: '';
             position: absolute;
@@ -605,6 +617,7 @@
             margin-bottom: 6px;
             cursor: zoom-in;
             flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         .avatar::before {
             content: '';
@@ -651,7 +664,6 @@
             box-shadow: 0 4px 28px rgba(0, 0, 0, 0.35);
             position: relative; z-index: 1; transition: var(--transition-smooth);
         }
-        .avatar img:hover { transform: scale(1.02); }
 
         .plate-photo {
             width: var(--plate-size);
@@ -661,6 +673,7 @@
             cursor: zoom-in;
             position: relative;
             margin-right: -2px;
+            -webkit-tap-highlight-color: transparent;
         }
         .plate-photo-inner {
             position: relative; width: 100%; border-radius: 12px;
@@ -669,13 +682,13 @@
             border: 1px solid var(--glass-border);
             transition: var(--transition-smooth);
         }
-        .plate-photo-inner:hover { box-shadow: var(--shadow-strong); transform: scale(1.02); }
         .stack-img {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; border-radius: 12px;
             transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform, opacity; backface-visibility: hidden;
             background: rgba(128, 128, 128, 0.08);
+            transform: translateZ(0);
         }
         .stack-img.active { transform: scale(1) translateY(0); opacity: 1; z-index: 5; }
         .stack-img.pile { transform: scale(0.90) translateY(8px); opacity: 0.65; z-index: 4; }
@@ -691,6 +704,7 @@
             border: 0.5px solid rgba(255, 255, 255, 0.10);
             cursor: pointer; transition: var(--transition-smooth);
             position: relative; overflow: hidden; margin-top: 3px;
+            -webkit-tap-highlight-color: transparent;
         }
         .plate::after {
             content: ''; position: absolute; inset: 0;
@@ -698,7 +712,6 @@
             transform: translateX(-100%); animation: plateShine 4.5s ease-in-out infinite;
         }
         @keyframes plateShine { 0% { transform: translateX(-100%); } 50% { transform: translateX(100%); } 100% { transform: translateX(100%); } }
-        .plate:hover { transform: scale(1.04); }
         .plate:active { transform: scale(0.92); }
 
         .name {
@@ -744,12 +757,13 @@
             position: relative; z-index: 10;
             border-radius: 14px;
             padding: 4px 2px 6px;
-            /* 去除方框背景 */
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
             border: none;
             box-shadow: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .app-button:active { transform: scale(0.90); }
         .app-icon-wrap {
@@ -764,6 +778,8 @@
             border: 1px solid var(--glass-border);
             transition: var(--transition-smooth); z-index: 10;
             overflow: hidden;
+            /* Android GPU 加速 */
+            transform: translateZ(0);
         }
         .app-icon-wrap::before {
             content: '';
@@ -780,8 +796,6 @@
             background: conic-gradient(from 0deg, var(--icon-color), transparent, var(--icon-color));
             opacity: 0; transition: opacity 0.4s ease; z-index: -1; filter: blur(8px);
         }
-        .app-button:hover .app-icon-wrap::after { opacity: 0.35; }
-        .app-button:hover .app-icon-wrap { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .app-button:active .app-icon-wrap { transform: scale(0.88); }
         .app-button.loading .app-icon-wrap { opacity: 0.6; transform: scale(0.95); }
         .app-label {
@@ -791,7 +805,6 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.02);
             margin-top: 1px;
         }
-        .app-button:hover .app-label { color: var(--text-main); }
 
         /* ===== Connecat VPN 图标美化 ===== */
         .vpn-icon {
@@ -814,10 +827,6 @@
             transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
             filter: drop-shadow(0 2px 8px rgba(255, 138, 76, 0.25));
         }
-        .vpn-shield { transition: all 0.4s ease; }
-        .vpn-lock-body,
-        .vpn-lock-shackle,
-        .vpn-lock-hole { transition: all 0.4s ease; }
         .vpn-wave {
             transition: all 0.4s ease;
             transform-origin: center;
@@ -843,22 +852,6 @@
             0%, 100% { opacity: 0.15; transform: scale(0.85); }
             50% { opacity: 0.45; transform: scale(1.15); }
         }
-        .app-button:hover .vpn-svg {
-            transform: scale(1.12);
-            filter: drop-shadow(0 4px 16px rgba(255, 138, 76, 0.45));
-        }
-        .app-button:hover .vpn-icon {
-            background: linear-gradient(145deg, rgba(255, 138, 76, 0.28), rgba(255, 90, 40, 0.14)) !important;
-            box-shadow: 
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                0 8px 28px rgba(255, 138, 76, 0.30),
-                0 0 0 1px rgba(255, 138, 76, 0.15) !important;
-        }
-        .app-button:hover .vpn-glow { opacity: 0.6; }
-        .app-button:hover .vpn-wave-1,
-        .app-button:hover .vpn-wave-3 { animation-duration: 1.6s; }
-        .app-button:hover .vpn-wave-2,
-        .app-button:hover .vpn-wave-4 { animation-duration: 1.6s; }
         .app-button:active .vpn-svg { transform: scale(0.88); }
         html.dark-mode .vpn-icon {
             background: linear-gradient(145deg, rgba(255, 138, 76, 0.22), rgba(255, 90, 40, 0.10)) !important;
@@ -881,6 +874,8 @@
             transition: opacity 0.3s var(--ease), transform 0.3s var(--spring);
             border: 0.5px solid rgba(255, 255, 255, 0.06);
             box-shadow: var(--shadow-strong);
+            max-width: 80vw;
+            text-align: center;
         }
         .toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
 
@@ -914,8 +909,8 @@
             border: 1px solid rgba(255, 255, 255, 0.06); color: #fff; font-size: 18px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 10003; transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-        .viewer-close:hover { background: rgba(255, 255, 255, 0.12); }
         .viewer-close:active { transform: scale(0.88); }
         .viewer-hint { color: rgba(255, 255, 255, 0.30); font-size: 12px; margin-top: 14px; letter-spacing: 0.3px; }
         .viewer-counter {
@@ -971,6 +966,7 @@
         .popup-inner video {
             display: block; width: 100%; height: auto; max-height: 80vh;
             object-fit: contain; background: #000;
+            transform: translateZ(0);
         }
         .popup-close {
             position: absolute; top: 10px; right: 10px; width: 38px; height: 38px;
@@ -979,8 +975,8 @@
             border: 1px solid rgba(255, 255, 255, 0.06); color: #fff; font-size: 16px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 10; opacity: 0.9; transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-        .popup-close:hover { background: rgba(255, 255, 255, 0.12); }
         .popup-close:active { transform: scale(0.88); }
         .popup-close.hidden { opacity: 0; pointer-events: none; }
         .popup-controls {
@@ -994,19 +990,21 @@
         .popup-controls.hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
         .popup-controls button {
             color: rgba(255, 255, 255, 0.85); font-size: 15px; padding: 4px; opacity: 0.85;
-            transition: all 0.2s ease; border-radius: 50%; width: 32px; height: 32px;
+            transition: all 0.2s ease; border-radius: 50%; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
             background: rgba(255, 255, 255, 0.04);
+            -webkit-tap-highlight-color: transparent;
         }
-        .popup-controls button:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
         .popup-controls button:active { opacity: 0.4; transform: scale(0.88); }
         .popup-progress-wrap {
             flex: 1; height: 3px; background: rgba(255, 255, 255, 0.15);
             border-radius: 99px; cursor: pointer; transition: height 0.2s ease;
+            padding: 6px 0;
+            margin-top: -6px;
+            box-sizing: content-box;
         }
-        .popup-progress-wrap:hover { height: 4px; }
         .popup-progress-bar {
-            height: 100%; border-radius: inherit;
+            height: 3px; border-radius: inherit;
             background: linear-gradient(90deg, #00D4FF, #7B61FF, #FF6B9E);
             width: 0%; box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
         }
@@ -1015,15 +1013,9 @@
             color: rgba(255, 255, 255, 0.75); letter-spacing: 0.3px;
         }
 
-        /* ===== 滚动条美化 ===== */
-        ::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
-        ::-webkit-scrollbar-thumb { 
-            background: rgba(128,128,128,0.25); 
-            border-radius: 10px;
-            transition: background 0.3s ease;
-        }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.45); }
-        ::-webkit-scrollbar-track { background: transparent; }
+        /* ===== 滚动条 ===== */
+        ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+        * { scrollbar-width: none; }
 
         /* 兼容回退 */
         @supports not (aspect-ratio: 1 / 1) {
@@ -1073,7 +1065,7 @@
         .floating-word.hidden-words { visibility: hidden !important; pointer-events: none !important; transition: visibility 0.3s ease; }
 
         /* 滚动锁定 */
-        body.scroll-locked { overflow: hidden; }
+        body.scroll-locked { overflow: hidden; position: fixed; width: 100%; }
         html.scroll-locked { overflow: hidden; }
 
         /* 低端机毛玻璃降级 */
@@ -1082,7 +1074,8 @@
         html.low-perf .viewer { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
         html.low-perf .sakura { display: none !important; }
 
-        /* 触屏设备禁用 hover 粘滞 */
+        /* ===== 安卓 Chrome 特定优化 ===== */
+        /* 1. 触屏设备禁用 hover 粘滞 */
         @media (hover: none), (pointer: coarse) {
             .app-button:hover .app-icon-wrap { transform: none; }
             .app-button:hover .app-icon-wrap::after { opacity: 0; }
@@ -1097,6 +1090,54 @@
             .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(255, 255, 255, 0.04); transform: none; }
         }
 
+        /* 2. 小屏手机适配 */
+        @media (max-width: 380px) {
+            :root { --status-btn-size: 30px; --status-btn-gap: 6px; }
+            .app-container { padding: calc(var(--safe-top) + 10px) 12px calc(var(--safe-bottom) + 28px); }
+            .main-card { padding: 10px 12px 12px; }
+            :root { --avatar-size: 62px; --plate-size: 76px; }
+            .plate { font-size: 13px; padding: 3px 12px; }
+            .name { font-size: 11px; }
+            .subtitle { font-size: 9px; }
+            .app-icon-wrap { width: 46px; height: 46px; font-size: 19px; }
+            .app-label { font-size: 8px; }
+            .apps-page { gap: 8px 6px; min-height: 80px; }
+            .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 45px; }
+            .center-play-btn { min-width: 38px; font-size: clamp(16px, 4.5vw, 28px); }
+            .profile-row { gap: 6px; padding-top: 6px; }
+            .video-controls { padding: 6px 10px 8px; }
+            .controls-row button { width: 32px; height: 32px; font-size: 13px; }
+            .btn-expand { width: 30px; height: 30px; }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
+            .ios-status-left { font-size: 12px; }
+        }
+        @media (max-width: 360px) {
+            :root { --plate-size: 68px; --avatar-size: 56px; }
+            .main-card { padding: 8px 10px 10px; }
+            .app-icon-wrap { width: 42px; height: 42px; font-size: 17px; }
+            .app-label { font-size: 7px; }
+            .apps-page { gap: 6px 5px; min-height: 72px; }
+            .plate { font-size: 12px; padding: 2px 10px; }
+            .name { font-size: 10px; }
+        }
+
+        /* 3. 横屏手机适配 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .app-container { max-width: 620px; padding: calc(var(--safe-top) + 8px) 16px calc(var(--safe-bottom) + 20px); }
+            .main-card { padding: 8px 12px; }
+            .video-player-container { max-height: 38vh; }
+            .profile-row { padding-top: 4px; }
+            .apps-scroll-wrapper { margin-top: 6px; }
+            .app-icon-wrap { width: 42px; height: 42px; font-size: 18px; }
+            .app-label { font-size: 8px; }
+            .apps-page { gap: 6px 5px; min-height: 70px; }
+            .plate-photo { --plate-size: 64px; }
+            .avatar { --avatar-size: 52px; }
+            .name { font-size: 10px; }
+            .subtitle { font-size: 9px; }
+        }
+
+        /* 4. 减少动画（用户偏好） */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -1112,219 +1153,62 @@
                 max-width: 640px;
                 padding: 40px 28px 56px;
             }
-            .video-player-container {
-                border-radius: 22px;
-                max-height: 340px;
-            }
-            .video-box {
-                aspect-ratio: 16 / 9;
-            }
-            .main-card {
-                padding: 28px 32px 32px;
-                border-radius: 28px;
-                gap: 6px;
-            }
-            .profile-row {
-                gap: 28px;
-                padding-top: 20px;
-            }
-            :root {
-                --avatar-size: 96px;
-                --plate-size: 120px;
-            }
-            .avatar {
-                margin-bottom: 12px;
-            }
-            .plate {
-                font-size: 20px;
-                padding: 8px 26px;
-                margin-top: 8px;
-                letter-spacing: 3px;
-            }
-            .name {
-                font-size: 16px;
-                margin-top: 8px;
-            }
-            .subtitle {
-                font-size: 14px;
-                margin-top: 6px;
-                line-height: 1.6;
-            }
-            .apps-scroll-wrapper {
-                margin-top: 24px;
-            }
-            .apps-page {
-                gap: 22px 16px;
-                min-height: 130px;
-            }
-            .app-button {
-                padding: 8px 4px 10px;
-                border-radius: 18px;
-                gap: 6px;
-            }
-            .app-icon-wrap {
-                width: 68px;
-                height: 68px;
-                font-size: 28px;
-                border-radius: 22px;
-            }
-            .vpn-svg {
-                width: 40px;
-                height: 40px;
-            }
-            .app-label {
-                font-size: 12px;
-                margin-top: 4px;
-            }
-            .dynamic-island {
-                height: 42px;
-                padding: 0 28px;
-                font-size: 15px;
-                min-width: 86px;
-            }
-            .island-text-scroll {
-                font-size: 15px;
-            }
+            .video-player-container { border-radius: 22px; max-height: 340px; }
+            .video-box { aspect-ratio: 16 / 9; }
+            .main-card { padding: 28px 32px 32px; border-radius: 28px; gap: 6px; }
+            .profile-row { gap: 28px; padding-top: 20px; }
+            :root { --avatar-size: 96px; --plate-size: 120px; }
+            .plate { font-size: 20px; padding: 8px 26px; margin-top: 8px; letter-spacing: 3px; }
+            .name { font-size: 16px; margin-top: 8px; }
+            .subtitle { font-size: 14px; margin-top: 6px; line-height: 1.6; }
+            .apps-scroll-wrapper { margin-top: 24px; }
+            .apps-page { gap: 22px 16px; min-height: 130px; }
+            .app-button { padding: 8px 4px 10px; border-radius: 18px; gap: 6px; }
+            .app-icon-wrap { width: 68px; height: 68px; font-size: 28px; border-radius: 22px; }
+            .vpn-svg { width: 40px; height: 40px; }
+            .app-label { font-size: 12px; margin-top: 4px; }
+            .dynamic-island { height: 42px; padding: 0 28px; font-size: 15px; min-width: 86px; }
+            .island-text-scroll { font-size: 15px; }
             .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
-                min-height: 44px;
+                width: 44px; height: 44px; min-width: 44px; min-height: 44px;
             }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i {
-                font-size: 20px;
-            }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 20px; }
             .status-theme-toggle i { font-size: 22px; }
             .ios-status-left { font-size: 16px; }
-            .center-play-btn {
-                max-width: 96px;
-                min-width: 64px;
-                font-size: clamp(28px, 4.5vw, 44px);
-            }
-            .controls-row button {
-                width: 42px;
-                height: 42px;
-                font-size: 20px;
-            }
-            .btn-expand {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-            .controls-time {
-                font-size: 15px;
-                gap: 10px;
-            }
-            .progress-track {
-                height: 4px;
-                margin-bottom: 10px;
-            }
-            .progress-track:hover { height: 6px; }
-            .video-controls {
-                padding: 14px 20px 16px;
-            }
-            .floating-word {
-                font-size: 34px;
-            }
-            .popup-inner {
-                max-width: 1000px;
-                border-radius: 20px;
-            }
-            .popup-inner video {
-                max-height: 78vh;
-            }
-            .popup-controls {
-                padding: 16px 22px 18px;
-                gap: 12px;
-            }
-            .popup-controls button {
-                width: 42px;
-                height: 42px;
-                font-size: 19px;
-            }
-            .popup-progress-wrap {
-                height: 4px;
-            }
-            .popup-progress-wrap:hover { height: 6px; }
-            .popup-time {
-                font-size: 13px;
-                min-width: 100px;
-            }
-            .popup-close {
-                width: 46px;
-                height: 46px;
-                font-size: 20px;
-                top: 16px;
-                right: 16px;
-            }
-            .viewer-img {
-                max-width: 80vw;
-                max-height: 82vh;
-            }
-            .viewer-close {
-                width: 52px;
-                height: 52px;
-                font-size: 22px;
-            }
-            .toast {
-                font-size: 15px;
-                padding: 12px 28px;
-                border-radius: 16px;
-                bottom: 50px;
-            }
+            .center-play-btn { max-width: 96px; min-width: 64px; font-size: clamp(28px, 4.5vw, 44px); }
+            .controls-row button { width: 42px; height: 42px; font-size: 20px; }
+            .btn-expand { width: 40px; height: 40px; font-size: 18px; }
+            .controls-time { font-size: 15px; gap: 10px; }
+            .progress-track { height: 4px; margin-bottom: 10px; }
+            .video-controls { padding: 14px 20px 16px; }
+            .floating-word { font-size: 34px; }
+            .popup-inner { max-width: 1000px; border-radius: 20px; }
+            .popup-inner video { max-height: 78vh; }
+            .popup-controls { padding: 16px 22px 18px; gap: 12px; }
+            .popup-controls button { width: 42px; height: 42px; font-size: 19px; }
+            .popup-progress-wrap { height: 4px; }
+            .popup-time { font-size: 13px; min-width: 100px; }
+            .popup-close { width: 46px; height: 46px; font-size: 20px; top: 16px; right: 16px; }
+            .viewer-img { max-width: 80vw; max-height: 82vh; }
+            .viewer-close { width: 52px; height: 52px; font-size: 22px; }
+            .toast { font-size: 15px; padding: 12px 28px; border-radius: 16px; bottom: 50px; }
             ::-webkit-scrollbar { width: 12px; }
-            ::-webkit-scrollbar-thumb { 
-                background: rgba(128,128,128,0.3); 
-                border-radius: 6px;
-                border: 3px solid transparent;
-                background-clip: content-box;
-            }
-            ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); background-clip: content-box; }
+            ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
         }
 
-        /* 大屏电脑（1440px+） */
+        /* 大屏电脑 */
         @media (min-width: 1440px) and (hover: hover) and (pointer: fine) {
-            .app-container {
-                max-width: 720px;
-                padding: 56px 32px 72px;
-            }
-            .video-player-container {
-                max-height: 380px;
-            }
-            .main-card {
-                padding: 36px 40px 40px;
-            }
-            :root {
-                --avatar-size: 108px;
-                --plate-size: 136px;
-            }
-            .app-icon-wrap {
-                width: 76px;
-                height: 76px;
-                font-size: 32px;
-                border-radius: 24px;
-            }
-            .vpn-svg {
-                width: 46px;
-                height: 46px;
-            }
-            .app-label {
-                font-size: 13px;
-            }
-            .apps-page {
-                gap: 28px 20px;
-                min-height: 150px;
-            }
-            .plate {
-                font-size: 22px;
-                padding: 10px 32px;
-            }
-            .name {
-                font-size: 18px;
-            }
-            .subtitle {
-                font-size: 15px;
-            }
+            .app-container { max-width: 720px; padding: 56px 32px 72px; }
+            .video-player-container { max-height: 380px; }
+            .main-card { padding: 36px 40px 40px; }
+            :root { --avatar-size: 108px; --plate-size: 136px; }
+            .app-icon-wrap { width: 76px; height: 76px; font-size: 32px; border-radius: 24px; }
+            .vpn-svg { width: 46px; height: 46px; }
+            .app-label { font-size: 13px; }
+            .apps-page { gap: 28px 20px; min-height: 150px; }
+            .plate { font-size: 22px; padding: 10px 32px; }
+            .name { font-size: 18px; }
+            .subtitle { font-size: 15px; }
         }
 
         /* 启动遮罩 */
@@ -1343,7 +1227,7 @@
         @keyframes bootSpin { to { transform: rotate(360deg); } }
     </style>
     <script>
-        // 主题跟随系统
+        // 主题跟随系统 + Android 动态视口修复
         (function () {
             try {
                 var k = 'plate_theme_mode';
@@ -1357,6 +1241,19 @@
                 var cs = document.querySelector('meta[name="color-scheme"]');
                 if (cs) cs.setAttribute('content', dark ? 'dark' : 'light');
             } catch (e) {}
+        })();
+
+        // Android Chrome 动态视口高度修复
+        (function() {
+            function setVH() {
+                var vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', vh + 'px');
+            }
+            setVH();
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', function() {
+                setTimeout(setVH, 100);
+            });
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
@@ -1599,7 +1496,7 @@ self.addEventListener('fetch', function (e) {
             'use strict';
 
             // ================================================================
-            //  ⚡ 性能参数
+            //  ⚡ 性能参数（Android 优化）
             // ================================================================
             const TARGET_FPS = 30;
             const FRAME_INTERVAL = 1000 / TARGET_FPS;
@@ -1610,6 +1507,10 @@ self.addEventListener('fetch', function (e) {
             const SAKURA_INTERVAL_MS = 320;
             const SAKURA_MAX = 10;
             const STACK_PRELOAD_COUNT = 6;
+
+            // Android 检测
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edge|Edg/i.test(navigator.userAgent);
 
             // ================================================================
             //  🌌 星空 + 流星雨系统
@@ -2530,7 +2431,7 @@ self.addEventListener('fetch', function (e) {
             let mainWasPlayingBeforePopup = false;
 
             // ================================================================
-            //  ▶️ 手动播放辅助函数
+            //  ▶️ 手动播放辅助函数（Android 优化）
             // ================================================================
             function playWithSound(videoEl) {
                 if (!videoEl) return;
@@ -2539,6 +2440,7 @@ self.addEventListener('fetch', function (e) {
                 var p = videoEl.play();
                 if (p && typeof p.catch === 'function') {
                     p.catch(function () {
+                        // Android Chrome 需要用户手势，显示提示
                         showToastMsg('请再次点击播放按钮');
                     });
                 }
@@ -2656,7 +2558,7 @@ self.addEventListener('fetch', function (e) {
                 toast.textContent = msg;
                 toast.classList.add("show");
                 clearTimeout(toastTimer);
-                toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
+                toastTimer = setTimeout(() => toast.classList.remove("show"), 1500);
             }
 
             function startAutoHideTimer() {
@@ -2877,12 +2779,32 @@ self.addEventListener('fetch', function (e) {
                 }
             });
 
+            // 进度条点击（增大触摸区域）
             progressTrack.addEventListener("click", (e) => {
                 const rect = progressTrack.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                 mainVideo.currentTime = r * mainVideo.duration;
                 showControls();
             });
+
+            // 进度条触摸支持
+            progressTrack.addEventListener("touchstart", (e) => {
+                e.stopPropagation();
+                const rect = progressTrack.getBoundingClientRect();
+                const touch = e.touches[0];
+                const r = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+                mainVideo.currentTime = r * mainVideo.duration;
+                showControls();
+            }, { passive: true });
+
+            progressTrack.addEventListener("touchmove", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = progressTrack.getBoundingClientRect();
+                const touch = e.touches[0];
+                const r = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+                mainVideo.currentTime = r * mainVideo.duration;
+            }, { passive: false });
 
             mainVideo.addEventListener("play", () => {
                 if (isPopupMode) {
@@ -2907,14 +2829,16 @@ self.addEventListener('fetch', function (e) {
                 if (!isPopupMode) switchVideo(currentVideoIndex + 1);
             });
 
-            // ----- 主视频滑动切换 -----
+            // ----- 主视频滑动切换（Android 优化） -----
             let startX = 0,
                 startY = 0,
                 isSwiping = false;
-            videoBox.addEventListener('touchstart', (e) => { const touch = e.touches[0];
+            videoBox.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
                 startX = touch.clientX;
                 startY = touch.clientY;
-                isSwiping = true; }, { passive: true });
+                isSwiping = true;
+            }, { passive: true });
             videoBox.addEventListener('touchmove', (e) => {
                 if (!isSwiping) return;
                 const dx = e.touches[0].clientX - startX;
@@ -3318,7 +3242,7 @@ self.addEventListener('fetch', function (e) {
             viewerImg.addEventListener('touchend', () => { clearTimeout(lpTimer); });
             viewerImg.addEventListener('touchcancel', () => { clearTimeout(lpTimer); });
 
-            // ===== APP跳转 =====
+            // ===== APP跳转（Android 优化） =====
             function jumpToApp(key) {
                 if (isJumping) return;
                 const config = APP_CONFIG[key];
@@ -3343,8 +3267,10 @@ self.addEventListener('fetch', function (e) {
                         document.removeEventListener('visibilitychange', onVis); } };
                 window.addEventListener('beforeunload', onUnload);
                 document.addEventListener('visibilitychange', onVis);
-                try { const win = window.open(config.scheme, '_blank'); if (!win || win.closed) window.location.href =
-                        config.scheme; } catch (e) { item.classList.remove("loading");
+                try { 
+                    // Android Chrome 推荐使用 location.href 直接跳转
+                    window.location.href = config.scheme;
+                } catch (e) { item.classList.remove("loading");
                     item.innerHTML = orig;
                     isJumping = false;
                     window.removeEventListener('beforeunload', onUnload);
@@ -3359,7 +3285,7 @@ self.addEventListener('fetch', function (e) {
             $$(".app-button").forEach(el => { el.addEventListener("click", (e) => { e.stopPropagation();
                     jumpToApp(el.dataset.app); }); });
 
-            // ===== 复制车牌 =====
+            // ===== 复制车牌（Android 优化） =====
             $("#plate").addEventListener("click", async (e) => {
                 e.stopPropagation();
                 const txt = "苏FA36165";
@@ -3370,9 +3296,11 @@ self.addEventListener('fetch', function (e) {
                         throw new Error('fallback');
                     }
                 } catch {
+                    // Android 兼容方案
                     const inp = document.createElement("input");
                     inp.value = txt;
-                    inp.style.cssText = "position:fixed;opacity:0;";
+                    inp.style.cssText = "position:fixed;opacity:0;left:-9999px;";
+                    inp.setAttribute('readonly', '');
                     document.body.appendChild(inp);
                     inp.select();
                     inp.setSelectionRange(0, 99999);
@@ -3435,11 +3363,15 @@ self.addEventListener('fetch', function (e) {
                 if (!isFollowing && wordsVisible) measureWordSizes();
             }, 1000);
 
-            // ===== 页面可见性 =====
+            // ===== 页面可见性（Android 优化） =====
             document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
                     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
                     if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
+                    // Android 暂停视频节省资源
+                    if (!isPopupMode && !mainVideo.paused) {
+                        mainVideo.pause();
+                    }
                 } else {
                     if (!animFrameId) { lastFrameTs = 0; animFrameId = requestAnimationFrame(animate); }
                     if (sakuraEnabled) {
@@ -3476,7 +3408,7 @@ self.addEventListener('fetch', function (e) {
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
-            // ===== 键盘快捷键（电脑端优化） =====
+            // ===== 键盘快捷键 =====
             document.addEventListener('keydown', function (e) {
                 var t = e.target || {};
                 var tag = (t.tagName || '').toLowerCase();
@@ -3496,11 +3428,12 @@ self.addEventListener('fetch', function (e) {
                 else if (k === 't' || k === 'T') { toggleTheme(); }
             });
 
-            // ===== 低端机检测 =====
+            // ===== 低端机检测（Android 优化） =====
             (function () {
                 try {
                     var low = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
-                              (navigator.deviceMemory && navigator.deviceMemory <= 2);
+                              (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+                              (isAndroid && /SM-|GT-|SCH-|SGH-|SPH-|Galaxy/i.test(navigator.userAgent));
                     if (low) document.documentElement.classList.add('low-perf');
                 } catch (e) {}
             })();
