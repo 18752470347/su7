@@ -242,8 +242,8 @@
         }
         @media (min-width: 768px) {
             .app-container {
-                max-width: 520px;
-                padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
+                max-width: 560px;
+                padding: calc(var(--safe-top) + 24px) 28px calc(var(--safe-bottom) + 24px);
             }
         }
 
@@ -777,6 +777,22 @@
             transition: var(--transition-smooth);
         }
         .app-button:hover .app-label { color: var(--text-main); }
+
+        /* 为 Connecat 定制图标样式（VPN 风格） */
+        .app-button[data-app="custom2"] .app-icon-wrap {
+            background: linear-gradient(145deg, #2B2B2B, #1A1A1A);
+            border: 1px solid rgba(255, 138, 76, 0.5);
+            box-shadow: 0 0 18px rgba(255, 138, 76, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .app-button[data-app="custom2"] .app-icon-wrap i {
+            color: #FF8A4C;
+            text-shadow: 0 0 16px rgba(255, 138, 76, 0.6);
+            font-size: 24px;
+        }
+        .app-button[data-app="custom2"] .app-icon-wrap::after {
+            background: conic-gradient(from 0deg, #FF8A4C, transparent, #FFB03C, transparent, #FF8A4C);
+            opacity: 0.35;
+        }
 
         /* ===== Toast ===== */
         .toast {
@@ -1358,8 +1374,8 @@ self.addEventListener('fetch', function (e) {
                     <div class="apps-track" id="appsTrack">
                         <div class="apps-page" data-page="0">
                             <button class="app-button" data-app="custom2" style="--icon-color:#FF8A4C" type="button">
-                                <div class="app-icon-wrap"><i class="fa-solid fa-plus"></i></div>
-                                <span class="app-label">A+ 系统</span>
+                                <div class="app-icon-wrap"><i class="fa-solid fa-shield-halved"></i></div>
+                                <span class="app-label">Connecat</span>
                             </button>
                             <button class="app-button" data-app="custom7" style="--icon-color:#FFB03C" type="button">
                                 <div class="app-icon-wrap"><i class="fa-solid fa-music"></i></div>
@@ -2078,6 +2094,7 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/9.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/10.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/11.mp4",
+				"https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/16.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/13.mp4",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E8%A7%86%E9%A2%91%E8%BD%AE%E6%92%AD/14.mp4",
             ];
@@ -2260,7 +2277,7 @@ self.addEventListener('fetch', function (e) {
             ];
             const APP_CONFIG = {
                 custom1: { scheme: "anywhere://open?sid=0444", name: "LX Music" },
-                custom2: { scheme: "anywhere://open?sid=2848", name: "A+系统" },
+                custom2: { scheme: "anywhere://open?sid=0575", name: "Connecat" },
                 custom7: { scheme: "anywhere://open?sid=5395", name: "汽水音乐" },
                 custom3: { scheme: "anywhere://open?sid=0451", name: "YouTube" },
                 custom4: { scheme: "anywhere://open?sid=2305", name: "FlClash" },
