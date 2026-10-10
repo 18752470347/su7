@@ -405,7 +405,7 @@
         }
         .signal-icon { width: 18px; height: 12px; fill: var(--status-color); flex-shrink: 0; opacity: 0.8; margin-left: 2px; }
 
-        /* ===== 视频播放器（进度条已隐藏） ===== */
+        /* ===== 视频播放器（进度条已隐藏 + 控件无遮罩） ===== */
         .video-player-container {
             width: 100%;
             flex: 0 0 auto;
@@ -464,18 +464,18 @@
         .center-play-btn:active { transform: translate(-50%, -50%) scale(0.88); }
         .center-play-btn.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.8); }
 
-        /* 隐藏进度条但保留控制按钮 */
+        /* 视频控制条：去除黑色渐变遮罩 */
         .video-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
             padding: 8px 12px 10px;
-            background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.80) 100%);
+            background: transparent;  /* 去除渐变遮罩 */
             z-index: 3;
             transition: opacity 0.4s ease, transform 0.4s ease;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
         .video-controls.hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
 
@@ -484,10 +484,10 @@
 
         .controls-row { display: flex; align-items: center; gap: 8px; }
         .controls-row button {
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.95);
             font-size: 15px;
             padding: 4px;
-            opacity: 0.85;
+            opacity: 0.95;
             transition: all 0.2s ease;
             border-radius: 50%;
             width: 36px;
@@ -495,25 +495,35 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(0, 0, 0, 0.35);  /* 按钮自身的半透明背景 */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             -webkit-tap-highlight-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
-        .controls-row button:active { opacity: 0.5; transform: scale(0.88); }
+        .controls-row button:active { opacity: 0.7; transform: scale(0.88); }
         .controls-time {
             margin-left: auto;
-            color: rgba(255, 255, 255, 0.85);
+            color: #fff;
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
             letter-spacing: 0.3px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);  /* 文字阴影代替遮罩 */
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
         }
         .btn-expand {
-            color: rgba(255, 255, 255, 0.75);
+            color: #fff;
             font-size: 13px;
             padding: 4px;
-            opacity: 0.8;
+            opacity: 0.95;
             transition: all 0.2s ease;
             border-radius: 50%;
             width: 34px;
@@ -521,10 +531,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             -webkit-tap-highlight-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
-        .btn-expand:active { opacity: 0.4; transform: scale(0.88); }
+        .btn-expand:active { opacity: 0.7; transform: scale(0.88); }
 
         /* ===== 主卡片 ===== */
         .main-card-container {
@@ -1054,7 +1067,7 @@
             .main-card:hover { box-shadow: var(--glass-shadow); }
             .avatar img:hover { transform: none; }
             .plate-photo-inner:hover { transform: none; }
-            .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(255, 255, 255, 0.04); transform: none; }
+            .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(0, 0, 0, 0.35); transform: none; }
             .center-play-btn:hover { transform: translate(-50%, -50%); }
         }
 
