@@ -4056,44 +4056,54 @@ self.addEventListener('fetch', function (e) {
             viewerImg.addEventListener('touchend', () => { clearTimeout(lpTimer); });
             viewerImg.addEventListener('touchcancel', () => { clearTimeout(lpTimer); });
 
-            // ===== APP跳转 =====
+            // ================================================================
+            //  🚀 APP跳转（优化：跳转成功后不显示"打开中"，恢复原样，无过渡动画）
+            // ================================================================
             function jumpToApp(key) {
                 if (isJumping) return;
                 const config = APP_CONFIG[key];
                 if (!config) return;
                 const item = document.querySelector(`[data-app="${key}"]`);
                 if (!item || item.classList.contains("loading")) return;
+
                 isJumping = true;
-                item.classList.add("loading");
-                const orig = item.innerHTML;
-                item.innerHTML =
-                    `<div class="app-icon-wrap"><i class="fa-solid fa-spinner fa-spin"></i></div><span class="app-label">打开中</span>`;
+                // 立即恢复原样，不显示"打开中"
+                // 不修改 item 的 innerHTML，保持原图标和文字
+
                 let unloaded = false;
-                const onUnload = () => { unloaded = true;
+                const onUnload = () => {
+                    unloaded = true;
                     isJumping = false;
                     window.removeEventListener('beforeunload', onUnload);
-                    document.removeEventListener('visibilitychange', onVis); };
-                const onVis = () => { if (!document.hidden && !unloaded) { if (document.body.contains(item)) { item
-                            .classList.remove("loading");
-                            item.innerHTML = orig; }
+                    document.removeEventListener('visibilitychange', onVis);
+                };
+                const onVis = () => {
+                    if (!document.hidden && !unloaded) {
                         isJumping = false;
                         window.removeEventListener('beforeunload', onUnload);
-                        document.removeEventListener('visibilitychange', onVis); } };
+                        document.removeEventListener('visibilitychange', onVis);
+                    }
+                };
                 window.addEventListener('beforeunload', onUnload);
                 document.addEventListener('visibilitychange', onVis);
-                try { 
+
+                try {
                     window.location.href = config.scheme;
-                } catch (e) { item.classList.remove("loading");
-                    item.innerHTML = orig;
+                } catch (e) {
                     isJumping = false;
                     window.removeEventListener('beforeunload', onUnload);
-                    document.removeEventListener('visibilitychange', onVis); return; }
-                setTimeout(() => { if (!unloaded && isJumping) { if (document.body.contains(item)) { item.classList
-                            .remove("loading");
-                            item.innerHTML = orig; }
+                    document.removeEventListener('visibilitychange', onVis);
+                    return;
+                }
+
+                // 兜底：3秒后重置状态（防止浏览器拦截或未响应）
+                setTimeout(() => {
+                    if (!unloaded && isJumping) {
                         isJumping = false;
                         window.removeEventListener('beforeunload', onUnload);
-                        document.removeEventListener('visibilitychange', onVis); } }, 2800);
+                        document.removeEventListener('visibilitychange', onVis);
+                    }
+                }, 3000);
             }
             $$(".app-button").forEach(el => { el.addEventListener("click", (e) => { e.stopPropagation();
                     jumpToApp(el.dataset.app); }); });
