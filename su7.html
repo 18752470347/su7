@@ -472,6 +472,21 @@
         .weather-location i {
             font-size: 8px;
         }
+        .weather-wind {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .weather-wind i {
+            font-size: 9px;
+            color: #4DA3FF;
+        }
 
         .widget-divider {
             width: 1px;
@@ -857,6 +872,176 @@
             background: var(--glass-bg);
         }
 
+        /* ===== 月历展开弹窗 ===== */
+        .month-calendar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .month-calendar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .month-calendar-panel {
+            width: 100%;
+            max-width: 480px;
+            max-height: 80vh;
+            background: var(--bg-primary);
+            border-radius: 24px 24px 0 0;
+            padding: 20px 20px calc(20px + var(--safe-bottom));
+            transform: translateY(100%);
+            transition: transform 0.4s var(--spring);
+            overflow-y: auto;
+        }
+        .month-calendar-overlay.show .month-calendar-panel {
+            transform: translateY(0);
+        }
+        .month-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .month-calendar-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .month-calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+        .month-calendar-nav button {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition-smooth);
+        }
+        .month-calendar-nav button:active { transform: scale(0.88); }
+        .month-calendar-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition-smooth);
+        }
+        .month-calendar-close:active { transform: scale(0.88); }
+
+        .month-calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .month-calendar-weekdays span {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 4px 0;
+        }
+        .month-calendar-weekdays span.weekend {
+            color: #FF6B9E;
+        }
+
+        .month-calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .month-calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            border: 1px solid transparent;
+        }
+        .month-calendar-day:active {
+            transform: scale(0.92);
+        }
+        .month-calendar-day.other-month {
+            color: var(--text-muted);
+            opacity: 0.35;
+        }
+        .month-calendar-day.today {
+            background: rgba(52, 199, 89, 0.15);
+            border-color: #34C759;
+            font-weight: 700;
+            color: #34C759;
+        }
+        .month-calendar-day.selected {
+            background: linear-gradient(135deg, #34C759, #28A745);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.35);
+        }
+        .month-calendar-day.holiday {
+            color: #34C759;
+            font-weight: 700;
+        }
+        .month-calendar-day.workday {
+            color: #FF9500;
+            font-weight: 700;
+        }
+        .month-calendar-day .day-lunar {
+            font-size: 8px;
+            color: var(--text-muted);
+            margin-top: 1px;
+            line-height: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        .month-calendar-day.selected .day-lunar {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .month-calendar-day .day-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+        .month-calendar-day .day-badge.rest {
+            background: #34C759;
+        }
+        .month-calendar-day .day-badge.work {
+            background: #FF9500;
+        }
+
         /* ===== 视频播放器 ===== */
         .video-player-container {
             width: 100%;
@@ -916,6 +1101,7 @@
         .center-play-btn:active { transform: translate(-50%, -50%) scale(0.88); }
         .center-play-btn.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.8); }
 
+        /* 视频控制条：去除圆形背景的按钮 */
         .video-controls {
             position: absolute;
             bottom: 0;
@@ -932,24 +1118,28 @@
 
         .progress-track { display: none !important; }
 
-        .controls-row { display: flex; align-items: center; gap: 8px; }
+        .controls-row { display: flex; align-items: center; gap: 12px; }
+        /* 去除圆圈背景，仅保留图标 */
         .controls-row button {
             color: rgba(255, 255, 255, 0.95);
-            font-size: 15px;
-            padding: 4px;
+            font-size: 17px;
+            padding: 2px;
             opacity: 0.95;
             transition: all 0.2s ease;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            border-radius: 0;
+            width: auto;
+            height: auto;
+            min-width: 28px;
+            min-height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             -webkit-tap-highlight-color: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: none;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
         }
         .controls-row button:active { opacity: 0.7; transform: scale(0.88); }
         .controls-time {
@@ -962,30 +1152,33 @@
             gap: 6px;
             letter-spacing: 0.3px;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 4px 10px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            padding: 0;
+            border-radius: 0;
+            border: none;
         }
         .btn-expand {
             color: #fff;
-            font-size: 13px;
-            padding: 4px;
+            font-size: 15px;
+            padding: 2px;
             opacity: 0.95;
             transition: all 0.2s ease;
-            border-radius: 50%;
-            width: 34px;
-            height: 34px;
+            border-radius: 0;
+            width: auto;
+            height: auto;
+            min-width: 28px;
+            min-height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             -webkit-tap-highlight-color: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: none;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
         }
         .btn-expand:active { opacity: 0.7; transform: scale(0.88); }
 
@@ -1494,7 +1687,7 @@
             .main-card:hover { box-shadow: var(--glass-shadow); }
             .avatar img:hover { transform: none; }
             .plate-photo-inner:hover { transform: none; }
-            .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: rgba(0, 0, 0, 0.35); transform: none; }
+            .controls-row button:hover, .btn-expand:hover, .popup-controls button:hover { background: transparent; transform: none; }
             .center-play-btn:hover { transform: translate(-50%, -50%); }
         }
 
@@ -1514,8 +1707,8 @@
             .center-play-btn { min-width: 38px; font-size: clamp(16px, 4.5vw, 28px); }
             .profile-row { gap: 6px; padding-top: 6px; }
             .video-controls { padding: 6px 10px 8px; }
-            .controls-row button { width: 32px; height: 32px; font-size: 13px; }
-            .btn-expand { width: 30px; height: 30px; }
+            .controls-row button { font-size: 15px; min-width: 24px; min-height: 24px; }
+            .btn-expand { font-size: 13px; min-width: 24px; min-height: 24px; }
             .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
             .ios-status-left { font-size: 12px; }
             .weather-calendar-card { padding: 8px 10px; }
@@ -1527,6 +1720,7 @@
             .almanac-label { font-size: 9px; padding: 1px 5px; }
             .almanac-content { font-size: 10px; }
             .calendar-lunar { font-size: 9px; }
+            .weather-wind { font-size: 9px; }
         }
         @media (max-width: 360px) {
             :root { --plate-size: 68px; --avatar-size: 56px; }
@@ -1585,8 +1779,8 @@
             .status-theme-toggle i { font-size: 22px; }
             .ios-status-left { font-size: 16px; }
             .center-play-btn { max-width: 96px; min-width: 64px; font-size: clamp(28px, 4.5vw, 44px); }
-            .controls-row button { width: 42px; height: 42px; font-size: 20px; }
-            .btn-expand { width: 40px; height: 40px; font-size: 18px; }
+            .controls-row button { font-size: 20px; min-width: 34px; min-height: 34px; }
+            .btn-expand { font-size: 18px; min-width: 34px; min-height: 34px; }
             .controls-time { font-size: 15px; gap: 10px; }
             .video-controls { padding: 14px 20px 16px; }
             .floating-word { font-size: 34px; }
@@ -1605,6 +1799,7 @@
             .weather-temp { font-size: 28px; }
             .weather-desc { font-size: 14px; }
             .weather-location { font-size: 12px; }
+            .weather-wind { font-size: 12px; }
             .calendar-date-block { width: 62px; height: 62px; border-radius: 16px; }
             .calendar-day-num { font-size: 30px; }
             .calendar-day-label { font-size: 11px; }
@@ -1707,7 +1902,7 @@ self.addEventListener('fetch', function (e) {
             caches.open(VERSION).then(function (cache) {
                 return cache.match(req).then(function (cached) {
                     var refresh = fetch(req).then(function (res) {
-                        if (res && (res.status === 200 || res.type === 'opaque')) cache.put(req, res.clone());
+                        if (res && (res.status === 200 || res.status === 0)) cache.put(req, res.clone());
                         return res;
                     }).catch(function () { return cached; });
                     return cached || refresh;
@@ -1783,6 +1978,30 @@ self.addEventListener('fetch', function (e) {
         </div>
     </div>
 
+    <!-- ===== 月历展开弹窗 ===== -->
+    <div class="month-calendar-overlay" id="monthCalendarOverlay">
+        <div class="month-calendar-panel" id="monthCalendarPanel">
+            <div class="month-calendar-header">
+                <div class="month-calendar-title" id="monthCalendarTitle">2026年1月</div>
+                <div class="month-calendar-nav">
+                    <button id="monthPrevBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button id="monthNextBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                    <button class="month-calendar-close" id="monthCalendarClose"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div class="month-calendar-weekdays">
+                <span class="weekend">日</span>
+                <span>一</span>
+                <span>二</span>
+                <span>三</span>
+                <span>四</span>
+                <span>五</span>
+                <span class="weekend">六</span>
+            </div>
+            <div class="month-calendar-days" id="monthCalendarDays"></div>
+        </div>
+    </div>
+
     <div class="app-container">
 
         <div class="status-bar-container">
@@ -1818,7 +2037,7 @@ self.addEventListener('fetch', function (e) {
 
         <!-- ===== 天气与日历卡片 ===== -->
         <div class="weather-calendar-card" id="weatherCalendarCard">
-            <!-- 天气组件（点击切换城市） -->
+            <!-- 天气组件 -->
             <div class="weather-widget" id="weatherWidget">
                 <div class="weather-icon" id="weatherIcon">
                     <i class="fa-solid fa-sun"></i>
@@ -1830,12 +2049,16 @@ self.addEventListener('fetch', function (e) {
                         <i class="fa-solid fa-location-dot"></i>
                         <span id="weatherLocation">定位中...</span>
                     </div>
+                    <div class="weather-wind" id="weatherWind">
+                        <i class="fa-solid fa-wind"></i>
+                        <span id="weatherWindText">--</span>
+                    </div>
                 </div>
             </div>
 
             <div class="widget-divider"></div>
 
-            <!-- 日历组件（点击选择日期） -->
+            <!-- 日历组件 -->
             <div class="calendar-widget" id="calendarWidget">
                 <div class="calendar-date-block" id="calendarDateBlock">
                     <div class="calendar-day-num" id="calendarDayNum">--</div>
@@ -3792,7 +4015,7 @@ self.addEventListener('fetch', function (e) {
             } catch (e) {}
 
             // ================================================================
-            //  🌤️ 天气与日历组件（完整版：定位 + 手动切换城市 + 节假日 + 手动选日期）
+            //  🌤️ 天气与日历组件（完整版）
             // ================================================================
             (function initWeatherCalendar() {
                 // ---- 天气代码映射 ----
@@ -3823,18 +4046,24 @@ self.addEventListener('fetch', function (e) {
                     95: '雷暴', 96: '雷暴伴冰雹', 99: '强雷暴伴冰雹'
                 };
 
-                // ---- 默认坐标（南通）作为定位失败时的回退 ----
+                // 风向映射（角度转中文）
+                function degToWindDirection(deg) {
+                    if (deg === undefined || deg === null || isNaN(deg)) return '--';
+                    var directions = ['北风', '东北风', '东风', '东南风', '南风', '西南风', '西风', '西北风'];
+                    var index = Math.round(((deg % 360) / 45)) % 8;
+                    return directions[index];
+                }
+
+                // ---- 默认坐标（南通） ----
                 const DEFAULT_LAT = 31.9802;
                 const DEFAULT_LON = 120.8943;
                 const DEFAULT_CITY = '南通';
 
-                // ---- 当前选中的城市坐标 ----
                 let currentLat = DEFAULT_LAT;
                 let currentLon = DEFAULT_LON;
                 let currentCity = DEFAULT_CITY;
                 let isManualCity = false;
 
-                // ---- 当前选中的日期（用于日历显示）----
                 let selectedDate = new Date();
                 let isManualDate = false;
 
@@ -3893,15 +4122,12 @@ self.addEventListener('fetch', function (e) {
                     { name: '台北', province: '台湾省', lat: 25.0330, lon: 121.5654 }
                 ];
 
-                // ---- 2026年法定节假日与调休数据（根据国务院通知）----
-                // type: 0=工作日, 1=节假日, 2=双休日, 3=调休日（需上班）
+                // ---- 2026年法定节假日与调休数据 ----
                 const HOLIDAY_DATA_2026 = [
-                    // 元旦
                     { date: '2026-01-01', name: '元旦', type: 1, rest: 1 },
                     { date: '2026-01-02', name: '元旦', type: 1, rest: 1 },
                     { date: '2026-01-03', name: '元旦', type: 1, rest: 1 },
                     { date: '2026-01-04', name: '元旦调休', type: 3, rest: 0 },
-                    // 春节
                     { date: '2026-02-14', name: '春节调休', type: 3, rest: 0 },
                     { date: '2026-02-15', name: '春节', type: 1, rest: 1 },
                     { date: '2026-02-16', name: '春节', type: 1, rest: 1 },
@@ -3913,27 +4139,22 @@ self.addEventListener('fetch', function (e) {
                     { date: '2026-02-22', name: '春节', type: 1, rest: 1 },
                     { date: '2026-02-23', name: '春节', type: 1, rest: 1 },
                     { date: '2026-02-28', name: '春节调休', type: 3, rest: 0 },
-                    // 清明节
                     { date: '2026-04-04', name: '清明节', type: 1, rest: 1 },
                     { date: '2026-04-05', name: '清明节', type: 1, rest: 1 },
                     { date: '2026-04-06', name: '清明节', type: 1, rest: 1 },
-                    // 劳动节
                     { date: '2026-05-01', name: '劳动节', type: 1, rest: 1 },
                     { date: '2026-05-02', name: '劳动节', type: 1, rest: 1 },
                     { date: '2026-05-03', name: '劳动节', type: 1, rest: 1 },
                     { date: '2026-05-04', name: '劳动节', type: 1, rest: 1 },
                     { date: '2026-05-05', name: '劳动节', type: 1, rest: 1 },
                     { date: '2026-05-09', name: '劳动节调休', type: 3, rest: 0 },
-                    // 端午节
                     { date: '2026-06-19', name: '端午节', type: 1, rest: 1 },
                     { date: '2026-06-20', name: '端午节', type: 1, rest: 1 },
                     { date: '2026-06-21', name: '端午节', type: 1, rest: 1 },
-                    // 中秋节
                     { date: '2026-09-20', name: '中秋节调休', type: 3, rest: 0 },
                     { date: '2026-09-25', name: '中秋节', type: 1, rest: 1 },
                     { date: '2026-09-26', name: '中秋节', type: 1, rest: 1 },
                     { date: '2026-09-27', name: '中秋节', type: 1, rest: 1 },
-                    // 国庆节
                     { date: '2026-10-01', name: '国庆节', type: 1, rest: 1 },
                     { date: '2026-10-02', name: '国庆节', type: 1, rest: 1 },
                     { date: '2026-10-03', name: '国庆节', type: 1, rest: 1 },
@@ -3944,25 +4165,21 @@ self.addEventListener('fetch', function (e) {
                     { date: '2026-10-10', name: '国庆节调休', type: 3, rest: 0 }
                 ];
 
-                // 构建日期索引 Map
                 const HOLIDAY_MAP = new Map();
                 HOLIDAY_DATA_2026.forEach(function(item) {
                     HOLIDAY_MAP.set(item.date, item);
                 });
 
-                // ---- 获取指定日期的节假日信息 ----
                 function getHolidayInfo(date) {
                     var year = date.getFullYear();
                     var month = String(date.getMonth() + 1).padStart(2, '0');
                     var day = String(date.getDate()).padStart(2, '0');
                     var dateStr = year + '-' + month + '-' + day;
 
-                    // 只处理2026年数据
                     if (year === 2026 && HOLIDAY_MAP.has(dateStr)) {
                         return HOLIDAY_MAP.get(dateStr);
                     }
 
-                    // 判断是否为周末
                     var dow = date.getDay();
                     if (dow === 0 || dow === 6) {
                         return { date: dateStr, name: '周末', type: 2, rest: 1 };
@@ -3971,8 +4188,8 @@ self.addEventListener('fetch', function (e) {
                     return { date: dateStr, name: '工作日', type: 0, rest: 0 };
                 }
 
-                // ---- 根据经纬度获取城市名 ----
-                async function fetchCityName(lat, lon) {
+                // ---- 反向地理编码获取详细地址（精确到区县）----
+                async function fetchLocationDetails(lat, lon) {
                     try {
                         const res = await fetch(
                             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`,
@@ -3980,14 +4197,22 @@ self.addEventListener('fetch', function (e) {
                         );
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
-                        return data.city || data.locality || data.principalSubdivision || '当前位置';
+                        // 优先显示区县，其次城市
+                        var district = data.locality || data.localityInfo?.administrative?.[2]?.name || '';
+                        var city = data.city || data.principalSubdivision || '';
+                        var displayName = district || city || '当前位置';
+                        return {
+                            district: district,
+                            city: city,
+                            displayName: displayName
+                        };
                     } catch (e) {
-                        console.warn('城市名获取失败:', e);
-                        return '当前位置';
+                        console.warn('位置信息获取失败:', e);
+                        return { district: '', city: '', displayName: '当前位置' };
                     }
                 }
 
-                // ---- 天气请求 ----
+                // ---- 天气请求（含风速风向）----
                 async function fetchWeather(lat, lon, cityName) {
                     try {
                         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
@@ -4001,24 +4226,36 @@ self.addEventListener('fetch', function (e) {
                         const iconClass = WEATHER_ICON_MAP[code] || 'fa-sun';
                         const desc = WEATHER_DESC_MAP[code] || '未知';
                         const temp = Math.round(cw.temperature);
+                        const windspeed = cw.windspeed;
+                        const winddirection = cw.winddirection;
 
                         document.getElementById('weatherIcon').innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
                         document.getElementById('weatherTemp').textContent = temp + '°C';
                         document.getElementById('weatherDesc').textContent = desc;
                         document.getElementById('weatherLocation').textContent = cityName || '当前位置';
 
+                        // 风速 + 风向
+                        var windDir = degToWindDirection(winddirection);
+                        var windText = '';
+                        if (windspeed !== undefined && windspeed !== null) {
+                            windText = windDir + ' ' + windspeed + ' km/h';
+                        } else {
+                            windText = windDir;
+                        }
+                        document.getElementById('weatherWindText').textContent = windText;
+
                     } catch (e) {
                         console.warn('天气获取失败:', e);
                         document.getElementById('weatherDesc').textContent = '获取失败';
+                        document.getElementById('weatherWindText').textContent = '--';
                     }
                 }
 
-                // ---- 定位并获取天气（默认行为）----
+                // ---- 定位并获取天气 ----
                 function locateAndFetchWeather() {
                     const locEl = document.getElementById('weatherLocation');
                     const descEl = document.getElementById('weatherDesc');
 
-                    // 如果用户已手动选择城市，不自动定位
                     if (isManualCity) {
                         fetchWeather(currentLat, currentLon, currentCity);
                         return;
@@ -4041,15 +4278,14 @@ self.addEventListener('fetch', function (e) {
                         async function (position) {
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
-                            const cityName = await fetchCityName(lat, lon);
+                            const details = await fetchLocationDetails(lat, lon);
                             currentLat = lat;
                             currentLon = lon;
-                            currentCity = cityName;
-                            fetchWeather(lat, lon, cityName);
+                            currentCity = details.displayName;
+                            fetchWeather(lat, lon, details.displayName);
                         },
                         function (error) {
                             console.warn('定位失败:', error.message);
-                            // 定位失败，回退到南通
                             currentLat = DEFAULT_LAT;
                             currentLon = DEFAULT_LON;
                             currentCity = DEFAULT_CITY;
@@ -4065,7 +4301,7 @@ self.addEventListener('fetch', function (e) {
                     );
                 }
 
-                // ---- 更新日历显示（根据 selectedDate）----
+                // ---- 更新日历显示 ----
                 function updateCalendar() {
                     const now = selectedDate;
 
@@ -4082,36 +4318,29 @@ self.addEventListener('fetch', function (e) {
                     document.getElementById('calendarYearMonth').textContent = year + '年' + month + '月';
                     document.getElementById('calendarWeekday').textContent = weekdaysCN[dayOfWeek];
 
-                    // 节假日信息
                     const holidayInfo = getHolidayInfo(now);
                     const holidayTagEl = document.getElementById('calendarHolidayTag');
                     const dateBlockEl = document.getElementById('calendarDateBlock');
 
-                    // 重置样式
                     dateBlockEl.classList.remove('holiday', 'workday');
                     holidayTagEl.classList.remove('holiday', 'workday', 'normal');
 
                     if (holidayInfo.type === 1) {
-                        // 法定节假日（休息）
                         dateBlockEl.classList.add('holiday');
                         holidayTagEl.classList.add('holiday');
                         holidayTagEl.textContent = holidayInfo.name + ' 休息';
                     } else if (holidayInfo.type === 3) {
-                        // 调休上班
                         dateBlockEl.classList.add('workday');
                         holidayTagEl.classList.add('workday');
                         holidayTagEl.textContent = holidayInfo.name + ' 上班';
                     } else if (holidayInfo.type === 2) {
-                        // 周末
                         holidayTagEl.classList.add('holiday');
                         holidayTagEl.textContent = '周末 休息';
                     } else {
-                        // 普通工作日
                         holidayTagEl.classList.add('normal');
                         holidayTagEl.textContent = '工作日';
                     }
 
-                    // 农历 + 宜忌
                     if (typeof Solar !== 'undefined') {
                         try {
                             const solar = Solar.fromDate(now);
@@ -4171,7 +4400,6 @@ self.addEventListener('fetch', function (e) {
                         '</div>';
                     }).join('');
 
-                    // 绑定点击事件
                     cityListEl.querySelectorAll('.city-item').forEach(function(el) {
                         el.addEventListener('click', function() {
                             var lat = parseFloat(this.dataset.lat);
@@ -4183,7 +4411,13 @@ self.addEventListener('fetch', function (e) {
                             currentCity = name;
                             isManualCity = true;
 
-                            fetchWeather(lat, lon, name);
+                            // 获取区县信息
+                            fetchLocationDetails(lat, lon).then(function(details) {
+                                var displayName = details.district || details.city || name;
+                                currentCity = displayName;
+                                fetchWeather(lat, lon, displayName);
+                            });
+
                             closeCityPicker();
                             showToastMsg('已切换到 ' + name);
                         });
@@ -4226,7 +4460,6 @@ self.addEventListener('fetch', function (e) {
                 const datePickerDay = document.getElementById('datePickerDay');
 
                 function initDatePicker() {
-                    // 年份
                     datePickerYear.innerHTML = '';
                     for (var y = 2020; y <= 2030; y++) {
                         var opt = document.createElement('option');
@@ -4235,7 +4468,6 @@ self.addEventListener('fetch', function (e) {
                         datePickerYear.appendChild(opt);
                     }
 
-                    // 月份
                     datePickerMonth.innerHTML = '';
                     for (var m = 1; m <= 12; m++) {
                         var opt = document.createElement('option');
@@ -4244,10 +4476,8 @@ self.addEventListener('fetch', function (e) {
                         datePickerMonth.appendChild(opt);
                     }
 
-                    // 日期
                     updateDayOptions();
 
-                    // 绑定事件
                     datePickerYear.addEventListener('change', updateDayOptions);
                     datePickerMonth.addEventListener('change', updateDayOptions);
                 }
@@ -4313,12 +4543,173 @@ self.addEventListener('fetch', function (e) {
                     showToastMsg('已回到今天');
                 });
 
+                // ============================================================
+                //  月历展开弹窗
+                // ============================================================
+                const monthCalendarOverlay = document.getElementById('monthCalendarOverlay');
+                const monthCalendarTitle = document.getElementById('monthCalendarTitle');
+                const monthCalendarDays = document.getElementById('monthCalendarDays');
+
+                let monthCalendarYear = new Date().getFullYear();
+                let monthCalendarMonth = new Date().getMonth();
+
+                function renderMonthCalendar() {
+                    monthCalendarTitle.textContent = monthCalendarYear + '年' + (monthCalendarMonth + 1) + '月';
+
+                    var firstDay = new Date(monthCalendarYear, monthCalendarMonth, 1);
+                    var lastDay = new Date(monthCalendarYear, monthCalendarMonth + 1, 0);
+                    var daysInMonth = lastDay.getDate();
+                    var startDayOfWeek = firstDay.getDay();
+
+                    var prevMonthLastDay = new Date(monthCalendarYear, monthCalendarMonth, 0).getDate();
+
+                    var html = '';
+
+                    // 上月填充
+                    for (var i = startDayOfWeek - 1; i >= 0; i--) {
+                        var d = prevMonthLastDay - i;
+                        html += '<div class="month-calendar-day other-month">' +
+                            '<span>' + d + '</span>' +
+                        '</div>';
+                    }
+
+                    // 本月
+                    for (var d = 1; d <= daysInMonth; d++) {
+                        var date = new Date(monthCalendarYear, monthCalendarMonth, d);
+                        var holidayInfo = getHolidayInfo(date);
+                        var classes = 'month-calendar-day';
+
+                        var isToday = (date.getFullYear() === new Date().getFullYear() &&
+                                       date.getMonth() === new Date().getMonth() &&
+                                       date.getDate() === new Date().getDate());
+                        var isSelected = (date.getFullYear() === selectedDate.getFullYear() &&
+                                          date.getMonth() === selectedDate.getMonth() &&
+                                          date.getDate() === selectedDate.getDate());
+
+                        if (isToday) classes += ' today';
+                        if (isSelected) classes += ' selected';
+                        if (holidayInfo.type === 1) classes += ' holiday';
+                        if (holidayInfo.type === 3) classes += ' workday';
+
+                        // 农历
+                        var lunarText = '';
+                        if (typeof Solar !== 'undefined') {
+                            try {
+                                var solar = Solar.fromDate(date);
+                                var lunar = solar.getLunar();
+                                lunarText = lunar.getDayInChinese();
+                            } catch (e) {}
+                        }
+
+                        // 角标
+                        var badgeHtml = '';
+                        if (holidayInfo.type === 1) {
+                            badgeHtml = '<span class="day-badge rest"></span>';
+                        } else if (holidayInfo.type === 3) {
+                            badgeHtml = '<span class="day-badge work"></span>';
+                        }
+
+                        html += '<div class="' + classes + '" data-date="' + date.getTime() + '">' +
+                            '<span>' + d + '</span>' +
+                            '<span class="day-lunar">' + lunarText + '</span>' +
+                            badgeHtml +
+                        '</div>';
+                    }
+
+                    // 下月填充
+                    var totalCells = startDayOfWeek + daysInMonth;
+                    var remaining = (7 - (totalCells % 7)) % 7;
+                    for (var i = 1; i <= remaining; i++) {
+                        html += '<div class="month-calendar-day other-month">' +
+                            '<span>' + i + '</span>' +
+                        '</div>';
+                    }
+
+                    monthCalendarDays.innerHTML = html;
+
+                    // 点击日期
+                    monthCalendarDays.querySelectorAll('.month-calendar-day[data-date]').forEach(function(el) {
+                        el.addEventListener('click', function() {
+                            var timestamp = parseInt(this.dataset.date);
+                            selectedDate = new Date(timestamp);
+                            isManualDate = true;
+                            updateCalendar();
+                            closeMonthCalendar();
+                            showToastMsg('已切换到 ' + selectedDate.getFullYear() + '年' + (selectedDate.getMonth() + 1) + '月' + selectedDate.getDate() + '日');
+                        });
+                    });
+                }
+
+                function openMonthCalendar() {
+                    monthCalendarYear = selectedDate.getFullYear();
+                    monthCalendarMonth = selectedDate.getMonth();
+                    renderMonthCalendar();
+                    monthCalendarOverlay.classList.add('show');
+                }
+
+                function closeMonthCalendar() {
+                    monthCalendarOverlay.classList.remove('show');
+                }
+
+                document.getElementById('monthCalendarClose').addEventListener('click', closeMonthCalendar);
+
+                monthCalendarOverlay.addEventListener('click', function(e) {
+                    if (e.target === monthCalendarOverlay) closeMonthCalendar();
+                });
+
+                document.getElementById('monthPrevBtn').addEventListener('click', function() {
+                    monthCalendarMonth--;
+                    if (monthCalendarMonth < 0) {
+                        monthCalendarMonth = 11;
+                        monthCalendarYear--;
+                    }
+                    renderMonthCalendar();
+                });
+
+                document.getElementById('monthNextBtn').addEventListener('click', function() {
+                    monthCalendarMonth++;
+                    if (monthCalendarMonth > 11) {
+                        monthCalendarMonth = 0;
+                        monthCalendarYear++;
+                    }
+                    renderMonthCalendar();
+                });
+
+                // 长按日历组件打开月历，点击打开日期选择器
+                var calendarLongPressTimer = null;
+                var calendarLongPressTriggered = false;
+
+                document.getElementById('calendarWidget').addEventListener('touchstart', function(e) {
+                    calendarLongPressTriggered = false;
+                    calendarLongPressTimer = setTimeout(function() {
+                        calendarLongPressTriggered = true;
+                        openMonthCalendar();
+                    }, 500);
+                }, { passive: true });
+
+                document.getElementById('calendarWidget').addEventListener('touchend', function(e) {
+                    clearTimeout(calendarLongPressTimer);
+                    if (!calendarLongPressTriggered) {
+                        e.preventDefault();
+                        openDatePicker();
+                    }
+                });
+
+                document.getElementById('calendarWidget').addEventListener('touchcancel', function(e) {
+                    clearTimeout(calendarLongPressTimer);
+                });
+
+                // 电脑端：右键打开月历
+                document.getElementById('calendarWidget').addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    openMonthCalendar();
+                });
+
                 // ---- 初始化 ----
                 initDatePicker();
                 locateAndFetchWeather();
                 updateCalendar();
 
-                // 天气每 15 分钟刷新（仅在未手动选择城市时重新定位）
                 setInterval(function() {
                     if (!isManualCity) {
                         locateAndFetchWeather();
@@ -4327,7 +4718,6 @@ self.addEventListener('fetch', function (e) {
                     }
                 }, 900000);
 
-                // 日历每分钟刷新（仅当未手动选择日期时才跟随今天）
                 setInterval(function() {
                     if (!isManualDate) {
                         selectedDate = new Date();
