@@ -801,7 +801,7 @@
             -webkit-backdrop-filter: blur(8px);
             display: flex;
             align-items: flex-end;
-            justify-content: center;
+            justify: center;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -2349,20 +2349,20 @@ self.addEventListener('fetch', function (e) {
             // ================================================================
             //  ⚡ 性能参数（优化后）
             // ================================================================
-            const TARGET_FPS = 20;                    // 30 → 20
+            const TARGET_FPS = 20;
             const FRAME_INTERVAL = 1000 / TARGET_FPS;
-            const STAR_COUNT = 180;                   // 380 → 180
-            const METEOR_SPAWN_INTERVAL_MIN = 25;     // 10 → 25
-            const METEOR_SPAWN_INTERVAL_MAX = 60;     // 30 → 60
-            const MAX_METEORS = 5;                    // 10 → 5
-            const SAKURA_INTERVAL_MS = 800;           // 320 → 800
-            const SAKURA_MAX = 6;                     // 10 → 6
+            const STAR_COUNT = 180;
+            const METEOR_SPAWN_INTERVAL_MIN = 25;
+            const METEOR_SPAWN_INTERVAL_MAX = 60;
+            const MAX_METEORS = 5;
+            const SAKURA_INTERVAL_MS = 800;
+            const SAKURA_MAX = 6;
             const STACK_PRELOAD_COUNT = 6;
 
             const isAndroid = /Android/i.test(navigator.userAgent);
             const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edge|Edg/i.test(navigator.userAgent);
 
-            // 低端机检测（提前执行，影响后续动画启动）
+            // 低端机检测
             let isLowPerf = false;
             (function () {
                 try {
@@ -2643,7 +2643,6 @@ self.addEventListener('fetch', function (e) {
                 }
                 ctx.globalAlpha = 1;
             }
-            // 低端机不启动星空
             if (!isLowPerf) {
                 animFrameId = requestAnimationFrame(animate);
             }
@@ -2838,7 +2837,6 @@ self.addEventListener('fetch', function (e) {
             updateCardRectForWords();
             measureWordSizes();
 
-            // 用 transform 定位，避免 left/top 触发布局
             function setWordPosition(word, left, top, idx) {
                 if (!cardRectForWords) updateCardRectForWords();
                 const margin = 10;
@@ -3301,19 +3299,67 @@ self.addEventListener('fetch', function (e) {
             let isPopupMode = false;
             let mainWasPlayingBeforePopup = false;
 
+            // 全局静音控制
+            let globalMuted = true;
+            const GLOBAL_MUTE_KEY = 'global_muted';
+            try {
+                const saved = localStorage.getItem(GLOBAL_MUTE_KEY);
+                if (saved !== null) globalMuted = saved === 'true';
+            } catch (e) {}
+
             // ================================================================
-            //  ▶️ 手动播放辅助函数
+            //  ▶️ 手动播放辅助函数（静音状态统一）
             // ================================================================
+            function updateAllMuteIcons() {
+                // 更新主视频静音图标
+                if (mainVideo) {
+                    if (globalMuted || mainVideo.muted || mainVideo.volume <= 0) {
+                        videoMuteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                    } else if (mainVideo.volume < 0.5) {
+                        videoMuteBtn.innerHTML = '<i class="fa-solid fa-volume-low"></i>';
+                    } else {
+                        videoMuteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                    }
+                }
+                // 更新弹窗视频静音图标
+                if (popupVideo) {
+                    if (globalMuted || popupVideo.muted || popupVideo.volume <= 0) {
+                        popupMuteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                    } else if (popupVideo.volume < 0.5) {
+                        popupMuteBtn.innerHTML = '<i class="fa-solid fa-volume-low"></i>';
+                    } else {
+                        popupMuteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                    }
+                }
+            }
+
+            function applyGlobalMute() {
+                mainVideo.muted = globalMuted;
+                popupVideo.muted = globalMuted;
+                if (!globalMuted) {
+                    if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                    if (popupVideo.volume <= 0) popupVideo.volume = 1;
+                }
+                updateAllMuteIcons();
+                try { localStorage.setItem(GLOBAL_MUTE_KEY, String(globalMuted)); } catch (e) {}
+            }
+
             function playWithSound(videoEl) {
                 if (!videoEl) return;
-                videoEl.muted = false;
-                if (videoEl.volume <= 0) videoEl.volume = 1;
+                // 应用全局静音状态
+                videoEl.muted = globalMuted;
+                if (!globalMuted && videoEl.volume <= 0) videoEl.volume = 1;
                 var p = videoEl.play();
                 if (p && typeof p.catch === 'function') {
                     p.catch(function () {
-                        showToastMsg('请再次点击播放按钮');
+                        // 自动播放失败时静音重试
+                        videoEl.muted = true;
+                        globalMuted = true;
+                        applyGlobalMute();
+                        videoEl.play().catch(function() {});
                     });
                 }
+                updateAllMuteIcons();
             }
 
             // ---- 堆叠图片（懒加载）----
@@ -3378,7 +3424,6 @@ self.addEventListener('fetch', function (e) {
             buildStack();
             photoInner.addEventListener('click', function(e) { e.stopPropagation();
                 openViewer(slideImages, slideIndex, '图片原图'); });
-            // 图片播放改为2秒
             if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 2000);
             try {
                 const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
@@ -3454,7 +3499,7 @@ self.addEventListener('fetch', function (e) {
             }
 
             // ================================================================
-            //  🔀 切换视频
+            //  🔀 切换视频（关键：统一静音状态）
             // ================================================================
             function switchVideo(index) {
                 if (videoList.length === 0) return;
@@ -3469,17 +3514,21 @@ self.addEventListener('fetch', function (e) {
                 if (isPopupMode) {
                     popupVideo.src = src;
                     popupVideo.currentTime = 0;
+                    popupVideo.muted = globalMuted;
+                    if (!globalMuted && popupVideo.volume <= 0) popupVideo.volume = 1;
                     playWithSound(popupVideo);
                     mainVideo.pause();
                     mainVideo.muted = true;
                 } else {
-                    mainVideo.muted = false;
-                    if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                    mainVideo.muted = globalMuted;
+                    if (!globalMuted && mainVideo.volume <= 0) mainVideo.volume = 1;
                     playWithSound(mainVideo);
                     popupVideo.src = src;
+                    popupVideo.muted = globalMuted;
                 }
 
                 updatePlayBtnIcon();
+                updateAllMuteIcons();
                 showControls();
                 saveCarouselState();
             }
@@ -3505,13 +3554,6 @@ self.addEventListener('fetch', function (e) {
 
             function nextVideo() { switchVideo(currentVideoIndex + 1); }
 
-            function updateMuteIcon() {
-                if (mainVideo.muted || mainVideo.volume <= 0) { videoMuteBtn.innerHTML =
-                        `<i class="fa-solid fa-volume-xmark"></i>`; } else if (mainVideo.volume < 0.5) { videoMuteBtn
-                        .innerHTML = `<i class="fa-solid fa-volume-low"></i>`; } else { videoMuteBtn.innerHTML =
-                        `<i class="fa-solid fa-volume-high"></i>`; }
-            }
-
             // ===== 初始化视频 =====
             currentVideoIndex = 0;
             if (currentVideoIndex >= videoList.length) currentVideoIndex = 0;
@@ -3522,9 +3564,14 @@ self.addEventListener('fetch', function (e) {
                 mainVideo.src = videoList[currentVideoIndex];
                 popupVideo.src = videoList[currentVideoIndex];
                 mainVideo.currentTime = 0;
-                mainVideo.muted = false;
-                if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                mainVideo.muted = globalMuted;
+                popupVideo.muted = globalMuted;
+                if (!globalMuted) {
+                    if (mainVideo.volume <= 0) mainVideo.volume = 1;
+                    if (popupVideo.volume <= 0) popupVideo.volume = 1;
+                }
                 updatePlayBtnIcon();
+                updateAllMuteIcons();
             }
             if (avatarImages.length > 0) {
                 avatarImg.src = avatarImages[avatarIndex % avatarImages.length];
@@ -3581,10 +3628,9 @@ self.addEventListener('fetch', function (e) {
             }
             islandText.textContent = textPool[0];
             islandText.style.animation = 'textShine 4s ease-in-out infinite, scrollUp 4s ease-in-out infinite';
-            // 灵动岛改为2秒
             islandInterval = setInterval(rollIsland, 2000);
 
-            // ===== 呼吸灯 6s（低端机不启动） =====
+            // ===== 呼吸灯 6s =====
             function randomColor() {
                 const c = ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'];
                 return c[Math.floor(Math.random() * c.length)];
@@ -3595,7 +3641,7 @@ self.addEventListener('fetch', function (e) {
                 document.documentElement.style.setProperty('--glow-color', randomColor());
             }
             if (!isLowPerf) {
-                glowInterval = setInterval(updateGlow, 6000);  // 1.8s → 6s
+                glowInterval = setInterval(updateGlow, 6000);
                 setTimeout(updateGlow, 50);
             }
 
@@ -3606,7 +3652,6 @@ self.addEventListener('fetch', function (e) {
                 avatarImg.src = avatarImages[avatarIndex];
                 saveCarouselState();
             }
-            // 头像播放改为2秒
             if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 2000);
 
             // ===== 视频事件 =====
@@ -3638,7 +3683,10 @@ self.addEventListener('fetch', function (e) {
                     mainVideo.muted = true;
                     return;
                 }
+                // 强制应用全局静音状态
+                mainVideo.muted = globalMuted;
                 updatePlayBtnIcon();
+                updateAllMuteIcons();
                 showControls();
             });
 
@@ -3724,15 +3772,16 @@ self.addEventListener('fetch', function (e) {
                 const dy = volStartY - e.touches[0].clientY;
                 let v = Math.max(0, Math.min(1, volStartVal + dy / 800));
                 mainVideo.volume = v;
-                mainVideo.muted = v <= 0;
-                updateMuteIcon();
+                globalMuted = v <= 0;
+                mainVideo.muted = globalMuted;
+                updateAllMuteIcons();
             }, { passive: false });
             videoMuteBtn.addEventListener('touchend', () => { volDrag = false; setTimeout(() => volDrag = false, 50); });
             videoMuteBtn.addEventListener('touchcancel', () => { volDrag = false; });
             videoMuteBtn.onclick = (e) => { if (volDrag) return;
                 e.stopPropagation();
-                mainVideo.muted = !mainVideo.muted;
-                updateMuteIcon();
+                globalMuted = !globalMuted;
+                applyGlobalMute();
                 showControls(); };
 
             // ===== 弹出播放器 =====
@@ -3754,13 +3803,12 @@ self.addEventListener('fetch', function (e) {
 
                 popupVideo.src = src;
                 popupVideo.currentTime = mainVideo.currentTime;
-                popupVideo.muted = false;
-                if (popupVideo.volume <= 0) popupVideo.volume = 1;
+                popupVideo.muted = globalMuted;
+                if (!globalMuted && popupVideo.volume <= 0) popupVideo.volume = 1;
 
                 videoPopup.classList.add('active');
 
-                popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
-                    `<i class="fa-solid fa-volume-high"></i>`;
+                updateAllMuteIcons();
                 popupTotTime.textContent = formatTime(popupVideo.duration);
 
                 if (mainWasPlayingBeforePopup) {
@@ -3789,9 +3837,9 @@ self.addEventListener('fetch', function (e) {
 
                 videoPopup.classList.remove('active');
 
-                mainVideo.muted = false;
-                if (mainVideo.volume <= 0) mainVideo.volume = 1;
-                updateMuteIcon();
+                mainVideo.muted = globalMuted;
+                if (!globalMuted && mainVideo.volume <= 0) mainVideo.volume = 1;
+                updateAllMuteIcons();
 
                 const resumePlay = function () {
                     mainVideo.removeEventListener('seeked', resumePlay);
@@ -3890,9 +3938,8 @@ self.addEventListener('fetch', function (e) {
             });
 
             popupMuteBtn.addEventListener('click', (e) => { e.stopPropagation();
-                popupVideo.muted = !popupVideo.muted;
-                popupMuteBtn.innerHTML = popupVideo.muted ? `<i class="fa-solid fa-volume-xmark"></i>` :
-                    `<i class="fa-solid fa-volume-high"></i>`;
+                globalMuted = !globalMuted;
+                applyGlobalMute();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -3930,8 +3977,10 @@ self.addEventListener('fetch', function (e) {
             });
 
             popupVideo.addEventListener('play', () => {
+                popupVideo.muted = globalMuted;
                 popupPlayBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
                 mainVideo.muted = true;
+                updateAllMuteIcons();
                 popupControlsVisible = true;
                 popupControls.classList.remove("hidden");
                 popupClose.classList.remove("hidden");
@@ -4060,7 +4109,7 @@ self.addEventListener('fetch', function (e) {
             viewerImg.addEventListener('touchcancel', () => { clearTimeout(lpTimer); });
 
             // ================================================================
-            //  🚀 APP跳转（优化：跳转成功后不显示"打开中"，恢复原样，无过渡动画）
+            //  🚀 APP跳转
             // ================================================================
             function jumpToApp(key) {
                 if (isJumping) return;
@@ -4070,8 +4119,6 @@ self.addEventListener('fetch', function (e) {
                 if (!item || item.classList.contains("loading")) return;
 
                 isJumping = true;
-                // 立即恢复原样，不显示"打开中"
-                // 不修改 item 的 innerHTML，保持原图标和文字
 
                 let unloaded = false;
                 const onUnload = () => {
@@ -4099,7 +4146,6 @@ self.addEventListener('fetch', function (e) {
                     return;
                 }
 
-                // 兜底：3秒后重置状态（防止浏览器拦截或未响应）
                 setTimeout(() => {
                     if (!unloaded && isJumping) {
                         isJumping = false;
@@ -4149,13 +4195,13 @@ self.addEventListener('fetch', function (e) {
                 if (statusClock) statusClock.textContent = h + ":" + m;
             }
             updateTime();
-            setInterval(updateTime, 30000);  // 1s → 30s
+            setInterval(updateTime, 30000);
 
             // ===== 启动 =====
             setTimeout(() => {
                 videoControls.classList.remove('hidden');
                 updatePlayBtnIcon();
-                updateMuteIcon();
+                updateAllMuteIcons();
             }, 300);
 
             // ===== 低频刷新卡片 rect 5s =====
@@ -4164,36 +4210,30 @@ self.addEventListener('fetch', function (e) {
                 updateCardRectForMeteors();
                 updateCardRectForWords();
                 if (!isFollowing && wordsVisible) measureWordSizes();
-            }, 5000);  // 1s → 5s
+            }, 5000);
 
             // ================================================================
-            //  🔥 核心修复：页面可见性变化时，确保所有轮播继续运行
+            //  🔥 页面可见性变化时，确保所有轮播继续运行
             // ================================================================
             function ensureAllCarouselsRunning() {
-                // 1. 恢复图片轮播
                 if (slideImages.length > 1) {
                     if (!slideTimer) {
                         slideTimer = setInterval(nextSlide, 2000);
                     }
                 }
-                // 2. 恢复头像轮播
                 if (avatarImages.length > 1) {
                     if (!avatarTimer) {
                         avatarTimer = setInterval(nextAvatar, 2000);
                     }
                 }
-                // 3. 恢复灵动岛轮播
                 if (!islandInterval) {
                     islandInterval = setInterval(rollIsland, 2000);
                 }
-                // 4. 恢复星空
                 if (!isLowPerf && !animFrameId) {
                     lastFrameTs = 0;
                     animFrameId = requestAnimationFrame(animate);
                 }
-                // 5. 恢复樱花
                 if (sakuraEnabled && !isLowPerf) ensureSakura();
-                // 6. 恢复漂浮文字
                 if (!isLowPerf && !isFollowing && !floatingAnimId) startFloating();
             }
 
@@ -4208,7 +4248,6 @@ self.addEventListener('fetch', function (e) {
 
             document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
-                    // 页面隐藏时清理计时器，避免后台消耗
                     if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
                     if (avatarTimer) { clearInterval(avatarTimer); avatarTimer = null; }
                     if (islandInterval) { clearInterval(islandInterval); islandInterval = null; }
@@ -4223,7 +4262,6 @@ self.addEventListener('fetch', function (e) {
                         mainVideo.pause();
                     }
                 } else {
-                    // 页面恢复时，重新启动所有轮播
                     ensureAllCarouselsRunning();
                     updateCardRectForMeteors();
                     updateCardRectForWords();
@@ -4241,6 +4279,7 @@ self.addEventListener('fetch', function (e) {
                     localStorage.setItem(METEOR_STORAGE_KEY, String(meteorEnabled));
                     localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible));
                     localStorage.setItem(SAKURA_STORAGE_KEY, String(sakuraEnabled));
+                    localStorage.setItem(GLOBAL_MUTE_KEY, String(globalMuted));
                 } catch (e) {}
                 stopAllCarousels();
                 if (glowInterval) clearInterval(glowInterval);
@@ -5002,7 +5041,6 @@ self.addEventListener('fetch', function (e) {
                 locateAndFetchWeather();
                 updateCalendar();
 
-                // 天气刷新间隔 30 分钟（原 15 分钟）
                 setInterval(function() {
                     if (document.hidden) return;
                     if (!isManualCity) {
@@ -5012,7 +5050,6 @@ self.addEventListener('fetch', function (e) {
                     }
                 }, 1800000);
 
-                // 日历刷新间隔 5 分钟（原 1 分钟）
                 setInterval(function() {
                     if (document.hidden) return;
                     if (!isManualDate) {
