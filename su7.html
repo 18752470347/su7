@@ -405,7 +405,199 @@
         }
         .signal-icon { width: 18px; height: 12px; fill: var(--status-color); flex-shrink: 0; opacity: 0.8; margin-left: 2px; }
 
-        /* ===== 视频播放器（进度条已隐藏 + 控件无遮罩） ===== */
+        /* ===== 天气与日历卡片 ===== */
+        .weather-calendar-card {
+            width: 100%;
+            flex-shrink: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            box-shadow: var(--glass-shadow);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            animation: cardSpringIn .7s var(--ease) 0.08s both;
+            transition: var(--transition-smooth);
+            margin-bottom: 2px;
+        }
+
+        /* 天气组件 */
+        .weather-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        .weather-icon {
+            font-size: 32px;
+            line-height: 1;
+            color: #FFB800;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 12px rgba(255, 184, 0, 0.25));
+        }
+        .weather-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .weather-temp {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .weather-desc {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .weather-location {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 1px;
+        }
+        .weather-location i {
+            font-size: 8px;
+        }
+
+        /* 分隔线 */
+        .widget-divider {
+            width: 1px;
+            height: 36px;
+            background: var(--glass-border);
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        /* 日历组件 */
+        .calendar-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .calendar-date-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #FF6B9E, #FF4D6D);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(255, 107, 158, 0.3);
+            flex-shrink: 0;
+        }
+        .calendar-day-num {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+        .calendar-day-label {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .calendar-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .calendar-year-month {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .calendar-weekday {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-sub);
+        }
+        .calendar-lunar {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 宜忌行 */
+        .almanac-row {
+            width: 100%;
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            animation: cardSpringIn .7s var(--ease) 0.12s both;
+        }
+
+        .almanac-item {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            min-width: 0;
+        }
+
+        .almanac-label {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+
+        .almanac-item.yi .almanac-label {
+            background: linear-gradient(135deg, #34C759, #28A745);
+            color: #fff;
+        }
+
+        .almanac-item.ji .almanac-label {
+            background: linear-gradient(135deg, #FF3B30, #D70015);
+            color: #fff;
+        }
+
+        .almanac-content {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-sub);
+            line-height: 1.5;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-break: break-all;
+        }
+
+        html.dark-mode .almanac-content {
+            color: var(--text-sub);
+        }
+
+        /* ===== 视频播放器 ===== */
         .video-player-container {
             width: 100%;
             flex: 0 0 auto;
@@ -464,14 +656,13 @@
         .center-play-btn:active { transform: translate(-50%, -50%) scale(0.88); }
         .center-play-btn.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.8); }
 
-        /* 视频控制条：去除黑色渐变遮罩 */
         .video-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
             padding: 8px 12px 10px;
-            background: transparent;  /* 去除渐变遮罩 */
+            background: transparent;
             z-index: 3;
             transition: opacity 0.4s ease, transform 0.4s ease;
             backdrop-filter: none;
@@ -479,7 +670,6 @@
         }
         .video-controls.hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
 
-        /* 隐藏进度条 */
         .progress-track { display: none !important; }
 
         .controls-row { display: flex; align-items: center; gap: 8px; }
@@ -495,7 +685,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.35);  /* 按钮自身的半透明背景 */
+            background: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             -webkit-tap-highlight-color: transparent;
@@ -511,7 +701,7 @@
             align-items: center;
             gap: 6px;
             letter-spacing: 0.3px;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);  /* 文字阴影代替遮罩 */
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             background: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -790,10 +980,8 @@
             margin-top: 1px;
         }
 
-        /* ===== Connecat VPN 图标美化（已调整为与其他按钮统一风格） ===== */
-        /* 保留原有的 vpn-icon 类，但样式改为普通图标效果 */
+        /* ===== Connecat VPN 图标美化（统一风格） ===== */
         .vpn-icon {
-            /* 移除特殊渐变背景和边框 */
             background: var(--icon-bg) !important;
             border-color: var(--glass-border) !important;
             box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
@@ -810,7 +998,6 @@
             transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
             filter: none;
         }
-        /* 移除动画效果，保持静态 */
         .vpn-wave {
             transition: none;
             transform-origin: center;
@@ -820,9 +1007,9 @@
         .vpn-wave-2, .vpn-wave-4 {
             animation: none;
         }
-        @keyframes vpnWavePulse { /* 保留空定义避免报错 */ }
+        @keyframes vpnWavePulse { }
         .vpn-glow {
-            display: none; /* 隐藏额外光晕 */
+            display: none;
         }
         .app-button:active .vpn-svg { transform: scale(0.88); }
         html.dark-mode .vpn-icon {
@@ -915,7 +1102,7 @@
             100% { transform: translateY(-200px) scale(0.4); opacity: 0; background-position: 0% 50%; }
         }
 
-        /* ===== 视频弹窗（副视频播放器） ===== */
+        /* ===== 视频弹窗（副视频） ===== */
         .video-popup {
             position: fixed; inset: 0; z-index: 10050;
             display: flex; align-items: center; justify-content: center;
@@ -968,7 +1155,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         .popup-controls button:active { opacity: 0.4; transform: scale(0.88); }
-        /* 隐藏副视频进度条 */
         .popup-progress-wrap {
             display: none !important;
         }
@@ -1038,7 +1224,9 @@
         /* 低端机毛玻璃降级 */
         html.low-perf .main-card,
         html.low-perf .video-popup,
-        html.low-perf .viewer { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+        html.low-perf .viewer,
+        html.low-perf .weather-calendar-card,
+        html.low-perf .almanac-item { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
         html.low-perf .sakura { display: none !important; }
 
         /* ===== 触屏设备禁用 hover ===== */
@@ -1074,6 +1262,15 @@
             .btn-expand { width: 30px; height: 30px; }
             .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
             .ios-status-left { font-size: 12px; }
+            .weather-calendar-card { padding: 8px 10px; }
+            .weather-icon { font-size: 26px; }
+            .weather-temp { font-size: 17px; }
+            .calendar-date-block { width: 40px; height: 40px; }
+            .calendar-day-num { font-size: 18px; }
+            .almanac-item { padding: 6px 8px; gap: 4px; }
+            .almanac-label { font-size: 9px; padding: 1px 5px; }
+            .almanac-content { font-size: 10px; }
+            .calendar-lunar { font-size: 9px; }
         }
         @media (max-width: 360px) {
             :root { --plate-size: 68px; --avatar-size: 56px; }
@@ -1083,6 +1280,13 @@
             .apps-page { gap: 6px 5px; min-height: 72px; }
             .plate { font-size: 12px; padding: 2px 10px; }
             .name { font-size: 10px; }
+            .weather-icon { font-size: 22px; }
+            .weather-temp { font-size: 15px; }
+            .weather-desc { font-size: 10px; }
+            .calendar-date-block { width: 34px; height: 34px; }
+            .calendar-day-num { font-size: 16px; }
+            .calendar-year-month { font-size: 11px; }
+            .calendar-weekday { font-size: 9px; }
         }
 
         /* ===== 横屏适配 ===== */
@@ -1099,6 +1303,11 @@
             .avatar { --avatar-size: 52px; }
             .name { font-size: 10px; }
             .subtitle { font-size: 9px; }
+            .weather-calendar-card { padding: 6px 12px; }
+            .weather-icon { font-size: 24px; }
+            .weather-temp { font-size: 16px; }
+            .calendar-date-block { width: 36px; height: 36px; }
+            .calendar-day-num { font-size: 16px; }
         }
 
         /* ===== 减少动画 ===== */
@@ -1155,6 +1364,22 @@
             .viewer-img { max-width: 80vw; max-height: 82vh; }
             .viewer-close { width: 52px; height: 52px; font-size: 22px; }
             .toast { font-size: 15px; padding: 12px 28px; border-radius: 16px; bottom: 50px; }
+
+            .weather-calendar-card { padding: 18px 24px; gap: 20px; }
+            .weather-icon { font-size: 44px; }
+            .weather-temp { font-size: 28px; }
+            .weather-desc { font-size: 14px; }
+            .weather-location { font-size: 12px; }
+            .calendar-date-block { width: 62px; height: 62px; border-radius: 16px; }
+            .calendar-day-num { font-size: 30px; }
+            .calendar-day-label { font-size: 11px; }
+            .calendar-year-month { font-size: 18px; }
+            .calendar-weekday { font-size: 14px; }
+            .calendar-lunar { font-size: 13px; }
+            .widget-divider { height: 48px; }
+            .almanac-item { padding: 12px 16px; border-radius: 18px; gap: 10px; }
+            .almanac-label { font-size: 13px; padding: 3px 10px; }
+            .almanac-content { font-size: 14px; }
         }
 
         /* 大屏电脑 */
@@ -1170,6 +1395,22 @@
             .plate { font-size: 22px; padding: 10px 32px; }
             .name { font-size: 18px; }
             .subtitle { font-size: 15px; }
+
+            .weather-calendar-card { padding: 22px 30px; gap: 28px; }
+            .weather-icon { font-size: 52px; }
+            .weather-temp { font-size: 34px; }
+            .weather-desc { font-size: 16px; }
+            .weather-location { font-size: 14px; }
+            .calendar-date-block { width: 72px; height: 72px; border-radius: 20px; }
+            .calendar-day-num { font-size: 36px; }
+            .calendar-day-label { font-size: 12px; }
+            .calendar-year-month { font-size: 22px; }
+            .calendar-weekday { font-size: 16px; }
+            .calendar-lunar { font-size: 14px; }
+            .widget-divider { height: 56px; }
+            .almanac-item { padding: 14px 20px; border-radius: 20px; }
+            .almanac-label { font-size: 14px; padding: 4px 12px; }
+            .almanac-content { font-size: 15px; }
         }
 
         /* 启动遮罩 */
@@ -1301,7 +1542,7 @@ self.addEventListener('fetch', function (e) {
                 <button id="popupPlayBtn"><i class="fa-solid fa-play"></i></button>
                 <button id="popupNextBtn" class="popup-nav-btn"><i class="fa-solid fa-forward-step"></i></button>
                 <button id="popupMuteBtn"><i class="fa-solid fa-volume-high"></i></button>
-                <!-- 进度条已隐藏（通过CSS display:none） -->
+                <!-- 进度条已隐藏 -->
                 <div class="popup-progress-wrap" id="popupProgressWrap">
                     <div class="popup-progress-bar" id="popupProgressBar"></div>
                 </div>
@@ -1340,6 +1581,52 @@ self.addEventListener('fetch', function (e) {
                         <rect x="13" y="0" width="3" height="12" rx="0.5" />
                     </svg>
                 </div>
+            </div>
+        </div>
+
+        <!-- ===== 天气与日历卡片（含农历宜忌） ===== -->
+        <div class="weather-calendar-card" id="weatherCalendarCard">
+            <!-- 天气组件 -->
+            <div class="weather-widget">
+                <div class="weather-icon" id="weatherIcon">
+                    <i class="fa-solid fa-sun"></i>
+                </div>
+                <div class="weather-info">
+                    <div class="weather-temp" id="weatherTemp">--°C</div>
+                    <div class="weather-desc" id="weatherDesc">加载中</div>
+                    <div class="weather-location">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span id="weatherLocation">南京</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分隔线 -->
+            <div class="widget-divider"></div>
+
+            <!-- 日历组件（含农历） -->
+            <div class="calendar-widget">
+                <div class="calendar-date-block">
+                    <div class="calendar-day-num" id="calendarDayNum">--</div>
+                    <div class="calendar-day-label" id="calendarDayLabel">---</div>
+                </div>
+                <div class="calendar-info">
+                    <div class="calendar-year-month" id="calendarYearMonth">----年--月</div>
+                    <div class="calendar-weekday" id="calendarWeekday">星期-</div>
+                    <div class="calendar-lunar" id="calendarLunar">农历 --</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 宜忌行 -->
+        <div class="almanac-row" id="almanacRow">
+            <div class="almanac-item yi">
+                <span class="almanac-label">宜</span>
+                <span class="almanac-content" id="almanacYi">--</span>
+            </div>
+            <div class="almanac-item ji">
+                <span class="almanac-label">忌</span>
+                <span class="almanac-content" id="almanacJi">--</span>
             </div>
         </div>
 
@@ -1393,7 +1680,7 @@ self.addEventListener('fetch', function (e) {
                 <div class="apps-scroll-wrapper" id="appsWrapper">
                     <div class="apps-track" id="appsTrack">
                         <div class="apps-page" data-page="0">
-                            <!-- Connecat VPN 按钮：已调整为普通图标风格 -->
+                            <!-- Connecat VPN 按钮 -->
                             <button class="app-button" data-app="custom2" type="button" style="--icon-color:#FF8A4C">
                                 <div class="app-icon-wrap vpn-icon">
                                     <svg class="vpn-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1455,6 +1742,9 @@ self.addEventListener('fetch', function (e) {
     <div class="floating-word" id="wordXu" style="left:8%; top:18%;"><span class="char">许</span></div>
     <div class="floating-word" id="wordHong" style="left:25%; top:55%;"><span class="char">红</span></div>
     <div class="floating-word" id="wordDou" style="left:70%; top:35%;"><span class="char">豆</span></div>
+
+    <!-- lunar-javascript 农历库（必须在主脚本之前） -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 
     <script>
         (function() {
@@ -3033,7 +3323,6 @@ self.addEventListener('fetch', function (e) {
                 }
             });
 
-            // 进度条点击事件虽保留但进度条已隐藏，不再触发（无影响）
             popupProgressWrap.addEventListener('click', (e) => {
                 const rect = popupProgressWrap.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -3415,6 +3704,130 @@ self.addEventListener('fetch', function (e) {
 
             window.lockScroll = lockScroll;
             window.unlockScroll = unlockScroll;
+
+            // ================================================================
+            //  🌤️ 天气与日历组件（Open-Meteo + lunar-javascript）
+            // ================================================================
+            (function initWeatherCalendar() {
+                // ---- 南京坐标 ----
+                const LAT = 32.06;
+                const LON = 118.79;
+
+                // ---- 天气代码 → 图标映射 ----
+                const WEATHER_ICON_MAP = {
+                    0: 'fa-sun',
+                    1: 'fa-cloud-sun', 2: 'fa-cloud-sun', 3: 'fa-cloud',
+                    45: 'fa-smog', 48: 'fa-smog',
+                    51: 'fa-cloud-rain', 53: 'fa-cloud-rain', 55: 'fa-cloud-rain',
+                    56: 'fa-cloud-rain', 57: 'fa-cloud-rain',
+                    61: 'fa-cloud-rain', 63: 'fa-cloud-showers-heavy', 65: 'fa-cloud-showers-heavy',
+                    66: 'fa-cloud-showers-heavy', 67: 'fa-cloud-showers-heavy',
+                    71: 'fa-snowflake', 73: 'fa-snowflake', 75: 'fa-snowflake', 77: 'fa-snowflake',
+                    80: 'fa-cloud-showers-heavy', 81: 'fa-cloud-showers-heavy', 82: 'fa-cloud-showers-heavy',
+                    85: 'fa-snowflake', 86: 'fa-snowflake',
+                    95: 'fa-cloud-bolt', 96: 'fa-cloud-bolt', 99: 'fa-cloud-bolt'
+                };
+
+                const WEATHER_DESC_MAP = {
+                    0: '晴朗', 1: '少云', 2: '多云', 3: '阴天',
+                    45: '雾', 48: '霜雾',
+                    51: '小毛毛雨', 53: '毛毛雨', 55: '大毛毛雨',
+                    56: '冻毛毛雨', 57: '冻毛毛雨',
+                    61: '小雨', 63: '中雨', 65: '大雨',
+                    66: '冻雨', 67: '冻雨',
+                    71: '小雪', 73: '中雪', 75: '大雪', 77: '雪粒',
+                    80: '小阵雨', 81: '中阵雨', 82: '大阵雨',
+                    85: '小阵雪', 86: '大阵雪',
+                    95: '雷暴', 96: '雷暴伴冰雹', 99: '强雷暴伴冰雹'
+                };
+
+                // ---- 天气请求 ----
+                async function fetchWeather() {
+                    try {
+                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true`;
+                        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const data = await res.json();
+                        const cw = data.current_weather;
+                        if (!cw) throw new Error('no current_weather');
+
+                        const code = cw.weathercode;
+                        const iconClass = WEATHER_ICON_MAP[code] || 'fa-sun';
+                        const desc = WEATHER_DESC_MAP[code] || '未知';
+                        const temp = Math.round(cw.temperature);
+
+                        document.getElementById('weatherIcon').innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+                        document.getElementById('weatherTemp').textContent = temp + '°C';
+                        document.getElementById('weatherDesc').textContent = desc;
+                        document.getElementById('weatherLocation').textContent = '南京';
+
+                    } catch (e) {
+                        console.warn('天气获取失败:', e);
+                        document.getElementById('weatherDesc').textContent = '获取失败';
+                    }
+                }
+
+                // ---- 日历 + 农历 + 宜忌 ----
+                function updateCalendar() {
+                    const now = new Date();
+
+                    // 公历
+                    const year = now.getFullYear();
+                    const month = now.getMonth() + 1;
+                    const date = now.getDate();
+                    const dayOfWeek = now.getDay();
+
+                    const weekdaysCN = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                    const weekdaysShort = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+                    document.getElementById('calendarDayNum').textContent = date;
+                    document.getElementById('calendarDayLabel').textContent = weekdaysShort[dayOfWeek];
+                    document.getElementById('calendarYearMonth').textContent = year + '年' + month + '月';
+                    document.getElementById('calendarWeekday').textContent = weekdaysCN[dayOfWeek];
+
+                    // 农历 + 宜忌（依赖 lunar-javascript）
+                    if (typeof Solar !== 'undefined') {
+                        try {
+                            const solar = Solar.fromDate(now);
+                            const lunar = solar.getLunar();
+
+                            // 农历显示
+                            document.getElementById('calendarLunar').textContent =
+                                '农历' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese();
+
+                            // 宜
+                            const yi = lunar.getDayYi();
+                            document.getElementById('almanacYi').textContent =
+                                yi && yi.length ? yi.slice(0, 6).join(' · ') : '诸事不宜';
+
+                            // 忌
+                            const ji = lunar.getDayJi();
+                            document.getElementById('almanacJi').textContent =
+                                ji && ji.length ? ji.slice(0, 6).join(' · ') : '诸事不宜';
+
+                        } catch (e) {
+                            console.warn('农历获取失败:', e);
+                            document.getElementById('calendarLunar').textContent = '农历 --';
+                            document.getElementById('almanacYi').textContent = '--';
+                            document.getElementById('almanacJi').textContent = '--';
+                        }
+                    } else {
+                        // lunar-javascript 尚未加载
+                        document.getElementById('calendarLunar').textContent = '农历 --';
+                        document.getElementById('almanacYi').textContent = '--';
+                        document.getElementById('almanacJi').textContent = '--';
+                    }
+                }
+
+                // ---- 初始化 ----
+                fetchWeather();
+                updateCalendar();
+
+                // 天气每 15 分钟刷新
+                setInterval(fetchWeather, 900000);
+                // 日历每分钟刷新（跨天自动更新）
+                setInterval(updateCalendar, 60000);
+            })();
 
         })();
     </script>
