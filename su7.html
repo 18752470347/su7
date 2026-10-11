@@ -894,7 +894,7 @@
         .month-calendar-panel {
             width: 100%;
             max-width: 480px;
-            max-height: 80vh;
+            max-height: 85vh;
             background: var(--bg-primary);
             border-radius: 24px 24px 0 0;
             padding: 20px 20px calc(20px + var(--safe-bottom));
@@ -1027,19 +1027,45 @@
         .month-calendar-day.selected .day-lunar {
             color: rgba(255, 255, 255, 0.85);
         }
-        .month-calendar-day .day-badge {
+        /* 休/班 文字标签 */
+        .month-calendar-day .day-tag {
             position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
+            top: 1px;
+            right: 1px;
+            font-size: 8px;
+            font-weight: 800;
+            line-height: 1;
+            padding: 1px 3px;
+            border-radius: 4px;
+            color: #fff;
         }
-        .month-calendar-day .day-badge.rest {
+        .month-calendar-day .day-tag.rest {
             background: #34C759;
         }
-        .month-calendar-day .day-badge.work {
+        .month-calendar-day .day-tag.work {
             background: #FF9500;
+        }
+        .month-calendar-day.selected .day-tag.rest {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+        .month-calendar-day.selected .day-tag.work {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+        /* 节气/传统节日标记 */
+        .month-calendar-day .day-festival {
+            font-size: 7px;
+            font-weight: 700;
+            color: #FF6B9E;
+            margin-top: 0;
+            line-height: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        .month-calendar-day.selected .day-festival {
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* ===== 视频播放器 ===== */
@@ -1119,7 +1145,6 @@
         .progress-track { display: none !important; }
 
         .controls-row { display: flex; align-items: center; gap: 12px; }
-        /* 去除圆圈背景，仅保留图标 */
         .controls-row button {
             color: rgba(255, 255, 255, 0.95);
             font-size: 17px;
@@ -2037,7 +2062,6 @@ self.addEventListener('fetch', function (e) {
 
         <!-- ===== 天气与日历卡片 ===== -->
         <div class="weather-calendar-card" id="weatherCalendarCard">
-            <!-- 天气组件 -->
             <div class="weather-widget" id="weatherWidget">
                 <div class="weather-icon" id="weatherIcon">
                     <i class="fa-solid fa-sun"></i>
@@ -2058,7 +2082,6 @@ self.addEventListener('fetch', function (e) {
 
             <div class="widget-divider"></div>
 
-            <!-- 日历组件 -->
             <div class="calendar-widget" id="calendarWidget">
                 <div class="calendar-date-block" id="calendarDateBlock">
                     <div class="calendar-day-num" id="calendarDayNum">--</div>
@@ -4046,7 +4069,7 @@ self.addEventListener('fetch', function (e) {
                     95: '雷暴', 96: '雷暴伴冰雹', 99: '强雷暴伴冰雹'
                 };
 
-                // 风向映射（角度转中文）
+                // 风向映射
                 function degToWindDirection(deg) {
                     if (deg === undefined || deg === null || isNaN(deg)) return '--';
                     var directions = ['北风', '东北风', '东风', '东南风', '南风', '西南风', '西风', '西北风'];
@@ -4054,7 +4077,6 @@ self.addEventListener('fetch', function (e) {
                     return directions[index];
                 }
 
-                // ---- 默认坐标（南通） ----
                 const DEFAULT_LAT = 31.9802;
                 const DEFAULT_LON = 120.8943;
                 const DEFAULT_CITY = '南通';
@@ -4188,7 +4210,27 @@ self.addEventListener('fetch', function (e) {
                     return { date: dateStr, name: '工作日', type: 0, rest: 0 };
                 }
 
-                // ---- 反向地理编码获取详细地址（精确到区县）----
+                // ---- 传统节气 / 节日名称 ----
+                function getFestivalName(date) {
+                    if (typeof Solar === 'undefined') return '';
+                    try {
+                        var solar = Solar.fromDate(date);
+                        var lunar = solar.getLunar();
+                        // 优先返回节气
+                        var jieQi = lunar.getJieQi();
+                        if (jieQi) return jieQi;
+                        // 其次返回传统节日
+                        var festivals = lunar.getFestivals();
+                        if (festivals && festivals.length > 0) return festivals[0];
+                        var otherFestivals = lunar.getOtherFestivals();
+                        if (otherFestivals && otherFestivals.length > 0) return otherFestivals[0];
+                        return '';
+                    } catch (e) {
+                        return '';
+                    }
+                }
+
+                // ---- 反向地理编码 ----
                 async function fetchLocationDetails(lat, lon) {
                     try {
                         const res = await fetch(
@@ -4197,7 +4239,6 @@ self.addEventListener('fetch', function (e) {
                         );
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
-                        // 优先显示区县，其次城市
                         var district = data.locality || data.localityInfo?.administrative?.[2]?.name || '';
                         var city = data.city || data.principalSubdivision || '';
                         var displayName = district || city || '当前位置';
@@ -4212,7 +4253,7 @@ self.addEventListener('fetch', function (e) {
                     }
                 }
 
-                // ---- 天气请求（含风速风向）----
+                // ---- 天气请求 ----
                 async function fetchWeather(lat, lon, cityName) {
                     try {
                         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
@@ -4234,7 +4275,6 @@ self.addEventListener('fetch', function (e) {
                         document.getElementById('weatherDesc').textContent = desc;
                         document.getElementById('weatherLocation').textContent = cityName || '当前位置';
 
-                        // 风速 + 风向
                         var windDir = degToWindDirection(winddirection);
                         var windText = '';
                         if (windspeed !== undefined && windspeed !== null) {
@@ -4328,14 +4368,14 @@ self.addEventListener('fetch', function (e) {
                     if (holidayInfo.type === 1) {
                         dateBlockEl.classList.add('holiday');
                         holidayTagEl.classList.add('holiday');
-                        holidayTagEl.textContent = holidayInfo.name + ' 休息';
+                        holidayTagEl.textContent = holidayInfo.name + ' 休';
                     } else if (holidayInfo.type === 3) {
                         dateBlockEl.classList.add('workday');
                         holidayTagEl.classList.add('workday');
-                        holidayTagEl.textContent = holidayInfo.name + ' 上班';
+                        holidayTagEl.textContent = holidayInfo.name + ' 班';
                     } else if (holidayInfo.type === 2) {
                         holidayTagEl.classList.add('holiday');
-                        holidayTagEl.textContent = '周末 休息';
+                        holidayTagEl.textContent = '周末 休';
                     } else {
                         holidayTagEl.classList.add('normal');
                         holidayTagEl.textContent = '工作日';
@@ -4411,7 +4451,6 @@ self.addEventListener('fetch', function (e) {
                             currentCity = name;
                             isManualCity = true;
 
-                            // 获取区县信息
                             fetchLocationDetails(lat, lon).then(function(details) {
                                 var displayName = details.district || details.city || name;
                                 currentCity = displayName;
@@ -4577,6 +4616,7 @@ self.addEventListener('fetch', function (e) {
                     for (var d = 1; d <= daysInMonth; d++) {
                         var date = new Date(monthCalendarYear, monthCalendarMonth, d);
                         var holidayInfo = getHolidayInfo(date);
+                        var festivalName = getFestivalName(date);
                         var classes = 'month-calendar-day';
 
                         var isToday = (date.getFullYear() === new Date().getFullYear() &&
@@ -4601,18 +4641,25 @@ self.addEventListener('fetch', function (e) {
                             } catch (e) {}
                         }
 
-                        // 角标
-                        var badgeHtml = '';
+                        // 休/班 文字标签
+                        var tagHtml = '';
                         if (holidayInfo.type === 1) {
-                            badgeHtml = '<span class="day-badge rest"></span>';
+                            tagHtml = '<span class="day-tag rest">休</span>';
                         } else if (holidayInfo.type === 3) {
-                            badgeHtml = '<span class="day-badge work"></span>';
+                            tagHtml = '<span class="day-tag work">班</span>';
+                        }
+
+                        // 节气/节日文字
+                        var festivalHtml = '';
+                        if (festivalName) {
+                            festivalHtml = '<span class="day-festival">' + festivalName + '</span>';
                         }
 
                         html += '<div class="' + classes + '" data-date="' + date.getTime() + '">' +
+                            tagHtml +
                             '<span>' + d + '</span>' +
                             '<span class="day-lunar">' + lunarText + '</span>' +
-                            badgeHtml +
+                            festivalHtml +
                         '</div>';
                     }
 
