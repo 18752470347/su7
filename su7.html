@@ -4166,33 +4166,65 @@ self.addEventListener('fetch', function (e) {
                 if (!isFollowing && wordsVisible) measureWordSizes();
             }, 5000);  // 1s → 5s
 
-            // ===== 页面可见性（彻底停止所有动画）=====
+            // ================================================================
+            //  🔥 核心修复：页面可见性变化时，确保所有轮播继续运行
+            // ================================================================
+            function ensureAllCarouselsRunning() {
+                // 1. 恢复图片轮播
+                if (slideImages.length > 1) {
+                    if (!slideTimer) {
+                        slideTimer = setInterval(nextSlide, 2000);
+                    }
+                }
+                // 2. 恢复头像轮播
+                if (avatarImages.length > 1) {
+                    if (!avatarTimer) {
+                        avatarTimer = setInterval(nextAvatar, 2000);
+                    }
+                }
+                // 3. 恢复灵动岛轮播
+                if (!islandInterval) {
+                    islandInterval = setInterval(rollIsland, 2000);
+                }
+                // 4. 恢复星空
+                if (!isLowPerf && !animFrameId) {
+                    lastFrameTs = 0;
+                    animFrameId = requestAnimationFrame(animate);
+                }
+                // 5. 恢复樱花
+                if (sakuraEnabled && !isLowPerf) ensureSakura();
+                // 6. 恢复漂浮文字
+                if (!isLowPerf && !isFollowing && !floatingAnimId) startFloating();
+            }
+
+            function stopAllCarousels() {
+                if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
+                if (avatarTimer) { clearInterval(avatarTimer); avatarTimer = null; }
+                if (islandInterval) { clearInterval(islandInterval); islandInterval = null; }
+                if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
+                if (floatingAnimId) { cancelAnimationFrame(floatingAnimId); floatingAnimId = null; }
+                if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+            }
+
             document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
-                    // 停止星空
-                    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-                    // 停止樱花
+                    // 页面隐藏时清理计时器，避免后台消耗
+                    if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
+                    if (avatarTimer) { clearInterval(avatarTimer); avatarTimer = null; }
+                    if (islandInterval) { clearInterval(islandInterval); islandInterval = null; }
                     if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
                     var box = document.getElementById('sakuraBox');
                     if (box) box.innerHTML = '';
                     sakuraCount = 0;
                     meteors = [];
-                    // 停止漂浮文字
                     if (floatingAnimId) { cancelAnimationFrame(floatingAnimId); floatingAnimId = null; }
-                    // 暂停视频
+                    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
                     if (!isPopupMode && !mainVideo.paused) {
                         mainVideo.pause();
                     }
                 } else {
-                    // 恢复星空
-                    if (!isLowPerf && !animFrameId) {
-                        lastFrameTs = 0;
-                        animFrameId = requestAnimationFrame(animate);
-                    }
-                    // 恢复樱花
-                    if (sakuraEnabled && !isLowPerf) ensureSakura();
-                    // 恢复漂浮文字
-                    if (!isLowPerf && !isFollowing && !floatingAnimId) startFloating();
+                    // 页面恢复时，重新启动所有轮播
+                    ensureAllCarouselsRunning();
                     updateCardRectForMeteors();
                     updateCardRectForWords();
                     measureWordSizes();
@@ -4210,16 +4242,11 @@ self.addEventListener('fetch', function (e) {
                     localStorage.setItem(WORD_STORAGE_KEY, String(wordsVisible));
                     localStorage.setItem(SAKURA_STORAGE_KEY, String(sakuraEnabled));
                 } catch (e) {}
+                stopAllCarousels();
                 if (glowInterval) clearInterval(glowInterval);
-                if (sakuraInterval) clearInterval(sakuraInterval);
-                if (islandInterval) clearInterval(islandInterval);
-                if (avatarTimer) clearInterval(avatarTimer);
-                if (slideTimer) clearInterval(slideTimer);
                 if (colorTimer) clearInterval(colorTimer);
                 if (saveTimer) clearInterval(saveTimer);
                 stopViewerAutoPlay();
-                if (animFrameId) cancelAnimationFrame(animFrameId);
-                if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
             });
 
             // ===== 键盘快捷键 =====
