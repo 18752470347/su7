@@ -3378,7 +3378,8 @@ self.addEventListener('fetch', function (e) {
             buildStack();
             photoInner.addEventListener('click', function(e) { e.stopPropagation();
                 openViewer(slideImages, slideIndex, '图片原图'); });
-            if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 10000);  // 3.8s → 10s
+            // 图片播放改为2秒
+            if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 2000);
             try {
                 const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
                 if (si !== null) { const idx = parseInt(si, 10); if (!isNaN(idx) && idx >= 0 && idx < slideImages.length)
@@ -3580,7 +3581,8 @@ self.addEventListener('fetch', function (e) {
             }
             islandText.textContent = textPool[0];
             islandText.style.animation = 'textShine 4s ease-in-out infinite, scrollUp 4s ease-in-out infinite';
-            islandInterval = setInterval(rollIsland, 5000);  // 2s → 5s
+            // 灵动岛改为2秒
+            islandInterval = setInterval(rollIsland, 2000);
 
             // ===== 呼吸灯 6s（低端机不启动） =====
             function randomColor() {
@@ -3597,14 +3599,15 @@ self.addEventListener('fetch', function (e) {
                 setTimeout(updateGlow, 50);
             }
 
-            // ===== 头像轮播 12s =====
+            // ===== 头像轮播 2秒 =====
             function nextAvatar() {
                 if (avatarImages.length < 2 || document.hidden) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
                 avatarImg.src = avatarImages[avatarIndex];
                 saveCarouselState();
             }
-            if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 12000);  // 4.5s → 12s
+            // 头像播放改为2秒
+            if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 2000);
 
             // ===== 视频事件 =====
             videoBox.addEventListener("click", function(e) {
