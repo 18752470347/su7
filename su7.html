@@ -790,60 +790,48 @@
             margin-top: 1px;
         }
 
-        /* ===== Connecat VPN 图标美化 ===== */
+        /* ===== Connecat VPN 图标美化（已调整为与其他按钮统一风格） ===== */
+        /* 保留原有的 vpn-icon 类，但样式改为普通图标效果 */
         .vpn-icon {
-            background: linear-gradient(145deg, rgba(255, 138, 76, 0.18), rgba(255, 90, 40, 0.08)) !important;
-            border-color: rgba(255, 138, 76, 0.25) !important;
-            box-shadow: 
-                inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                0 4px 20px rgba(255, 138, 76, 0.15),
-                0 0 0 1px rgba(255, 138, 76, 0.08) !important;
+            /* 移除特殊渐变背景和边框 */
+            background: var(--icon-bg) !important;
+            border-color: var(--glass-border) !important;
+            box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
             position: relative;
-            overflow: visible;
-            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            transition: var(--transition-smooth);
         }
         .vpn-svg {
-            width: 30px;
-            height: 30px;
-            color: #FF8A4C;
+            width: 24px;
+            height: 24px;
+            color: var(--icon-color);
             position: relative;
             z-index: 2;
             transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-            filter: drop-shadow(0 2px 8px rgba(255, 138, 76, 0.25));
+            filter: none;
         }
+        /* 移除动画效果，保持静态 */
         .vpn-wave {
-            transition: all 0.4s ease;
+            transition: none;
             transform-origin: center;
+            animation: none;
         }
-        .vpn-wave-1, .vpn-wave-3 { animation: vpnWavePulse 2.4s ease-in-out infinite; }
-        .vpn-wave-2, .vpn-wave-4 { animation: vpnWavePulse 2.4s ease-in-out 0.4s infinite; }
-        @keyframes vpnWavePulse {
-            0%, 100% { opacity: 0.35; transform: scale(0.92); }
-            50% { opacity: 1; transform: scale(1.05); }
+        .vpn-wave-1, .vpn-wave-3,
+        .vpn-wave-2, .vpn-wave-4 {
+            animation: none;
         }
+        @keyframes vpnWavePulse { /* 保留空定义避免报错 */ }
         .vpn-glow {
-            position: absolute;
-            inset: -8px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 138, 76, 0.35) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-            z-index: 0;
-            animation: vpnGlowPulse 3s ease-in-out infinite;
-        }
-        @keyframes vpnGlowPulse {
-            0%, 100% { opacity: 0.15; transform: scale(0.85); }
-            50% { opacity: 0.45; transform: scale(1.15); }
+            display: none; /* 隐藏额外光晕 */
         }
         .app-button:active .vpn-svg { transform: scale(0.88); }
         html.dark-mode .vpn-icon {
-            background: linear-gradient(145deg, rgba(255, 138, 76, 0.22), rgba(255, 90, 40, 0.10)) !important;
-            border-color: rgba(255, 138, 76, 0.35) !important;
+            background: var(--icon-bg) !important;
+            border-color: var(--glass-border) !important;
         }
         html.dark-mode .vpn-svg {
-            color: #FFA066;
-            filter: drop-shadow(0 2px 12px rgba(255, 138, 76, 0.35));
+            color: var(--icon-color);
+            filter: none;
         }
         .app-button.loading .vpn-svg { opacity: 0.3; }
 
@@ -927,7 +915,7 @@
             100% { transform: translateY(-200px) scale(0.4); opacity: 0; background-position: 0% 50%; }
         }
 
-        /* ===== 视频弹窗 ===== */
+        /* ===== 视频弹窗（副视频播放器） ===== */
         .video-popup {
             position: fixed; inset: 0; z-index: 10050;
             display: flex; align-items: center; justify-content: center;
@@ -980,17 +968,12 @@
             -webkit-tap-highlight-color: transparent;
         }
         .popup-controls button:active { opacity: 0.4; transform: scale(0.88); }
+        /* 隐藏副视频进度条 */
         .popup-progress-wrap {
-            flex: 1; height: 3px; background: rgba(255, 255, 255, 0.15);
-            border-radius: 99px; cursor: pointer; transition: height 0.2s ease;
-            padding: 6px 0;
-            margin-top: -6px;
-            box-sizing: content-box;
+            display: none !important;
         }
         .popup-progress-bar {
-            height: 3px; border-radius: inherit;
-            background: linear-gradient(90deg, #00D4FF, #7B61FF, #FF6B9E);
-            width: 0%; box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+            display: none !important;
         }
         .popup-time {
             font-size: 11px; font-weight: 500; min-width: 80px; text-align: right;
@@ -1147,7 +1130,7 @@
             .apps-page { gap: 22px 16px; min-height: 130px; }
             .app-button { padding: 8px 4px 10px; border-radius: 18px; gap: 6px; }
             .app-icon-wrap { width: 68px; height: 68px; font-size: 28px; border-radius: 22px; }
-            .vpn-svg { width: 40px; height: 40px; }
+            .vpn-svg { width: 32px; height: 32px; }
             .app-label { font-size: 12px; margin-top: 4px; }
             .dynamic-island { height: 42px; padding: 0 28px; font-size: 15px; min-width: 86px; }
             .island-text-scroll { font-size: 15px; }
@@ -1181,7 +1164,7 @@
             .main-card { padding: 36px 40px 40px; }
             :root { --avatar-size: 108px; --plate-size: 136px; }
             .app-icon-wrap { width: 76px; height: 76px; font-size: 32px; border-radius: 24px; }
-            .vpn-svg { width: 46px; height: 46px; }
+            .vpn-svg { width: 36px; height: 36px; }
             .app-label { font-size: 13px; }
             .apps-page { gap: 28px 20px; min-height: 150px; }
             .plate { font-size: 22px; padding: 10px 32px; }
@@ -1318,6 +1301,7 @@ self.addEventListener('fetch', function (e) {
                 <button id="popupPlayBtn"><i class="fa-solid fa-play"></i></button>
                 <button id="popupNextBtn" class="popup-nav-btn"><i class="fa-solid fa-forward-step"></i></button>
                 <button id="popupMuteBtn"><i class="fa-solid fa-volume-high"></i></button>
+                <!-- 进度条已隐藏（通过CSS display:none） -->
                 <div class="popup-progress-wrap" id="popupProgressWrap">
                     <div class="popup-progress-bar" id="popupProgressBar"></div>
                 </div>
@@ -1409,7 +1393,7 @@ self.addEventListener('fetch', function (e) {
                 <div class="apps-scroll-wrapper" id="appsWrapper">
                     <div class="apps-track" id="appsTrack">
                         <div class="apps-page" data-page="0">
-                            <!-- Connecat VPN 美化按钮 -->
+                            <!-- Connecat VPN 按钮：已调整为普通图标风格 -->
                             <button class="app-button" data-app="custom2" type="button" style="--icon-color:#FF8A4C">
                                 <div class="app-icon-wrap vpn-icon">
                                     <svg class="vpn-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1429,7 +1413,6 @@ self.addEventListener('fetch', function (e) {
                                         <path class="vpn-wave vpn-wave-4" d="M31 37C33.5 34.5 36.5 34.5 39 37" 
                                               stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.6"/>
                                     </svg>
-                                    <span class="vpn-glow"></span>
                                 </div>
                                 <span class="app-label">Connecat</span>
                             </button>
@@ -2865,7 +2848,7 @@ self.addEventListener('fetch', function (e) {
                 updateMuteIcon();
                 showControls(); };
 
-            // ===== 弹出播放器 =====
+            // ===== 弹出播放器（副视频，进度条已隐藏） =====
             function togglePopupControls() {
                 popupControlsVisible = !popupControlsVisible;
                 popupControls.classList.toggle("hidden", !popupControlsVisible);
@@ -3050,6 +3033,7 @@ self.addEventListener('fetch', function (e) {
                 }
             });
 
+            // 进度条点击事件虽保留但进度条已隐藏，不再触发（无影响）
             popupProgressWrap.addEventListener('click', (e) => {
                 const rect = popupProgressWrap.getBoundingClientRect();
                 const r = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
