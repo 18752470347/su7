@@ -230,7 +230,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ===== 主容器：顶部对齐，适配安卓Chrome ===== */
+        /* ===== 主容器 ===== */
         .app-container {
             display: flex;
             flex-direction: column;
@@ -417,15 +417,23 @@
             animation: cardSpringIn .7s var(--ease) 0.08s both;
             transition: var(--transition-smooth);
             margin-bottom: 2px;
+            position: relative;
         }
 
+        /* 天气组件 */
         .weather-widget {
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 1;
             min-width: 0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            border-radius: 12px;
+            padding: 4px;
+            transition: var(--transition-smooth);
         }
+        .weather-widget:active { transform: scale(0.97); }
         .weather-icon {
             font-size: 32px;
             line-height: 1;
@@ -473,12 +481,19 @@
             opacity: 0.6;
         }
 
+        /* 日历组件 */
         .calendar-widget {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            border-radius: 12px;
+            padding: 4px;
+            transition: var(--transition-smooth);
         }
+        .calendar-widget:active { transform: scale(0.97); }
         .calendar-date-block {
             display: flex;
             flex-direction: column;
@@ -491,6 +506,16 @@
             color: #fff;
             box-shadow: 0 4px 16px rgba(255, 107, 158, 0.3);
             flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .calendar-date-block.holiday {
+            background: linear-gradient(135deg, #34C759, #28A745);
+            box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+        }
+        .calendar-date-block.workday {
+            background: linear-gradient(135deg, #FF9500, #FF6B00);
+            box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
         }
         .calendar-day-num {
             font-size: 22px;
@@ -527,6 +552,27 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .calendar-holiday-tag {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-top: 2px;
+            display: inline-block;
+            width: fit-content;
+        }
+        .calendar-holiday-tag.holiday {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34C759;
+        }
+        .calendar-holiday-tag.workday {
+            background: rgba(255, 149, 0, 0.15);
+            color: #FF9500;
+        }
+        .calendar-holiday-tag.normal {
+            background: rgba(142, 142, 147, 0.15);
+            color: var(--text-muted);
         }
 
         /* 宜忌行 */
@@ -586,6 +632,229 @@
 
         html.dark-mode .almanac-content {
             color: var(--text-sub);
+        }
+
+        /* ===== 城市选择弹窗 ===== */
+        .city-picker-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .city-picker-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .city-picker-panel {
+            width: 100%;
+            max-width: 480px;
+            max-height: 70vh;
+            background: var(--bg-primary);
+            border-radius: 24px 24px 0 0;
+            padding: 20px 20px calc(20px + var(--safe-bottom));
+            transform: translateY(100%);
+            transition: transform 0.4s var(--spring);
+            overflow-y: auto;
+            position: relative;
+        }
+        .city-picker-overlay.show .city-picker-panel {
+            transform: translateY(0);
+        }
+        .city-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .city-picker-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .city-picker-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition-smooth);
+        }
+        .city-picker-close:active { transform: scale(0.88); }
+        .city-search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 16px;
+            transition: var(--transition-smooth);
+        }
+        .city-search-input:focus {
+            border-color: #34C759;
+            box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.15);
+        }
+        .city-search-input::placeholder {
+            color: var(--text-muted);
+        }
+        .city-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .city-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .city-item:active {
+            transform: scale(0.98);
+            background: rgba(52, 199, 89, 0.1);
+        }
+        .city-item .city-province {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* ===== 日期选择弹窗 ===== */
+        .date-picker-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .date-picker-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .date-picker-panel {
+            width: 100%;
+            max-width: 480px;
+            background: var(--bg-primary);
+            border-radius: 24px 24px 0 0;
+            padding: 20px 20px calc(20px + var(--safe-bottom));
+            transform: translateY(100%);
+            transition: transform 0.4s var(--spring);
+        }
+        .date-picker-overlay.show .date-picker-panel {
+            transform: translateY(0);
+        }
+        .date-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .date-picker-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .date-picker-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition-smooth);
+        }
+        .date-picker-close:active { transform: scale(0.88); }
+        .date-picker-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .date-picker-select {
+            flex: 1;
+            padding: 12px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .date-picker-select:focus {
+            border-color: #34C759;
+        }
+        .date-picker-confirm {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #34C759, #28A745);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+        }
+        .date-picker-confirm:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+        }
+        .date-picker-reset {
+            width: 100%;
+            padding: 12px;
+            border-radius: 14px;
+            background: transparent;
+            color: var(--text-sub);
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            margin-top: 10px;
+            transition: var(--transition-smooth);
+        }
+        .date-picker-reset:active {
+            transform: scale(0.97);
+            background: var(--glass-bg);
         }
 
         /* ===== 视频播放器 ===== */
@@ -971,7 +1240,7 @@
             margin-top: 1px;
         }
 
-        /* ===== Connecat VPN 图标美化（统一风格） ===== */
+        /* ===== Connecat VPN 图标 ===== */
         .vpn-icon {
             background: var(--icon-bg) !important;
             border-color: var(--glass-border) !important;
@@ -1093,7 +1362,7 @@
             100% { transform: translateY(-200px) scale(0.4); opacity: 0; background-position: 0% 50%; }
         }
 
-        /* ===== 视频弹窗（副视频） ===== */
+        /* ===== 视频弹窗 ===== */
         .video-popup {
             position: fixed; inset: 0; z-index: 10050;
             display: flex; align-items: center; justify-content: center;
@@ -1348,37 +1617,6 @@
             .almanac-content { font-size: 14px; }
         }
 
-        /* 大屏电脑 */
-        @media (min-width: 1440px) and (hover: hover) and (pointer: fine) {
-            .app-container { max-width: 720px; padding: 48px 32px 56px; }
-            .video-player-container { max-height: 360px; }
-            .main-card { padding: 36px 40px 40px; }
-            :root { --avatar-size: 108px; --plate-size: 136px; }
-            .app-icon-wrap { width: 76px; height: 76px; font-size: 32px; border-radius: 24px; }
-            .vpn-svg { width: 36px; height: 36px; }
-            .app-label { font-size: 13px; }
-            .apps-page { gap: 28px 20px; min-height: 150px; }
-            .plate { font-size: 22px; padding: 10px 32px; }
-            .name { font-size: 18px; }
-            .subtitle { font-size: 15px; }
-
-            .weather-calendar-card { padding: 22px 30px; gap: 28px; }
-            .weather-icon { font-size: 52px; }
-            .weather-temp { font-size: 34px; }
-            .weather-desc { font-size: 16px; }
-            .weather-location { font-size: 14px; }
-            .calendar-date-block { width: 72px; height: 72px; border-radius: 20px; }
-            .calendar-day-num { font-size: 36px; }
-            .calendar-day-label { font-size: 12px; }
-            .calendar-year-month { font-size: 22px; }
-            .calendar-weekday { font-size: 16px; }
-            .calendar-lunar { font-size: 14px; }
-            .widget-divider { height: 56px; }
-            .almanac-item { padding: 14px 20px; border-radius: 20px; }
-            .almanac-label { font-size: 14px; padding: 4px 12px; }
-            .almanac-content { font-size: 15px; }
-        }
-
         /* 启动遮罩 */
         #boot-mask {
             position: fixed; inset: 0; z-index: 99999;
@@ -1516,6 +1754,35 @@ self.addEventListener('fetch', function (e) {
         </div>
     </div>
 
+    <!-- ===== 城市选择弹窗 ===== -->
+    <div class="city-picker-overlay" id="cityPickerOverlay">
+        <div class="city-picker-panel" id="cityPickerPanel">
+            <div class="city-picker-header">
+                <div class="city-picker-title">选择城市</div>
+                <div class="city-picker-close" id="cityPickerClose"><i class="fa-solid fa-xmark"></i></div>
+            </div>
+            <input class="city-search-input" id="citySearchInput" type="text" placeholder="输入城市名称搜索..." />
+            <div class="city-list" id="cityList"></div>
+        </div>
+    </div>
+
+    <!-- ===== 日期选择弹窗 ===== -->
+    <div class="date-picker-overlay" id="datePickerOverlay">
+        <div class="date-picker-panel" id="datePickerPanel">
+            <div class="date-picker-header">
+                <div class="date-picker-title">选择日期</div>
+                <div class="date-picker-close" id="datePickerClose"><i class="fa-solid fa-xmark"></i></div>
+            </div>
+            <div class="date-picker-row">
+                <select class="date-picker-select" id="datePickerYear"></select>
+                <select class="date-picker-select" id="datePickerMonth"></select>
+                <select class="date-picker-select" id="datePickerDay"></select>
+            </div>
+            <button class="date-picker-confirm" id="datePickerConfirm">确定</button>
+            <button class="date-picker-reset" id="datePickerReset">回到今天</button>
+        </div>
+    </div>
+
     <div class="app-container">
 
         <div class="status-bar-container">
@@ -1549,9 +1816,10 @@ self.addEventListener('fetch', function (e) {
             </div>
         </div>
 
-        <!-- ===== 天气与日历卡片（含农历宜忌） ===== -->
+        <!-- ===== 天气与日历卡片 ===== -->
         <div class="weather-calendar-card" id="weatherCalendarCard">
-            <div class="weather-widget">
+            <!-- 天气组件（点击切换城市） -->
+            <div class="weather-widget" id="weatherWidget">
                 <div class="weather-icon" id="weatherIcon">
                     <i class="fa-solid fa-sun"></i>
                 </div>
@@ -1567,8 +1835,9 @@ self.addEventListener('fetch', function (e) {
 
             <div class="widget-divider"></div>
 
-            <div class="calendar-widget">
-                <div class="calendar-date-block">
+            <!-- 日历组件（点击选择日期） -->
+            <div class="calendar-widget" id="calendarWidget">
+                <div class="calendar-date-block" id="calendarDateBlock">
                     <div class="calendar-day-num" id="calendarDayNum">--</div>
                     <div class="calendar-day-label" id="calendarDayLabel">---</div>
                 </div>
@@ -1576,6 +1845,7 @@ self.addEventListener('fetch', function (e) {
                     <div class="calendar-year-month" id="calendarYearMonth">----年--月</div>
                     <div class="calendar-weekday" id="calendarWeekday">星期-</div>
                     <div class="calendar-lunar" id="calendarLunar">农历 --</div>
+                    <div class="calendar-holiday-tag normal" id="calendarHolidayTag">工作日</div>
                 </div>
             </div>
         </div>
@@ -2437,136 +2707,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/17.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/18.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/19.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/20.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/21.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/22.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/23.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/24.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/25.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/26.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/27.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/28.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/29.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/30.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/31.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/32.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/33.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/34.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/35.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/36.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/37.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/38.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/39.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/40.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/41.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/43.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/42.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/44.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/45.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/46.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/47.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/48.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/49.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/50.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/51.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/52.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/53.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/54.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/55.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/56.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/57.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/58.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/59.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/60.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/61.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/62.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/63.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/64.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/65.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/66.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/67.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/68.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/69.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/70.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/70.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/71.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/72.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/73.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/74.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/75.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/76.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/77.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/78.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/79.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/80.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/81.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/82.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/83.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/84.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/85.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/86.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/87.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/88.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/89.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/90.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/91.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/92.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/93.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/94.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/95.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/96.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/97.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/98.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/99.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/100.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/101.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/102.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/103.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/104.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/105.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/106.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/107.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/108.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/109.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/110.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/111.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/112.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/113.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/114.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/115.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/116.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/117.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/118.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/119.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/120.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/121.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/122.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/123.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/124.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/125.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/126.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/127.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/128.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/129.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/130.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/131.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/132.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/133.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/134.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/135.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/136.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/137.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/138.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/139.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/140.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/141.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/142.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/143.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/144.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/145.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/146.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/147.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/148.jpg",
             ];
             const APP_CONFIG = {
                 custom1: { scheme: "anywhere://open?sid=0444", name: "LX Music" },
@@ -3099,7 +3239,7 @@ self.addEventListener('fetch', function (e) {
                 updateMuteIcon();
                 showControls(); };
 
-            // ===== 弹出播放器（副视频，进度条已隐藏） =====
+            // ===== 弹出播放器 =====
             function togglePopupControls() {
                 popupControlsVisible = !popupControlsVisible;
                 popupControls.classList.toggle("hidden", !popupControlsVisible);
@@ -3502,7 +3642,9 @@ self.addEventListener('fetch', function (e) {
                     e.target.closest(".status-sakura-toggle") ||
                     e.target.closest(".floating-word") || e.target.closest(".plate-photo") ||
                     e.target.closest(".status-meteor-toggle") ||
-                    e.target.closest(".status-word-toggle")) return;
+                    e.target.closest(".status-word-toggle") ||
+                    e.target.closest(".weather-widget") ||
+                    e.target.closest(".calendar-widget")) return;
                 const txt = clickTexts[Math.floor(Math.random() * clickTexts.length)];
                 const el = document.createElement("div");
                 el.className = "click-text-item";
@@ -3650,7 +3792,7 @@ self.addEventListener('fetch', function (e) {
             } catch (e) {}
 
             // ================================================================
-            //  🌤️ 天气与日历组件（定位 + Open-Meteo + lunar-javascript）
+            //  🌤️ 天气与日历组件（完整版：定位 + 手动切换城市 + 节假日 + 手动选日期）
             // ================================================================
             (function initWeatherCalendar() {
                 // ---- 天气代码映射 ----
@@ -3681,15 +3823,157 @@ self.addEventListener('fetch', function (e) {
                     95: '雷暴', 96: '雷暴伴冰雹', 99: '强雷暴伴冰雹'
                 };
 
-                // ---- 默认坐标（南京）作为定位失败时的回退 ----
-                const DEFAULT_LAT = 32.06;
-                const DEFAULT_LON = 118.79;
-                const DEFAULT_CITY = '南京';
+                // ---- 默认坐标（南通）作为定位失败时的回退 ----
+                const DEFAULT_LAT = 31.9802;
+                const DEFAULT_LON = 120.8943;
+                const DEFAULT_CITY = '南通';
 
-                // ---- 根据经纬度获取城市名（使用 Open-Meteo 的 reverse geocoding 或简单显示坐标）----
+                // ---- 当前选中的城市坐标 ----
+                let currentLat = DEFAULT_LAT;
+                let currentLon = DEFAULT_LON;
+                let currentCity = DEFAULT_CITY;
+                let isManualCity = false;
+
+                // ---- 当前选中的日期（用于日历显示）----
+                let selectedDate = new Date();
+                let isManualDate = false;
+
+                // ---- 常用城市列表 ----
+                const CITY_LIST = [
+                    { name: '北京', province: '北京市', lat: 39.9042, lon: 116.4074 },
+                    { name: '上海', province: '上海市', lat: 31.2304, lon: 121.4737 },
+                    { name: '广州', province: '广东省', lat: 23.1291, lon: 113.2644 },
+                    { name: '深圳', province: '广东省', lat: 22.5431, lon: 114.0579 },
+                    { name: '杭州', province: '浙江省', lat: 30.2741, lon: 120.1551 },
+                    { name: '南京', province: '江苏省', lat: 32.0603, lon: 118.7969 },
+                    { name: '苏州', province: '江苏省', lat: 31.2989, lon: 120.5853 },
+                    { name: '无锡', province: '江苏省', lat: 31.4912, lon: 120.3119 },
+                    { name: '常州', province: '江苏省', lat: 31.8107, lon: 119.9740 },
+                    { name: '南通', province: '江苏省', lat: 31.9802, lon: 120.8943 },
+                    { name: '徐州', province: '江苏省', lat: 34.2618, lon: 117.1859 },
+                    { name: '扬州', province: '江苏省', lat: 32.3942, lon: 119.4129 },
+                    { name: '盐城', province: '江苏省', lat: 33.3496, lon: 120.1615 },
+                    { name: '泰州', province: '江苏省', lat: 32.4849, lon: 119.9229 },
+                    { name: '镇江', province: '江苏省', lat: 32.1878, lon: 119.4250 },
+                    { name: '淮安', province: '江苏省', lat: 33.5975, lon: 119.0213 },
+                    { name: '连云港', province: '江苏省', lat: 34.5967, lon: 119.2216 },
+                    { name: '宿迁', province: '江苏省', lat: 33.9631, lon: 118.2752 },
+                    { name: '成都', province: '四川省', lat: 30.5728, lon: 104.0668 },
+                    { name: '重庆', province: '重庆市', lat: 29.5630, lon: 106.5516 },
+                    { name: '武汉', province: '湖北省', lat: 30.5928, lon: 114.3055 },
+                    { name: '西安', province: '陕西省', lat: 34.3416, lon: 108.9398 },
+                    { name: '天津', province: '天津市', lat: 39.3434, lon: 117.3616 },
+                    { name: '长沙', province: '湖南省', lat: 28.2282, lon: 112.9388 },
+                    { name: '郑州', province: '河南省', lat: 34.7466, lon: 113.6254 },
+                    { name: '青岛', province: '山东省', lat: 36.0671, lon: 120.3826 },
+                    { name: '济南', province: '山东省', lat: 36.6512, lon: 117.1201 },
+                    { name: '厦门', province: '福建省', lat: 24.4798, lon: 118.0894 },
+                    { name: '福州', province: '福建省', lat: 26.0745, lon: 119.2965 },
+                    { name: '合肥', province: '安徽省', lat: 31.8206, lon: 117.2272 },
+                    { name: '南昌', province: '江西省', lat: 28.6820, lon: 115.8579 },
+                    { name: '昆明', province: '云南省', lat: 24.8801, lon: 102.8329 },
+                    { name: '贵阳', province: '贵州省', lat: 26.6477, lon: 106.6302 },
+                    { name: '南宁', province: '广西壮族自治区', lat: 22.8170, lon: 108.3665 },
+                    { name: '海口', province: '海南省', lat: 20.0444, lon: 110.1999 },
+                    { name: '三亚', province: '海南省', lat: 18.2528, lon: 109.5119 },
+                    { name: '哈尔滨', province: '黑龙江省', lat: 45.8038, lon: 126.5349 },
+                    { name: '长春', province: '吉林省', lat: 43.8171, lon: 125.3235 },
+                    { name: '沈阳', province: '辽宁省', lat: 41.8057, lon: 123.4315 },
+                    { name: '大连', province: '辽宁省', lat: 38.9140, lon: 121.6147 },
+                    { name: '石家庄', province: '河北省', lat: 38.0428, lon: 114.5149 },
+                    { name: '太原', province: '山西省', lat: 37.8706, lon: 112.5489 },
+                    { name: '呼和浩特', province: '内蒙古自治区', lat: 40.8414, lon: 111.7519 },
+                    { name: '兰州', province: '甘肃省', lat: 36.0611, lon: 103.8343 },
+                    { name: '西宁', province: '青海省', lat: 36.6171, lon: 101.7782 },
+                    { name: '银川', province: '宁夏回族自治区', lat: 38.4872, lon: 106.2309 },
+                    { name: '乌鲁木齐', province: '新疆维吾尔自治区', lat: 43.8256, lon: 87.6168 },
+                    { name: '拉萨', province: '西藏自治区', lat: 29.6500, lon: 91.1000 },
+                    { name: '香港', province: '香港特别行政区', lat: 22.3193, lon: 114.1694 },
+                    { name: '澳门', province: '澳门特别行政区', lat: 22.1987, lon: 113.5439 },
+                    { name: '台北', province: '台湾省', lat: 25.0330, lon: 121.5654 }
+                ];
+
+                // ---- 2026年法定节假日与调休数据（根据国务院通知）----
+                // type: 0=工作日, 1=节假日, 2=双休日, 3=调休日（需上班）
+                const HOLIDAY_DATA_2026 = [
+                    // 元旦
+                    { date: '2026-01-01', name: '元旦', type: 1, rest: 1 },
+                    { date: '2026-01-02', name: '元旦', type: 1, rest: 1 },
+                    { date: '2026-01-03', name: '元旦', type: 1, rest: 1 },
+                    { date: '2026-01-04', name: '元旦调休', type: 3, rest: 0 },
+                    // 春节
+                    { date: '2026-02-14', name: '春节调休', type: 3, rest: 0 },
+                    { date: '2026-02-15', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-16', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-17', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-18', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-19', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-20', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-21', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-22', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-23', name: '春节', type: 1, rest: 1 },
+                    { date: '2026-02-28', name: '春节调休', type: 3, rest: 0 },
+                    // 清明节
+                    { date: '2026-04-04', name: '清明节', type: 1, rest: 1 },
+                    { date: '2026-04-05', name: '清明节', type: 1, rest: 1 },
+                    { date: '2026-04-06', name: '清明节', type: 1, rest: 1 },
+                    // 劳动节
+                    { date: '2026-05-01', name: '劳动节', type: 1, rest: 1 },
+                    { date: '2026-05-02', name: '劳动节', type: 1, rest: 1 },
+                    { date: '2026-05-03', name: '劳动节', type: 1, rest: 1 },
+                    { date: '2026-05-04', name: '劳动节', type: 1, rest: 1 },
+                    { date: '2026-05-05', name: '劳动节', type: 1, rest: 1 },
+                    { date: '2026-05-09', name: '劳动节调休', type: 3, rest: 0 },
+                    // 端午节
+                    { date: '2026-06-19', name: '端午节', type: 1, rest: 1 },
+                    { date: '2026-06-20', name: '端午节', type: 1, rest: 1 },
+                    { date: '2026-06-21', name: '端午节', type: 1, rest: 1 },
+                    // 中秋节
+                    { date: '2026-09-20', name: '中秋节调休', type: 3, rest: 0 },
+                    { date: '2026-09-25', name: '中秋节', type: 1, rest: 1 },
+                    { date: '2026-09-26', name: '中秋节', type: 1, rest: 1 },
+                    { date: '2026-09-27', name: '中秋节', type: 1, rest: 1 },
+                    // 国庆节
+                    { date: '2026-10-01', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-02', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-03', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-04', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-05', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-06', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-07', name: '国庆节', type: 1, rest: 1 },
+                    { date: '2026-10-10', name: '国庆节调休', type: 3, rest: 0 }
+                ];
+
+                // 构建日期索引 Map
+                const HOLIDAY_MAP = new Map();
+                HOLIDAY_DATA_2026.forEach(function(item) {
+                    HOLIDAY_MAP.set(item.date, item);
+                });
+
+                // ---- 获取指定日期的节假日信息 ----
+                function getHolidayInfo(date) {
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    var dateStr = year + '-' + month + '-' + day;
+
+                    // 只处理2026年数据
+                    if (year === 2026 && HOLIDAY_MAP.has(dateStr)) {
+                        return HOLIDAY_MAP.get(dateStr);
+                    }
+
+                    // 判断是否为周末
+                    var dow = date.getDay();
+                    if (dow === 0 || dow === 6) {
+                        return { date: dateStr, name: '周末', type: 2, rest: 1 };
+                    }
+
+                    return { date: dateStr, name: '工作日', type: 0, rest: 0 };
+                }
+
+                // ---- 根据经纬度获取城市名 ----
                 async function fetchCityName(lat, lon) {
                     try {
-                        // 使用 BigDataCloud 免费反向地理编码
                         const res = await fetch(
                             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`,
                             { signal: AbortSignal.timeout(6000) }
@@ -3729,14 +4013,23 @@ self.addEventListener('fetch', function (e) {
                     }
                 }
 
-                // ---- 定位并获取天气 ----
+                // ---- 定位并获取天气（默认行为）----
                 function locateAndFetchWeather() {
                     const locEl = document.getElementById('weatherLocation');
                     const descEl = document.getElementById('weatherDesc');
 
+                    // 如果用户已手动选择城市，不自动定位
+                    if (isManualCity) {
+                        fetchWeather(currentLat, currentLon, currentCity);
+                        return;
+                    }
+
                     if (!navigator.geolocation) {
                         locEl.textContent = DEFAULT_CITY;
                         descEl.textContent = '定位不支持';
+                        currentLat = DEFAULT_LAT;
+                        currentLon = DEFAULT_LON;
+                        currentCity = DEFAULT_CITY;
                         fetchWeather(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY);
                         return;
                     }
@@ -3749,10 +4042,17 @@ self.addEventListener('fetch', function (e) {
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
                             const cityName = await fetchCityName(lat, lon);
+                            currentLat = lat;
+                            currentLon = lon;
+                            currentCity = cityName;
                             fetchWeather(lat, lon, cityName);
                         },
                         function (error) {
                             console.warn('定位失败:', error.message);
+                            // 定位失败，回退到南通
+                            currentLat = DEFAULT_LAT;
+                            currentLon = DEFAULT_LON;
+                            currentCity = DEFAULT_CITY;
                             locEl.textContent = DEFAULT_CITY;
                             descEl.textContent = '定位失败';
                             fetchWeather(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY);
@@ -3760,14 +4060,14 @@ self.addEventListener('fetch', function (e) {
                         {
                             enableHighAccuracy: false,
                             timeout: 10000,
-                            maximumAge: 600000 // 10分钟缓存
+                            maximumAge: 600000
                         }
                     );
                 }
 
-                // ---- 日历 + 农历 + 宜忌 ----
+                // ---- 更新日历显示（根据 selectedDate）----
                 function updateCalendar() {
-                    const now = new Date();
+                    const now = selectedDate;
 
                     const year = now.getFullYear();
                     const month = now.getMonth() + 1;
@@ -3782,6 +4082,36 @@ self.addEventListener('fetch', function (e) {
                     document.getElementById('calendarYearMonth').textContent = year + '年' + month + '月';
                     document.getElementById('calendarWeekday').textContent = weekdaysCN[dayOfWeek];
 
+                    // 节假日信息
+                    const holidayInfo = getHolidayInfo(now);
+                    const holidayTagEl = document.getElementById('calendarHolidayTag');
+                    const dateBlockEl = document.getElementById('calendarDateBlock');
+
+                    // 重置样式
+                    dateBlockEl.classList.remove('holiday', 'workday');
+                    holidayTagEl.classList.remove('holiday', 'workday', 'normal');
+
+                    if (holidayInfo.type === 1) {
+                        // 法定节假日（休息）
+                        dateBlockEl.classList.add('holiday');
+                        holidayTagEl.classList.add('holiday');
+                        holidayTagEl.textContent = holidayInfo.name + ' 休息';
+                    } else if (holidayInfo.type === 3) {
+                        // 调休上班
+                        dateBlockEl.classList.add('workday');
+                        holidayTagEl.classList.add('workday');
+                        holidayTagEl.textContent = holidayInfo.name + ' 上班';
+                    } else if (holidayInfo.type === 2) {
+                        // 周末
+                        holidayTagEl.classList.add('holiday');
+                        holidayTagEl.textContent = '周末 休息';
+                    } else {
+                        // 普通工作日
+                        holidayTagEl.classList.add('normal');
+                        holidayTagEl.textContent = '工作日';
+                    }
+
+                    // 农历 + 宜忌
                     if (typeof Solar !== 'undefined') {
                         try {
                             const solar = Solar.fromDate(now);
@@ -3811,14 +4141,200 @@ self.addEventListener('fetch', function (e) {
                     }
                 }
 
+                // ============================================================
+                //  城市选择弹窗
+                // ============================================================
+                const cityPickerOverlay = document.getElementById('cityPickerOverlay');
+                const citySearchInput = document.getElementById('citySearchInput');
+                const cityListEl = document.getElementById('cityList');
+
+                function renderCityList(filter) {
+                    var keyword = (filter || '').trim().toLowerCase();
+                    var filtered = CITY_LIST;
+
+                    if (keyword) {
+                        filtered = CITY_LIST.filter(function(c) {
+                            return c.name.toLowerCase().includes(keyword) ||
+                                   c.province.toLowerCase().includes(keyword);
+                        });
+                    }
+
+                    if (filtered.length === 0) {
+                        cityListEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:14px;">未找到匹配的城市</div>';
+                        return;
+                    }
+
+                    cityListEl.innerHTML = filtered.map(function(c) {
+                        return '<div class="city-item" data-lat="' + c.lat + '" data-lon="' + c.lon + '" data-name="' + c.name + '">' +
+                            '<span>' + c.name + '</span>' +
+                            '<span class="city-province">' + c.province + '</span>' +
+                        '</div>';
+                    }).join('');
+
+                    // 绑定点击事件
+                    cityListEl.querySelectorAll('.city-item').forEach(function(el) {
+                        el.addEventListener('click', function() {
+                            var lat = parseFloat(this.dataset.lat);
+                            var lon = parseFloat(this.dataset.lon);
+                            var name = this.dataset.name;
+
+                            currentLat = lat;
+                            currentLon = lon;
+                            currentCity = name;
+                            isManualCity = true;
+
+                            fetchWeather(lat, lon, name);
+                            closeCityPicker();
+                            showToastMsg('已切换到 ' + name);
+                        });
+                    });
+                }
+
+                function openCityPicker() {
+                    citySearchInput.value = '';
+                    renderCityList('');
+                    cityPickerOverlay.classList.add('show');
+                    setTimeout(function() { citySearchInput.focus(); }, 300);
+                }
+
+                function closeCityPicker() {
+                    cityPickerOverlay.classList.remove('show');
+                    citySearchInput.blur();
+                }
+
+                document.getElementById('weatherWidget').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openCityPicker();
+                });
+
+                document.getElementById('cityPickerClose').addEventListener('click', closeCityPicker);
+
+                cityPickerOverlay.addEventListener('click', function(e) {
+                    if (e.target === cityPickerOverlay) closeCityPicker();
+                });
+
+                citySearchInput.addEventListener('input', function() {
+                    renderCityList(this.value);
+                });
+
+                // ============================================================
+                //  日期选择弹窗
+                // ============================================================
+                const datePickerOverlay = document.getElementById('datePickerOverlay');
+                const datePickerYear = document.getElementById('datePickerYear');
+                const datePickerMonth = document.getElementById('datePickerMonth');
+                const datePickerDay = document.getElementById('datePickerDay');
+
+                function initDatePicker() {
+                    // 年份
+                    datePickerYear.innerHTML = '';
+                    for (var y = 2020; y <= 2030; y++) {
+                        var opt = document.createElement('option');
+                        opt.value = y;
+                        opt.textContent = y + '年';
+                        datePickerYear.appendChild(opt);
+                    }
+
+                    // 月份
+                    datePickerMonth.innerHTML = '';
+                    for (var m = 1; m <= 12; m++) {
+                        var opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m + '月';
+                        datePickerMonth.appendChild(opt);
+                    }
+
+                    // 日期
+                    updateDayOptions();
+
+                    // 绑定事件
+                    datePickerYear.addEventListener('change', updateDayOptions);
+                    datePickerMonth.addEventListener('change', updateDayOptions);
+                }
+
+                function updateDayOptions() {
+                    var year = parseInt(datePickerYear.value);
+                    var month = parseInt(datePickerMonth.value);
+                    var daysInMonth = new Date(year, month, 0).getDate();
+
+                    datePickerDay.innerHTML = '';
+                    for (var d = 1; d <= daysInMonth; d++) {
+                        var opt = document.createElement('option');
+                        opt.value = d;
+                        opt.textContent = d + '日';
+                        datePickerDay.appendChild(opt);
+                    }
+                }
+
+                function setDatePickerValues(date) {
+                    datePickerYear.value = date.getFullYear();
+                    datePickerMonth.value = date.getMonth() + 1;
+                    updateDayOptions();
+                    datePickerDay.value = date.getDate();
+                }
+
+                function openDatePicker() {
+                    setDatePickerValues(selectedDate);
+                    datePickerOverlay.classList.add('show');
+                }
+
+                function closeDatePicker() {
+                    datePickerOverlay.classList.remove('show');
+                }
+
+                document.getElementById('calendarWidget').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openDatePicker();
+                });
+
+                document.getElementById('datePickerClose').addEventListener('click', closeDatePicker);
+
+                datePickerOverlay.addEventListener('click', function(e) {
+                    if (e.target === datePickerOverlay) closeDatePicker();
+                });
+
+                document.getElementById('datePickerConfirm').addEventListener('click', function() {
+                    var year = parseInt(datePickerYear.value);
+                    var month = parseInt(datePickerMonth.value) - 1;
+                    var day = parseInt(datePickerDay.value);
+
+                    selectedDate = new Date(year, month, day);
+                    isManualDate = true;
+                    updateCalendar();
+                    closeDatePicker();
+                    showToastMsg('已切换到 ' + year + '年' + (month + 1) + '月' + day + '日');
+                });
+
+                document.getElementById('datePickerReset').addEventListener('click', function() {
+                    selectedDate = new Date();
+                    isManualDate = false;
+                    updateCalendar();
+                    closeDatePicker();
+                    showToastMsg('已回到今天');
+                });
+
                 // ---- 初始化 ----
+                initDatePicker();
                 locateAndFetchWeather();
                 updateCalendar();
 
-                // 天气每 15 分钟刷新（重新定位）
-                setInterval(locateAndFetchWeather, 900000);
-                // 日历每分钟刷新（跨天自动更新）
-                setInterval(updateCalendar, 60000);
+                // 天气每 15 分钟刷新（仅在未手动选择城市时重新定位）
+                setInterval(function() {
+                    if (!isManualCity) {
+                        locateAndFetchWeather();
+                    } else {
+                        fetchWeather(currentLat, currentLon, currentCity);
+                    }
+                }, 900000);
+
+                // 日历每分钟刷新（仅当未手动选择日期时才跟随今天）
+                setInterval(function() {
+                    if (!isManualDate) {
+                        selectedDate = new Date();
+                        updateCalendar();
+                    }
+                }, 60000);
+
             })();
 
         })();
