@@ -93,7 +93,8 @@
             --viewer-bg: rgba(0, 0, 0, 0.85);
             --plate-bg: linear-gradient(135deg, #34C759, #28A745);
             --name-gradient: linear-gradient(90deg, #FF1744, #FF6D00, #FFD600, #00E676, #00B0FF, #AA00FF, #FF1744);
-            --sub-gradient: linear-gradient(90deg, #FF3D71, #FF8A00, #FFD600, #00E5A0, #00B4FF, #B44CFF, #FF3D71);
+            --line1-gradient: linear-gradient(90deg, #FF3D71, #FF8A00, #FFD600, #00E5A0, #00B4FF, #B44CFF, #FF3D71);
+            --line2-gradient: linear-gradient(90deg, #00B4FF, #6A5CFF, #FF3D71, #FFD600, #00E676, #00B4FF);
             --island-bg: rgba(255, 255, 255, 0.8);
             --island-text: #1C1C1E;
             --popup-overlay: rgba(0, 0, 0, 0.85);
@@ -119,6 +120,7 @@
             --weather-desc-color: #FF6B00;
             --weather-loc-color: #1C1C1E;
             --weather-wind-color: #007AFF;
+            --weather-minmax-color: #8E8E93;
             --calendar-year-color: #0A0A0C;
             --calendar-weekday-color: #FF3B30;
             --calendar-lunar-color: #7B61FF;
@@ -140,7 +142,8 @@
             --viewer-bg: rgba(0, 0, 0, 0.92);
             --plate-bg: linear-gradient(135deg, #00D4FF, #7B61FF);
             --name-gradient: linear-gradient(90deg, #FF4D8D, #FFA000, #FFEA00, #00FFB3, #00C3FF, #D04CFF, #FF4D8D);
-            --sub-gradient: linear-gradient(90deg, #FF6BA8, #FFB300, #FFEE58, #33FFC6, #33CCFF, #E066FF, #FF6BA8);
+            --line1-gradient: linear-gradient(90deg, #FF6BA8, #FFB300, #FFEE58, #33FFC6, #33CCFF, #E066FF, #FF6BA8);
+            --line2-gradient: linear-gradient(90deg, #33CCFF, #8B7BFF, #FF6BA8, #FFEE58, #33FFC6, #33CCFF);
             --island-bg: rgba(20, 20, 24, 0.8);
             --island-text: #fff;
             --popup-overlay: rgba(0, 0, 0, 0.92);
@@ -156,6 +159,7 @@
             --weather-desc-color: #FFB84D;
             --weather-loc-color: #F5F5F7;
             --weather-wind-color: #4DA3FF;
+            --weather-minmax-color: #A1A1A6;
             --calendar-year-color: #FFFFFF;
             --calendar-weekday-color: #FF6B6B;
             --calendar-lunar-color: #A78BFF;
@@ -398,14 +402,14 @@
             font-weight: 600;
             font-size: 11px;
             background: linear-gradient(90deg, #FF6B9E, #FFD966, #6AA9FF, #FF6B9E);
-            background-size: 300% 100%;
+            background-size: 200% 100%;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             white-space: nowrap;
             position: relative;
             z-index: 1;
-            animation: textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite;
+            animation: textShine 4s ease-in-out infinite, scrollUp 4s ease-in-out infinite;
         }
         @keyframes textShine { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes scrollUp { 0% { transform: translateY(100%); opacity: 0; } 10% { transform: translateY(0); opacity: 1; } 90% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100%); opacity: 0; } }
@@ -441,7 +445,7 @@
             position: relative;
         }
 
-        /* 天气组件 —— 文字加粗加大更醒目，深色主题适配 */
+        /* 天气组件 */
         .weather-widget {
             display: flex;
             align-items: center;
@@ -481,6 +485,20 @@
             letter-spacing: -0.5px;
             line-height: 1.2;
         }
+        .weather-minmax {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--weather-minmax-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .weather-minmax .max-temp { color: #FF3B30; }
+        html.dark-mode .weather-minmax .max-temp { color: #FF6B6B; }
+        .weather-minmax .min-temp { color: #007AFF; }
+        html.dark-mode .weather-minmax .min-temp { color: #4DA3FF; }
         .weather-desc {
             font-size: 12px;
             font-weight: 800;
@@ -502,7 +520,7 @@
             font-size: 11px;
             color: #FF3B30;
             filter: drop-shadow(0 0 6px rgba(255, 59, 48, 0.6));
-            animation: locationPulse 1.6s ease-in-out infinite;
+            animation: locationPulse 3s ease-in-out infinite;
         }
         html.dark-mode .weather-location i {
             color: #FF6B6B;
@@ -528,7 +546,7 @@
             font-size: 11px;
             color: var(--weather-wind-color);
             filter: drop-shadow(0 0 6px rgba(0, 122, 255, 0.5));
-            animation: windBlow 2.4s ease-in-out infinite;
+            animation: windBlow 4s ease-in-out infinite;
         }
         html.dark-mode .weather-wind i {
             filter: drop-shadow(0 0 8px rgba(77, 163, 255, 0.7));
@@ -564,7 +582,7 @@
             opacity: 0.45;
             z-index: -1;
             filter: blur(24px);
-            animation: glowPulse 1.8s ease-in-out infinite alternate;
+            animation: glowPulse 3.6s ease-in-out infinite alternate;
             transform: scale(0.7);
         }
         @keyframes glowPulse { 0% { transform: scale(0.6); opacity: 0.25; filter: blur(20px); } 100% { transform: scale(1.5); opacity: 0.75; filter: blur(36px); } }
@@ -577,20 +595,20 @@
             opacity: 0.4;
             z-index: -1;
             filter: blur(32px);
-            animation: glowPulse2 2.4s ease-in-out infinite alternate;
+            animation: glowPulse2 4.8s ease-in-out infinite alternate;
             transform: scale(0.5);
         }
         @keyframes glowPulse2 { 0% { transform: scale(0.4); opacity: 0.15; filter: blur(28px); } 100% { transform: scale(1.7); opacity: 0.6; filter: blur(48px); } }
         .avatar-center .avatar-ring {
             position: absolute; inset: -4px; border-radius: 50%;
             background: conic-gradient(from 0deg, var(--glow-color), #FFD046, #00D4FF, #7B61FF, var(--glow-color));
-            animation: ringRotate 2.8s linear infinite; filter: blur(4px); z-index: -1; opacity: 0.85;
+            animation: ringRotate 5.6s linear infinite; filter: blur(4px); z-index: -1; opacity: 0.85;
         }
         @keyframes ringRotate { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.06); } 100% { transform: rotate(360deg) scale(1); } }
         .avatar-center .avatar-ring-2 {
             position: absolute; inset: -7px; border-radius: 50%;
             background: conic-gradient(from 180deg, #7B61FF, #00D4FF, #FF6B9E, #7B61FF);
-            animation: ringRotate2 3.6s linear infinite reverse; filter: blur(8px); z-index: -2; opacity: 0.4;
+            animation: ringRotate2 7.2s linear infinite reverse; filter: blur(8px); z-index: -2; opacity: 0.4;
         }
         @keyframes ringRotate2 { 0% { transform: rotate(0deg) scale(0.85); } 50% { transform: rotate(180deg) scale(1.12); } 100% { transform: rotate(360deg) scale(0.85); } }
         .avatar-center img {
@@ -603,7 +621,7 @@
             border-color: rgba(255, 255, 255, 0.25);
         }
 
-        /* 日历组件 —— 文字加粗加大更醒目，深色主题适配 */
+        /* 日历组件 */
         .calendar-widget {
             display: flex;
             align-items: center;
@@ -710,7 +728,7 @@
             color: #AEAEB2;
         }
 
-        /* 宜忌行 —— 文字加粗加大更醒目，深色主题适配 */
+        /* 宜忌行 */
         .almanac-row {
             width: 100%;
             display: flex;
@@ -734,18 +752,10 @@
             min-width: 0;
             transition: var(--transition-smooth);
         }
-        .almanac-item.yi {
-            border-left: 3px solid #00E676;
-        }
-        .almanac-item.ji {
-            border-left: 3px solid #FF3B30;
-        }
-        html.dark-mode .almanac-item.yi {
-            border-left-color: #00FF88;
-        }
-        html.dark-mode .almanac-item.ji {
-            border-left-color: #FF6B6B;
-        }
+        .almanac-item.yi { border-left: 3px solid #00E676; }
+        .almanac-item.ji { border-left: 3px solid #FF3B30; }
+        html.dark-mode .almanac-item.yi { border-left-color: #00FF88; }
+        html.dark-mode .almanac-item.ji { border-left-color: #FF6B6B; }
 
         .almanac-label {
             font-size: 12px;
@@ -796,10 +806,7 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .city-picker-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
+        .city-picker-overlay.show { opacity: 1; visibility: visible; }
         .city-picker-panel {
             width: 100%;
             max-width: 480px;
@@ -812,9 +819,7 @@
             overflow-y: auto;
             position: relative;
         }
-        .city-picker-overlay.show .city-picker-panel {
-            transform: translateY(0);
-        }
+        .city-picker-overlay.show .city-picker-panel { transform: translateY(0); }
         .city-picker-header {
             display: flex;
             justify-content: space-between;
@@ -857,9 +862,7 @@
             border-color: #34C759;
             box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.15);
         }
-        .city-search-input::placeholder {
-            color: var(--text-muted);
-        }
+        .city-search-input::placeholder { color: var(--text-muted); }
         .city-list {
             display: flex;
             flex-direction: column;
@@ -904,10 +907,7 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .date-picker-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
+        .date-picker-overlay.show { opacity: 1; visibility: visible; }
         .date-picker-panel {
             width: 100%;
             max-width: 480px;
@@ -917,9 +917,7 @@
             transform: translateY(100%);
             transition: transform 0.4s var(--spring);
         }
-        .date-picker-overlay.show .date-picker-panel {
-            transform: translateY(0);
-        }
+        .date-picker-overlay.show .date-picker-panel { transform: translateY(0); }
         .date-picker-header {
             display: flex;
             justify-content: space-between;
@@ -966,9 +964,7 @@
             -webkit-appearance: none;
             appearance: none;
         }
-        .date-picker-select:focus {
-            border-color: #34C759;
-        }
+        .date-picker-select:focus { border-color: #34C759; }
         .date-picker-confirm {
             width: 100%;
             padding: 14px;
@@ -1019,10 +1015,7 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .month-calendar-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
+        .month-calendar-overlay.show { opacity: 1; visibility: visible; }
         .month-calendar-panel {
             width: 100%;
             max-width: 480px;
@@ -1034,9 +1027,7 @@
             transition: transform 0.4s var(--spring);
             overflow-y: auto;
         }
-        .month-calendar-overlay.show .month-calendar-panel {
-            transform: translateY(0);
-        }
+        .month-calendar-overlay.show .month-calendar-panel { transform: translateY(0); }
         .month-calendar-header {
             display: flex;
             justify-content: space-between;
@@ -1048,10 +1039,7 @@
             font-weight: 700;
             color: var(--text-main);
         }
-        .month-calendar-nav {
-            display: flex;
-            gap: 8px;
-        }
+        .month-calendar-nav { display: flex; gap: 8px; }
         .month-calendar-nav button {
             width: 34px;
             height: 34px;
@@ -1096,9 +1084,7 @@
             color: var(--text-muted);
             padding: 4px 0;
         }
-        .month-calendar-weekdays span.weekend {
-            color: #FF6B9E;
-        }
+        .month-calendar-weekdays span.weekend { color: #FF6B9E; }
 
         .month-calendar-days {
             display: grid;
@@ -1120,13 +1106,8 @@
             position: relative;
             border: 1px solid transparent;
         }
-        .month-calendar-day:active {
-            transform: scale(0.92);
-        }
-        .month-calendar-day.other-month {
-            color: var(--text-muted);
-            opacity: 0.35;
-        }
+        .month-calendar-day:active { transform: scale(0.92); }
+        .month-calendar-day.other-month { color: var(--text-muted); opacity: 0.35; }
         .month-calendar-day.today {
             background: rgba(52, 199, 89, 0.15);
             border-color: #34C759;
@@ -1139,14 +1120,8 @@
             font-weight: 700;
             box-shadow: 0 2px 8px rgba(52, 199, 89, 0.35);
         }
-        .month-calendar-day.holiday {
-            color: #34C759;
-            font-weight: 700;
-        }
-        .month-calendar-day.workday {
-            color: #FF9500;
-            font-weight: 700;
-        }
+        .month-calendar-day.holiday { color: #34C759; font-weight: 700; }
+        .month-calendar-day.workday { color: #FF9500; font-weight: 700; }
         .month-calendar-day .day-lunar {
             font-size: 8px;
             color: var(--text-muted);
@@ -1156,9 +1131,7 @@
             overflow: hidden;
             max-width: 100%;
         }
-        .month-calendar-day.selected .day-lunar {
-            color: rgba(255, 255, 255, 0.85);
-        }
+        .month-calendar-day.selected .day-lunar { color: rgba(255, 255, 255, 0.85); }
         .month-calendar-day .day-tag {
             position: absolute;
             top: 1px;
@@ -1170,16 +1143,9 @@
             border-radius: 4px;
             color: #fff;
         }
-        .month-calendar-day .day-tag.rest {
-            background: #34C759;
-        }
-        .month-calendar-day .day-tag.work {
-            background: #FF9500;
-        }
-        .month-calendar-day.selected .day-tag.rest {
-            background: rgba(255, 255, 255, 0.35);
-            color: #fff;
-        }
+        .month-calendar-day .day-tag.rest { background: #34C759; }
+        .month-calendar-day .day-tag.work { background: #FF9500; }
+        .month-calendar-day.selected .day-tag.rest,
         .month-calendar-day.selected .day-tag.work {
             background: rgba(255, 255, 255, 0.35);
             color: #fff;
@@ -1194,9 +1160,7 @@
             overflow: hidden;
             max-width: 100%;
         }
-        .month-calendar-day.selected .day-festival {
-            color: rgba(255, 255, 255, 0.9);
-        }
+        .month-calendar-day.selected .day-festival { color: rgba(255, 255, 255, 0.9); }
 
         /* ===== 视频播放器 ===== */
         .video-player-container {
@@ -1229,10 +1193,7 @@
             transform: translateZ(0);
             backface-visibility: hidden;
         }
-        /* 隐藏主视频中间的播放/暂停按钮 */
-        .center-play-btn {
-            display: none !important;
-        }
+        .center-play-btn { display: none !important; }
 
         .video-controls {
             position: absolute;
@@ -1313,7 +1274,7 @@
         }
         .btn-expand:active { opacity: 0.7; transform: scale(0.88); }
 
-        /* ===== 主卡片（文字与图片左右排列） ===== */
+        /* ===== 主卡片 ===== */
         .main-card-container {
             width: 100%;
             flex: 0 0 auto;
@@ -1353,7 +1314,6 @@
             pointer-events: none;
         }
 
-        /* 个人信息区域 —— 左右排列：文字在左，图片在右 */
         .profile-row {
             display: flex;
             flex-direction: row;
@@ -1363,7 +1323,6 @@
             width: 100%;
             flex-shrink: 0;
         }
-        /* 左侧文字容器 */
         .profile-left {
             flex: 1;
             min-width: 0;
@@ -1375,7 +1334,6 @@
             gap: 8px;
         }
 
-        /* 右侧图片容器（已去除跑马灯） */
         .plate-photo {
             width: var(--plate-size);
             flex-shrink: 0;
@@ -1407,18 +1365,18 @@
         .stack-img.pile3 { transform: scale(0.75) translateY(24px); opacity: 0.15; z-index: 2; }
         .stack-img.hidden { transform: scale(0.65) translateY(32px); opacity: 0; z-index: 1; pointer-events: none; }
 
-        /* 主卡片文字 —— 醒目高饱和渐变，快速流动 */
+        /* 主卡片文字 —— 每行独立渐变，动画放慢至 8s 以上 */
         .name {
             font-size: 17px;
             font-weight: 900;
             text-align: left;
             margin-top: 0;
             background: var(--name-gradient);
-            background-size: 400% 100%;
+            background-size: 200% 100%;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: textGradientFast 1.2s ease-in-out infinite;
+            animation: textGradientName 9s ease-in-out infinite;
             max-width: 100%;
             white-space: nowrap;
             overflow: hidden;
@@ -1427,7 +1385,7 @@
             line-height: 1.3;
             filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
         }
-        @keyframes textGradientFast {
+        @keyframes textGradientName {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
@@ -1437,29 +1395,44 @@
             font-weight: 800;
             text-align: left;
             margin-top: 0;
-            background: var(--sub-gradient);
-            background-size: 400% 100%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: textGradientSubFast 1.5s ease-in-out infinite;
             line-height: 1.5;
             letter-spacing: 0.3px;
             display: flex;
             flex-direction: column;
             gap: 2px;
+        }
+        .subtitle .line-1 {
+            display: block;
+            background: var(--line1-gradient);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: textGradientLine1 8s ease-in-out infinite;
             filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06));
         }
-        .subtitle .line {
+        .subtitle .line-2 {
             display: block;
+            background: var(--line2-gradient);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: textGradientLine2 10s ease-in-out infinite;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06));
         }
-        @keyframes textGradientSubFast {
+        @keyframes textGradientLine1 {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        @keyframes textGradientLine2 {
+            0% { background-position: 100% 50%; }
+            50% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
 
-        /* ===== 应用图标 —— 图标保持原尺寸但更醒目，文字加粗加黑 ===== */
+        /* ===== 应用图标 ===== */
         .apps-scroll-wrapper {
             width: 100%;
             overflow: visible;
@@ -1507,7 +1480,6 @@
             overflow: hidden;
             transform: translateZ(0);
         }
-        /* 图标更加醒目：增加光环阴影 */
         html.dark-mode .app-icon-wrap {
             box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 4px 20px rgba(0, 0, 0, 0.35);
             border-color: rgba(255, 255, 255, 0.10);
@@ -1525,20 +1497,15 @@
             content: ''; position: absolute; inset: -3px;
             border-radius: calc(var(--icon-radius) + 2px);
             background: conic-gradient(from 0deg, var(--icon-color), transparent, var(--icon-color));
-            opacity: 0;
+            opacity: 0.25;
             transition: opacity 0.4s ease;
             z-index: -1;
             filter: blur(8px);
-            /* 常态下也保持一层淡淡的彩色光圈，让图标更醒目 */
-            opacity: 0.25;
         }
-        html.dark-mode .app-icon-wrap::after {
-            opacity: 0.35;
-        }
+        html.dark-mode .app-icon-wrap::after { opacity: 0.35; }
         .app-button:active .app-icon-wrap { transform: scale(0.88); }
         .app-button:active .app-icon-wrap::after { opacity: 0.6; }
         .app-button.loading .app-icon-wrap { opacity: 0.6; transform: scale(0.95); }
-        /* 应用名称文字：加粗加黑更醒目，深色主题适配 */
         .app-label {
             font-size: 10px;
             font-weight: 900;
@@ -1585,9 +1552,7 @@
             animation: none;
         }
         @keyframes vpnWavePulse { }
-        .vpn-glow {
-            display: none;
-        }
+        .vpn-glow { display: none; }
         .app-button:active .vpn-svg { transform: scale(0.88); }
         html.dark-mode .vpn-svg {
             color: var(--icon-color);
@@ -1675,7 +1640,7 @@
             100% { transform: translateY(-200px) scale(0.4); opacity: 0; background-position: 0% 50%; }
         }
 
-        /* ===== 视频弹窗 ===== */
+        /* ===== 视频弹窗（副视频） ===== */
         .video-popup {
             position: fixed; inset: 0; z-index: 10050;
             display: flex; align-items: center; justify-content: center;
@@ -1713,37 +1678,60 @@
         .popup-close.hidden { opacity: 0; pointer-events: none; }
         .popup-controls {
             position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 10px 14px 12px;
-            background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.80) 100%);
-            z-index: 5; display: flex; align-items: center; gap: 8px; color: #fff;
+            padding: 8px 12px 10px;
+            background: transparent;
+            z-index: 5;
+            display: flex; align-items: center; gap: 12px; color: #fff;
             opacity: 1; transition: opacity 0.4s ease, transform 0.4s ease;
-            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
         .popup-controls.hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
         .popup-controls button {
-            color: rgba(255, 255, 255, 0.85); font-size: 15px; padding: 4px; opacity: 0.85;
-            transition: all 0.2s ease; border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(255, 255, 255, 0.04);
-            -webkit-tap-highlight-color: transparent;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 17px;
+            padding: 2px;
+            opacity: 0.95;
+            transition: all 0.2s ease;
+            border-radius: 0;
+            width: auto;
+            height: auto;
+            min-width: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
         }
-        .popup-controls button:active { opacity: 0.4; transform: scale(0.88); }
-        .popup-progress-wrap {
-            display: none !important;
-        }
-        .popup-progress-bar {
-            display: none !important;
-        }
+        .popup-controls button:active { opacity: 0.7; transform: scale(0.88); }
+        .popup-progress-wrap { display: none !important; }
+        .popup-progress-bar { display: none !important; }
         .popup-time {
-            font-size: 11px; font-weight: 500; min-width: 80px; text-align: right;
-            color: rgba(255, 255, 255, 0.75); letter-spacing: 0.3px;
+            margin-left: auto;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            padding: 0;
+            border-radius: 0;
+            border: none;
         }
 
         /* ===== 滚动条隐藏 ===== */
         ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
         * { scrollbar-width: none; }
 
-        /* 兼容回退 */
         @supports not (aspect-ratio: 1 / 1) {
             .video-box { height: 0; padding-bottom: 56.25%; }
             .video-box > video { position: absolute; left: 0; top: 0; }
@@ -1751,16 +1739,18 @@
             .center-play-btn { height: 54px; }
         }
 
-        /* ===== 漂浮文字 ===== */
+        /* ===== 漂浮文字（改用 transform 定位） ===== */
         .floating-word {
             position: fixed; font-size: 22px; font-weight: 900;
             font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
             cursor: grab; z-index: 1100; pointer-events: auto;
             transition: none; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
-            letter-spacing: 3px; will-change: left, top;
+            letter-spacing: 3px; will-change: transform;
             user-select: none; -webkit-user-select: none;
             filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.03));
             touch-action: none; -webkit-touch-callout: none;
+            left: 0; top: 0;
+            transform: translate3d(0, 0, 0);
         }
         .floating-word:active { cursor: grabbing; }
         .floating-word.following {
@@ -1790,13 +1780,24 @@
         @keyframes trailPulse { 0% { transform: scale(0.7); opacity: 0.2; } 100% { transform: scale(1.5); opacity: 0.6; } }
         .floating-word.hidden-words { visibility: hidden !important; pointer-events: none !important; transition: visibility 0.3s ease; }
 
-        /* 低端机毛玻璃降级 */
+        /* 低端机整体降级 */
         html.low-perf .main-card,
         html.low-perf .video-popup,
         html.low-perf .viewer,
         html.low-perf .top-card,
         html.low-perf .almanac-item { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
         html.low-perf .sakura { display: none !important; }
+        html.low-perf .avatar-center::before,
+        html.low-perf .avatar-center::after,
+        html.low-perf .avatar-center .avatar-ring,
+        html.low-perf .avatar-center .avatar-ring-2 { display: none !important; }
+        html.low-perf .floating-word { display: none !important; }
+        html.low-perf .name,
+        html.low-perf .subtitle .line-1,
+        html.low-perf .subtitle .line-2 { animation: none !important; }
+        html.low-perf .app-icon-wrap::after { animation: none !important; }
+        html.low-perf .status-theme-toggle::before { animation: none !important; }
+        html.low-perf .island-text-scroll { animation: none !important; color: #FF6B9E !important; background: none !important; -webkit-background-clip: initial !important; background-clip: initial !important; }
 
         /* ===== 触屏设备禁用 hover ===== */
         @media (hover: none), (pointer: coarse) {
@@ -1822,7 +1823,9 @@
             .apps-page { gap: 8px 6px; min-height: 80px; }
             .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 45px; }
             .video-controls { padding: 6px 10px 8px; }
+            .popup-controls { padding: 6px 10px 8px; }
             .controls-row button { font-size: 15px; min-width: 24px; min-height: 24px; }
+            .popup-controls button { font-size: 15px; min-width: 24px; min-height: 24px; }
             .btn-expand { font-size: 13px; min-width: 24px; min-height: 24px; }
             .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
             .ios-status-left { font-size: 12px; }
@@ -1832,6 +1835,7 @@
             .weather-desc { font-size: 11px; }
             .weather-location { font-size: 10px; }
             .weather-wind { font-size: 10px; }
+            .weather-minmax { font-size: 10px; }
             .calendar-date-block { width: 40px; height: 40px; }
             .calendar-day-num { font-size: 18px; }
             .calendar-year-month { font-size: 12px; }
@@ -1874,11 +1878,7 @@
 
         /* ===== 电脑端适配 ===== */
         @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-            .app-container {
-                max-width: 640px;
-                padding: 32px 28px 40px;
-                gap: 12px;
-            }
+            .app-container { max-width: 640px; padding: 32px 28px 40px; gap: 12px; }
             .video-player-container { border-radius: 22px; max-height: 320px; }
             .video-box { aspect-ratio: 16 / 9; }
             .main-card { padding: 32px 40px 36px; border-radius: 28px; gap: 16px; }
@@ -1901,15 +1901,15 @@
             .status-theme-toggle i { font-size: 22px; }
             .ios-status-left { font-size: 16px; }
             .controls-row button { font-size: 20px; min-width: 34px; min-height: 34px; }
+            .popup-controls button { font-size: 20px; min-width: 34px; min-height: 34px; }
             .btn-expand { font-size: 18px; min-width: 34px; min-height: 34px; }
             .controls-time { font-size: 15px; gap: 10px; }
+            .popup-time { font-size: 15px; gap: 10px; }
             .video-controls { padding: 14px 20px 16px; }
+            .popup-controls { padding: 14px 20px 16px; }
             .floating-word { font-size: 34px; }
             .popup-inner { max-width: 1000px; border-radius: 20px; }
             .popup-inner video { max-height: 78vh; }
-            .popup-controls { padding: 16px 22px 18px; gap: 12px; }
-            .popup-controls button { width: 42px; height: 42px; font-size: 19px; }
-            .popup-time { font-size: 13px; min-width: 100px; }
             .popup-close { width: 46px; height: 46px; font-size: 20px; top: 16px; right: 16px; }
             .viewer-img { max-width: 80vw; max-height: 82vh; }
             .viewer-close { width: 52px; height: 52px; font-size: 22px; }
@@ -1921,6 +1921,7 @@
             .weather-desc { font-size: 15px; }
             .weather-location { font-size: 14px; }
             .weather-wind { font-size: 14px; }
+            .weather-minmax { font-size: 14px; }
             .calendar-date-block { width: 62px; height: 62px; border-radius: 14px; }
             .calendar-day-num { font-size: 28px; }
             .calendar-day-label { font-size: 11px; }
@@ -1985,7 +1986,7 @@
                 var handler = function() {
                     try {
                         var saved = localStorage.getItem('plate_theme_mode');
-                        if (saved) return; // 用户手动设置过，不跟随系统
+                        if (saved) return;
                         var h = document.documentElement;
                         if (mq.matches) h.classList.add('dark-mode');
                         else h.classList.remove('dark-mode');
@@ -1999,7 +2000,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v5';
+var VERSION = 'su-fa36165-v6';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -2180,6 +2181,11 @@ self.addEventListener('fetch', function (e) {
                 </div>
                 <div class="weather-info">
                     <div class="weather-temp" id="weatherTemp">--°C</div>
+                    <div class="weather-minmax" id="weatherMinMax">
+                        <span class="max-temp" id="weatherMaxTemp">--°</span>
+                        <span>/</span>
+                        <span class="min-temp" id="weatherMinTemp">--°</span>
+                    </div>
                     <div class="weather-desc" id="weatherDesc">定位中</div>
                     <div class="weather-location">
                         <i class="fa-solid fa-location-dot"></i>
@@ -2253,12 +2259,11 @@ self.addEventListener('fetch', function (e) {
 
         <div class="main-card-container">
             <div class="main-card" id="mainCard">
-                <!-- 文字在左，图片在右，左右排列 -->
                 <div class="profile-row">
                     <div class="profile-left">
                         <div class="subtitle">
-                            <span class="line">你好，我叫许红豆</span>
-                            <span class="line">风乍起，吹皱一江春水</span>
+                            <span class="line-1">你好，我叫许红豆</span>
+                            <span class="line-2">风乍起，吹皱一江春水</span>
                         </div>
                         <div class="name">刘茜美子・去有风的地方遇见你</div>
                     </div>
@@ -2330,9 +2335,9 @@ self.addEventListener('fetch', function (e) {
     </div>
 
     <!-- 许红豆漂浮文字 -->
-    <div class="floating-word" id="wordXu" style="left:8%; top:18%;"><span class="char">许</span></div>
-    <div class="floating-word" id="wordHong" style="left:25%; top:55%;"><span class="char">红</span></div>
-    <div class="floating-word" id="wordDou" style="left:70%; top:35%;"><span class="char">豆</span></div>
+    <div class="floating-word" id="wordXu"><span class="char">许</span></div>
+    <div class="floating-word" id="wordHong"><span class="char">红</span></div>
+    <div class="floating-word" id="wordDou"><span class="char">豆</span></div>
 
     <!-- lunar-javascript 农历库 -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
@@ -2342,20 +2347,31 @@ self.addEventListener('fetch', function (e) {
             'use strict';
 
             // ================================================================
-            //  ⚡ 性能参数
+            //  ⚡ 性能参数（优化后）
             // ================================================================
-            const TARGET_FPS = 30;
+            const TARGET_FPS = 20;                    // 30 → 20
             const FRAME_INTERVAL = 1000 / TARGET_FPS;
-            const STAR_COUNT = 380;
-            const METEOR_SPAWN_INTERVAL_MIN = 10;
-            const METEOR_SPAWN_INTERVAL_MAX = 30;
-            const MAX_METEORS = 10;
-            const SAKURA_INTERVAL_MS = 320;
-            const SAKURA_MAX = 10;
+            const STAR_COUNT = 180;                   // 380 → 180
+            const METEOR_SPAWN_INTERVAL_MIN = 25;     // 10 → 25
+            const METEOR_SPAWN_INTERVAL_MAX = 60;     // 30 → 60
+            const MAX_METEORS = 5;                    // 10 → 5
+            const SAKURA_INTERVAL_MS = 800;           // 320 → 800
+            const SAKURA_MAX = 6;                     // 10 → 6
             const STACK_PRELOAD_COUNT = 6;
 
             const isAndroid = /Android/i.test(navigator.userAgent);
             const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edge|Edg/i.test(navigator.userAgent);
+
+            // 低端机检测（提前执行，影响后续动画启动）
+            let isLowPerf = false;
+            (function () {
+                try {
+                    isLowPerf = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+                                (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+                                (isAndroid && /SM-|GT-|SCH-|SGH-|SPH-|Galaxy/i.test(navigator.userAgent));
+                    if (isLowPerf) document.documentElement.classList.add('low-perf');
+                } catch (e) {}
+            })();
 
             // ================================================================
             //  🌌 星空 + 流星雨系统
@@ -2591,6 +2607,10 @@ self.addEventListener('fetch', function (e) {
             let lastFrameTs = 0;
 
             function animate(now) {
+                if (document.hidden) {
+                    animFrameId = null;
+                    return;
+                }
                 animFrameId = requestAnimationFrame(animate);
                 if (now === undefined) now = performance.now();
                 if (lastFrameTs === 0) { lastFrameTs = now; return; }
@@ -2605,7 +2625,7 @@ self.addEventListener('fetch', function (e) {
 
                 for (let i = 0; i < stars.length; i++) stars[i].draw(time, dark);
 
-                if (meteorEnabled) {
+                if (meteorEnabled && !isLowPerf) {
                     meteorSpawnCounter += step;
                     const interval = METEOR_SPAWN_INTERVAL_MIN +
                         Math.random() * (METEOR_SPAWN_INTERVAL_MAX - METEOR_SPAWN_INTERVAL_MIN);
@@ -2623,7 +2643,10 @@ self.addEventListener('fetch', function (e) {
                 }
                 ctx.globalAlpha = 1;
             }
-            animFrameId = requestAnimationFrame(animate);
+            // 低端机不启动星空
+            if (!isLowPerf) {
+                animFrameId = requestAnimationFrame(animate);
+            }
 
             let resizeTimer = null;
             window.addEventListener('resize', function () {
@@ -2679,6 +2702,7 @@ self.addEventListener('fetch', function (e) {
                 const saved = localStorage.getItem(SAKURA_STORAGE_KEY);
                 if (saved !== null) sakuraEnabled = saved === 'true';
             } catch (e) {}
+            if (isLowPerf) sakuraEnabled = false;
 
             function updateSakuraToggleUI() {
                 if (sakuraEnabled) {
@@ -2780,10 +2804,10 @@ self.addEventListener('fetch', function (e) {
                 } catch (e) {}
             }
 
-            let saveTimer = setInterval(saveCarouselState, 5000);
+            let saveTimer = setInterval(saveCarouselState, 15000);
 
             // ================================================================
-            //  许红豆漂浮文字
+            //  许红豆漂浮文字（改用 transform 定位）
             // ================================================================
             const wordXu = document.getElementById('wordXu');
             const wordHong = document.getElementById('wordHong');
@@ -2814,6 +2838,7 @@ self.addEventListener('fetch', function (e) {
             updateCardRectForWords();
             measureWordSizes();
 
+            // 用 transform 定位，避免 left/top 触发布局
             function setWordPosition(word, left, top, idx) {
                 if (!cardRectForWords) updateCardRectForWords();
                 const margin = 10;
@@ -2824,8 +2849,7 @@ self.addEventListener('fetch', function (e) {
                     maxTop = cardRectForWords.bottom - margin - sz.h;
                 left = Math.max(minLeft, Math.min(maxLeft, left));
                 top = Math.max(minTop, Math.min(maxTop, top));
-                word.style.left = left + 'px';
-                word.style.top = top + 'px';
+                word.style.transform = 'translate3d(' + left + 'px,' + top + 'px,0)';
             }
 
             function updateWordPosition(word, percentX, percentY, idx) {
@@ -2863,8 +2887,10 @@ self.addEventListener('fetch', function (e) {
                     });
                 });
             }
-            randomizeColors();
-            colorTimer = setInterval(randomizeColors, 5000);
+            if (!isLowPerf) {
+                randomizeColors();
+                colorTimer = setInterval(randomizeColors, 15000);
+            }
 
             function initPositions() {
                 measureWordSizes();
@@ -2873,12 +2899,13 @@ self.addEventListener('fetch', function (e) {
             initPositions();
 
             function startFloating() {
+                if (isLowPerf) return;
                 if (isFollowing) return;
                 if (floatingAnimId) cancelAnimationFrame(floatingAnimId);
 
                 function animateWords() {
+                    if (document.hidden) { floatingAnimId = null; return; }
                     if (isFollowing) { floatingAnimId = requestAnimationFrame(animateWords); return; }
-                    if (document.hidden) { floatingAnimId = requestAnimationFrame(animateWords); return; }
                     for (let idx = 0; idx < allWords.length; idx++) {
                         const word = allWords[idx];
                         if (word.classList.contains('following')) continue;
@@ -2913,11 +2940,10 @@ self.addEventListener('fetch', function (e) {
                 followTarget = null;
                 allWords.forEach((w, idx) => {
                     w.classList.remove('following');
-                    w.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    w.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     pos[idx].x = 5 + Math.random() * 85;
                     pos[idx].y = 5 + Math.random() * 85;
                     updateWordPosition(w, pos[idx].x, pos[idx].y, idx);
-                    w.style.transform = '';
                 });
                 setTimeout(() => { allWords.forEach(w => w.style.transition = '');
                     startFloating(); }, 80);
@@ -2943,7 +2969,7 @@ self.addEventListener('fetch', function (e) {
                     let left = cx - wordWidth / 2 + offset,
                         top = cy - rect.height / 2;
                     setWordPosition(w, left, top, idx);
-                    const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
+                    const p = getPercentPosition(left, top);
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
                 });
@@ -2978,7 +3004,7 @@ self.addEventListener('fetch', function (e) {
                     let left = cx - centerOffset + offset,
                         top = cy - 25;
                     setWordPosition(w, left, top, idx);
-                    const p = getPercentPosition(parseFloat(w.style.left), parseFloat(w.style.top));
+                    const p = getPercentPosition(left, top);
                     pos[idx].x = p.x;
                     pos[idx].y = p.y;
                 });
@@ -3066,7 +3092,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/16.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/17.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/18.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/19.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/19.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/20.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/21.jpg",
@@ -3353,7 +3378,7 @@ self.addEventListener('fetch', function (e) {
             buildStack();
             photoInner.addEventListener('click', function(e) { e.stopPropagation();
                 openViewer(slideImages, slideIndex, '图片原图'); });
-            if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 3800);
+            if (slideImages.length > 1) slideTimer = setInterval(nextSlide, 10000);  // 3.8s → 10s
             try {
                 const si = localStorage.getItem(STORAGE_PREFIX + 'slide_index');
                 if (si !== null) { const idx = parseInt(si, 10); if (!isNaN(idx) && idx >= 0 && idx < slideImages.length)
@@ -3512,6 +3537,7 @@ self.addEventListener('fetch', function (e) {
             // ===== 樱花 =====
             function createSakura() {
                 if (document.hidden) return;
+                if (isLowPerf) return;
                 if (sakuraCount >= SAKURA_MAX) return;
                 const el = document.createElement("div");
                 el.className = "sakura";
@@ -3534,7 +3560,7 @@ self.addEventListener('fetch', function (e) {
             function ensureSakura() {
                 if (sakuraInterval) clearInterval(sakuraInterval);
                 sakuraInterval = null;
-                if (document.hidden || !sakuraEnabled) return;
+                if (document.hidden || !sakuraEnabled || isLowPerf) return;
                 for (let i = 0; i < 3; i++) setTimeout(createSakura, i * 80);
                 sakuraInterval = setInterval(createSakura, SAKURA_INTERVAL_MS);
             }
@@ -3550,13 +3576,13 @@ self.addEventListener('fetch', function (e) {
                 islandText.textContent = textPool[tidx];
                 islandText.style.animation = 'none';
                 void islandText.offsetWidth;
-                islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite';
+                islandText.style.animation = 'textShine 4s ease-in-out infinite, scrollUp 4s ease-in-out infinite';
             }
             islandText.textContent = textPool[0];
-            islandText.style.animation = 'textShine 2.5s ease-in-out infinite, scrollUp 2s ease-in-out infinite';
-            islandInterval = setInterval(rollIsland, 2000);
+            islandText.style.animation = 'textShine 4s ease-in-out infinite, scrollUp 4s ease-in-out infinite';
+            islandInterval = setInterval(rollIsland, 5000);  // 2s → 5s
 
-            // ===== 呼吸灯 =====
+            // ===== 呼吸灯 6s（低端机不启动） =====
             function randomColor() {
                 const c = ['#00D4FF', '#7B61FF', '#FF6B9E', '#FFD966'];
                 return c[Math.floor(Math.random() * c.length)];
@@ -3566,20 +3592,21 @@ self.addEventListener('fetch', function (e) {
                 if (document.hidden) return;
                 document.documentElement.style.setProperty('--glow-color', randomColor());
             }
-            glowInterval = setInterval(updateGlow, 1800);
-            setTimeout(updateGlow, 50);
+            if (!isLowPerf) {
+                glowInterval = setInterval(updateGlow, 6000);  // 1.8s → 6s
+                setTimeout(updateGlow, 50);
+            }
 
-            // ===== 头像轮播 =====
+            // ===== 头像轮播 12s =====
             function nextAvatar() {
                 if (avatarImages.length < 2 || document.hidden) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
                 avatarImg.src = avatarImages[avatarIndex];
                 saveCarouselState();
             }
-            if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 4500);
+            if (avatarImages.length > 1) avatarTimer = setInterval(nextAvatar, 12000);  // 4.5s → 12s
 
             // ===== 视频事件 =====
-            // 中间播放按钮已隐藏，点击视频区域切换播放/暂停
             videoBox.addEventListener("click", function(e) {
                 if (e.target.closest(".video-controls") || e.target.closest(".btn-expand")) return;
                 e.stopPropagation();
@@ -3935,7 +3962,7 @@ self.addEventListener('fetch', function (e) {
                 viewerAutoPlayTimer = setInterval(() => { if (isViewerInteracting || document.hidden) return;
                     viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
                     viewerImg.src = viewerGallery[viewerGalleryIndex];
-                    updateViewerCounter(); }, 3500);
+                    updateViewerCounter(); }, 7000);
             }
 
             function stopViewerAutoPlay() { if (viewerAutoPlayTimer) { clearInterval(viewerAutoPlayTimer);
@@ -4100,7 +4127,7 @@ self.addEventListener('fetch', function (e) {
                 setTimeout(() => { if (el.parentNode) el.remove(); }, 4800);
             });
 
-            // ===== 状态栏时间 =====
+            // ===== 状态栏时间 30s =====
             const statusClock = document.getElementById('statusClock');
             function updateTime() {
                 const now = new Date();
@@ -4109,7 +4136,7 @@ self.addEventListener('fetch', function (e) {
                 if (statusClock) statusClock.textContent = h + ":" + m;
             }
             updateTime();
-            setInterval(updateTime, 1000);
+            setInterval(updateTime, 30000);  // 1s → 30s
 
             // ===== 启动 =====
             setTimeout(() => {
@@ -4118,29 +4145,41 @@ self.addEventListener('fetch', function (e) {
                 updateMuteIcon();
             }, 300);
 
-            // ===== 低频刷新卡片 rect =====
+            // ===== 低频刷新卡片 rect 5s =====
             setInterval(function () {
                 if (document.hidden) return;
                 updateCardRectForMeteors();
                 updateCardRectForWords();
                 if (!isFollowing && wordsVisible) measureWordSizes();
-            }, 1000);
+            }, 5000);  // 1s → 5s
 
-            // ===== 页面可见性 =====
+            // ===== 页面可见性（彻底停止所有动画）=====
             document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
+                    // 停止星空
                     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+                    // 停止樱花
                     if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
+                    var box = document.getElementById('sakuraBox');
+                    if (box) box.innerHTML = '';
+                    sakuraCount = 0;
+                    meteors = [];
+                    // 停止漂浮文字
+                    if (floatingAnimId) { cancelAnimationFrame(floatingAnimId); floatingAnimId = null; }
+                    // 暂停视频
                     if (!isPopupMode && !mainVideo.paused) {
                         mainVideo.pause();
                     }
                 } else {
-                    if (!animFrameId) { lastFrameTs = 0; animFrameId = requestAnimationFrame(animate); }
-                    if (sakuraEnabled) {
-                        ensureSakura();
-                    } else {
-                        if (sakuraInterval) { clearInterval(sakuraInterval); sakuraInterval = null; }
+                    // 恢复星空
+                    if (!isLowPerf && !animFrameId) {
+                        lastFrameTs = 0;
+                        animFrameId = requestAnimationFrame(animate);
                     }
+                    // 恢复樱花
+                    if (sakuraEnabled && !isLowPerf) ensureSakura();
+                    // 恢复漂浮文字
+                    if (!isLowPerf && !isFollowing && !floatingAnimId) startFloating();
                     updateCardRectForMeteors();
                     updateCardRectForWords();
                     measureWordSizes();
@@ -4190,16 +4229,6 @@ self.addEventListener('fetch', function (e) {
                 else if (k === 't' || k === 'T') { toggleTheme(); }
             });
 
-            // ===== 低端机检测 =====
-            (function () {
-                try {
-                    var low = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
-                              (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
-                              (isAndroid && /SM-|GT-|SCH-|SGH-|SPH-|Galaxy/i.test(navigator.userAgent));
-                    if (low) document.documentElement.classList.add('low-perf');
-                } catch (e) {}
-            })();
-
             // ===== 启动遮罩 =====
             (function () {
                 try {
@@ -4232,7 +4261,7 @@ self.addEventListener('fetch', function (e) {
             } catch (e) {}
 
             // ================================================================
-            //  🌤️ 天气与日历组件（完整版）
+            //  🌤️ 天气与日历组件
             // ================================================================
             (function initWeatherCalendar() {
                 const WEATHER_ICON_MAP = {
@@ -4441,7 +4470,7 @@ self.addEventListener('fetch', function (e) {
 
                 async function fetchWeather(lat, lon, cityName) {
                     try {
-                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`;
                         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
@@ -4460,6 +4489,16 @@ self.addEventListener('fetch', function (e) {
                         document.getElementById('weatherDesc').textContent = desc;
                         document.getElementById('weatherLocation').textContent = cityName || '当前位置';
 
+                        let maxTemp = '--', minTemp = '--';
+                        if (data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_max.length > 0) {
+                            maxTemp = Math.round(data.daily.temperature_2m_max[0]);
+                        }
+                        if (data.daily && data.daily.temperature_2m_min && data.daily.temperature_2m_min.length > 0) {
+                            minTemp = Math.round(data.daily.temperature_2m_min[0]);
+                        }
+                        document.getElementById('weatherMaxTemp').textContent = maxTemp + '°';
+                        document.getElementById('weatherMinTemp').textContent = minTemp + '°';
+
                         var windDir = degToWindDirection(winddirection);
                         var windText = '';
                         if (windspeed !== undefined && windspeed !== null) {
@@ -4473,6 +4512,8 @@ self.addEventListener('fetch', function (e) {
                         console.warn('天气获取失败:', e);
                         document.getElementById('weatherDesc').textContent = '获取失败';
                         document.getElementById('weatherWindText').textContent = '--';
+                        document.getElementById('weatherMaxTemp').textContent = '--°';
+                        document.getElementById('weatherMinTemp').textContent = '--°';
                     }
                 }
 
@@ -4921,20 +4962,24 @@ self.addEventListener('fetch', function (e) {
                 locateAndFetchWeather();
                 updateCalendar();
 
+                // 天气刷新间隔 30 分钟（原 15 分钟）
                 setInterval(function() {
+                    if (document.hidden) return;
                     if (!isManualCity) {
                         locateAndFetchWeather();
                     } else {
                         fetchWeather(currentLat, currentLon, currentCity);
                     }
-                }, 900000);
+                }, 1800000);
 
+                // 日历刷新间隔 5 分钟（原 1 分钟）
                 setInterval(function() {
+                    if (document.hidden) return;
                     if (!isManualDate) {
                         selectedDate = new Date();
                         updateCalendar();
                     }
-                }, 60000);
+                }, 300000);
 
             })();
 
