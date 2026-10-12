@@ -75,8 +75,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding-bottom: env(safe-area-inset-bottom, 0px);
+            justify-content: center;
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2px);
         }
         :root {
             --text-main: #1C1C1E;
@@ -258,7 +258,7 @@
             justify-content: flex-start;
             width: 100%;
             max-width: 480px;
-            padding: calc(var(--safe-top) + 6px) 12px calc(var(--safe-bottom) + 8px);
+            padding: calc(var(--safe-top) + 6px) 12px calc(var(--safe-bottom) + 2px);
             position: relative;
             z-index: 2;
             animation: pageSpringIn .8s var(--spring) both;
@@ -1745,7 +1745,7 @@
         /* ===== 小屏适配 ===== */
         @media (max-width: 380px) {
             :root { --status-btn-size: 28px; --status-btn-gap: 5px; }
-            .app-container { padding: calc(var(--safe-top) + 5px) 10px calc(var(--safe-bottom) + 6px); gap: 5px; }
+            .app-container { padding: calc(var(--safe-top) + 5px) 10px calc(var(--safe-bottom) + 2px); gap: 5px; }
             .main-card { padding: 8px 10px 10px; gap: 7px; }
             :root { --avatar-size: 54px; --plate-size: 66px; }
             .name { font-size: 13px; }
