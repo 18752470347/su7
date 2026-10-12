@@ -104,16 +104,16 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
-            --card-radius: 24px;
-            --icon-radius: 16px;
-            --avatar-size: 72px;
-            --plate-size: 86px;
+            --card-radius: 20px;
+            --icon-radius: 14px;
+            --avatar-size: 62px;
+            --plate-size: 74px;
             --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.06);
             --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.10);
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
             --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            --status-btn-size: 34px;
-            --status-btn-gap: 8px;
+            --status-btn-size: 30px;
+            --status-btn-gap: 6px;
             --vh: 1vh;
             --weather-temp-color: #0A0A0C;
             --weather-desc-color: #FF6B00;
@@ -258,12 +258,12 @@
             justify-content: flex-start;
             width: 100%;
             max-width: 480px;
-            padding: calc(var(--safe-top) + 12px) 14px calc(var(--safe-bottom) + 24px);
+            padding: calc(var(--safe-top) + 6px) 12px calc(var(--safe-bottom) + 8px);
             position: relative;
             z-index: 2;
             animation: pageSpringIn .8s var(--spring) both;
             margin: 0 auto;
-            gap: 8px;
+            gap: 6px;
             flex: 0 0 auto;
             box-sizing: border-box;
         }
@@ -279,10 +279,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--status-color);
-            min-height: 34px;
+            min-height: 30px;
             padding: 0 2px;
         }
         .ios-status-left {
@@ -290,7 +290,7 @@
             text-align: left;
             font-weight: 600;
             letter-spacing: 0.2px;
-            font-size: 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: var(--status-btn-gap);
@@ -331,11 +331,11 @@
         .status-word-toggle i {
             position: relative;
             z-index: 2;
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1;
             transition: var(--transition-smooth);
         }
-        .status-theme-toggle i { font-size: 16px; }
+        .status-theme-toggle i { font-size: 15px; }
         .status-btn:active,
         .status-theme-toggle:active,
         .status-sakura-toggle:active,
@@ -375,13 +375,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 32px;
-            padding: 0 16px;
-            min-width: 55px;
+            height: 28px;
+            padding: 0 14px;
+            min-width: 50px;
             background: var(--island-bg);
-            border-radius: 22px;
+            border-radius: 20px;
             color: var(--island-text);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -396,7 +396,7 @@
         .island-text-scroll {
             display: inline-block;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 10px;
             background: linear-gradient(90deg, #FF6B9E, #FFD966, #6AA9FF, #FF6B9E);
             background-size: 200% 100%;
             -webkit-background-clip: text;
@@ -417,7 +417,7 @@
             align-items: center;
             gap: var(--status-btn-gap);
         }
-        .signal-icon { width: 18px; height: 12px; fill: var(--status-color); flex-shrink: 0; opacity: 0.8; margin-left: 2px; }
+        .signal-icon { width: 16px; height: 10px; fill: var(--status-color); flex-shrink: 0; opacity: 0.8; margin-left: 2px; }
 
         /* ===== 天气 + 头像 + 日历 三栏卡片 ===== */
         .top-card {
@@ -429,15 +429,15 @@
             border: 1px solid var(--glass-border);
             border-radius: var(--card-radius);
             box-shadow: var(--glass-shadow);
-            padding: 12px 10px;
+            padding: 8px 8px;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
             justify-items: center;
-            gap: 6px;
+            gap: 4px;
             animation: cardSpringIn .7s var(--ease) 0.08s both;
             transition: var(--transition-smooth);
-            margin-bottom: 2px;
+            margin-bottom: 0;
             position: relative;
         }
 
@@ -446,18 +446,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             min-width: 0;
             width: 100%;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             border-radius: 12px;
-            padding: 4px;
+            padding: 2px;
             transition: var(--transition-smooth);
         }
         .weather-widget:active { transform: scale(0.97); }
         .weather-icon {
-            font-size: 30px;
+            font-size: 24px;
             line-height: 1;
             color: #FF9500;
             flex-shrink: 0;
@@ -475,19 +475,19 @@
             gap: 1px;
         }
         .weather-temp {
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 900;
             color: var(--weather-temp-color);
             letter-spacing: -0.5px;
             line-height: 1.2;
         }
         .weather-minmax {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--weather-minmax-color);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             white-space: nowrap;
             line-height: 1.2;
         }
@@ -496,7 +496,7 @@
         .weather-minmax .min-temp { color: #007AFF; }
         html.dark-mode .weather-minmax .min-temp { color: #4DA3FF; }
         .weather-desc {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             color: var(--weather-desc-color);
             white-space: nowrap;
@@ -504,16 +504,16 @@
             text-overflow: ellipsis;
         }
         .weather-location {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--weather-loc-color);
             display: flex;
             align-items: center;
             gap: 3px;
-            margin-top: 2px;
+            margin-top: 1px;
         }
         .weather-location i {
-            font-size: 11px;
+            font-size: 10px;
             color: #FF3B30;
             filter: drop-shadow(0 0 6px rgba(255, 59, 48, 0.6));
             animation: locationPulse 3s ease-in-out infinite;
@@ -527,7 +527,7 @@
             50% { transform: scale(1.25); opacity: 1; }
         }
         .weather-wind {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--weather-wind-color);
             display: flex;
@@ -539,7 +539,7 @@
             text-overflow: ellipsis;
         }
         .weather-wind i {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--weather-wind-color);
             filter: drop-shadow(0 0 6px rgba(0, 122, 255, 0.5));
             animation: windBlow 4s ease-in-out infinite;
@@ -558,7 +558,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            padding: 0 4px;
+            padding: 0 2px;
         }
         .avatar-center {
             position: relative;
@@ -572,7 +572,7 @@
         .avatar-center::before {
             content: '';
             position: absolute;
-            inset: -14px;
+            inset: -12px;
             border-radius: 50%;
             background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
             opacity: 0.45;
@@ -585,7 +585,7 @@
         .avatar-center::after {
             content: '';
             position: absolute;
-            inset: -8px;
+            inset: -6px;
             border-radius: 50%;
             background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
             opacity: 0.4;
@@ -596,13 +596,13 @@
         }
         @keyframes glowPulse2 { 0% { transform: scale(0.4); opacity: 0.15; filter: blur(28px); } 100% { transform: scale(1.7); opacity: 0.6; filter: blur(48px); } }
         .avatar-center .avatar-ring {
-            position: absolute; inset: -4px; border-radius: 50%;
+            position: absolute; inset: -3px; border-radius: 50%;
             background: conic-gradient(from 0deg, var(--glow-color), #FFD046, #00D4FF, #7B61FF, var(--glow-color));
             animation: ringRotate 5.6s linear infinite; filter: blur(4px); z-index: -1; opacity: 0.85;
         }
         @keyframes ringRotate { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.06); } 100% { transform: rotate(360deg) scale(1); } }
         .avatar-center .avatar-ring-2 {
-            position: absolute; inset: -7px; border-radius: 50%;
+            position: absolute; inset: -6px; border-radius: 50%;
             background: conic-gradient(from 180deg, #7B61FF, #00D4FF, #FF6B9E, #7B61FF);
             animation: ringRotate2 7.2s linear infinite reverse; filter: blur(8px); z-index: -2; opacity: 0.4;
         }
@@ -622,13 +622,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             min-width: 0;
             width: 100%;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             border-radius: 12px;
-            padding: 4px;
+            padding: 2px;
             transition: var(--transition-smooth);
         }
         .calendar-widget:active { transform: scale(0.97); }
@@ -637,9 +637,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #FF2E63, #FF0055);
             color: #fff;
             box-shadow: 0 4px 18px rgba(255, 46, 99, 0.45);
@@ -656,14 +656,14 @@
             box-shadow: 0 4px 18px rgba(255, 145, 0, 0.5);
         }
         .calendar-day-num {
-            font-size: 21px;
+            font-size: 18px;
             font-weight: 900;
             line-height: 1;
             letter-spacing: -0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         }
         .calendar-day-label {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 800;
             opacity: 0.95;
             text-transform: uppercase;
@@ -676,19 +676,19 @@
             min-width: 0;
         }
         .calendar-year-month {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 900;
             color: var(--calendar-year-color);
             white-space: nowrap;
         }
         .calendar-weekday {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--calendar-weekday-color);
             white-space: nowrap;
         }
         .calendar-lunar {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             color: var(--calendar-lunar-color);
             white-space: nowrap;
@@ -696,11 +696,11 @@
             text-overflow: ellipsis;
         }
         .calendar-holiday-tag {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 900;
-            padding: 2px 7px;
-            border-radius: 6px;
-            margin-top: 2px;
+            padding: 1px 6px;
+            border-radius: 5px;
+            margin-top: 1px;
             display: inline-block;
             width: fit-content;
             white-space: nowrap;
@@ -1133,7 +1133,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 8px 12px 10px;
+            padding: 6px 10px 8px;
             background: transparent;
             z-index: 3;
             transition: opacity 0.4s ease, transform 0.4s ease;
@@ -1144,18 +1144,18 @@
 
         .progress-track { display: none !important; }
 
-        .controls-row { display: flex; align-items: center; gap: 12px; }
+        .controls-row { display: flex; align-items: center; gap: 10px; }
         .controls-row button {
             color: rgba(255, 255, 255, 0.95);
-            font-size: 17px;
+            font-size: 16px;
             padding: 2px;
             opacity: 0.95;
             transition: all 0.2s ease;
             border-radius: 0;
             width: auto;
             height: auto;
-            min-width: 28px;
-            min-height: 28px;
+            min-width: 26px;
+            min-height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1170,7 +1170,7 @@
         .controls-time {
             margin-left: auto;
             color: #fff;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -1186,15 +1186,15 @@
         }
         .btn-expand {
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             padding: 2px;
             opacity: 0.95;
             transition: all 0.2s ease;
             border-radius: 0;
             width: auto;
             height: auto;
-            min-width: 28px;
-            min-height: 28px;
+            min-width: 26px;
+            min-height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1219,7 +1219,7 @@
         }
         .main-card {
             width: 100%;
-            padding: 16px 16px 18px;
+            padding: 10px 12px 12px;
             border-radius: var(--card-radius);
             background: var(--glass-bg);
             backdrop-filter: blur(24px) saturate(180%);
@@ -1233,7 +1233,7 @@
             justify-content: center;
             align-items: stretch;
             transition: var(--transition-smooth);
-            gap: 12px;
+            gap: 8px;
         }
         .main-card::before {
             content: '';
@@ -1252,7 +1252,7 @@
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 8px;
             width: 100%;
             flex-shrink: 0;
         }
@@ -1264,20 +1264,20 @@
             align-items: flex-start;
             justify-content: center;
             text-align: left;
-            gap: 8px;
+            gap: 4px;
         }
 
         .plate-photo {
             width: var(--plate-size);
             flex-shrink: 0;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: visible;
             cursor: zoom-in;
             position: relative;
             -webkit-tap-highlight-color: transparent;
         }
         .plate-photo-inner {
-            position: relative; width: 100%; border-radius: 12px;
+            position: relative; width: 100%; border-radius: 10px;
             box-shadow: var(--shadow-medium);
             aspect-ratio: 9 / 16; overflow: hidden;
             border: 1px solid var(--glass-border);
@@ -1286,7 +1286,7 @@
         }
         .stack-img {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; border-radius: 12px;
+            object-fit: cover; border-radius: 10px;
             transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform, opacity; backface-visibility: hidden;
             background: rgba(128, 128, 128, 0.08);
@@ -1298,9 +1298,9 @@
         .stack-img.pile3 { transform: scale(0.75) translateY(24px); opacity: 0.15; z-index: 2; }
         .stack-img.hidden { transform: scale(0.65) translateY(32px); opacity: 0; z-index: 1; pointer-events: none; }
 
-        /* 主卡片文字 —— 每行独立渐变，动画放慢至 8s 以上 */
+        /* 主卡片文字 */
         .name {
-            font-size: 17px;
+            font-size: 14px;
             font-weight: 900;
             text-align: left;
             margin-top: 0;
@@ -1324,15 +1324,15 @@
             100% { background-position: 0% 50%; }
         }
         .subtitle {
-            font-size: 15px;
+            font-size: 12px;
             font-weight: 800;
             text-align: left;
             margin-top: 0;
-            line-height: 1.5;
+            line-height: 1.4;
             letter-spacing: 0.3px;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px;
         }
         .subtitle .line-1 {
             display: block;
@@ -1379,17 +1379,17 @@
             flex: 0 0 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px 8px;
+            gap: 8px 6px;
             padding: 0;
-            min-height: 88px;
+            min-height: 76px;
         }
         .app-button {
             --icon-color: #00D4FF;
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
             background: transparent; cursor: pointer; transition: var(--transition-smooth);
             position: relative; z-index: 10;
-            border-radius: 14px;
-            padding: 4px 2px 6px;
+            border-radius: 12px;
+            padding: 3px 2px 4px;
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
@@ -1400,12 +1400,12 @@
         }
         .app-button:active { transform: scale(0.90); }
         .app-icon-wrap {
-            position: relative; width: 52px; height: 52px;
+            position: relative; width: 46px; height: 46px;
             display: flex; align-items: center; justify-content: center;
             border-radius: var(--icon-radius);
             background: var(--icon-bg);
             box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
-            font-size: 22px; color: var(--icon-color);
+            font-size: 20px; color: var(--icon-color);
             backdrop-filter: blur(14px) saturate(170%);
             -webkit-backdrop-filter: blur(14px) saturate(170%);
             border: 1px solid var(--glass-border);
@@ -1440,14 +1440,14 @@
         .app-button:active .app-icon-wrap::after { opacity: 0.6; }
         .app-button.loading .app-icon-wrap { opacity: 0.6; transform: scale(0.95); }
         .app-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 900;
             color: var(--app-label-color);
             text-align: center;
             line-height: 1.2;
             letter-spacing: 0.2px;
             transition: var(--transition-smooth);
-            margin-top: 2px;
+            margin-top: 1px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
         }
         html.dark-mode .app-label {
@@ -1467,8 +1467,8 @@
             box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
         .vpn-svg {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             color: var(--icon-color);
             position: relative;
             z-index: 2;
@@ -1495,7 +1495,7 @@
 
         /* ===== Toast ===== */
         .toast {
-            position: fixed; z-index: 10001; left: 50%; bottom: calc(30px + var(--safe-bottom));
+            position: fixed; z-index: 10001; left: 50%; bottom: calc(20px + var(--safe-bottom));
             transform: translate(-50%, 20px) scale(0.92);
             padding: 8px 20px; border-radius: 12px;
             color: #fff; background: var(--toast-bg);
@@ -1672,9 +1672,9 @@
             .center-play-btn { height: 54px; }
         }
 
-        /* ===== 漂浮文字（改用 transform 定位） ===== */
+        /* ===== 漂浮文字 ===== */
         .floating-word {
-            position: fixed; font-size: 22px; font-weight: 900;
+            position: fixed; font-size: 20px; font-weight: 900;
             font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
             cursor: grab; z-index: 1100; pointer-events: auto;
             transition: none; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
@@ -1744,52 +1744,52 @@
 
         /* ===== 小屏适配 ===== */
         @media (max-width: 380px) {
-            :root { --status-btn-size: 30px; --status-btn-gap: 6px; }
-            .app-container { padding: calc(var(--safe-top) + 8px) 12px calc(var(--safe-bottom) + 20px); gap: 6px; }
-            .main-card { padding: 12px 12px 14px; gap: 10px; }
-            :root { --avatar-size: 62px; --plate-size: 76px; }
-            .name { font-size: 15px; }
-            .subtitle { font-size: 13px; }
-            .app-icon-wrap { width: 46px; height: 46px; font-size: 19px; }
-            .app-label { font-size: 9px; }
-            .apps-page { gap: 8px 6px; min-height: 80px; }
-            .dynamic-island { height: 28px; font-size: 10px; padding: 0 12px; min-width: 45px; }
-            .video-controls { padding: 6px 10px 8px; }
-            .popup-controls { padding: 6px 10px 8px; }
-            .controls-row button { font-size: 15px; min-width: 24px; min-height: 24px; }
-            .popup-controls button { font-size: 15px; min-width: 24px; min-height: 24px; }
-            .btn-expand { font-size: 13px; min-width: 24px; min-height: 24px; }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 13px; }
-            .ios-status-left { font-size: 12px; }
-            .top-card { padding: 8px 6px; gap: 4px; }
-            .weather-icon { font-size: 24px; }
-            .weather-temp { font-size: 17px; }
-            .weather-desc { font-size: 11px; }
-            .weather-location { font-size: 10px; }
-            .weather-wind { font-size: 10px; }
-            .weather-minmax { font-size: 10px; }
-            .calendar-date-block { width: 40px; height: 40px; }
-            .calendar-day-num { font-size: 18px; }
-            .calendar-year-month { font-size: 12px; }
-            .calendar-weekday { font-size: 10px; }
-            .calendar-lunar { font-size: 9px; }
-            .profile-row { gap: 8px; }
-        }
-        @media (max-width: 360px) {
-            :root { --plate-size: 68px; --avatar-size: 56px; }
-            .main-card { padding: 10px 10px 12px; gap: 8px; }
-            .app-icon-wrap { width: 42px; height: 42px; font-size: 17px; }
+            :root { --status-btn-size: 28px; --status-btn-gap: 5px; }
+            .app-container { padding: calc(var(--safe-top) + 5px) 10px calc(var(--safe-bottom) + 6px); gap: 5px; }
+            .main-card { padding: 8px 10px 10px; gap: 7px; }
+            :root { --avatar-size: 54px; --plate-size: 66px; }
+            .name { font-size: 13px; }
+            .subtitle { font-size: 11px; }
+            .app-icon-wrap { width: 42px; height: 42px; font-size: 18px; }
             .app-label { font-size: 8px; }
-            .apps-page { gap: 6px 5px; min-height: 72px; }
-            .name { font-size: 14px; }
-            .subtitle { font-size: 12px; }
-            .weather-icon { font-size: 22px; }
+            .apps-page { gap: 7px 5px; min-height: 70px; }
+            .dynamic-island { height: 26px; font-size: 9px; padding: 0 10px; min-width: 42px; }
+            .video-controls { padding: 5px 8px 6px; }
+            .popup-controls { padding: 5px 8px 6px; }
+            .controls-row button { font-size: 14px; min-width: 22px; min-height: 22px; }
+            .popup-controls button { font-size: 14px; min-width: 22px; min-height: 22px; }
+            .btn-expand { font-size: 12px; min-width: 22px; min-height: 22px; }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 12px; }
+            .ios-status-left { font-size: 11px; }
+            .top-card { padding: 6px 5px; gap: 3px; }
+            .weather-icon { font-size: 20px; }
             .weather-temp { font-size: 15px; }
             .weather-desc { font-size: 10px; }
+            .weather-location { font-size: 9px; }
+            .weather-wind { font-size: 9px; }
+            .weather-minmax { font-size: 9px; }
             .calendar-date-block { width: 36px; height: 36px; }
             .calendar-day-num { font-size: 16px; }
             .calendar-year-month { font-size: 11px; }
             .calendar-weekday { font-size: 9px; }
+            .calendar-lunar { font-size: 8px; }
+            .profile-row { gap: 6px; }
+        }
+        @media (max-width: 360px) {
+            :root { --plate-size: 60px; --avatar-size: 50px; }
+            .main-card { padding: 7px 8px 9px; gap: 6px; }
+            .app-icon-wrap { width: 38px; height: 38px; font-size: 16px; }
+            .app-label { font-size: 7px; }
+            .apps-page { gap: 5px 4px; min-height: 64px; }
+            .name { font-size: 12px; }
+            .subtitle { font-size: 10px; }
+            .weather-icon { font-size: 18px; }
+            .weather-temp { font-size: 14px; }
+            .weather-desc { font-size: 9px; }
+            .calendar-date-block { width: 32px; height: 32px; }
+            .calendar-day-num { font-size: 14px; }
+            .calendar-year-month { font-size: 10px; }
+            .calendar-weekday { font-size: 8px; }
         }
 
         /* ===== 减少动画 ===== */
@@ -1804,56 +1804,56 @@
 
         /* ===== 电脑端适配 ===== */
         @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-            .app-container { max-width: 640px; padding: 32px 28px 40px; gap: 12px; }
-            .video-player-container { border-radius: 22px; max-height: 320px; }
+            .app-container { max-width: 640px; padding: 20px 24px 24px; gap: 10px; }
+            .video-player-container { border-radius: 20px; max-height: 300px; }
             .video-box { aspect-ratio: 16 / 9; }
-            .main-card { padding: 32px 40px 36px; border-radius: 28px; gap: 16px; }
-            .profile-row { gap: 24px; }
-            :root { --avatar-size: 96px; --plate-size: 120px; }
-            .name { font-size: 24px; }
-            .subtitle { font-size: 19px; line-height: 1.6; }
-            .apps-scroll-wrapper { margin-top: 8px; }
-            .apps-page { gap: 22px 16px; min-height: 130px; }
-            .app-button { padding: 8px 4px 10px; border-radius: 18px; gap: 6px; }
-            .app-icon-wrap { width: 68px; height: 68px; font-size: 28px; border-radius: 22px; }
-            .vpn-svg { width: 32px; height: 32px; }
-            .app-label { font-size: 13px; margin-top: 4px; }
-            .dynamic-island { height: 42px; padding: 0 28px; font-size: 15px; min-width: 86px; }
-            .island-text-scroll { font-size: 15px; }
+            .main-card { padding: 24px 32px 28px; border-radius: 24px; gap: 14px; }
+            .profile-row { gap: 20px; }
+            :root { --avatar-size: 84px; --plate-size: 104px; }
+            .name { font-size: 20px; }
+            .subtitle { font-size: 16px; line-height: 1.5; }
+            .apps-scroll-wrapper { margin-top: 6px; }
+            .apps-page { gap: 18px 14px; min-height: 110px; }
+            .app-button { padding: 6px 4px 8px; border-radius: 16px; gap: 5px; }
+            .app-icon-wrap { width: 60px; height: 60px; font-size: 24px; border-radius: 20px; }
+            .vpn-svg { width: 28px; height: 28px; }
+            .app-label { font-size: 12px; margin-top: 3px; }
+            .dynamic-island { height: 36px; padding: 0 22px; font-size: 13px; min-width: 72px; }
+            .island-text-scroll { font-size: 13px; }
             .status-btn, .status-theme-toggle, .status-sakura-toggle, .status-meteor-toggle, .status-word-toggle {
-                width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+                width: 38px; height: 38px; min-width: 38px; min-height: 38px;
             }
-            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 20px; }
-            .status-theme-toggle i { font-size: 22px; }
-            .ios-status-left { font-size: 16px; }
-            .controls-row button { font-size: 20px; min-width: 34px; min-height: 34px; }
-            .popup-controls button { font-size: 20px; min-width: 34px; min-height: 34px; }
-            .btn-expand { font-size: 18px; min-width: 34px; min-height: 34px; }
-            .controls-time { font-size: 15px; gap: 10px; }
-            .popup-time { font-size: 15px; gap: 10px; }
-            .video-controls { padding: 14px 20px 16px; }
-            .popup-controls { padding: 14px 20px 16px; }
-            .floating-word { font-size: 34px; }
-            .popup-inner { max-width: 1000px; border-radius: 20px; }
-            .popup-inner video { max-height: 78vh; }
-            .popup-close { width: 46px; height: 46px; font-size: 20px; top: 16px; right: 16px; }
+            .status-btn i, .status-theme-toggle i, .status-sakura-toggle i, .status-meteor-toggle i, .status-word-toggle i { font-size: 17px; }
+            .status-theme-toggle i { font-size: 19px; }
+            .ios-status-left { font-size: 14px; }
+            .controls-row button { font-size: 18px; min-width: 30px; min-height: 30px; }
+            .popup-controls button { font-size: 18px; min-width: 30px; min-height: 30px; }
+            .btn-expand { font-size: 16px; min-width: 30px; min-height: 30px; }
+            .controls-time { font-size: 13px; gap: 8px; }
+            .popup-time { font-size: 13px; gap: 8px; }
+            .video-controls { padding: 12px 16px 14px; }
+            .popup-controls { padding: 12px 16px 14px; }
+            .floating-word { font-size: 30px; }
+            .popup-inner { max-width: 900px; border-radius: 18px; }
+            .popup-inner video { max-height: 76vh; }
+            .popup-close { width: 42px; height: 42px; font-size: 18px; top: 14px; right: 14px; }
             .viewer-img { max-width: 80vw; max-height: 82vh; }
-            .viewer-close { width: 52px; height: 52px; font-size: 22px; }
-            .toast { font-size: 15px; padding: 12px 28px; border-radius: 16px; bottom: 50px; }
+            .viewer-close { width: 48px; height: 48px; font-size: 20px; }
+            .toast { font-size: 14px; padding: 10px 24px; border-radius: 14px; bottom: 40px; }
 
-            .top-card { padding: 18px 20px; gap: 16px; }
-            .weather-icon { font-size: 40px; }
-            .weather-temp { font-size: 28px; }
-            .weather-desc { font-size: 15px; }
-            .weather-location { font-size: 14px; }
-            .weather-wind { font-size: 14px; }
-            .weather-minmax { font-size: 14px; }
-            .calendar-date-block { width: 62px; height: 62px; border-radius: 14px; }
-            .calendar-day-num { font-size: 28px; }
-            .calendar-day-label { font-size: 11px; }
-            .calendar-year-month { font-size: 18px; }
-            .calendar-weekday { font-size: 15px; }
-            .calendar-lunar { font-size: 13px; }
+            .top-card { padding: 14px 16px; gap: 12px; }
+            .weather-icon { font-size: 34px; }
+            .weather-temp { font-size: 24px; }
+            .weather-desc { font-size: 13px; }
+            .weather-location { font-size: 12px; }
+            .weather-wind { font-size: 12px; }
+            .weather-minmax { font-size: 12px; }
+            .calendar-date-block { width: 52px; height: 52px; border-radius: 12px; }
+            .calendar-day-num { font-size: 24px; }
+            .calendar-day-label { font-size: 10px; }
+            .calendar-year-month { font-size: 16px; }
+            .calendar-weekday { font-size: 13px; }
+            .calendar-lunar { font-size: 11px; }
         }
 
         /* 启动遮罩 */
@@ -1903,7 +1903,6 @@
             if (window.visualViewport) {
                 window.visualViewport.addEventListener('resize', setVH);
             }
-            // 监听系统主题变化
             if (window.matchMedia) {
                 var mq = window.matchMedia('(prefers-color-scheme: dark)');
                 var handler = function() {
