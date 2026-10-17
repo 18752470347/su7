@@ -83,7 +83,6 @@
             --text-sub: #3A3A3C;
             --text-muted: #8E8E93;
             --bg-primary: #F2F2F7;
-            --bg-secondary: rgba(255, 255, 255, 0.35);
             --glass-bg: rgba(255, 255, 255, 0.28);
             --glass-border: rgba(255, 255, 255, 0.65);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.02);
@@ -91,15 +90,12 @@
             --status-color: #1C1C1E;
             --toast-bg: rgba(20, 22, 28, 0.78);
             --viewer-bg: rgba(0, 0, 0, 0.85);
-            --plate-bg: linear-gradient(135deg, #34C759, #28A745);
             --name-gradient: linear-gradient(90deg, #FF1744, #FF6D00, #FFD600, #00E676, #00B0FF, #AA00FF, #FF1744);
             --line1-gradient: linear-gradient(90deg, #FF3D71, #FF8A00, #FFD600, #00E5A0, #00B4FF, #B44CFF, #FF3D71);
             --line2-gradient: linear-gradient(90deg, #00B4FF, #6A5CFF, #FF3D71, #FFD600, #00E676, #00B4FF);
             --island-bg: rgba(255, 255, 255, 0.8);
             --island-text: #1C1C1E;
-            --popup-overlay: rgba(0, 0, 0, 0.85);
             --glow-color: #FF2E63;
-            --sakura-color: rgba(255, 80, 120, 0.55);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -108,7 +104,6 @@
             --icon-radius: 14px;
             --avatar-size: 62px;
             --plate-size: 74px;
-            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.06);
             --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.10);
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
             --transition-smooth: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -130,7 +125,6 @@
             --text-sub: #A1A1A6;
             --text-muted: #6E6E73;
             --bg-primary: #0A0A0C;
-            --bg-secondary: rgba(20, 20, 24, 0.30);
             --glass-bg: rgba(44, 44, 46, 0.25);
             --glass-border: rgba(255, 255, 255, 0.06);
             --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -138,16 +132,12 @@
             --status-color: #F5F5F7;
             --toast-bg: rgba(60, 60, 66, 0.85);
             --viewer-bg: rgba(0, 0, 0, 0.92);
-            --plate-bg: linear-gradient(135deg, #00D4FF, #7B61FF);
             --name-gradient: linear-gradient(90deg, #FF4D8D, #FFA000, #FFEA00, #00FFB3, #00C3FF, #D04CFF, #FF4D8D);
             --line1-gradient: linear-gradient(90deg, #FF6BA8, #FFB300, #FFEE58, #33FFC6, #33CCFF, #E066FF, #FF6BA8);
             --line2-gradient: linear-gradient(90deg, #33CCFF, #8B7BFF, #FF6BA8, #FFEE58, #33FFC6, #33CCFF);
             --island-bg: rgba(20, 20, 24, 0.8);
             --island-text: #fff;
-            --popup-overlay: rgba(0, 0, 0, 0.92);
             --glow-color: #00D4FF;
-            --sakura-color: rgba(255, 200, 216, 0.45);
-            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
             --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.4);
             --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.5);
             background-color: #0A0A0C;
@@ -166,19 +156,24 @@
             background: #0A0A0C;
             color: #F5F5F7;
         }
-        html.transitioning {
-            transition: background-color 0.6s var(--ease), color 0.6s var(--ease);
-        }
-        html.transitioning * {
-            transition: background-color 0.6s var(--ease),
-                color 0.6s var(--ease),
-                border-color 0.6s var(--ease),
-                box-shadow 0.6s var(--ease),
-                fill 0.6s var(--ease),
-                opacity 0.6s var(--ease),
-                transform 0.6s var(--ease),
-                backdrop-filter 0.6s var(--ease),
-                -webkit-backdrop-filter 0.6s var(--ease);
+        /* 收窄过渡范围：只给容器级元素加过渡，避免 148 张堆叠图同时过渡导致卡顿 */
+        html.transitioning body,
+        html.transitioning .app-container,
+        html.transitioning .top-card,
+        html.transitioning .video-player-container,
+        html.transitioning .main-card,
+        html.transitioning .app-icon-wrap,
+        html.transitioning .calendar-date-block,
+        html.transitioning .dynamic-island,
+        html.transitioning .toast,
+        html.transitioning .viewer,
+        html.transitioning .video-popup {
+            transition: background-color 0.4s var(--ease),
+                color 0.4s var(--ease),
+                border-color 0.4s var(--ease),
+                box-shadow 0.4s var(--ease),
+                opacity 0.4s var(--ease),
+                transform 0.4s var(--ease);
         }
         button,
         img,
@@ -196,14 +191,13 @@
         img, video, button, .app-button, .plate, .avatar {
             -webkit-touch-callout: none;
         }
-        button, .app-button, .plate, .avatar, .status-btn,
-        .status-theme-toggle,
+        button, .app-button, .plate, .avatar, .status-theme-toggle,
         .center-play-btn, .btn-expand {
             touch-action: manipulation;
         }
         .viewer-img { -webkit-touch-callout: default; }
 
-        /* ===== 星空画布（已移除动画，保留空占位） ===== */
+        /* ===== 星空画布（占位） ===== */
         #particles-canvas {
             position: fixed;
             top: 0;
@@ -232,7 +226,7 @@
             box-sizing: border-box;
         }
 
-        /* ===== 状态栏区域（合并重复选择器） ===== */
+        /* ===== 状态栏区域 ===== */
         .status-bar-container {
             width: 100%;
             flex-shrink: 0;
@@ -261,8 +255,7 @@
             min-width: 0;
         }
 
-        /* 合并所有圆形状态按钮 — 只保留主题切换 */
-        .status-btn,
+        /* 圆形状态按钮 — 仅保留主题切换 */
         .status-theme-toggle {
             width: var(--status-btn-size);
             height: var(--status-btn-size);
@@ -287,16 +280,13 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
-        .status-btn i,
         .status-theme-toggle i {
             position: relative;
             z-index: 2;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1;
             transition: var(--transition-smooth);
         }
-        .status-theme-toggle i { font-size: 15px; }
-        .status-btn:active,
         .status-theme-toggle:active { transform: scale(0.85); }
 
         .status-theme-toggle::before {
@@ -943,7 +933,6 @@
             backface-visibility: hidden;
         }
 
-        /* 合并隐藏状态类（video-controls.hidden 与 popup-controls.hidden 共用） */
         .hidden {
             opacity: 0 !important;
             pointer-events: none !important;
@@ -1434,7 +1423,7 @@
             .controls-row button { font-size: 14px; min-width: 22px; min-height: 22px; }
             .popup-controls button { font-size: 14px; min-width: 22px; min-height: 22px; }
             .btn-expand { font-size: 12px; min-width: 22px; min-height: 22px; }
-            .status-btn i, .status-theme-toggle i { font-size: 12px; }
+            .status-theme-toggle i { font-size: 12px; }
             .ios-status-left { font-size: 11px; }
             .top-card { padding: 6px 5px; gap: 3px; }
             .weather-icon { font-size: 20px; }
@@ -1495,10 +1484,9 @@
             .app-label { font-size: 12px; margin-top: 3px; }
             .dynamic-island { height: 36px; padding: 0 22px; font-size: 13px; min-width: 72px; }
             .island-text-scroll { font-size: 13px; }
-            .status-btn, .status-theme-toggle {
+            .status-theme-toggle {
                 width: 38px; height: 38px; min-width: 38px; min-height: 38px;
             }
-            .status-btn i, .status-theme-toggle i { font-size: 17px; }
             .status-theme-toggle i { font-size: 19px; }
             .ios-status-left { font-size: 14px; }
             .controls-row button { font-size: 18px; min-width: 30px; min-height: 30px; }
@@ -1594,7 +1582,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v7';
+var VERSION = 'su-fa36165-v8';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -1737,7 +1725,7 @@ self.addEventListener('fetch', function (e) {
             <div class="ios-status-bar">
                 <span class="ios-status-left" id="statusTime">
                     <span id="statusClock">09:41</span>
-                    <!-- 只保留深色/浅色切换按钮 -->
+                    <!-- 仅保留深色/浅色切换按钮 -->
                     <button class="status-theme-toggle" id="statusThemeToggle" aria-label="切换深色/浅色模式">
                         <i class="fa-regular fa-sun" id="statusThemeIcon"></i>
                     </button>
@@ -1903,9 +1891,8 @@ self.addEventListener('fetch', function (e) {
         (function() {
             'use strict';
 
-            const STACK_PRELOAD_COUNT = 6;
+            const STACK_PRELOAD_COUNT = 10;
             const isAndroid = /Android/i.test(navigator.userAgent);
-            const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edge|Edg/i.test(navigator.userAgent);
 
             let isLowPerf = false;
             (function () {
@@ -1950,7 +1937,6 @@ self.addEventListener('fetch', function (e) {
                 }
             };
 
-            // 注意：移除了樱花、流星雨、许红豆文字的开关，相关状态与定时器不再需要
             const STORAGE_PREFIX = 'su7_carousel_';
 
             function saveCarouselState() {
@@ -2003,47 +1989,10 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/18.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E5%A4%B4%E5%83%8F%E8%BD%AE%E6%92%AD/19.jpg",
             ];
-            // slideImages 数组保持不变，为了简洁省略了完整数组（但实际应保留原数组）。由于篇幅限制，下面保持原数组结构。
-            // 注意：这里为了展示，省略了大量图片链接，但实际运行时应当完整保留。
-            // 为了代码可运行，我们将在实际部署时保留原完整数组。这里我们使用占位，但确保逻辑不变。
-            // 不过考虑到用户需求只是移除开关，图片数据应保留。但由于回答长度限制，我们在此声明该数组内容与原文件一致。
-            // 下方用注释表示原数组存在，实际测试时请保留完整。
-            // 由于我无法在回答中复制全部数百个链接，我会保留数组变量但内容简略，真实场景请使用原文件。
-            // 为不破坏功能，我在此处声明该数组为原样，但在最终输出中，我会保留原文件中的完整数组。
-            // 但为了回答，我必须提供一个完整可用的文件……然而链接太多，我无法逐一列出。
-            // 考虑到实际情况，我们可以在回答中保留原文件的数组，或者告知用户保留原有。
-            // 这里，为了给出一个完整答案，我决定保留原文件中的数组（虽然很长，但可以复制）。
-            // 但是回答长度有限制，所以我将在最终回答中省略部分链接，但会注明“（此处省略大量图片链接，请保留原文件中的完整数组）”。
-            // 但这样代码不能直接运行。为此，我将在实际输出中尽量包含完整数组，但可能超出长度限制。
-            // 因此，我采用一个折中方案：保留数组变量，但使用注释说明原文件中有完整链接。
-            // 这对于需要直接复制的用户来说不友好。
-            // 鉴于以上，我决定在最终回答中保留原文件的完整 slideImages 数组，但为了不超过长度限制，我会在回答中略去部分重复的链接？不，那样会破坏功能。
-            // 最好的办法是：在回答中，只展示修改的部分（即状态栏部分），其他部分告诉用户保留原样。
-            // 但用户要求的是“给出以上代码修改后的完整代码”。所以我必须提供完整代码。
-            // 我将尝试提供完整代码，如果超出长度，系统可能会截断。我会尽量压缩空白。
-            // 由于实际限制，我将在回答中提供完整代码，但可能会忽略部分图片链接。为了确保用户能使用，建议用户用原文件对比替换。
-            // 无论如何，下面我将写一个占位，并提示用户替换为原数组。
-            // 为了节省篇幅，我在回答中会保留原数组，但会折叠？不，纯文本无法折叠。
-            // 我决定在最终输出中保留原数组，但可能会因为长度问题被截断。我将尝试精简其他部分。
-            // 实际上，原文件中的 slideImages 有数百个链接，非常占篇幅。我们可以采用一个技巧：将 slideImages 定义在单独的文件中？但不行。
-            // 我将在回答中保留该数组，但为了控制长度，我会删除注释和多余空格，并可能合并一些行。
-            // 然而，回答的字符上限可能是问题。我决定提供完整代码，如果失败，用户可以用 diff。
-            // 最终，我将提供一个完整的HTML，其中 slideImages 数组使用原文件中的内容，但为了可读性，我可能会使用省略号？不可行。
-            // 另一种方案：告诉用户只需修改状态栏部分，其他不变。但用户要的是完整代码。
-            // 所以我决定：在回答中，提供一个完整的HTML，但 slideImages 数组仅包含前几个图片作为示例，并注释说明“请替换为原文件中的完整数组”。
-            // 这样用户需要手动替换。这可能是最好的折中。
-            // 我将在代码中为 slideImages 数组保留前3个链接，并注释说明。
-            // 同时，我将在回答开头明确说明这一修改。
-            // 下面是最终代码。
-
-            // 为了篇幅，仅保留前3个 slideImages 作为示例，实际请替换为原文件中的完整数组
+            // 完整 slideImages 数组（已去重）
             const slideImages = [
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/su7/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260830233326_31_21.png",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/1.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/2.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/3.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/4.jpg",
@@ -2052,6 +2001,7 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/7.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/8.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/9.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/10.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/11.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/12.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/13.jpg",
@@ -2083,8 +2033,8 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/39.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/40.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/41.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/43.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/42.jpg",
+                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/43.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/44.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/45.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/46.jpg",
@@ -2111,7 +2061,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/67.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/68.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/69.jpg",
-                "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/70.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/70.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/71.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/72.jpg",
@@ -2191,7 +2140,6 @@ self.addEventListener('fetch', function (e) {
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/146.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/147.jpg",
                 "https://gerenboke-1311553598.cos.ap-nanjing.myqcloud.com/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%BD%AE%E6%92%AD%E5%9B%BE/148.jpg",
-                // ... 请在此处粘贴原文件中的全部 slideImages 链接
             ];
 
             const APP_CONFIG = {
@@ -2259,7 +2207,6 @@ self.addEventListener('fetch', function (e) {
             let isPopupMode = false;
             let mainWasPlayingBeforePopup = false;
 
-            // ===== 全局静音控制：默认非静音 =====
             let globalMuted = false;
             const GLOBAL_MUTE_KEY = 'global_muted';
             try {
@@ -2307,6 +2254,7 @@ self.addEventListener('fetch', function (e) {
                 if (p && typeof p.catch === 'function') {
                     p.catch(function () {
                         updateAllMuteIcons();
+                        showToastMsg('点击播放按钮开始播放');
                     });
                 }
                 updateAllMuteIcons();
@@ -2338,7 +2286,7 @@ self.addEventListener('fetch', function (e) {
 
             function ensureStackLoaded(activeIndex) {
                 const len = stackImgs.length;
-                for (let d = 0; d < 5; d++) {
+                for (let d = 0; d < 8; d++) {
                     const i = (activeIndex + d) % len;
                     const img = stackImgs[i];
                     if (img && !img.getAttribute('src') && img.dataset.src) {
@@ -2402,7 +2350,7 @@ self.addEventListener('fetch', function (e) {
                     try { localStorage.setItem('plate_theme_mode', 'dark'); } catch (e) {}
                     showToastMsg('🌕 已切换到深色模式');
                 }
-                setTimeout(() => html.classList.remove('transitioning'), 800);
+                setTimeout(() => html.classList.remove('transitioning'), 600);
             }
             statusThemeToggle.addEventListener('click', toggleTheme);
 
@@ -2464,8 +2412,7 @@ self.addEventListener('fetch', function (e) {
                     mainVideo.muted = globalMuted;
                     if (!globalMuted && mainVideo.volume <= 0) mainVideo.volume = 1;
                     playWithSound(mainVideo);
-                    popupVideo.src = src;
-                    popupVideo.muted = globalMuted;
+                    // 懒设：弹窗关闭时不设置 popupVideo.src，减少请求
                 }
 
                 updatePlayBtnIcon();
@@ -2503,14 +2450,12 @@ self.addEventListener('fetch', function (e) {
 
             if (videoList.length > 0) {
                 mainVideo.src = videoList[currentVideoIndex];
-                popupVideo.src = videoList[currentVideoIndex];
                 mainVideo.currentTime = 0;
                 mainVideo.muted = globalMuted;
-                popupVideo.muted = globalMuted;
                 if (!globalMuted) {
                     if (mainVideo.volume <= 0) mainVideo.volume = 1;
-                    if (popupVideo.volume <= 0) popupVideo.volume = 1;
                 }
+                // 懒设：初始化时不设置 popupVideo.src
                 updatePlayBtnIcon();
                 updateAllMuteIcons();
             }
@@ -2579,30 +2524,44 @@ self.addEventListener('fetch', function (e) {
                 if (!isPopupMode) switchVideo(currentVideoIndex + 1);
             });
 
-            // ----- 主视频滑动切换 -----
+            // ----- 主视频滑动切换（修复过度拦截）-----
             let startX = 0,
                 startY = 0,
-                isSwiping = false;
+                isSwiping = false,
+                swipeDirectionLocked = false;
             videoBox.addEventListener('touchstart', (e) => {
                 const touch = e.touches[0];
                 startX = touch.clientX;
                 startY = touch.clientY;
                 isSwiping = true;
+                swipeDirectionLocked = false;
             }, { passive: true });
             videoBox.addEventListener('touchmove', (e) => {
                 if (!isSwiping) return;
                 const dx = e.touches[0].clientX - startX;
                 const dy = e.touches[0].clientY - startY;
-                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-                    e.preventDefault();
+                // 只在判定为横向滑动后才锁定方向并阻止默认行为
+                if (!swipeDirectionLocked) {
+                    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                        if (Math.abs(dx) > Math.abs(dy) * 1.2) {
+                            swipeDirectionLocked = true;
+                        } else {
+                            // 纵向滑动：放弃拦截，允许页面滚动
+                            isSwiping = false;
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
                 }
-                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                e.preventDefault();
+                if (Math.abs(dx) > 40) {
                     if (dx < 0) { nextVideo(); isSwiping = false; }
                     else { prevVideo(); isSwiping = false; }
                 }
             }, { passive: false });
-            videoBox.addEventListener('touchend', () => { isSwiping = false; });
-            videoBox.addEventListener('touchcancel', () => { isSwiping = false; });
+            videoBox.addEventListener('touchend', () => { isSwiping = false; swipeDirectionLocked = false; });
+            videoBox.addEventListener('touchcancel', () => { isSwiping = false; swipeDirectionLocked = false; });
 
             // ----- 弹窗视频滑动切换 -----
             let popupStartX = 0,
@@ -2623,7 +2582,7 @@ self.addEventListener('fetch', function (e) {
                 if (e.target.closest('.popup-controls') || e.target.closest('.popup-close')) return;
                 const dx = e.touches[0].clientX - popupStartX;
                 const dy = e.touches[0].clientY - popupStartY;
-                if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
                     e.preventDefault();
                     if (dx < 0) {
                         nextVideo();
@@ -2649,7 +2608,7 @@ self.addEventListener('fetch', function (e) {
                 if (!volDrag) return;
                 e.preventDefault();
                 const dy = volStartY - e.touches[0].clientY;
-                let v = Math.max(0, Math.min(1, volStartVal + dy / 800));
+                let v = Math.max(0, Math.min(1, volStartVal + dy / 200));
                 mainVideo.volume = v;
                 globalMuted = v <= 0;
                 mainVideo.muted = globalMuted;
@@ -2680,6 +2639,7 @@ self.addEventListener('fetch', function (e) {
 
                 mainVideo.muted = true;
 
+                // 懒设：仅在打开弹窗时设置 popupVideo.src
                 popupVideo.src = src;
                 popupVideo.currentTime = mainVideo.currentTime;
                 popupVideo.muted = globalMuted;
@@ -2878,7 +2838,7 @@ self.addEventListener('fetch', function (e) {
                 viewerAutoPlayTimer = setInterval(() => { if (isViewerInteracting || document.hidden) return;
                     viewerGalleryIndex = (viewerGalleryIndex + 1) % viewerGallery.length;
                     viewerImg.src = viewerGallery[viewerGalleryIndex];
-                    updateViewerCounter(); }, 7000);
+                    updateViewerCounter(); }, 8000);
             }
 
             function stopViewerAutoPlay() { if (viewerAutoPlayTimer) { clearInterval(viewerAutoPlayTimer);
@@ -3039,16 +2999,16 @@ self.addEventListener('fetch', function (e) {
             }, 300);
 
             // ================================================================
-            //  统一定时器注册（合并所有周期性任务）
+            //  统一定时器注册（低频任务用 setInterval，rAF 只保留动画类）
             // ================================================================
             TimerManager.add('clock', updateTime, 30000);
-            TimerManager.add('avatar', nextAvatar, 2000);
-            TimerManager.add('slide', nextSlide, 2000);
+            TimerManager.add('avatar', nextAvatar, 4000);
+            TimerManager.add('slide', nextSlide, 3500);
             TimerManager.add('island', function() {
                 if (document.hidden) return;
                 tidx = (tidx + 1) % textPool.length;
                 islandText.textContent = textPool[tidx];
-            }, 2000);
+            }, 3500);
             TimerManager.add('save', saveCarouselState, 15000);
             TimerManager.start();
 
@@ -3124,6 +3084,24 @@ self.addEventListener('fetch', function (e) {
                     document.head.appendChild(_mLink);
                 }
             } catch (e) {}
+
+            // ===== Service Worker 注册（修复：原代码未注册）=====
+            (function registerSW() {
+                if (!('serviceWorker' in navigator)) return;
+                var swEl = document.getElementById('pwa-sw-src');
+                if (!swEl) return;
+                try {
+                    var swBlob = new Blob([swEl.textContent], { type: 'text/javascript' });
+                    var swUrl = URL.createObjectURL(swBlob);
+                    navigator.serviceWorker.register(swUrl, { scope: './' }).then(function (reg) {
+                        console.log('SW registered:', reg.scope);
+                    }).catch(function (err) {
+                        console.warn('SW register failed:', err);
+                    });
+                } catch (e) {
+                    console.warn('SW register error:', e);
+                }
+            })();
 
             // ================================================================
             //  天气与日历组件
@@ -3460,6 +3438,7 @@ self.addEventListener('fetch', function (e) {
                             locEl.textContent = DEFAULT_CITY;
                             descEl.textContent = '定位失败';
                             fetchWeather(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY);
+                            showToastMsg('定位失败，点击天气卡片可手动选择城市');
                         },
                         {
                             enableHighAccuracy: false,
