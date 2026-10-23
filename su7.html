@@ -1147,7 +1147,7 @@
             filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06));
         }
 
-        /* ===== 应用图标 ===== */
+        /* ===== 应用图标 —— 液态玻璃重构 ===== */
         .apps-scroll-wrapper {
             width: 100%;
             overflow: visible;
@@ -1167,44 +1167,127 @@
         }
         .app-button {
             --icon-color: #00D4FF;
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
-            background: transparent; cursor: pointer; transition: var(--transition-smooth);
-            position: relative; z-index: 10;
-            border-radius: 12px;
-            padding: 3px 2px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            background: transparent;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            z-index: 10;
+            border-radius: 14px;
+            padding: 4px 2px 5px;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
         .app-button:active { transform: scale(0.90); }
+
+        /* 液态玻璃图标容器 —— 更通透、更轻盈 */
         .app-icon-wrap {
-            position: relative; width: 46px; height: 46px;
-            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: var(--icon-radius);
-            background: var(--icon-bg);
-            box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
-            font-size: 20px; color: var(--icon-color);
-            backdrop-filter: blur(14px) saturate(170%);
-            -webkit-backdrop-filter: blur(14px) saturate(170%);
-            border: 1px solid var(--glass-border);
-            transition: var(--transition-smooth); z-index: 10;
+            background: rgba(255, 255, 255, 0.50);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+            font-size: 20px;
+            color: var(--icon-color);
+            transition: var(--transition-smooth);
+            z-index: 10;
             overflow: hidden;
             transform: translateZ(0);
         }
-        html.dark-mode .app-icon-wrap {
-            box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 4px 20px rgba(0, 0, 0, 0.35);
-            border-color: rgba(255, 255, 255, 0.10);
-        }
+        /* 顶部高光 —— 液态玻璃的灵魂 */
         .app-icon-wrap::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), transparent 70%);
-            opacity: 0.7;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.70) 0%,
+                rgba(255, 255, 255, 0.25) 40%,
+                rgba(255, 255, 255, 0.00) 100%
+            );
             pointer-events: none;
             border-radius: inherit;
+            z-index: 1;
         }
-        .app-button:active .app-icon-wrap { transform: scale(0.88); }
+        /* 底部微反射 */
+        .app-icon-wrap::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 35%;
+            background: linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.18) 0%,
+                rgba(255, 255, 255, 0.00) 100%
+            );
+            pointer-events: none;
+            border-radius: inherit;
+            z-index: 1;
+        }
+        /* 图标内容位于高光之上 */
+        .app-icon-wrap > i,
+        .app-icon-wrap > svg,
+        .app-icon-wrap > .vpn-svg {
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.10));
+        }
+        .app-button:active .app-icon-wrap {
+            transform: scale(0.88);
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.04),
+                0 1px 2px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
         .app-button.loading .app-icon-wrap { opacity: 0.6; transform: scale(0.95); }
+
+        /* 深色模式下的液态玻璃 */
+        html.dark-mode .app-icon-wrap {
+            background: rgba(60, 60, 70, 0.55);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.40),
+                0 1px 3px rgba(0, 0, 0, 0.20),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+        }
+        html.dark-mode .app-icon-wrap::before {
+            background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.18) 0%,
+                rgba(255, 255, 255, 0.06) 40%,
+                rgba(255, 255, 255, 0.00) 100%
+            );
+        }
+        html.dark-mode .app-icon-wrap::after {
+            background: linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.06) 0%,
+                rgba(255, 255, 255, 0.00) 100%
+            );
+        }
+
         .app-label {
             font-size: 9px;
             font-weight: 900;
@@ -1220,17 +1303,29 @@
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
-        /* ===== VPN 图标 ===== */
+        /* ===== VPN 图标（跟随液态玻璃） ===== */
         .vpn-icon {
-            background: var(--icon-bg) !important;
-            border-color: var(--glass-border) !important;
-            box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+            background: rgba(255, 255, 255, 0.50) !important;
+            backdrop-filter: blur(20px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+            border-color: rgba(255, 255, 255, 0.75) !important;
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.2) !important;
             position: relative;
             overflow: hidden;
             transition: var(--transition-smooth);
         }
         html.dark-mode .vpn-icon {
-            box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+            background: rgba(60, 60, 70, 0.55) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.40),
+                0 1px 3px rgba(0, 0, 0, 0.20),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
         }
         .vpn-svg {
             width: 22px;
@@ -1239,7 +1334,7 @@
             position: relative;
             z-index: 2;
             transition: all 0.45s var(--spring);
-            filter: none;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.10));
         }
         .app-button:active .vpn-svg { transform: scale(0.88); }
         html.dark-mode .vpn-svg {
@@ -1247,6 +1342,22 @@
             filter: drop-shadow(0 0 6px rgba(255, 138, 76, 0.5));
         }
         .app-button.loading .vpn-svg { opacity: 0.3; }
+
+        /* ===== Netflix 图标优化：粗体 N + 品牌色 ===== */
+        .netflix-icon {
+            width: 22px;
+            height: 22px;
+            color: #E50914;
+            position: relative;
+            z-index: 2;
+            transition: var(--transition-smooth);
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+        }
+        html.dark-mode .netflix-icon {
+            color: #FF3B5C;
+            filter: drop-shadow(0 0 8px rgba(255, 59, 92, 0.6));
+        }
+        .app-button:active .netflix-icon { transform: scale(0.88); }
 
         /* ===== Toast ===== */
         .toast {
@@ -1481,6 +1592,7 @@
             .app-button { padding: 6px 4px 8px; border-radius: 16px; gap: 5px; }
             .app-icon-wrap { width: 60px; height: 60px; font-size: 24px; border-radius: 20px; }
             .vpn-svg { width: 28px; height: 28px; }
+            .netflix-icon { width: 28px; height: 28px; }
             .app-label { font-size: 12px; margin-top: 3px; }
             .dynamic-island { height: 36px; padding: 0 22px; font-size: 13px; min-width: 72px; }
             .island-text-scroll { font-size: 13px; }
@@ -1582,7 +1694,7 @@
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v8';
+var VERSION = 'su-fa36165-v12';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -1862,9 +1974,13 @@ self.addEventListener('fetch', function (e) {
                                 <div class="app-icon-wrap"><i class="fa-brands fa-youtube"></i></div>
                                 <span class="app-label">YouTube</span>
                             </button>
-                            <button class="app-button" data-app="custom4" style="--icon-color:#38E1FF" type="button">
-                                <div class="app-icon-wrap"><i class="fa-solid fa-globe"></i></div>
-                                <span class="app-label">FlClash</span>
+                            <button class="app-button" data-app="custom4" style="--icon-color:#E50914" type="button">
+                                <div class="app-icon-wrap">
+                                    <svg class="netflix-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 2v20h4.5V9.5L14 22h4V2h-4.5v12L8 2H6z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <span class="app-label">Netflix</span>
                             </button>
                             <button class="app-button" data-app="custom5" style="--icon-color:#4DA3FF" type="button">
                                 <div class="app-icon-wrap"><i class="fa-solid fa-map-location-dot"></i></div>
@@ -2149,7 +2265,7 @@ self.addEventListener('fetch', function (e) {
                 custom2: { scheme: "anywhere://open?sid=0575", name: "Connecat" },
                 custom7: { scheme: "anywhere://open?sid=5395", name: "汽水音乐" },
                 custom3: { scheme: "anywhere://open?sid=0451", name: "YouTube" },
-                custom4: { scheme: "anywhere://open?sid=2305", name: "FlClash" },
+                custom4: { scheme: "anywhere://open?sid=3789", name: "Netflix" },
                 custom5: { scheme: "anywhere://open?sid=7535", name: "高德地图" },
                 custom6: { scheme: "anywhere://open?sid=5181", name: "抖音" },
                 custom8: { scheme: "anywhere://open?sid=9850", name: "酷狗音乐" }
@@ -3087,7 +3203,7 @@ self.addEventListener('fetch', function (e) {
                 }
             } catch (e) {}
 
-            // ===== Service Worker 注册（修复：原代码未注册）=====
+            // ===== Service Worker 注册 =====
             (function registerSW() {
                 if (!('serviceWorker' in navigator)) return;
                 var swEl = document.getElementById('pwa-sw-src');
