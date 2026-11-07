@@ -2586,6 +2586,8 @@ html.dark-mode .wx-now-cell[data-k="uv"]{--k:#FFC24D}
   --lg-solid:rgba(250,251,255,.97);
   --lg-blur:18px;
   --lg-sat:192%;
+  /* 整条滤镜抽成变量：手机上要连 brightness 一起去掉，写死就换不干净 */
+  --lg-filter:blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(1.03);
   --lg-spec:rgba(255,255,255,.92);
   --lg-rim:rgba(112,128,204,.24);
   --lg-in:rgba(255,255,255,.42);
@@ -2615,8 +2617,8 @@ html.dark-mode{
     radial-gradient(64% 50% at 102% 112%,rgba(150,170,255,.26) 0%,rgba(150,170,255,0) 66%),
     /* ④ 斜向漫反射，让平面不再均匀 */
     linear-gradient(158deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.02) 44%,rgba(255,255,255,.08) 100%);
-  -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(1.03);
-  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(1.03);
+  -webkit-backdrop-filter:var(--lg-filter);
+  backdrop-filter:var(--lg-filter);
   box-shadow:
     inset 0 1px 0 var(--lg-spec),                       /* 顶棱镜实线 */
     inset 0 2px 5px -2px rgba(255,255,255,.70),         /* 顶内辉 */
@@ -2918,6 +2920,37 @@ html.dark-mode .top-right .weather-widget::before{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
+/* ============================================================================
+   33 手机端降耗（小米 18 Pro · 安卓 Chrome「放着不动过一会儿就烫」）
+   ----------------------------------------------------------------------------
+   这一节的每一条都对应一份**持续的**开销，不是一次性开销：
+
+   ① 毛玻璃：§30 把卡片的模糊定在 18px + saturate(192%) + brightness(1.03)，
+      而 §22 的手机档只改了旧的 --glass-blur，--lg-blur 从来没降过 ——
+      也就是说手机上一直按 18px 在算。安卓 GPU 每帧都要为这几块大面积做
+      离屏高斯 + 色彩矩阵，radius 每降 1px 都是线性的收益。
+      brightness() 在 backdrop 链里是一个额外的 color-matrix pass，
+      1.03 的提亮肉眼看不出来，去掉它等于白赚一次 pass。
+   ② 手机档统一到 12px / 162%，不再带 brightness。
+   ③ 弹层的 34px 同理降到 20px（弹层是全屏面积，比卡片更贵）。
+   ========================================================================== */
+@media (max-width:560px){
+  :root{
+    --lg-blur:12px;
+    --lg-sat:162%;
+    --lg-filter:blur(12px) saturate(162%);
+  }
+  .weather-sheet-overlay .weather-sheet-panel,
+  .city-picker-panel,
+  .month-calendar-panel{
+    -webkit-backdrop-filter:blur(20px) saturate(170%);
+    backdrop-filter:blur(20px) saturate(170%);
+  }
+}
+/* 静置期间不动毛玻璃。曾经试过在这里把 backdrop-filter 设成 none，
+   但画面已经冻结、Chrome 本来就不会重算 backdrop，省不下什么，
+   反而会在冻结那一瞬间让卡片"突然变实"，肉眼一跳。省电交给停任务去做。 */
+
 </style>
     <script>
         (function () {
@@ -3203,7 +3236,7 @@ self.addEventListener('fetch', function (e) {
             </div>
                     <div class="profile-left">
                         <div class="subtitle">
-                            <span class="line-1" id="greetLine">你好，我叫许红豆，永远相信美好的事情即将发生!</span>
+                            <span class="line-1" id="greetLine">你好，我叫许红豆&nbsp;&nbsp;永远相信美好的事情即将发生</span>
                             <span class="line-2" id="mottoLine">风乍起，吹皱一江春水</span>
                         </div>
                         <div class="name">刘茜美子・去有风的地方遇见你</div>
@@ -3406,9 +3439,11 @@ self.addEventListener('fetch', function (e) {
 
             const TimerManager = {
                 tasks: {},
-                add: function(name, fn, interval) {
+                /* sleep=true：静置期间跳过。切图 / 换头像要解码位图，
+                   换文字要重绘渐变字形，这三件事是「放着不动也烫」的主因 */
+                add: function(name, fn, interval, sleep) {
                     if (this.tasks[name]) return;
-                    this.tasks[name] = { fn: fn, interval: interval, lastRun: 0 };
+                    this.tasks[name] = { fn: fn, interval: interval, lastRun: 0, sleep: !!sleep };
                 },
                 start: function() {
                     if (this._tid) return;
@@ -3420,6 +3455,9 @@ self.addEventListener('fetch', function (e) {
                         var now = performance.now();
                         for (var name in self.tasks) {
                             var task = self.tasks[name];
+                            // 静置期间跳过解码类任务。lastRun 故意不更新，
+                            // 所以一有交互就会立刻补跑一次，不会停在旧画面上
+                            if (self._idle && task.sleep) continue;
                             if (now - task.lastRun >= task.interval) {
                                 task.lastRun = now;
                                 try { task.fn(); } catch (e) {}
@@ -3437,7 +3475,8 @@ self.addEventListener('fetch', function (e) {
                 },
                 remove: function(name) {
                     delete this.tasks[name];
-                }
+                },
+                setIdle: function(on) { this._idle = !!on; }
             };
 
             const STORAGE_PREFIX = 'su7_carousel_';
@@ -4321,7 +4360,6 @@ self.addEventListener('fetch', function (e) {
                 if (avatarImages.length < 2 || document.hidden) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
                 swapAvatar(avatarImages[avatarIndex]);
-                saveCarouselState();
             }
 
             // ===== 视频事件 =====
@@ -4845,14 +4883,14 @@ self.addEventListener('fetch', function (e) {
             //  统一定时器注册（低频任务用 setInterval，rAF 只保留动画类）
             // ================================================================
             TimerManager.add('clock', updateTime, 30000);
-            TimerManager.add('avatar', nextAvatar, 4000);
-            TimerManager.add('slide', nextSlide, 3500);
+            TimerManager.add('avatar', nextAvatar, 4000, true);
+            TimerManager.add('slide', nextSlide, 3500, true);
             TimerManager.add('island', function() {
                 if (document.hidden) return;
                 tidx = (tidx + 1) % textPool.length;
                 setIslandText(textPool[tidx]);
-            }, 3500);
-            TimerManager.add('save', saveCarouselState, 15000);
+            }, 3500, true);
+            TimerManager.add('save', saveCarouselState, 60000, true);
             TimerManager.start();
 
             // ================================================================
@@ -4862,6 +4900,7 @@ self.addEventListener('fetch', function (e) {
             let videoWasPlaying = false;
             document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
+                    try { saveCarouselState(); } catch (e) {}
                     TimerManager.stop();
                     if (mainVideo && !mainVideo.paused) {
                         videoWasPlaying = true;
@@ -4891,6 +4930,7 @@ self.addEventListener('fetch', function (e) {
             let idleTimer = null;
             function setIdle(on) {
                 document.documentElement.classList.toggle('power-idle', !!on);
+                try { TimerManager.setIdle(!!on); } catch (e) {}
             }
             function wakeIdle() {
                 if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
@@ -5548,7 +5588,7 @@ self.addEventListener('fetch', function (e) {
                    - 页面切后台自动停监停，回到前台再续上
                    ------------------------------------------------------------------ */
                 var geoAccuracy = 0;      // 最近一次定位的水平精度（米）
-                var geoFollow = { wid: null, lat: null, lon: null, at: 0 };
+                var geoFollow = { wid: null, tid: null, busy: false, lat: null, lon: null, at: 0 };
                 var geoWeatherAt = { lat: DEFAULT_LAT, lon: DEFAULT_LON };
 
                 function geoDistance(lat1, lon1, lat2, lon2) {
@@ -5590,34 +5630,64 @@ self.addEventListener('fetch', function (e) {
                     }).catch(function () {});
                 }
 
+                /* 定位跟随｜低频粗探 + 按需高精度
+                   ------------------------------------------------------------------
+                   enableHighAccuracy 的 watchPosition 会一直把 GPS 芯片拉起，
+                   屏幕常亮时等于全程开着导航 —— 这是「放着不动过一会儿就烫」的
+                   第一大来源（浏览器不会因为位置没变就停掉 GPS，它只是重复回调）。
+                   现在的做法：
+                     · 每 90 秒一次 getCurrentPosition(enableHighAccuracy:false)，
+                       走基站 / Wi-Fi，静止时功耗几乎为零，不碰 GPS
+                     · 粗定位报出「移动超过阈值」才升级一次高精度采样（geoWatchBest）
+                     · 阈值跟着粗定位自身误差放大，Wi-Fi 漂移 1km 骗不起 GPS
+                     · 路名仍然由高精度坐标反查，显示精度不变
+                   ------------------------------------------------------------------ */
                 function startGeoFollow() {
-                    if (geoFollow.wid !== null || isManualCity) return;
+                    if (geoFollow.tid !== null || isManualCity) return;
                     if (!navigator.geolocation) return;
-                    try {
-                        geoFollow.wid = navigator.geolocation.watchPosition(function (pos) {
+
+                    function probe() {
+                        if (document.hidden || isManualCity) return;
+                        navigator.geolocation.getCurrentPosition(function (pos) {
                             if (!pos || !pos.coords) return;
                             var la = pos.coords.latitude, lo = pos.coords.longitude;
                             var acc = pos.coords.accuracy || 0;
-                            if (acc > 900) return;                       // 太粗，不可信
+                            if (acc > 3000) return;                    // 粗到没法用
                             if (geoFollow.lat === null) { geoFollow.lat = la; geoFollow.lon = lo; return; }
-                            var d = geoDistance(geoFollow.lat, geoFollow.lon, la, lo);
-                            // 阈值取「250m 或自身误差的 1.5 倍」，避免站着不动也一直刷新
-                            if (d < Math.max(250, acc * 1.5)) return;
-                            geoFollow.lat = la; geoFollow.lon = lo;
-                            geoAccuracy = acc;
-                            geoFollowRefresh(la, lo);
+                            var moved = geoDistance(geoFollow.lat, geoFollow.lon, la, lo);
+                            // 误差 800m 就要求真的移动 800m 才算动了，避免站着不动被漂移刷屏
+                            var thr = Math.max(600, Math.min(acc, 1800));
+                            if (moved < thr || geoFollow.busy) return;
+                            geoFollow.busy = true;
+                            geoWatchBest(false, 8000).then(function (best) {
+                                geoFollow.busy = false;
+                                if (!best || !best.coords) return;
+                                if ((best.coords.accuracy || 9999) > 900) {
+                                    geoFollow.lat = la; geoFollow.lon = lo;   // 这轮没拿到好的，下次再试
+                                    return;
+                                }
+                                geoFollow.lat = best.coords.latitude;
+                                geoFollow.lon = best.coords.longitude;
+                                geoAccuracy = best.coords.accuracy || 0;
+                                geoFollowRefresh(geoFollow.lat, geoFollow.lon);
+                            }).catch(function () { geoFollow.busy = false; });
                         }, function () {}, {
-                            enableHighAccuracy: true,
-                            maximumAge: 20000,
-                            timeout: 30000
+                            enableHighAccuracy: false,     // 关键：粗探不启动 GPS
+                            maximumAge: 90000,
+                            timeout: 15000
                         });
-                    } catch (e) { geoFollow.wid = null; }
+                    }
+
+                    probe();
+                    geoFollow.tid = setInterval(probe, 90000);
                 }
 
                 function stopGeoFollow() {
-                    if (geoFollow.wid === null) return;
-                    try { navigator.geolocation.clearWatch(geoFollow.wid); } catch (e) {}
-                    geoFollow.wid = null;
+                    if (geoFollow.tid !== null) { clearInterval(geoFollow.tid); geoFollow.tid = null; }
+                    if (geoFollow.wid !== null) {
+                        try { navigator.geolocation.clearWatch(geoFollow.wid); } catch (e) {}
+                        geoFollow.wid = null;
+                    }
                 }
 
                 // 切后台就停（长时间开着 GPS 最费电），回前台再跟上
@@ -6810,7 +6880,7 @@ self.addEventListener('fetch', function (e) {
                         _m.title = mottoShown;
                         mottoFit(_m);
                     }
-                    TimerManager.add('motto', mottoNext, 10000);
+                    TimerManager.add('motto', mottoNext, 10000, true);
                 } catch (e) {}
 
                 TimerManager.add('weather', function() {
