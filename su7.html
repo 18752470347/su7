@@ -2153,20 +2153,7 @@ html body .avatar-center.swapping::after{
 /* 只有 active / pile / pile2 / pile3 四张参与渲染 */
 .top-card .stack-img.hidden{display:none}
 
-html.power-idle .avatar-halo,
-html.power-idle .avatar-center::before,
-html.power-idle .avatar-orbit,
-html.power-idle .dynamic-island::before,
-html.power-idle .island-grad,
-html.power-idle .profile-row .name,
-html.power-idle .profile-row .subtitle .line-1,
-html.power-idle .profile-row .subtitle .line-2{
-  animation-play-state:paused!important;
-}
-/* 冻结期间把常驻合成层也撤掉，唤醒时 Chrome 会自动重建 */
-html.power-idle .avatar-halo,
-html.power-idle .avatar-center::before,
-html.power-idle .avatar-orbit{will-change:auto}
+/* 静置冻结已移除：页面长时间无操作也不再暂停任何装饰动画 */
 
 /* ============================================================================
    23 地点搜索：省 / 市 / 县 / 镇 / 村
@@ -3455,9 +3442,7 @@ self.addEventListener('fetch', function (e) {
                         var now = performance.now();
                         for (var name in self.tasks) {
                             var task = self.tasks[name];
-                            // 静置期间跳过解码类任务。lastRun 故意不更新，
-                            // 所以一有交互就会立刻补跑一次，不会停在旧画面上
-                            if (self._idle && task.sleep) continue;
+                            // 静置跳过逻辑已移除：无论是否有交互都照常执行
                             if (now - task.lastRun >= task.interval) {
                                 task.lastRun = now;
                                 try { task.fn(); } catch (e) {}
@@ -4920,31 +4905,13 @@ self.addEventListener('fetch', function (e) {
             });
 
             /* ------------------------------------------------------------------
-               静置冻结｜60 秒没有任何交互 → 暂停全部无限循环的装饰动画
-               （光环呼吸 / 双环旋转 / 岛面扫光 / 三行渐变文字流动）
-               冻结后合成器不再每帧提交，屏幕刷新率才能落回 1~10Hz，
-               长时间挂着不发烫主要就靠这一下。任意触摸 / 滚动 / 按键立刻解冻，
-               动画从暂停的那一帧接着走，不会跳。
+               静置冻结已移除｜页面长时间没有操作，也保持全部动效与轮播运行：
+               光环呼吸 / 双环旋转 / 岛面扫光 / 三行渐变文字流动，
+               以及头像、图集、岛面文案、箴言的自动切换，都不会再被暂停。
+               setIdle / wakeIdle 保留为空实现，兼容既有调用点。
                ------------------------------------------------------------------ */
-            const IDLE_MS = 60000;
-            let idleTimer = null;
-            function setIdle(on) {
-                document.documentElement.classList.toggle('power-idle', !!on);
-                try { TimerManager.setIdle(!!on); } catch (e) {}
-            }
-            function wakeIdle() {
-                if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
-                setIdle(false);
-                idleTimer = setTimeout(function () {
-                    idleTimer = null;
-                    if (document.hidden) return;
-                    setIdle(true);
-                }, IDLE_MS);
-            }
-            ['pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'].forEach(function (ev) {
-                document.addEventListener(ev, wakeIdle, { passive: true });
-            });
-            wakeIdle();
+            function setIdle() {}
+            function wakeIdle() {}
 
             // ===== 页面卸载时保存 =====
             window.addEventListener('beforeunload', () => {
