@@ -2562,6 +2562,362 @@ html.dark-mode .wx-now-cell[data-k="uv"]{--k:#FFC24D}
 .wx-now-sun b{font-size:12px;font-weight:800;color:var(--label);letter-spacing:-.2px}
 .wx-now-meta{color:var(--label-2)}
 
+
+/* ============================================================================
+   30 全页液态玻璃（Liquid Glass v2）
+   ----------------------------------------------------------------------------
+   §15 只给「四张卡 + 弹层」涂了一层玻璃，底色 44% 白压得太重，看着像磨砂塑料。
+   这一节把配方重做并铺满整页，四处是关键：
+     ① 底色透到 30%（深色 44%），背后的极光真的能看见；可读性靠多层眩光补，
+        而不是靠把底色涂白
+     ② backdrop-filter 加 brightness(1.03)：光穿过玻璃会被玻璃提亮，
+        这一步是「液态」和「磨砂」的分界
+     ③ 边缘做成四段式棱镜：顶 1px 实高光 → 2px 内辉 → 内白环 → 底边回弹高光，
+        再叠一道底部内反光，玻璃就有了厚度
+     ④ 弹层从 90% 白降到 74%，模糊加到 28px；内部再叠一层「玻璃上的玻璃」
+        （分段控件 / 六宫格 / 七天列表），层级才像 iOS 26
+
+   性能：backdrop-filter 只挂 7 个静态表面（4 张卡 + 3 个弹层）。
+        图片卡、视频卡内容不透明，不做模糊；视频控制条用渐变遮罩而不是模糊
+        —— 视频每帧都在变，模糊要每帧重算，是发烫的头号来源。
+   ========================================================================== */
+:root{
+  --lg-tint:rgba(255,255,255,.20);
+  --lg-solid:rgba(250,251,255,.97);
+  --lg-blur:18px;
+  --lg-sat:192%;
+  --lg-spec:rgba(255,255,255,.92);
+  --lg-rim:rgba(112,128,204,.24);
+  --lg-in:rgba(255,255,255,.42);
+  --lg-in-line:rgba(255,255,255,.58);
+}
+html.dark-mode{
+  --lg-tint:rgba(26,28,48,.32);
+  --lg-solid:rgba(20,21,36,.96);
+  --lg-spec:rgba(255,255,255,.22);
+  --lg-rim:rgba(152,166,240,.16);
+  --lg-in:rgba(255,255,255,.075);
+  --lg-in-line:rgba(255,255,255,.13);
+}
+
+/* ---- 30.1 外层玻璃：资料卡 / 天气卡 / 日历卡 / App 网格 ---- */
+.profile-row,
+.top-right .weather-widget,
+.top-right .calendar-widget,
+.apps-scroll-wrapper{
+  background-color:var(--lg-tint);
+  background-image:
+    /* ① 顶棱镜：0 处实高光，1px 处还在 55%，10px 内衰减干净 */
+    linear-gradient(180deg,var(--lg-spec) 0,rgba(255,255,255,.52) 1px,rgba(255,255,255,.10) 2.5px,rgba(255,255,255,0) 11px),
+    /* ② 左上透镜眩光：玻璃"有体积"的主要来源 */
+    radial-gradient(74% 56% at 5% -8%,rgba(255,255,255,.44) 0%,rgba(255,255,255,0) 58%),
+    /* ③ 右下折返：光从背面折射回来，偏冷 */
+    radial-gradient(64% 50% at 102% 112%,rgba(150,170,255,.26) 0%,rgba(150,170,255,0) 66%),
+    /* ④ 斜向漫反射，让平面不再均匀 */
+    linear-gradient(158deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.02) 44%,rgba(255,255,255,.08) 100%);
+  -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(1.03);
+  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(1.03);
+  box-shadow:
+    inset 0 1px 0 var(--lg-spec),                       /* 顶棱镜实线 */
+    inset 0 2px 5px -2px rgba(255,255,255,.70),         /* 顶内辉 */
+    inset 1px 0 0 rgba(255,255,255,.34),                /* 左棱 */
+    inset -1px 0 0 rgba(255,255,255,.20),               /* 右棱 */
+    inset 0 -1px 0 rgba(255,255,255,.30),               /* 底回弹 */
+    inset 0 0 0 1px rgba(255,255,255,.30),              /* 内白环 */
+    inset 0 -24px 30px -28px rgba(255,255,255,.65),     /* 底部内反光 */
+    0 0 0 .5px var(--lg-rim),                           /* 外侧冷细边 */
+    0 1px 2px rgba(24,30,70,.05),
+    0 20px 42px -22px rgba(58,78,180,.46);
+}
+html.dark-mode .profile-row,
+html.dark-mode .top-right .weather-widget,
+html.dark-mode .top-right .calendar-widget,
+html.dark-mode .apps-scroll-wrapper{
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.15) 0,rgba(255,255,255,.06) 1px,rgba(255,255,255,0) 11px),
+    radial-gradient(74% 56% at 5% -8%,rgba(255,255,255,.13) 0%,rgba(255,255,255,0) 58%),
+    radial-gradient(64% 50% at 102% 112%,rgba(140,160,255,.15) 0%,rgba(140,160,255,0) 66%),
+    linear-gradient(158deg,rgba(255,255,255,.06) 0%,rgba(255,255,255,0) 46%,rgba(255,255,255,.04) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.19),
+    inset 0 2px 5px -2px rgba(255,255,255,.09),
+    inset 1px 0 0 rgba(255,255,255,.08),
+    inset -1px 0 0 rgba(255,255,255,.05),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    inset 0 0 0 1px rgba(255,255,255,.09),
+    inset 0 -24px 30px -28px rgba(255,255,255,.10),
+    0 0 0 .5px var(--lg-rim),
+    0 20px 42px -22px rgba(0,0,0,.92);
+}
+
+/* ---- 30.2 图片卡：内容不透明，只给玻璃外壳 ---- */
+.top-card .plate-photo{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.85),
+    inset 0 0 0 1px rgba(255,255,255,.38),
+    0 0 0 .5px var(--lg-rim),
+    0 20px 42px -22px rgba(58,78,180,.5);
+}
+/* 盖在照片上的那层：顶部反射 + 底部压暗 + 右下冷光，框感全在这 */
+.top-card .plate-photo::after{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.44),inset 0 1px 0 rgba(255,255,255,.9);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.06) 13%,rgba(255,255,255,0) 34%),
+    linear-gradient(0deg,rgba(10,12,30,.28) 0%,rgba(10,12,30,0) 30%),
+    radial-gradient(58% 42% at 104% 2%,rgba(160,180,255,.22) 0%,rgba(160,180,255,0) 62%);
+}
+html.dark-mode .top-card .plate-photo::after{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),inset 0 1px 0 rgba(255,255,255,.28);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.03) 13%,rgba(255,255,255,0) 34%),
+    linear-gradient(0deg,rgba(0,0,0,.34) 0%,rgba(0,0,0,0) 30%),
+    radial-gradient(58% 42% at 104% 2%,rgba(150,170,255,.18) 0%,rgba(150,170,255,0) 62%);
+}
+
+/* ---- 30.3 视频卡：外壳玻璃 + 控制条渐变遮罩（不模糊，见文件头注释） ---- */
+.video-player-container{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 0 0 .5px var(--lg-rim),
+    0 22px 44px -24px rgba(40,50,140,.62);
+}
+.video-player-container::after{
+  background:
+    linear-gradient(116deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.04) 16%,rgba(255,255,255,0) 32%),
+    radial-gradient(120% 74% at 50% -12%,rgba(130,150,255,.22) 0%,rgba(130,150,255,0) 58%),
+    radial-gradient(88% 56% at 50% 112%,rgba(255,122,200,.10) 0%,rgba(255,122,200,0) 58%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 0 0 1px rgba(255,255,255,.13),
+    inset 0 -1px 0 rgba(255,255,255,.07);
+}
+.video-controls{
+  background:linear-gradient(180deg,rgba(8,10,24,0) 0%,rgba(8,10,24,.42) 38%,rgba(8,10,24,.70) 100%);
+  border-radius:0 0 var(--radius-widget) var(--radius-widget);
+}
+/* 播放键与前后帧做成玻璃胶囊，压在画面上 */
+.controls-row button,#videoPlayBtn{
+  text-shadow:0 1px 3px rgba(0,0,0,.55);
+}
+
+/* ---- 30.4 弹层：更透 + 更强模糊 + 更硬朗的顶棱 ---- */
+.weather-sheet-overlay,
+.city-picker-overlay,
+.month-calendar-overlay{
+  background:rgba(10,12,30,.14);
+  -webkit-backdrop-filter:blur(9px) saturate(125%);
+  backdrop-filter:blur(9px) saturate(125%);
+}
+html.dark-mode .weather-sheet-overlay,
+html.dark-mode .city-picker-overlay,
+html.dark-mode .month-calendar-overlay{background:rgba(2,3,10,.40)}
+
+.weather-sheet-overlay .weather-sheet-panel,
+.city-picker-panel,
+.month-calendar-panel{
+  background-color:rgba(250,251,255,.80);
+  background-image:
+    linear-gradient(0deg,rgba(250,251,255,.72) 0%,rgba(250,251,255,.28) 16%,rgba(255,255,255,0) 34%),
+    linear-gradient(180deg,rgba(255,255,255,.96) 0,rgba(255,255,255,.56) 1px,rgba(255,255,255,.16) 3px,rgba(255,255,255,0) 26px),
+    radial-gradient(68% 42% at 4% -2%,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 62%),
+    radial-gradient(72% 48% at 100% 104%,rgba(150,170,255,.20) 0%,rgba(150,170,255,0) 66%),
+    linear-gradient(160deg,rgba(255,255,255,.24) 0%,rgba(255,255,255,.02) 52%,rgba(255,255,255,.14) 100%);
+  -webkit-backdrop-filter:blur(34px) saturate(190%) brightness(1.05);
+  backdrop-filter:blur(34px) saturate(190%) brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 0 0 1px rgba(255,255,255,.42),
+    0 0 0 .5px var(--lg-rim),
+    0 -22px 60px -26px rgba(40,50,140,.55);
+}
+html.dark-mode .weather-sheet-overlay .weather-sheet-panel,
+html.dark-mode .city-picker-panel,
+html.dark-mode .month-calendar-panel{
+  background-color:rgba(16,17,30,.80);
+  background-image:
+    linear-gradient(0deg,rgba(14,15,26,.78) 0%,rgba(14,15,26,.34) 16%,rgba(255,255,255,0) 34%),
+    linear-gradient(180deg,rgba(255,255,255,.16) 0,rgba(255,255,255,.05) 1px,rgba(255,255,255,0) 26px),
+    radial-gradient(68% 42% at 4% -2%,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 62%),
+    radial-gradient(72% 48% at 100% 104%,rgba(140,160,255,.16) 0%,rgba(140,160,255,0) 66%),
+    linear-gradient(160deg,rgba(255,255,255,.06) 0%,rgba(255,255,255,0) 52%,rgba(255,255,255,.04) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 0 0 1px rgba(255,255,255,.10),
+    0 0 0 .5px var(--lg-rim),
+    0 -22px 60px -26px rgba(0,0,0,.9);
+}
+/* 拖拽条也做成一颗玻璃胶囊 */
+.weather-sheet-overlay .weather-sheet-panel::before,
+.city-picker-panel::before,
+.month-calendar-panel::before{
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(150,160,195,.55));
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.75),0 1px 2px rgba(20,26,60,.12);
+}
+html.dark-mode .weather-sheet-overlay .weather-sheet-panel::before,
+html.dark-mode .city-picker-panel::before,
+html.dark-mode .month-calendar-panel::before{
+  background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.14));
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.16);
+}
+
+/* ---- 30.5 弹层内部：玻璃叠玻璃 ---- */
+/* 分段控件 */
+.wx-tabs{
+  background:var(--lg-in);
+  box-shadow:
+    inset 0 1px 0 var(--lg-in-line),
+    inset 0 0 0 .5px rgba(255,255,255,.40),
+    0 2px 8px -7px rgba(40,60,150,.5);
+}
+.wx-tab.on{
+  background:rgba(255,255,255,.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 0 0 .5px rgba(255,255,255,.62),
+    0 .5px 1px rgba(20,24,60,.08),
+    0 4px 12px -6px rgba(60,80,180,.45);
+}
+html.dark-mode .wx-tabs{background:rgba(255,255,255,.07)}
+html.dark-mode .wx-tab.on{
+  background:rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12),0 4px 12px -6px rgba(0,0,0,.8);
+}
+/* 六宫格 */
+.wx-now-cell{
+  background:var(--lg-in);
+  box-shadow:
+    inset 0 1px 0 var(--lg-in-line),
+    inset 0 0 0 .5px rgba(255,255,255,.42),
+    0 10px 20px -18px rgba(50,70,170,.6);
+}
+html.dark-mode .wx-now-cell{
+  background:rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(255,255,255,.09),0 10px 20px -18px rgba(0,0,0,.9);
+}
+/* 七天列表 */
+.wx7-list{
+  background:var(--lg-in);
+  box-shadow:
+    inset 0 1px 0 var(--lg-in-line),
+    inset 0 0 0 .5px rgba(255,255,255,.42),
+    0 12px 26px -22px rgba(50,70,170,.6);
+}
+html.dark-mode .wx7-list{
+  background:rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(255,255,255,.09),0 12px 26px -22px rgba(0,0,0,.9);
+}
+.wx7-row.today{background:linear-gradient(100deg,rgba(122,140,255,.16),rgba(255,92,147,.10))}
+/* 月历的手动选年月 */
+.mc-month{
+  background:var(--lg-in);
+  box-shadow:inset 0 1px 0 var(--lg-in-line),inset 0 0 0 .5px rgba(255,255,255,.40);
+}
+html.dark-mode .mc-month{
+  background:rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11),inset 0 0 0 .5px rgba(255,255,255,.08);
+}
+.mc-month.cur{
+  background:linear-gradient(140deg,#7A6BFF 0%,#B15CFF 52%,#FF5C93 100%);
+  box-shadow:0 8px 18px -10px rgba(150,90,255,.95),inset 0 1px 0 rgba(255,255,255,.45);
+}
+.mc-month.now{box-shadow:inset 0 0 0 1.5px rgba(255,77,126,.55),inset 0 1px 0 rgba(255,255,255,.5)}
+html.dark-mode .mc-month.now{box-shadow:inset 0 0 0 1.5px rgba(255,124,156,.55),inset 0 1px 0 rgba(255,255,255,.12)}
+.mc-month.cur.now{box-shadow:0 8px 18px -10px rgba(150,90,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.55)}
+/* 城市搜索框 */
+.city-search-input{
+  background-color:var(--lg-in);
+  box-shadow:inset 0 1px 0 var(--lg-in-line),inset 0 0 0 .5px rgba(255,255,255,.42);
+}
+html.dark-mode .city-search-input{
+  background-color:rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11),inset 0 0 0 .5px rgba(255,255,255,.08);
+}
+
+/* ---- 30.6 降级：低端机 / 不支持 backdrop-filter 的内核 ---- */
+.low-perf .profile-row,
+.low-perf .top-right .weather-widget,
+.low-perf .top-right .calendar-widget,
+.low-perf .apps-scroll-wrapper,
+.low-perf .weather-sheet-overlay .weather-sheet-panel,
+.low-perf .city-picker-panel,
+.low-perf .month-calendar-panel{
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  background-color:var(--lg-solid);
+}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .profile-row,.top-right .weather-widget,.top-right .calendar-widget,.apps-scroll-wrapper{
+    background-color:var(--lg-solid);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 26%);
+    box-shadow:inset 0 0 0 1px var(--card-ring),inset 0 0 0 .5px var(--card-line),var(--card-shadow);
+  }
+  html.dark-mode .profile-row,html.dark-mode .top-right .weather-widget,
+  html.dark-mode .top-right .calendar-widget,html.dark-mode .apps-scroll-wrapper{
+    background-color:var(--lg-solid);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 26%);
+  }
+  .weather-sheet-overlay .weather-sheet-panel,.city-picker-panel,.month-calendar-panel{
+    background-color:rgba(252,253,255,.98);
+  }
+  html.dark-mode .weather-sheet-overlay .weather-sheet-panel,
+  html.dark-mode .city-picker-panel,html.dark-mode .month-calendar-panel{
+    background-color:rgba(20,21,36,.98);
+  }
+}
+
+
+/* ============================================================================
+   31 给玻璃一点可折射的东西（页面底层重排）
+   ----------------------------------------------------------------------------
+   玻璃透光透的是「背后」，可 §02 的极光太淡（#D8E4FF 这类），透上来几乎还是白
+   —— 30% 白底盖在近白的背景上，看不出玻璃，只看出白卡。
+   这一节把极光加浓，并补两块中段色斑，让每张卡背后都有颜色：
+     资料卡背后 = 蓝紫，图片卡 / 天气卡 = 粉 + 紫，App 网格 = 青绿
+   色相不变，只提饱和度，避免整页变成调色盘。
+   ========================================================================== */
+html{
+  background-color:#E9EEFF;
+  background-image:
+    radial-gradient(122% 58% at 0% -10%,#C9DAFF 0%,rgba(201,218,255,0) 62%),
+    radial-gradient(98% 52% at 104% -4%,#FFC9E4 0%,rgba(255,201,228,0) 63%),
+    radial-gradient(92% 46% at 50% 108%,#BCF1E6 0%,rgba(188,241,230,0) 66%),
+    radial-gradient(72% 42% at 10% 56%,rgba(178,168,255,.52) 0%,rgba(178,168,255,0) 70%),
+    radial-gradient(66% 38% at 94% 74%,rgba(150,226,255,.42) 0%,rgba(150,226,255,0) 70%),
+    linear-gradient(164deg,#F3F7FF 0%,#F8F2FF 44%,#EDFAF8 100%);
+}
+html.dark-mode{
+  background-color:#06060D;
+  background-image:
+    radial-gradient(122% 56% at 0% -6%,#24276B 0%,rgba(36,39,107,0) 62%),
+    radial-gradient(98% 50% at 104% 2%,#5C1252 0%,rgba(92,18,82,0) 62%),
+    radial-gradient(92% 44% at 50% 110%,#073039 0%,rgba(7,48,57,0) 66%),
+    radial-gradient(72% 42% at 10% 56%,rgba(72,52,142,.55) 0%,rgba(72,52,142,0) 70%),
+    radial-gradient(66% 38% at 94% 74%,rgba(10,82,98,.48) 0%,rgba(10,82,98,0) 70%),
+    linear-gradient(164deg,#080816 0%,#0B0817 48%,#050E18 100%);
+}
+
+/* 深色下天气卡右上那块暖光在更透的底上会发浑，压到 .28 */
+html.dark-mode .top-right .weather-widget::before{
+  background:radial-gradient(circle at 40% 40%,rgba(255,190,96,.28) 0%,rgba(255,128,150,.14) 38%,rgba(255,120,170,0) 72%);
+}
+
+/* ============================================================================
+   32 标题行：问候语 + 固定文案（同一行，同字号同渐变，不滚动）
+   ----------------------------------------------------------------------------
+   「你好，我叫许红豆」后面接「永远相信美好的事情即将发生」。
+   两句现在是**同一个 <span> 里的两句话**，不是两个元素 —— 这是字号与颜色
+   完全一致的前提：同一个元素只有一套 font-size、一套 background-clip:text
+   渐变、一套 islandFlow 动画，天然不可能出现「一句彩色一句灰、一个大一个小」。
+   顺带好处：渐变是一条连续的色带，接缝处不会因为各自的 background-position
+   换算基准不同而跳色（两个元素时尺寸不同，同一时刻取到的色段就不一样）。
+   代价是两句只能一起缩放：JS 从 14px 起逐档往下试到 9.5px，直到这一行放得下，
+   因为真机 MiSans 比桌面字体宽，写死断点靠不住。
+   ========================================================================== */
+.profile-row .subtitle .line-1{
+  display:block;width:100%;max-width:100%;
+  height:var(--profile-line);line-height:var(--profile-line);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
 </style>
     <script>
         (function () {
@@ -2847,7 +3203,7 @@ self.addEventListener('fetch', function (e) {
             </div>
                     <div class="profile-left">
                         <div class="subtitle">
-                            <span class="line-1">你好，我叫许红豆</span>
+                            <span class="line-1" id="greetLine">你好，我叫许红豆，永远相信美好的事情即将发生!</span>
                             <span class="line-2" id="mottoLine">风乍起，吹皱一江春水</span>
                         </div>
                         <div class="name">刘茜美子・去有风的地方遇见你</div>
@@ -3367,6 +3723,32 @@ self.addEventListener('fetch', function (e) {
                     islandText.innerHTML = '<span class="island-grad">' + text + '</span>';
                 }
             }
+
+            // 标题行：「你好，我叫许红豆　永远相信美好的事情即将发生」，同一行不滚动。
+            // 两句在同一个 span 里，字号必然一致，所以只能整体缩：
+            // 从 14px 起每次 0.5px 往下试，一直试到 9.5px 为止。
+            // 用 JS 量实际宽度而不是写死断点 —— 真机 MiSans 比桌面字体宽。
+            function fitGreetLine() {
+                var el = document.getElementById('greetLine');
+                if (!el) return;
+                var fs = 14, min = 9.5;
+                // scrollWidth 有个坑：内容不溢出时它返回的就是 clientWidth 本身，
+                // 拿它跟 clientWidth 比永远成立（上一版就是这样把所有尺寸缩到最小的）。
+                // 用 Range 拿文本的真实宽度才准，留 3px 余量防真机差半像素 / 字体略宽
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                function textW() { return range.getBoundingClientRect().width; }
+                el.style.fontSize = fs + 'px';
+                while (textW() > el.clientWidth - 2 && fs > min) {
+                    fs -= 0.5;
+                    el.style.fontSize = fs + 'px';
+                }
+            }
+            window.addEventListener('resize', fitGreetLine, { passive: true });
+            // 首帧时父级还在布局、字体也可能没就位，量出来的宽度不准，补三次重算
+            window.addEventListener('load', fitGreetLine);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitGreetLine);
+            setTimeout(fitGreetLine, 360);
             const expandBtn = $("#expandBtn");
             const statusThemeToggle = $("#statusThemeToggle");
 
@@ -3873,6 +4255,7 @@ self.addEventListener('fetch', function (e) {
             const textPool = ["❤️ 刘亦菲", "苏FA36165", "Xiaomi SU7 Pro", "许红豆", "刘茜美子"];
             let tidx = 0;
             setIslandText(textPool[0]);
+            fitGreetLine();
 
             // ===== 头像轮播 =====
             // 双层切换：旧图留在下层（avatar-prev）当底，新图先 decode 再进入，
@@ -6217,7 +6600,7 @@ self.addEventListener('fetch', function (e) {
                 updateCalendar();
 
                 /* ------------------------------------------------------------------
-                   座右铭｜150 句，每 10 秒换一句
+                   座右铭｜150 句，每 10 秒换一句（标题行是另一套静态文案，见第 7 节 fitGreetLine）
                    - 洗牌轮播：一轮之内不重复，150 句放完（约 25 分钟）再重洗
                    - 交给 TimerManager 调度，页面切后台自动停，不空跑定时器
                    - 换字先淡出再淡入，直接替换文字会因为渐变文字重绘而抖一下
@@ -6387,7 +6770,7 @@ self.addEventListener('fetch', function (e) {
                         var j = Math.floor(Math.random() * (i + 1));
                         var t = a[i]; a[i] = a[j]; a[j] = t;
                     }
-                    // 新一轮的第一句不能和上一轮最后一句一样，否则交界处会出现连续两天同款
+                    // 新一轮的第一句不能和上一轮最后一句一样
                     if (a.length > 1 && a[0] === mottoShown) {
                         var k = a[0]; a[0] = a[a.length - 1]; a[a.length - 1] = k;
                     }
