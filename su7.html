@@ -2191,6 +2191,197 @@ html.dark-mode .city-lv.lv-far{background:rgba(120,140,255,.24);color:#AAB6FF}
 }
 .city-empty{padding:24px 16px;text-align:center;color:var(--label-3);font-size:13px;line-height:19px}
 
+/* ============================================================================
+   24 顶栏（图片卡）高度 +6px
+   ----------------------------------------------------------------------------
+   原公式上限是 29.4svh 与 clamp 的 254 / 240 / 228 三档，实测 393×852 下
+   29.4svh=250.5 才是真正的天花板（clamp 的 254 根本没摸到），所以只调 clamp
+   不动 svh 是白调。这里把「视口高比例」和「像素档」一起抬 6px 左右：
+   · 29.4svh → 30.2svh（852 高时 +6.5px）
+   · 矮屏档 28.6svh → 29.4svh（730 高时 +5.8px）
+   · clamp 228/64vw/254 → 234/65.4vw/260
+   图片卡与右列同处一行 grid，会一起变高，天气/日历留白也更舒服。
+   底部原本还有 20~50px 余量，加高后仍然一屏不滚动（见 25 节验证数据）。
+   ========================================================================== */
+@supports (height:100svh){
+  .top-card{height:min(clamp(234px,65.4vw,260px),30.2svh)}
+  @media (min-width:400px){.top-card{height:min(260px,30.2svh)}}
+  @media (max-width:390px){.top-card{height:min(clamp(234px,65.4vw,246px),30.2svh)}}
+  @media (max-width:352px){.top-card{height:min(234px,30.2svh)}}
+  @media (max-height:760px){.top-card{height:min(clamp(234px,65.4vw,260px),29.4svh)}}
+  /* 宽屏 + 矮视口（如 430×780）本来就贴边，这里回到原尺寸，只加不减 */
+  @media (min-width:396px) and (max-height:800px){.top-card{height:min(254px,29.4svh)}}
+}
+/* 不支持 svh 的浏览器（极旧内核）走固定档 */
+@supports not (height:100svh){
+  .top-card{height:clamp(234px,65.4vw,260px)}
+}
+
+/* ============================================================================
+   25 天气弹层：实时 / 未来 7 天 双页
+   ----------------------------------------------------------------------------
+   原来点天气卡只能看 7 天列表，当前实时细项（体感/湿度/风/气压/能见度/紫外线）
+   只在卡片那 2×3 的 9px 小字里，看不清。这里加一个分段控件：
+   「实时」页 = 大温度 + 今日高低温 + 六宫格 + 日出日落进度 + 更新时间/刷新
+   「7 天」页 = 原来的列表，保持不变。
+   ========================================================================== */
+.wx-tabs{
+  display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:2px 0 10px;padding:3px;
+  border-radius:13px;background:var(--fill-2);
+}
+.wx-tab{
+  height:30px;border-radius:10px;font-size:12.5px;font-weight:700;letter-spacing:-.1px;
+  color:var(--label-2);background:transparent;
+  transition:color .18s var(--ease),background .22s var(--ease),box-shadow .22s var(--ease);
+}
+.wx-tab.on{
+  color:var(--label);background:var(--card-bg);
+  box-shadow:0 .5px 1px rgba(20,24,60,.10),0 3px 10px -5px rgba(60,80,180,.45),
+             inset 0 0 0 .5px var(--card-line);
+}
+html.dark-mode .wx-tab.on{
+  background:rgba(255,255,255,.11);
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.10),0 3px 10px -5px rgba(0,0,0,.7);
+}
+.wx-tab:active{transform:scale(.97)}
+
+/* 两个页面互斥：面板类名决定显示哪一页 */
+.weather-sheet-panel .wx-now{display:none}
+.weather-sheet-panel.tab-now .wx-now{display:block}
+.weather-sheet-panel.tab-now .wx7-list{display:none}
+
+.wx-hero-hl{
+  display:flex;align-items:baseline;gap:7px;margin-left:2px;
+  font-size:12.5px;font-weight:700;color:var(--label-2);
+  font-variant-numeric:tabular-nums;
+}
+.wx-hero-hl .hl-hi{color:#FF7A47}
+.wx-hero-hl .hl-lo{color:#4E9BFF}
+html.dark-mode .wx-hero-hl .hl-hi{color:#FF9B6B}
+html.dark-mode .wx-hero-hl .hl-lo{color:#7FBAFF}
+
+/* 六宫格：体感 / 湿度 / 风 / 气压 / 能见度 / 紫外线 */
+.wx-now-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.wx-now-cell{
+  display:flex;flex-direction:column;gap:4px;padding:9px 10px;border-radius:14px;
+  background:var(--card-bg);
+  box-shadow:inset 0 0 0 .5px var(--card-line),0 8px 18px -16px rgba(70,90,190,.85);
+}
+.wx-now-cell span{font-size:10.5px;font-weight:700;color:var(--label-2);letter-spacing:-.1px}
+.wx-now-cell b{
+  font-size:15px;font-weight:700;color:var(--label);letter-spacing:-.4px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.wx-now-cell b i{font-style:normal;font-size:10px;font-weight:700;color:var(--label-3);margin-left:2px}
+html.dark-mode .wx-now-cell b i{color:#AEB6E0}
+
+/* 日出 / 日落：与天气卡同一套描边图标 + 当日进度 */
+.wx-now-sun{
+  display:flex;align-items:center;gap:8px;margin:12px 2px 0;
+  font-size:11.5px;font-weight:700;color:var(--label-2);
+  font-variant-numeric:tabular-nums;
+}
+.wx-now-sun .wns-ico{
+  width:13px;height:13px;flex:0 0 auto;
+  fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.wx-now-sun .rise .wns-ico{color:#FFA733}
+.wx-now-sun .set .wns-ico{color:#FF7A9E}
+html.dark-mode .wx-now-sun .rise .wns-ico{color:#FFC24D}
+html.dark-mode .wx-now-sun .set .wns-ico{color:#FF97B2}
+.wns-line{
+  position:relative;flex:1 1 auto;height:3px;border-radius:3px;
+  background:rgba(138,144,184,.26);
+}
+html.dark-mode .wns-line{background:rgba(200,205,240,.20)}
+.wns-line i{
+  position:absolute;left:0;top:0;bottom:0;border-radius:3px;
+  background:linear-gradient(90deg,rgba(255,167,51,.9),rgba(255,122,158,.9));
+  transition:width .6s var(--ease);
+}
+.wns-line u{
+  position:absolute;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;
+  background:#FFF;box-shadow:0 0 6px 1.5px rgba(255,150,90,.85);
+  transition:left .6s var(--ease);
+}
+.wx-now-meta{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:12px 2px 0;font-size:11px;font-weight:600;color:var(--label-3);
+}
+.wx-now-refresh{
+  display:flex;align-items:center;gap:5px;height:28px;padding:0 13px;border-radius:14px;
+  background:linear-gradient(120deg,rgba(122,140,255,.20),rgba(168,85,247,.16));
+  color:#4E58D6;font-size:11.5px;font-weight:700;letter-spacing:-.1px;
+  transition:transform .18s var(--ease),opacity .18s var(--ease);
+}
+html.dark-mode .wx-now-refresh{
+  color:#A9B4FF;background:linear-gradient(120deg,rgba(122,140,255,.26),rgba(168,85,247,.20));
+}
+.wx-now-refresh:active{transform:scale(.95);opacity:.75}
+.wx-now-refresh[disabled]{opacity:.45}
+
+/* ============================================================================
+   26 月历：点标题手动选年 / 月
+   ----------------------------------------------------------------------------
+   标题改成按钮：点一下把 7 列日期网格换成「年份步进 + 12 个月」。
+   年份 ‹‹ / ‹ / › / ›› 分别 ±10 / ±1，月份 4×3 排布。
+   当前正在看的月份 = 渐变填充；今天所在月份 = 粉红描边。
+   ========================================================================== */
+.month-calendar-title{
+  display:inline-flex;align-items:center;gap:6px;
+  background:none;border:none;padding:0;cursor:pointer;
+  color:var(--label-2);-webkit-text-fill-color:currentColor;
+}
+.month-calendar-title span{
+  background:var(--grad-cool);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+}
+/* 小三角：不用 FA（这套只内联了 29 个图标，没有 chevron-down） */
+.month-calendar-title::after{
+  content:'';width:0;height:0;margin-top:2px;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid currentColor;opacity:.55;
+  transition:transform .24s var(--ease);
+}
+.month-calendar-panel.picking .month-calendar-title::after{transform:rotate(180deg)}
+.month-calendar-title:active{opacity:.6}
+
+.mc-picker{display:none;padding:2px 0 4px}
+.month-calendar-panel.picking .mc-picker{display:block}
+.month-calendar-panel.picking .month-calendar-weekdays,
+.month-calendar-panel.picking .month-calendar-days,
+.month-calendar-panel.picking .month-calendar-legend{display:none}
+
+.mc-picker-bar{display:flex;align-items:center;justify-content:center;gap:9px;margin:2px 0 14px}
+.mc-picker-bar button{
+  width:30px;height:30px;border-radius:50%;background:var(--fill-2);color:var(--label-2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+  transition:transform .18s var(--ease),opacity .18s var(--ease);
+}
+.mc-picker-bar button.jump{font-size:9.5px;letter-spacing:-.5px}
+.mc-picker-bar button:active{transform:scale(.9);opacity:.6}
+.mc-year{
+  min-width:96px;text-align:center;font-size:16px;font-weight:700;color:var(--label);
+  letter-spacing:-.3px;font-variant-numeric:tabular-nums;
+}
+.mc-months{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mc-month{
+  height:44px;border-radius:13px;background:var(--fill-2);
+  color:var(--label);font-size:13px;font-weight:700;letter-spacing:-.2px;
+  font-variant-numeric:tabular-nums;
+  transition:transform .16s var(--ease),box-shadow .2s var(--ease);
+}
+.mc-month:active{transform:scale(.94)}
+.mc-month.now{box-shadow:inset 0 0 0 1.5px rgba(255,77,126,.55);color:#FF4D7E}
+html.dark-mode .mc-month.now{color:#FF7C9C;box-shadow:inset 0 0 0 1.5px rgba(255,124,156,.55)}
+.mc-month.cur{
+  background:linear-gradient(140deg,#7A6BFF 0%,#B15CFF 52%,#FF5C93 100%);
+  color:#FFF;box-shadow:0 8px 18px -10px rgba(150,90,255,.95);
+}
+.mc-month.cur.now{box-shadow:0 8px 18px -10px rgba(150,90,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.55)}
+
 </style>
     <script>
         (function () {
@@ -2355,7 +2546,7 @@ self.addEventListener('fetch', function (e) {
     <div class="weather-sheet-overlay" id="weatherSheetOverlay">
         <div class="weather-sheet-panel">
             <div class="wx7-head">
-                <div class="wx7-title">未来 7 天</div>
+                <div class="wx7-title" id="wxSheetTitle">未来 7 天</div>
                 <div class="wx7-actions">
                     <button class="wx7-city-btn" id="wxSheetCity">
                         <i class="fa-solid fa-location-dot"></i><span id="wxSheetCityName">当前</span>
@@ -2363,7 +2554,13 @@ self.addEventListener('fetch', function (e) {
                     <button class="wx7-close" id="wxSheetClose"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
+            <!-- 实时 / 7 天 分段控件（样式见 pro-theme.css 25 节） -->
+            <div class="wx-tabs" id="wxTabs">
+                <button class="wx-tab" data-tab="now" type="button">实时</button>
+                <button class="wx-tab on" data-tab="week" type="button">未来 7 天</button>
+            </div>
             <div class="wx7-hero" id="wxHero"></div>
+            <div class="wx-now" id="wxNow"></div>
             <div class="wx7-list" id="wx7List"></div>
             <div class="wx7-foot">数据来自 Open-Meteo · 点城市名可切换城市</div>
         </div>
@@ -2372,13 +2569,26 @@ self.addEventListener('fetch', function (e) {
     <div class="month-calendar-overlay" id="monthCalendarOverlay">
         <div class="month-calendar-panel" id="monthCalendarPanel">
             <div class="month-calendar-header">
-                <div class="month-calendar-title" id="monthCalendarTitle">2026年1月</div>
+                <button class="month-calendar-title" id="monthCalendarTitle" type="button" aria-haspopup="true">
+                    <span id="monthCalendarTitleText">2026年1月</span>
+                </button>
                 <div class="month-calendar-nav">
                     <button id="monthPrevBtn"><i class="fa-solid fa-chevron-left"></i></button>
                     <button id="monthNextBtn"><i class="fa-solid fa-chevron-right"></i></button>
                     <button class="month-calendar-close" id="monthCalendarClose"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
+            <div class="mc-picker" id="mcPicker">
+                <div class="mc-picker-bar">
+                    <button class="jump" id="mcYearPrev10" type="button" aria-label="上十年">«</button>
+                    <button id="mcYearPrev" type="button" aria-label="上一年"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span class="mc-year" id="mcYearLabel">2026 年</span>
+                    <button id="mcYearNext" type="button" aria-label="下一年"><i class="fa-solid fa-chevron-right"></i></button>
+                    <button class="jump" id="mcYearNext10" type="button" aria-label="下十年">»</button>
+                </div>
+                <div class="mc-months" id="mcMonths"></div>
+            </div>
+
             <div class="month-calendar-weekdays">
                 <span class="weekend">日</span>
                 <span>一</span>
@@ -4947,6 +5157,7 @@ self.addEventListener('fetch', function (e) {
                         wxSet('wxSunset', fmtHourMin(daily.sunset ? daily.sunset[0] : ''));
 
                         // 日出→日落 的当日进度：光点落在当前时间的位置
+                        var sunPct = null;
                         try {
                             var srIso = daily.sunrise ? daily.sunrise[0] : null;
                             var ssIso = daily.sunset ? daily.sunset[0] : null;
@@ -4956,11 +5167,36 @@ self.addEventListener('fetch', function (e) {
                                 if (t1 > t0) {
                                     var pg = (Date.now() - t0) / (t1 - t0);
                                     pg = Math.max(0, Math.min(1, pg));
+                                    sunPct = pg;
                                     var ln = document.querySelector('.wx-sun-line');
                                     if (ln) ln.style.setProperty('--p', (pg * 100).toFixed(1) + '%');
                                 }
                             }
                         } catch (e3) { console.warn('日出进度计算失败:', e3); }
+
+                        // 7 天面板的「实时」页复用这一份数据：直接从刚写好的 DOM 取值，
+                        // 免得再算一遍格式（风向/风力/能见度/紫外线等级各有各的写法）
+                        if (window.__wxData) {
+                            var wxTxt = function (id) {
+                                var el = document.getElementById(id);
+                                return el ? el.textContent : '--';
+                            };
+                            window.__wxData.now = {
+                                feels: wxTxt('wxFeels'),
+                                hum: wxTxt('wxHumidity'),
+                                wind: wxTxt('wxWind'),
+                                press: wxTxt('wxPressure'),
+                                vis: wxTxt('wxVisibility'),
+                                uv: wxTxt('wxUv'),
+                                uvLv: wxTxt('wxUvLv'),
+                                sunrise: wxTxt('wxSunrise'),
+                                sunset: wxTxt('wxSunset'),
+                                sunPct: sunPct
+                            };
+                            window.__wxData.max = maxTemp;
+                            window.__wxData.min = minTemp;
+                            window.__wxData.at = Date.now();
+                        }
 
 
                     } catch (e) {
@@ -5304,10 +5540,72 @@ self.addEventListener('fetch', function (e) {
                     citySearchInput.blur();
                 }
 
-                // ---- 未来 7 天 ----
+                // ---- 天气面板：实时 / 未来 7 天 ----
                 var weatherSheetOverlay = document.getElementById('weatherSheetOverlay');
+                var weatherSheetPanel = weatherSheetOverlay.querySelector('.weather-sheet-panel');
+                var wxSheetTitle = document.getElementById('wxSheetTitle');
                 var wxSheetCityName = document.getElementById('wxSheetCityName');
                 var WX7_WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                var wxSheetTab = 'week';
+
+                // 实时页：六宫格 + 日出日落进度 + 更新时间
+                function renderWxNow() {
+                    var box = document.getElementById('wxNow');
+                    var d = window.__wxData;
+                    if (!box) return;
+                    if (!d || !d.now) {
+                        box.innerHTML = '<div class="wx7-empty">实时数据还没拿到，稍等一下</div>';
+                        return;
+                    }
+                    var n = d.now;
+                    var cells = [
+                        ['体感温度', n.feels],
+                        ['相对湿度', n.hum],
+                        ['风', n.wind],
+                        ['气压', n.press],
+                        ['能见度', n.vis],
+                        ['紫外线', n.uv + (n.uvLv && n.uv !== '--' ? '<i>' + n.uvLv + '</i>' : '')]
+                    ];
+                    var html = '<div class="wx-now-grid">';
+                    for (var i = 0; i < cells.length; i++) {
+                        html += '<div class="wx-now-cell"><span>' + cells[i][0] + '</span><b>' +
+                            cells[i][1] + '</b></div>';
+                    }
+                    html += '</div>';
+
+                    var pct = (n.sunPct === null || n.sunPct === undefined) ? 0 : n.sunPct * 100;
+                    html += '<div class="wx-now-sun">' +
+                        '<span class="rise"><svg class="wns-ico" viewBox="0 0 24 24" aria-hidden="true">' +
+                            '<circle cx="12" cy="12" r="4.3"/>' +
+                            '<path d="M12 2.4v2.3M12 19.3v2.3M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6' +
+                            'M2.4 12h2.3M19.3 12h2.3M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span>' +
+                        '<b>' + (n.sunrise || '--:--') + '</b>' +
+                        '<span class="wns-line"><i style="width:' + pct.toFixed(1) + '%"></i>' +
+                            '<u style="left:' + pct.toFixed(1) + '%"></u></span>' +
+                        '<b>' + (n.sunset || '--:--') + '</b>' +
+                        '<span class="set"><svg class="wns-ico" viewBox="0 0 24 24" aria-hidden="true">' +
+                            '<path d="M20.4 14.7A8.3 8.3 0 0 1 9.4 3.7a8.5 8.5 0 1 0 11 11Z"/></svg></span>' +
+                    '</div>';
+
+                    var at = d.at ? new Date(d.at) : null;
+                    var hhmm = at ? ('0' + at.getHours()).slice(-2) + ':' + ('0' + at.getMinutes()).slice(-2) : '--:--';
+                    html += '<div class="wx-now-meta"><span>更新于 ' + hhmm + '</span>' +
+                        '<button class="wx-now-refresh" id="wxNowRefresh" type="button">刷新一下</button></div>';
+
+                    box.innerHTML = html;
+                }
+
+                function wxSheetShowTab(tab) {
+                    wxSheetTab = (tab === 'now') ? 'now' : 'week';
+                    weatherSheetPanel.classList.toggle('tab-now', wxSheetTab === 'now');
+                    var btns = document.querySelectorAll('#wxTabs .wx-tab');
+                    for (var i = 0; i < btns.length; i++) {
+                        btns[i].classList.toggle('on', btns[i].getAttribute('data-tab') === wxSheetTab);
+                    }
+                    if (wxSheetTitle) {
+                        wxSheetTitle.textContent = (wxSheetTab === 'now') ? '实时天气' : '未来 7 天';
+                    }
+                }
 
                 function renderWeatherSheet() {
                     var hero = document.getElementById('wxHero');
@@ -5316,13 +5614,22 @@ self.addEventListener('fetch', function (e) {
                     if (!d) {
                         hero.innerHTML = '<div class="wx7-empty">天气数据还没拿到，稍等一下</div>';
                         list.innerHTML = '';
+                        renderWxNow();
                         return;
                     }
                     wxSheetCityName.textContent = d.city || '当前';
+                    var hl = '';
+                    if (d.max !== undefined && d.max !== '--' && d.min !== undefined) {
+                        hl = '<span class="wx-hero-hl"><span class="hl-hi">最高 ' + d.max + '°</span>' +
+                            '<span class="hl-lo">最低 ' + d.min + '°</span></span>';
+                    }
                     hero.innerHTML =
                         '<div class="ws-main"><span class="ws-temp">' + d.temp + '°</span>' +
-                        '<span class="ws-desc">' + d.desc + '</span></div>' +
+                        '<span class="ws-desc">' + d.desc + '</span>' + hl + '</div>' +
                         '<div class="ws-city"><i class="fa-solid fa-location-dot"></i>' + (d.city || '') + '</div>';
+
+                    renderWxNow();
+                    wxSheetShowTab(wxSheetTab);
 
                     var day = d.daily;
                     if (!day || !day.time || !day.time.length) {
@@ -5366,8 +5673,18 @@ self.addEventListener('fetch', function (e) {
                 }
 
                 function openWeatherSheet() {
+                    // 「实时」页最怕看到一小时前的数据：超过 10 分钟就先静默刷一版
+                    var stale = !window.__wxData || !window.__wxData.at ||
+                        (Date.now() - window.__wxData.at > 600000);
                     renderWeatherSheet();
                     weatherSheetOverlay.classList.add('show');
+                    if (stale) {
+                        try {
+                            Promise.resolve(fetchWeather(currentLat, currentLon, currentCity)).then(function () {
+                                if (weatherSheetOverlay.classList.contains('show')) renderWeatherSheet();
+                            });
+                        } catch (e0) {}
+                    }
                 }
 
                 function closeWeatherSheet() {
@@ -5383,7 +5700,26 @@ self.addEventListener('fetch', function (e) {
                     if (e.target === weatherSheetOverlay) closeWeatherSheet();
                 });
 
-                // 点天气卡 = 打开未来 7 天
+                document.getElementById('wxTabs').addEventListener('click', function(e) {
+                    var b = e.target.closest ? e.target.closest('.wx-tab') : null;
+                    if (b) wxSheetShowTab(b.getAttribute('data-tab'));
+                });
+
+                // 刷新按钮是每次渲染重建的，用委托
+                document.getElementById('wxNow').addEventListener('click', function(e) {
+                    var btn = e.target.closest ? e.target.closest('#wxNowRefresh') : null;
+                    if (!btn || btn.disabled) return;
+                    btn.disabled = true;
+                    btn.textContent = '刷新中…';
+                    Promise.resolve(fetchWeather(currentLat, currentLon, currentCity)).then(function () {
+                        renderWeatherSheet();
+                    }).catch(function () {
+                        btn.disabled = false;
+                        btn.textContent = '重试';
+                    });
+                });
+
+                // 点天气卡 = 打开天气面板
                 document.getElementById('weatherWidget').addEventListener('click', function(e) {
                     e.stopPropagation();
                     openWeatherSheet();
@@ -5402,12 +5738,14 @@ self.addEventListener('fetch', function (e) {
                 const monthCalendarOverlay = document.getElementById('monthCalendarOverlay');
                 const monthCalendarTitle = document.getElementById('monthCalendarTitle');
                 const monthCalendarDays = document.getElementById('monthCalendarDays');
+                const monthCalendarTitleText = document.getElementById('monthCalendarTitleText');
+                const monthCalendarPanel = document.getElementById('monthCalendarPanel');
 
                 let monthCalendarYear = new Date().getFullYear();
                 let monthCalendarMonth = new Date().getMonth();
 
                 function renderMonthCalendar() {
-                    monthCalendarTitle.textContent = monthCalendarYear + '年' + (monthCalendarMonth + 1) + '月';
+                    monthCalendarTitleText.textContent = monthCalendarYear + '年' + (monthCalendarMonth + 1) + '月';
 
                     var firstDay = new Date(monthCalendarYear, monthCalendarMonth, 1);
                     var lastDay = new Date(monthCalendarYear, monthCalendarMonth + 1, 0);
@@ -5497,6 +5835,7 @@ self.addEventListener('fetch', function (e) {
                 function openMonthCalendar() {
                     monthCalendarYear = selectedDate.getFullYear();
                     monthCalendarMonth = selectedDate.getMonth();
+                    setMcPicking(false);
                     renderMonthCalendar();
                     monthCalendarOverlay.classList.add('show');
                 }
@@ -5527,6 +5866,68 @@ self.addEventListener('fetch', function (e) {
                         monthCalendarYear++;
                     }
                     renderMonthCalendar();
+                });
+
+                /* ------------------------------------------------------------------
+                   年月手动选择
+                   点标题 → 日期网格换成「« ‹ 2026 年 › » + 12 个月」；
+                   选月直接跳到该月并收起。« / » 是 ±10 年。
+                   ------------------------------------------------------------------ */
+                const mcMonths = document.getElementById('mcMonths');
+                const mcYearLabel = document.getElementById('mcYearLabel');
+                let mcPickYear = monthCalendarYear;
+
+                function renderMcPicker() {
+                    mcYearLabel.textContent = mcPickYear + ' 年';
+                    var now = new Date();
+                    var nowY = now.getFullYear(), nowM = now.getMonth();
+                    var html = '';
+                    for (var m = 0; m < 12; m++) {
+                        var cls = 'mc-month';
+                        if (mcPickYear === monthCalendarYear && m === monthCalendarMonth) cls += ' cur';
+                        if (mcPickYear === nowY && m === nowM) cls += ' now';
+                        html += '<button class="' + cls + '" type="button" data-m="' + m + '">' + (m + 1) + '月</button>';
+                    }
+                    mcMonths.innerHTML = html;
+                }
+
+                function setMcPicking(on) {
+                    monthCalendarPanel.classList.toggle('picking', !!on);
+                    if (on) {
+                        mcPickYear = monthCalendarYear;
+                        renderMcPicker();
+                    }
+                }
+
+                monthCalendarTitle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    setMcPicking(!monthCalendarPanel.classList.contains('picking'));
+                });
+
+                document.getElementById('mcYearPrev').addEventListener('click', function() {
+                    mcPickYear--;
+                    renderMcPicker();
+                });
+                document.getElementById('mcYearNext').addEventListener('click', function() {
+                    mcPickYear++;
+                    renderMcPicker();
+                });
+                document.getElementById('mcYearPrev10').addEventListener('click', function() {
+                    mcPickYear -= 10;
+                    renderMcPicker();
+                });
+                document.getElementById('mcYearNext10').addEventListener('click', function() {
+                    mcPickYear += 10;
+                    renderMcPicker();
+                });
+
+                mcMonths.addEventListener('click', function(e) {
+                    var b = e.target.closest ? e.target.closest('.mc-month') : null;
+                    if (!b) return;
+                    monthCalendarYear = mcPickYear;
+                    monthCalendarMonth = parseInt(b.getAttribute('data-m'), 10);
+                    renderMonthCalendar();
+                    setMcPicking(false);
                 });
 
                 var calendarLongPressTimer = null;
