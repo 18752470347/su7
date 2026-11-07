@@ -1085,7 +1085,7 @@ html.dark-mode .avatar-center img{
   grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);
   grid-template-rows:minmax(0,1fr);
   gap:12px;
-  height:clamp(232px,64vw,254px);
+  height:clamp(228px,64vw,254px);
   min-height:0;
   align-items:stretch;
 }
@@ -1538,6 +1538,9 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
 
 /* ============================================================================
    13 机型适配（小米 18 Pro · Chrome 逻辑宽 352~407dp）
+   —— 纵向尺寸的「固定 px」问题：真机打开时地址栏展开，可视高只有 690~740，
+      而行高累加写死约 800，所以必然出滚动条。下面统一给纵向尺寸加上
+      「视口高度上限」，812 高时与原设计一致，视口变矮则等比收缩。
    ========================================================================== */
 :root{
   --avatar-size:clamp(52px,14.6vw,58px);
@@ -1552,28 +1555,129 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
 .app-icon-wrap{width:clamp(52px,14.4vw,58px);height:clamp(52px,14.4vw,58px)}
 
 @media (min-width:400px){
-  .top-card{height:254px;gap:13px}
+  .top-card{gap:13px}
   .top-right{gap:9px}
   .profile-row{gap:22px;padding:14px 17px}
 }
 @media (max-width:390px){
-  .top-card{height:clamp(232px,64vw,240px)}
+  .top-card{height:clamp(228px,64vw,240px)}
   .profile-row{padding:12px 14px;--profile-line:25px}
   .top-right .weather-temp{font-size:clamp(20px,5.8vw,23px)}
   .wx-d > b{font-size:9px}
   .yj-text{font-size:9px}
 }
 @media (max-width:352px){
-  .top-card{height:232px}
+  .top-card{height:228px}
   .profile-row .avatar-center-wrap{--avatar-size:46px}
   .wx-d > span{font-size:8px}
   .wx-d > b{font-size:8.5px}
   .yj-text{font-size:8.5px}
 }
 
-/* 安卓 Chrome：用 svh 跟随地址栏收起/展开，避免首屏被顶掉 */
+/* ---------------------------------------------------------------------------
+   13.1 一屏适配核心：每块高度 = min(原设计值, 视口高百分比)
+   svh = 地址栏展开时的最小视口高，正好是「刚打开页面」看到的高度，
+   用它做上限就不会因地址栏收放而跳动（dvh 会抖，费电也更容易掉帧）。
+   --------------------------------------------------------------------------- */
 @supports (height:100svh){
-  body{min-height:100svh}
+  /* body 原来自带的 22px 底部留白会顶出滚动条，收回 10px；min-height 也从 dvh 换成 svh */
+  body{
+    min-height:100svh;
+    padding-bottom:calc(var(--safe-bottom) + 10px);
+  }
+
+  /* 状态栏（灵动岛定高撑出来的）：33 → 最矮 4.2svh */
+  .dynamic-island{height:min(33px,4.2svh)}
+
+  /* 组件间距 / 底部内边距一起收 */
+  .app-container{
+    gap:min(9px,0.95svh);
+    padding-bottom:calc(var(--safe-bottom) + min(7px,0.9svh));
+  }
+
+  /* 顶栏（图片 + 天气 + 日历）：整页最吃高度的一块，让出来的空间都给下面的视频 */
+  .top-card{height:min(clamp(228px,64vw,254px),29.4svh)}
+  @media (min-width:400px){.top-card{height:min(254px,29.4svh)}}
+  @media (max-width:390px){.top-card{height:min(clamp(228px,64vw,240px),29.4svh)}}
+  @media (max-width:352px){.top-card{height:min(228px,29.4svh)}}
+
+  /* 视频卡：保持原生 16/9，不做任何高度裁切（用户要求还原） */
+
+  /* 资料卡：行高 26 → 3.1svh；头像 6.6svh */
+  .profile-row{--profile-line:min(26px,3.1svh)}
+  @media (max-width:390px){.profile-row{--profile-line:min(25px,3svh)}}
+  .profile-row .avatar-center-wrap{--avatar-size:min(clamp(52px,14.6vw,58px),6.6svh)}
+
+  /* App 图标 */
+  .app-icon-wrap{
+    width:min(clamp(52px,14.4vw,58px),6.3svh);
+    height:min(clamp(52px,14.4vw,58px),6.3svh);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   13.2 矮屏紧凑档（可视高 ≤760：多数安卓机地址栏 + 工具栏占位后就是这个数）
+   只压天气/日历内部的文字与日期块，卡片本体尺寸由上方 svh 统一控制
+   --------------------------------------------------------------------------- */
+@media (max-height:760px){
+  .top-right .weather-widget{padding:6px 10px}
+  .top-right .weather-temp{font-size:clamp(19px,5.4vw,22px)}
+  .wx-detail{margin-top:2px;gap:1px 6px}
+  .wx-d > span{font-size:8px}
+  .wx-d > b{font-size:9px}
+  .wx-sun{margin-top:2px;font-size:8.5px}
+
+  .top-right .calendar-widget{padding:7px 10px;gap:0 8px}
+  .top-right .calendar-date-block{width:40px;height:44px;border-radius:10px}
+  .top-right .calendar-day-num{font-size:21px;line-height:22px}
+  .cal-yiji{margin-top:2px;gap:1px}
+  .yj-text{font-size:8.5px;line-height:11px}
+
+  /* 视频卡保持 16/9 原尺寸，高度全部从上方的顶栏里省 */
+  .top-card{height:min(clamp(228px,64vw,254px),28.6svh)}
+  .profile-row{--profile-line:min(26px,2.95svh)}
+
+  .app-label{font-size:10px;line-height:12px}
+  .app-button{gap:4px}
+  .apps-page{gap:14px 8px}
+}
+
+/* ---------------------------------------------------------------------------
+   13.3 极矮档（可视高 ≤720：地址栏 + 底部工具栏都占满时）
+   顶栏被 svh 压到 ~205px，右侧两卡只剩 100px 左右，内部尺寸必须整体再降一档，
+   否则天气卡会溢出压到日历卡上
+   --------------------------------------------------------------------------- */
+@media (max-height:720px){
+  /* 视频卡已还原成 16/9，这里从状态栏 / 间距 / 宫格里挤回被视频占走的空间 */
+  .dynamic-island{height:min(33px,4.05svh)}
+  .app-container{gap:min(9px,0.8svh)}
+  .app-icon-wrap{
+    width:min(clamp(52px,14.4vw,58px),5.85svh);
+    height:min(clamp(52px,14.4vw,58px),5.85svh);
+  }
+  .profile-row{--profile-line:min(26px,2.85svh)}
+
+  .top-right .weather-widget{padding:5px 9px}
+  .top-right .weather-temp{font-size:19px;line-height:1}
+  .top-right .weather-minmax{font-size:10.5px;line-height:12px}
+  .wx-sub{margin-top:0;line-height:11px}
+  .top-right .weather-desc,
+  .top-right .weather-location{font-size:9.5px;line-height:11px}
+  .wx-detail{margin-top:2px;gap:1px 6px;line-height:1.18}
+  .wx-d > span{font-size:7.5px}
+  .wx-d > b{font-size:8.5px}
+  .wx-uvlv{font-size:7px}
+  .wx-sun{margin-top:1px;font-size:8px}
+
+  .top-right .calendar-widget{padding:6px 9px}
+  .top-right .calendar-date-block{width:38px;height:42px}
+  .top-right .calendar-day-num{font-size:20px;line-height:21px}
+  .top-right .calendar-year-month{font-size:10.5px;line-height:12px}
+  .top-right .calendar-weekday{font-size:10px;line-height:12px}
+  .top-right .calendar-lunar{font-size:9px;line-height:11px}
+  .top-right .calendar-holiday-tag{font-size:8px;padding:1px 6px;margin-top:1px}
+  .cal-yiji{margin-top:2px;gap:1px}
+  .yj-text{font-size:8.5px;line-height:11px}
 }
 
 /* ============================================================================
@@ -1601,6 +1705,20 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
 .low-perf .weather-widget::before,
 .low-perf .weather-widget::after{filter:blur(10px)}
 .low-perf .toast{backdrop-filter:none}
+
+/* ---------------------------------------------------------------------------
+   13.4 兜底：不支持 svh 的旧内核（Chrome <108 / 部分套壳浏览器）
+   按「可视高 700」这一最常见值直接给固定上限，保证同样不出滚动条
+   --------------------------------------------------------------------------- */
+@supports not (height:100svh){
+  body{padding-bottom:calc(var(--safe-bottom) + 8px)}
+  .dynamic-island{height:30px}
+  .app-container{gap:8px}
+  .top-card{height:186px}
+  .profile-row{--profile-line:22px}
+  .profile-row .avatar-center-wrap{--avatar-size:46px}
+  .app-icon-wrap{width:44px;height:44px}
+}
 
 </style>
     <script>
