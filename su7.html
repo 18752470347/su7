@@ -801,6 +801,7 @@ html.dark-mode .app-icon-wrap{box-shadow:0 0 0 .5px rgba(255,255,255,.12),0 6px 
   --bg-elevated:#FFFFFF;
 
   --status-color:#2C3157;
+  --batt-in:#FFFFFF;                /* 电池填充盖住数字时，数字翻成这个色 */
   --weather-temp-color:#171A32;
   --weather-desc-color:#4E5A8C;
   --weather-loc-color:#8A90B8;
@@ -837,6 +838,7 @@ html.dark-mode{
   --bg-elevated:#141522;
 
   --status-color:#E6E9FF;
+  --batt-in:#0B0D18;
   --weather-temp-color:#F2F3FF;
   --weather-desc-color:#C3C9EE;
   --weather-loc-color:#9CA3CB;
@@ -2382,6 +2384,184 @@ html.dark-mode .mc-month.now{color:#FF7C9C;box-shadow:inset 0 0 0 1.5px rgba(255
 }
 .mc-month.cur.now{box-shadow:0 8px 18px -10px rgba(150,90,255,.95),inset 0 0 0 1.5px rgba(255,255,255,.55)}
 
+/* ============================================================================
+   27 实时天气：未来 24 小时（苹果天气那条横滑）
+   ----------------------------------------------------------------------------
+   每格：整点 → 图标 → 温度 → 降水概率（≥20% 才写，蓝色）。
+   有雨的小时（雨/雪/雷code 或概率≥55%）整格加淡蓝底，扫一眼就知道几点下。
+   横滑用 overflow-x:auto + 隐藏滚动条，触屏惯性滑动。
+   ========================================================================== */
+.wx-hours{margin:14px 0 0}
+.wx-hours-head{
+  display:flex;align-items:center;gap:5px;margin:0 2px 8px;
+  font-size:11.5px;font-weight:700;color:var(--label-2);letter-spacing:-.1px;
+}
+.wx-hours-head .fa-solid.fa-droplet{font-size:10px;color:#3E8CFF}
+html.dark-mode .wx-hours-head .fa-solid.fa-droplet{color:#6FB0FF}
+.wx-hours-head em{font-style:normal;color:#3E8CFF}
+html.dark-mode .wx-hours-head em{color:#6FB0FF}
+
+.wx-hours-strip{
+  display:flex;gap:2px;padding:2px 0 4px;
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  scroll-snap-type:x proximity;
+}
+.wx-hours-strip::-webkit-scrollbar{display:none}
+.wx-hr{
+  flex:0 0 44px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:7px 0 6px;border-radius:12px;scroll-snap-align:start;
+}
+.wx-hr.on{background:var(--fill-2)}
+.wx-hr.wet{background:rgba(62,140,255,.10)}
+html.dark-mode .wx-hr.wet{background:rgba(90,150,255,.16)}
+.wx-hr .h-time{
+  font-size:10px;font-weight:700;color:var(--label-2);letter-spacing:-.2px;
+  white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.wx-hr.on .h-time{color:var(--label)}
+.wx-hr .h-ico{
+  display:flex;align-items:center;justify-content:center;height:16px;
+  color:var(--label-2);
+}
+.wx-hr .h-ico .fa-solid{font-size:14px}
+html.dark-mode .wx-hr .h-ico{color:#C3C9F0}
+.wx-hr .h-temp{
+  font-size:13px;font-weight:700;color:var(--label);letter-spacing:-.3px;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.wx-hr .h-rain{
+  font-size:9.5px;font-weight:700;color:#3E8CFF;line-height:1;height:10px;
+  letter-spacing:-.2px;font-variant-numeric:tabular-nums;
+}
+html.dark-mode .wx-hr .h-rain{color:#6FB0FF}
+
+
+/* ============================================================================
+   28 状态栏：电池百分比 + 信号/无线强度
+   ----------------------------------------------------------------------------
+   电池：navigator.getBattery() 直接给 level/charging，百分比画在电池内腔里。
+   信号：浏览器读不到 dBm，用 Network Information API 的 effectiveType /
+        downlink / rtt 折算 1~4 格；四根柱子按可用格数调透明度。
+   无线：connection.type === 'wifi' 时显示，移动网络时整个图标隐藏
+        （iPhone 在纯蜂窝下本来也不显示 Wi-Fi）。
+   ========================================================================== */
+/* 百分比画进电池里（不加 % 号）
+   ----------------------------------------------------------------------------
+   电池轮廓放大到 34×14，内腔 25.4×9.4，8.4px 的三位数刚好塞得下。
+   数字画两层：
+     A 用 currentColor —— 露在空腔里的部分
+     B 用 --batt-in 并用 fill 区域 clipPath 裁切 —— 被电量填充盖住的那部分翻成反色
+   两层完全同位，一旦填充边界切过数字，左侧立刻切成反色，不会出现半截糊字。 */
+.ios-status-right .battery-icon{width:34px;height:14px}
+.battery-icon .bat-txt{
+  font-size:8px;font-weight:700;letter-spacing:-.3px;
+  font-variant-numeric:tabular-nums;
+  fill:currentColor;
+}
+.battery-icon .bat-txt-in{fill:var(--batt-in)}
+.ios-status-right .battery-icon.low{color:#FF3B30}
+html.dark-mode .ios-status-right .battery-icon.low{color:#FF6961}
+.ios-status-right .battery-icon.charging{color:#1F9D45}
+html.dark-mode .ios-status-right .battery-icon.charging{color:#34C759}
+.ios-status-right .signal-icon.off{opacity:.35}
+
+
+/* ============================================================================
+   29 实时天气：字体层级与配色重做
+   ----------------------------------------------------------------------------
+   原来整页几乎都是 --label / --label-2 的中性灰，大温度之外的数字没有主次，
+   19 个数字挤在一起看不出重点。这一节只改「颜色 + 字重 + 字号」：
+     · 大温度加同色光晕，深浅色都不糊在玻璃上
+     · 最高 / 最低 从纯文字改成两枚淡色药丸（橙 / 蓝），一眼分冷暖
+     · 六宫格：标签前一颗彩色圆点按类别上色，数值加重到 800，单位跟标签同色
+     · 24 小时带：「现在」那格用靛紫渐变底 + 描边，温度放大一档
+     · 日出日落时间、更新时间统一提到 --label / --label-2，不再发灰
+   所有彩色都给了 html.dark-mode 的浅色版本，深色下不会闷成脏色。
+   ========================================================================== */
+.wx7-hero .ws-temp{filter:drop-shadow(0 7px 18px rgba(86,104,255,.28))}
+html.dark-mode .wx7-hero .ws-temp{filter:drop-shadow(0 7px 20px rgba(140,130,255,.34))}
+.wx7-hero .ws-desc{font-weight:700;letter-spacing:-.25px;color:var(--label)}
+
+/* 最高 / 最低：淡色药丸 */
+.wx-hero-hl{align-items:center;gap:6px}
+.wx-hero-hl>span{
+  display:inline-flex;align-items:center;
+  padding:3px 8px;border-radius:9px;line-height:1.25;
+  font-weight:800;letter-spacing:-.2px;
+}
+.wx-hero-hl .hl-hi{
+  color:#BE540F;background:rgba(255,122,71,.14);
+  box-shadow:inset 0 0 0 .5px rgba(255,122,71,.30);
+}
+.wx-hero-hl .hl-lo{
+  color:#1565D8;background:rgba(78,155,255,.14);
+  box-shadow:inset 0 0 0 .5px rgba(78,155,255,.32);
+}
+html.dark-mode .wx-hero-hl .hl-hi{
+  color:#FFB388;background:rgba(255,140,90,.18);
+  box-shadow:inset 0 0 0 .5px rgba(255,150,105,.32);
+}
+html.dark-mode .wx-hero-hl .hl-lo{
+  color:#93C8FF;background:rgba(100,165,255,.18);
+  box-shadow:inset 0 0 0 .5px rgba(120,175,255,.32);
+}
+
+/* 24 小时带：标题提亮，「现在」那格做成高亮卡 */
+.wx-hours-head{font-size:12px;color:var(--label-2)}
+.wx-hours-head em{font-weight:800}
+.wx-hr .h-temp{font-weight:800}
+.wx-hr.on{
+  background:linear-gradient(160deg,rgba(122,140,255,.20) 0%,rgba(177,92,255,.13) 100%);
+  box-shadow:inset 0 0 0 .5px rgba(122,140,255,.42),0 5px 14px -9px rgba(110,120,255,.9);
+}
+.wx-hr.on .h-time{color:#3B45C8}
+.wx-hr.on .h-temp{font-size:14px}
+html.dark-mode .wx-hr.on{
+  background:linear-gradient(160deg,rgba(140,155,255,.26) 0%,rgba(190,120,255,.18) 100%);
+  box-shadow:inset 0 0 0 .5px rgba(160,170,255,.34);
+}
+html.dark-mode .wx-hr.on .h-time{color:#C2CAFF}
+/* 现在 + 正在下雨：两套高亮叠在一起，保留蓝色的雨水味 */
+.wx-hr.on.wet{
+  background:linear-gradient(160deg,rgba(62,140,255,.24) 0%,rgba(122,140,255,.16) 100%);
+  box-shadow:inset 0 0 0 .5px rgba(90,150,255,.46);
+}
+html.dark-mode .wx-hr.on.wet{
+  background:linear-gradient(160deg,rgba(90,150,255,.30) 0%,rgba(140,155,255,.18) 100%);
+  box-shadow:inset 0 0 0 .5px rgba(120,175,255,.36);
+}
+
+/* 六宫格：彩色圆点 + 加粗数值 */
+.wx-now-cell{gap:5px;padding:10px 11px}
+.wx-now-cell[data-k="feels"]{--k:#BE540F}
+.wx-now-cell[data-k="hum"]{--k:#1565D8}
+.wx-now-cell[data-k="wind"]{--k:#0A746B}
+.wx-now-cell[data-k="press"]{--k:#6A46DE}
+.wx-now-cell[data-k="vis"]{--k:#0A7A53}
+.wx-now-cell[data-k="uv"]{--k:#9C6608}
+html.dark-mode .wx-now-cell[data-k="feels"]{--k:#FFA96B}
+html.dark-mode .wx-now-cell[data-k="hum"]{--k:#7FB6FF}
+html.dark-mode .wx-now-cell[data-k="wind"]{--k:#4FD3C4}
+html.dark-mode .wx-now-cell[data-k="press"]{--k:#B49BFF}
+html.dark-mode .wx-now-cell[data-k="vis"]{--k:#45D79B}
+html.dark-mode .wx-now-cell[data-k="uv"]{--k:#FFC24D}
+
+.wx-now-cell span{
+  display:flex;align-items:center;gap:4.5px;
+  font-size:11px;font-weight:700;color:var(--k,var(--label-2));
+}
+.wx-now-cell span::before{
+  content:'';flex:0 0 auto;width:5px;height:5px;border-radius:50%;
+  background:currentColor;box-shadow:0 0 5px -.5px currentColor;
+}
+.wx-now-cell b{font-size:16.5px;font-weight:800;letter-spacing:-.45px}
+.wx-now-cell b i{color:var(--k,var(--label-3));opacity:.8;font-weight:800}
+
+/* 日出日落 / 更新时间 */
+.wx-now-sun b{font-size:12px;font-weight:800;color:var(--label);letter-spacing:-.2px}
+.wx-now-meta{color:var(--label-2)}
+
 </style>
     <script>
         (function () {
@@ -2640,10 +2820,13 @@ self.addEventListener('fetch', function (e) {
                         <path d="M2.2 5.2a10 10 0 0 1 13.6 0" stroke-width="1.8" stroke-linecap="round" />
                         <circle cx="9" cy="10.9" r="1.6" fill="currentColor" stroke="none" />
                     </svg>
-                    <svg class="battery-icon" viewBox="0 0 27 13" aria-hidden="true">
-                        <rect x="0.7" y="0.9" width="22.6" height="11.2" rx="3.6" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".35" />
-                        <rect x="2.4" y="2.6" width="16.2" height="7.8" rx="2.2" />
-                        <path d="M24.7 4.6c1 .32 1.5 1 1.5 1.9s-.5 1.58-1.5 1.9z" opacity=".35" />
+                    <svg class="battery-icon" viewBox="0 0 34 14" aria-hidden="true">
+                        <clipPath id="batClip"><rect id="batClipRect" x="2.2" y="2.3" width="12" height="9.4" rx="0.8" /></clipPath>
+                        <rect x="0.6" y="0.7" width="28.6" height="12.6" rx="4" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".35" />
+                        <rect id="batFill" x="2.2" y="2.3" width="12" height="9.4" rx="2.4" />
+                        <path d="M30.4 4.9c1 .34 1.55 1.05 1.55 2.1s-.55 1.76-1.55 2.1z" opacity=".4" />
+                        <text id="batTxt" class="bat-txt" x="15" y="9.95" text-anchor="middle"></text>
+                        <text id="batTxtIn" class="bat-txt bat-txt-in" x="15" y="9.95" text-anchor="middle" clip-path="url(#batClip)"></text>
                     </svg>
                 </div>
             </div>
@@ -5062,7 +5245,7 @@ self.addEventListener('fetch', function (e) {
 
                 async function fetchWeather(lat, lon, cityName) {
                     try {
-                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7`;
+                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7&forecast_hours=26`;
                         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
@@ -5082,6 +5265,8 @@ self.addEventListener('fetch', function (e) {
                         // 缓存一份给 7 天面板用
                         window.__wxData = {
                             daily: data.daily || null,
+                            hourly: data.hourly || null,
+                            ct: cur.time || '',
                             temp: temp,
                             desc: desc,
                             icon: iconClass,
@@ -5548,6 +5733,21 @@ self.addEventListener('fetch', function (e) {
                 var WX7_WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
                 var wxSheetTab = 'week';
 
+                // 天气码 → 图标，夜间换月亮系（与天气卡同一套规则）
+                function wxIconFor(code, isDay) {
+                    var c = WEATHER_ICON_MAP[code] || 'fa-sun';
+                    if (isDay === 0) {
+                        if (code === 0 || code === 1) return 'fa-moon';
+                        if (code === 2) return 'fa-cloud-moon';
+                        if (code === 3) return 'fa-cloud';
+                        if (code >= 51 && code <= 67) return 'fa-cloud-moon-rain';
+                        if (code >= 71 && code <= 77) return 'fa-snowflake';
+                        if (code >= 80 && code <= 82) return 'fa-cloud-moon-rain';
+                        if (code >= 95) return 'fa-cloud-bolt';
+                    }
+                    return c;
+                }
+
                 // 实时页：六宫格 + 日出日落进度 + 更新时间
                 function renderWxNow() {
                     var box = document.getElementById('wxNow');
@@ -5558,18 +5758,67 @@ self.addEventListener('fetch', function (e) {
                         return;
                     }
                     var n = d.now;
+                    // 每格挂一个 data-k：CSS 按类别给标签圆点和单位上色（pro-theme.css 29 节）
                     var cells = [
-                        ['体感温度', n.feels],
-                        ['相对湿度', n.hum],
-                        ['风', n.wind],
-                        ['气压', n.press],
-                        ['能见度', n.vis],
-                        ['紫外线', n.uv + (n.uvLv && n.uv !== '--' ? '<i>' + n.uvLv + '</i>' : '')]
+                        ['feels', '体感温度', n.feels],
+                        ['hum', '相对湿度', n.hum],
+                        ['wind', '风', n.wind],
+                        ['press', '气压', n.press],
+                        ['vis', '能见度', n.vis],
+                        ['uv', '紫外线', n.uv + (n.uvLv && n.uv !== '--' ? '<i>' + n.uvLv + '</i>' : '')]
                     ];
-                    var html = '<div class="wx-now-grid">';
+                    // ---- 未来 24 小时：哪几个小时下雨，一句话 + 横滑带 ----
+                    // 起点取接口返回的 current.time（timezone=auto，已是当地整点），
+                    // 不用本地时间，避免手机时区和所在地不一致时错位
+                    var hoursHtml = '';
+                    var H = d.hourly;
+                    if (H && H.time && H.time.length) {
+                        var ctKey = (d.ct || '').slice(0, 13);
+                        var start = 0, hit = false;
+                        if (ctKey) {
+                            for (var hk = 0; hk < H.time.length; hk++) {
+                                if (H.time[hk].slice(0, 13) >= ctKey) { start = hk; hit = true; break; }
+                            }
+                            if (!hit) start = 0;
+                        }
+                        var cnt = Math.min(24, H.time.length - start);
+                        var firstRain = -1, wetCnt = 0, cellsH = '';
+                        for (var hi = 0; hi < cnt; hi++) {
+                            var ix = start + hi;
+                            var tstr = H.time[ix] || '';
+                            var hh = tstr.slice(11, 16);
+                            var code = H.weather_code ? H.weather_code[ix] : 0;
+                            var pp = H.precipitation_probability ? (H.precipitation_probability[ix] || 0) : 0;
+                            var isDay = H.is_day ? H.is_day[ix] : 1;
+                            var wet = (code >= 51 && code <= 67) || (code >= 71 && code <= 77) ||
+                                      (code >= 80 && code <= 82) || (code >= 95) || pp >= 55;
+                            if (wet) { wetCnt++; if (firstRain < 0) firstRain = hi; }
+                            var tv = H.temperature_2m ? H.temperature_2m[ix] : null;
+                            var tShow = (tv === null || tv === undefined) ? '--' : Math.round(tv) + '°';
+                            cellsH += '<div class="wx-hr' + (hi === 0 ? ' on' : '') + (wet ? ' wet' : '') + '">' +
+                                '<span class="h-time">' + (hi === 0 ? '现在' : hh) + '</span>' +
+                                '<span class="h-ico"><i class="fa-solid ' + wxIconFor(code, isDay) + '"></i></span>' +
+                                '<span class="h-temp">' + tShow + '</span>' +
+                                '<span class="h-rain">' + (pp >= 20 ? pp + '%' : '') + '</span>' +
+                            '</div>';
+                        }
+                        var headText;
+                        if (firstRain >= 0) {
+                            headText = '预计 <em>' + (firstRain === 0 ? '当前' : H.time[start + firstRain].slice(11, 16)) +
+                                '</em> 起有降水 · 未来 24 小时 <em>' + wetCnt + '</em> 小时有雨';
+                        } else {
+                            headText = '未来 24 小时无降水';
+                        }
+                        hoursHtml = '<div class="wx-hours">' +
+                            '<div class="wx-hours-head"><i class="fa-solid fa-droplet"></i><span>' + headText + '</span></div>' +
+                            '<div class="wx-hours-strip">' + cellsH + '</div>' +
+                        '</div>';
+                    }
+
+                    var html = hoursHtml + '<div class="wx-now-grid">';
                     for (var i = 0; i < cells.length; i++) {
-                        html += '<div class="wx-now-cell"><span>' + cells[i][0] + '</span><b>' +
-                            cells[i][1] + '</b></div>';
+                        html += '<div class="wx-now-cell" data-k="' + cells[i][0] + '"><span>' + cells[i][1] + '</span><b>' +
+                            cells[i][2] + '</b></div>';
                     }
                     html += '</div>';
 
@@ -6202,6 +6451,95 @@ self.addEventListener('fetch', function (e) {
 
         })();
     </script>
+<script>
+/* 状态栏真机数据：电池百分比（画在电池里）、信号格数、Wi-Fi 是否在用
+   ----------------------------------------------------------------------------
+   电量：navigator.getBattery() 的 level / charging（安卓 Chrome 支持）
+   信号：浏览器读不到 dBm，只能拿 Network Information API 的
+        effectiveType(4g/3g/2g) + downlink(Mbps) + rtt(ms) 折算 1~4 格
+   无线：connection.type === 'wifi' 才显示，纯蜂窝下隐藏（和 iPhone 一致） */
+(function () {
+    var sig = document.querySelector('.signal-icon');
+    var wifi = document.querySelector('.wifi-icon');
+    var bat = document.querySelector('.battery-icon');
+    var rects = sig ? sig.querySelectorAll('rect') : [];
+
+    /* ---------------- 电池 ---------------- */
+    /* 内腔 25.4 宽，满电 25.4、最低留 1.2 的底，避免 0% 时条消失。
+       batFill 是填充条，batClipRect 是同一形状的裁切框，一起改宽度，
+       这样数字被填充盖住的部分才会正好翻色。 */
+    var batFill = document.getElementById('batFill');
+    var batClip = document.getElementById('batClipRect');
+    var batTxt = document.getElementById('batTxt');
+    var batTxtIn = document.getElementById('batTxtIn');
+
+    function paintBattery(level, charging) {
+        if (!bat) return;
+        level = Math.max(0, Math.min(1, level));
+        var w = (1.2 + 24.2 * level).toFixed(2);
+        if (batFill) batFill.setAttribute('width', w);
+        if (batClip) batClip.setAttribute('width', w);
+        bat.classList.toggle('low', level <= 0.2 && !charging);
+        bat.classList.toggle('charging', !!charging);
+        var pct = Math.round(level * 100);
+        if (batTxt) batTxt.textContent = pct;
+        if (batTxtIn) batTxtIn.textContent = pct;
+        bat.setAttribute('title', pct + '% 电量' + (charging ? ' · 充电中' : ''));
+    }
+
+    if (navigator.getBattery) {
+        navigator.getBattery().then(function (b) {
+            paintBattery(b.level, b.charging);
+            b.addEventListener('levelchange', function () { paintBattery(b.level, b.charging); });
+            b.addEventListener('chargingchange', function () { paintBattery(b.level, b.charging); });
+        })['catch'](function () {});
+    }
+
+    /* ---------------- 信号 / 无线 ---------------- */
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+    function barsFor(c) {
+        if (!c) return null;
+        if (c.saveData) return 1;
+        var et = c.effectiveType || '';
+        var dl = c.downlink || 0;
+        var b;
+        if (et === '4g') b = dl >= 20 ? 4 : (dl >= 6 ? 3 : 2);
+        else if (et === '3g') b = 2;
+        else if (et === '2g' || et === 'slow-2g') b = 1;
+        else b = 3;
+        var rtt = c.rtt || 0;
+        if (rtt > 500) b = 1;
+        else if (rtt > 250) b = b - 1;
+        return Math.max(1, Math.min(4, b));
+    }
+
+    function paintNet() {
+        var online = navigator.onLine !== false;
+        var n = online ? barsFor(conn) : 0;
+        for (var i = 0; i < rects.length; i++) {
+            rects[i].style.opacity = (n === null) ? '' : (i < n ? '1' : '.2');
+        }
+        if (sig) sig.classList.toggle('off', !online);
+        var isWifi = !!(conn && conn.type === 'wifi');
+        if (wifi && conn && conn.type) wifi.style.display = isWifi ? '' : 'none';
+        if (conn) {
+            var desc = (isWifi ? 'Wi-Fi' : (conn.type ? '移动网络' : '网络')) +
+                ' · ' + (conn.effectiveType || '未知') +
+                (conn.downlink ? ' · ' + conn.downlink + ' Mbps' : '') +
+                (conn.rtt ? ' · ' + conn.rtt + ' ms' : '');
+            if (sig) sig.setAttribute('title', desc);
+            if (wifi) wifi.setAttribute('title', desc);
+        }
+    }
+
+    paintNet();
+    if (conn && conn.addEventListener) conn.addEventListener('change', paintNet);
+    window.addEventListener('online', paintNet);
+    window.addEventListener('offline', paintNet);
+    setInterval(paintNet, 30000);
+})();
+</script>
 <script type="application/json" id="areaIndex">
 #河北省|114.502,38.045
 石家庄市|114.502,38.045|长安区:114.548,38.048;桥西区:114.463,38.028;新华区:114.466,38.067;井陉矿区:114.058,38.07;裕华区:114.533,38.028;藁城区:114.85,38.034;鹿泉区:114.321,38.094;栾城区:114.654,37.887;井陉县:114.144,38.034;正定县:114.57,38.148;行唐县:114.553,38.437;灵寿县:114.379,38.307;高邑县:114.611,37.606;深泽县:115.2,38.185;赞皇县:114.388,37.66;无极县:114.978,38.176;平山县:114.184,38.259;元氏县:114.526,37.763;赵县:114.775,37.754;辛集市:115.217,37.929;晋州市:115.045,38.027;新乐市:114.686,38.345
