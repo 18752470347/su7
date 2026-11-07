@@ -976,8 +976,8 @@ html.dark-mode .status-theme-toggle{
   align-items:center;              /* 头像与文字整体垂直居中 */
   justify-content:flex-start;
   gap:22px;                        /* 头像与文字的呼吸距离，沿用上一轮定稿 */
-  padding:13px 15px;
-  --profile-line:26px;
+  padding:10px 15px;               /* 纵向内边距 13→10，卡片更紧凑 */
+  --profile-line:23px;
   box-shadow:inset 0 0 0 .5px var(--card-line),0 1px 1.5px rgba(23,26,50,.05),0 16px 34px -22px rgba(88,104,255,.55);
 }
 .profile-row::before{
@@ -1332,21 +1332,17 @@ html.dark-mode .calendar-holiday-tag.workday{color:#FFB65C;background:linear-gra
 html.dark-mode .yj-text{color:#C0C6E8}
 
 /* ============================================================================
-   10 视频卡
+   10 视频卡（外圈描边/光边已去掉，只留柔和投影）
    ========================================================================== */
 .video-player-container{
-  box-shadow:0 0 0 .5px rgba(255,255,255,.55),0 16px 38px -22px rgba(88,104,255,.75);
+  box-shadow:0 16px 38px -22px rgba(88,104,255,.75);
 }
 .video-box{background:linear-gradient(145deg,#101226 0%,#1B0F2B 52%,#08161C 100%)}
 .video-box video{background:transparent}
 html.dark-mode .video-box{background:linear-gradient(145deg,#0C0D1C 0%,#150B22 52%,#061218 100%)}
+/* 原来那圈 1.5px 彩虹描边：整条关掉 */
 .video-player-container::before{
-  content:'';position:absolute;inset:0;border-radius:18px;padding:1.5px;pointer-events:none;z-index:6;
-  background:linear-gradient(140deg,rgba(122,140,255,1) 0%,rgba(196,110,255,.8) 38%,rgba(255,92,147,.9) 66%,rgba(94,231,223,1) 100%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  mask-composite:exclude;
+  content:none!important;display:none!important;
 }
 
 /* ============================================================================
@@ -1432,12 +1428,12 @@ html.dark-mode .ws-metric b{color:#E8EAFF}
   backdrop-filter:blur(20px) saturate(180%);
   box-shadow:0 18px 40px -16px rgba(60,40,140,.9),inset 0 .5px 0 rgba(255,255,255,.16);
 }
-body::after{
-  background:linear-gradient(90deg,#7A8CFF 0%,#B06AB3 50%,#FF7AC8 100%);
-  opacity:.8;width:132px;
-  box-shadow:0 0 12px rgba(150,120,255,.7);
+/* 底部 home indicator 小白条：整条去掉（用户要求不要这条横杠） */
+body::after,
+html.dark-mode body::after{
+  content:none!important;display:none!important;
+  width:0;height:0;box-shadow:none;opacity:0;
 }
-html.dark-mode body::after{background:linear-gradient(90deg,#8FA8FF,#C79BFF,#FF9AC8);opacity:.85}
 
 /* ---- 未来 7 天面板 ---- */
 .weather-sheet-overlay{
@@ -1557,11 +1553,11 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
 @media (min-width:400px){
   .top-card{gap:13px}
   .top-right{gap:9px}
-  .profile-row{gap:22px;padding:14px 17px}
+  .profile-row{gap:22px;padding:11px 17px}
 }
 @media (max-width:390px){
   .top-card{height:clamp(228px,64vw,240px)}
-  .profile-row{padding:12px 14px;--profile-line:25px}
+  .profile-row{padding:10px 14px;--profile-line:22px}
   .top-right .weather-temp{font-size:clamp(20px,5.8vw,23px)}
   .wx-d > b{font-size:9px}
   .yj-text{font-size:9px}
@@ -1580,19 +1576,21 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
    用它做上限就不会因地址栏收放而跳动（dvh 会抖，费电也更容易掉帧）。
    --------------------------------------------------------------------------- */
 @supports (height:100svh){
-  /* body 原来自带的 22px 底部留白会顶出滚动条，收回 10px；min-height 也从 dvh 换成 svh */
+  /* body 的 22px 底部留白原本会顶出滚动条；这里归零，底部留白统一交给 .app-container，
+     避免「body + 容器」两层叠加出十几 px 的死白（正好把空间让给顶部呼吸位） */
   body{
     min-height:100svh;
-    padding-bottom:calc(var(--safe-bottom) + 10px);
+    padding-bottom:0;
   }
 
   /* 状态栏（灵动岛定高撑出来的）：33 → 最矮 4.2svh */
   .dynamic-island{height:min(33px,4.2svh)}
 
-  /* 组件间距 / 底部内边距一起收 */
+  /* 组件间距 / 顶部呼吸位 / 底部内边距 */
   .app-container{
+    padding-top:calc(var(--safe-top) + min(12px,1.75svh));   /* 顶部留白：不再贴着浏览器地址栏 */
     gap:min(9px,0.95svh);
-    padding-bottom:calc(var(--safe-bottom) + min(7px,0.9svh));
+    padding-bottom:calc(var(--safe-bottom) + min(8px,1.05svh));
   }
 
   /* 顶栏（图片 + 天气 + 日历）：整页最吃高度的一块，让出来的空间都给下面的视频 */
@@ -1604,8 +1602,8 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
   /* 视频卡：保持原生 16/9，不做任何高度裁切（用户要求还原） */
 
   /* 资料卡：行高 26 → 3.1svh；头像 6.6svh */
-  .profile-row{--profile-line:min(26px,3.1svh)}
-  @media (max-width:390px){.profile-row{--profile-line:min(25px,3svh)}}
+  .profile-row{--profile-line:min(23px,2.75svh)}
+  @media (max-width:390px){.profile-row{--profile-line:min(22px,2.6svh)}}
   .profile-row .avatar-center-wrap{--avatar-size:min(clamp(52px,14.6vw,58px),6.6svh)}
 
   /* App 图标 */
@@ -1613,6 +1611,16 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
     width:min(clamp(52px,14.4vw,58px),6.3svh);
     height:min(clamp(52px,14.4vw,58px),6.3svh);
   }
+}
+
+/* ---------------------------------------------------------------------------
+   13.1b 宽屏收间距（≥396dp）
+   视频卡是 16/9，屏越宽它越高（407 宽时比 373 宽高出 17px），
+   宽屏且视口不高的组合（如 407×730）会溢出，这里把组件间距再收一点补回来。
+   必须放在 13.1 之后才能盖住 @supports 里的 gap（媒体查询不加特异性）。
+   --------------------------------------------------------------------------- */
+@media (min-width:396px){
+  .app-container{gap:min(9px,0.78svh)}
 }
 
 /* ---------------------------------------------------------------------------
@@ -1635,7 +1643,7 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
 
   /* 视频卡保持 16/9 原尺寸，高度全部从上方的顶栏里省 */
   .top-card{height:min(clamp(228px,64vw,254px),28.6svh)}
-  .profile-row{--profile-line:min(26px,2.95svh)}
+  .profile-row{--profile-line:min(23px,2.7svh)}
 
   .app-label{font-size:10px;line-height:12px}
   .app-button{gap:4px}
@@ -1655,7 +1663,7 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
     width:min(clamp(52px,14.4vw,58px),5.85svh);
     height:min(clamp(52px,14.4vw,58px),5.85svh);
   }
-  .profile-row{--profile-line:min(26px,2.85svh)}
+  .profile-row{--profile-line:min(23px,2.62svh)}
 
   .top-right .weather-widget{padding:5px 9px}
   .top-right .weather-temp{font-size:19px;line-height:1}
@@ -1678,6 +1686,19 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
   .top-right .calendar-holiday-tag{font-size:8px;padding:1px 6px;margin-top:1px}
   .cal-yiji{margin-top:2px;gap:1px}
   .yj-text{font-size:8.5px;line-height:11px}
+}
+
+/* ---------------------------------------------------------------------------
+   13.3b 极端矮屏（≤680：小屏机 + 地址栏/工具栏全展开）
+   顶部呼吸位吃掉约 12px 后这里已经贴死，从 App 图标挤 4~5px 回来，
+   保证连 1px 的滚动条都不出现
+   --------------------------------------------------------------------------- */
+@media (max-height:680px){
+  .app-icon-wrap{
+    width:min(clamp(52px,14.4vw,58px),5.55svh);
+    height:min(clamp(52px,14.4vw,58px),5.55svh);
+  }
+  .app-container{gap:min(9px,0.75svh)}
 }
 
 /* ============================================================================
@@ -1711,11 +1732,15 @@ html.dark-mode .wx7-temp .track{background:rgba(150,165,220,.22)}
    按「可视高 700」这一最常见值直接给固定上限，保证同样不出滚动条
    --------------------------------------------------------------------------- */
 @supports not (height:100svh){
-  body{padding-bottom:calc(var(--safe-bottom) + 8px)}
+  body{padding-bottom:0}
+  .app-container{
+    padding-top:calc(var(--safe-top) + 10px);
+    padding-bottom:calc(var(--safe-bottom) + 8px);
+    gap:8px;
+  }
   .dynamic-island{height:30px}
-  .app-container{gap:8px}
   .top-card{height:186px}
-  .profile-row{--profile-line:22px}
+  .profile-row{--profile-line:21px}
   .profile-row .avatar-center-wrap{--avatar-size:46px}
   .app-icon-wrap{width:44px;height:44px}
 }
