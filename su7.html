@@ -2954,6 +2954,191 @@ html.dark-mode .top-right .weather-widget::before{
 /* 静置期间不动毛玻璃。曾经试过在这里把 backdrop-filter 设成 none，
    但画面已经冻结、Chrome 本来就不会重算 backdrop，省不下什么，
    反而会在冻结那一瞬间让卡片"突然变实"，肉眼一跳。省电交给停任务去做。 */
+/* ============================================================================
+   31 实时天气文字配色精修
+   ----------------------------------------------------------------------------
+   原来六宫格的标签文字本身被涂成六种色相（橙棕 / 蓝 / 青 / 紫 / 绿 / 橄榄），
+   一屏六色打架，读数反而变慢。这里把「识别」和「阅读」拆开：
+     · 小圆点保留类别色 —— 它是眼睛定位的那颗锚
+     · 标签文字统一收成一支深中性蓝，安静但足够清楚
+     · 数值最深、单位退一档，形成三级层次
+     · 只有紫外线等级保留语义色（低 / 中 / 高 / 很高 / 极高），因为它本身是分级
+   顺带：最高最低温降饱和、24 小时条按「时间 / 温度 / 降水」分三档、
+   更新时间不再和正文同权重。
+   —— 整节只覆盖，不改上面的原规则，想回退删掉即可。
+   ========================================================================== */
+:root{
+  --wxc-label:#3B4470;    /* 指标标签：中性深蓝，8.1:1 */
+  --wxc-value:#121834;    /* 数值：最深 */
+  --wxc-unit:#6E76A0;     /* 单位：退一档，4.6:1 */
+  --wxc-meta:#5A628C;     /* 更新时间 / 城市 */
+  --wxc-time:#5C6490;     /* 24 小时条的时间 */
+  --wxc-hi:#EF5F2C;       /* 最高温 */
+  --wxc-lo:#3B79EE;       /* 最低温 */
+  --wxc-rain:#2E7BFF;     /* 降水概率 */
+}
+html.dark-mode{
+  --wxc-label:#B9C0E6;
+  --wxc-value:#F2F4FF;
+  --wxc-unit:#9AA2CC;
+  --wxc-meta:#AAB2D8;
+  --wxc-time:#A6AED6;
+  --wxc-hi:#FF9670;
+  --wxc-lo:#7FB0FF;
+  --wxc-rain:#7FB6FF;
+}
+
+/* --- 六宫格：色留在圆点上，字统一 --- */
+.wx-now-cell span{color:var(--wxc-label);letter-spacing:0}
+.wx-now-cell span::before{
+  background:var(--k,currentColor);
+  box-shadow:0 0 5px -.5px var(--k,currentColor);
+}
+.wx-now-cell b{color:var(--wxc-value)}
+.wx-now-cell b i{color:var(--wxc-unit);opacity:1;margin-left:3px}
+/* 紫外线分级 */
+.wx-now-cell b i.uv-lv[data-lv="low"]{color:#1E9E63}
+.wx-now-cell b i.uv-lv[data-lv="mid"]{color:#B07800}
+.wx-now-cell b i.uv-lv[data-lv="high"]{color:#C25A12}
+.wx-now-cell b i.uv-lv[data-lv="vh"]{color:#C92E45}
+.wx-now-cell b i.uv-lv[data-lv="ex"]{color:#7B3FBF}
+html.dark-mode .wx-now-cell b i.uv-lv[data-lv="low"]{color:#4FD48D}
+html.dark-mode .wx-now-cell b i.uv-lv[data-lv="mid"]{color:#F0C24D}
+html.dark-mode .wx-now-cell b i.uv-lv[data-lv="high"]{color:#FFA860}
+html.dark-mode .wx-now-cell b i.uv-lv[data-lv="vh"]{color:#FF7A93}
+html.dark-mode .wx-now-cell b i.uv-lv[data-lv="ex"]{color:#C79BFF}
+
+/* --- 弹层顶部：大温度旁的说明 --- */
+.weather-sheet-panel .ws-desc{color:var(--wxc-value)}
+.weather-sheet-panel .ws-city{color:var(--wxc-meta)}
+.wx-hero-hl .hl-hi{color:var(--wxc-hi)}
+.wx-hero-hl .hl-lo{color:var(--wxc-lo)}
+
+/* --- 未来 24 小时 --- */
+.wx-hours-head{color:var(--wxc-meta)}
+.wx-hr .h-time{color:var(--wxc-time)}
+.wx-hr.on .h-time{color:var(--wxc-value)}
+.wx-hr .h-temp{color:var(--wxc-value)}
+.wx-hr .h-rain{color:var(--wxc-rain)}
+.wx-hr .h-ico{color:#6B7399}
+
+/* --- 更新时间 / 刷新 --- */
+.wx-now-meta{color:var(--wxc-meta)}
+.wx-now-sun{color:var(--wxc-meta)}
+.wx-now-sun b{color:var(--wxc-value)}
+
+/* --- 卡片内那 2×3 的小字，同步加深一档 --- */
+.top-right .weather-desc{color:#3C4470}
+html.dark-mode .top-right .weather-desc{color:#CBD2F5}
+.top-right .weather-location{color:#4A527C}
+html.dark-mode .top-right .weather-location{color:#B7BDE0}
+.top-right .wx-d > span{color:#5E6690}
+.top-right .wx-d > b{color:#141A3A}
+.top-right .wx-sun{color:#5A628C}
+.top-right .wx-sun-item b{color:var(--wxc-value)}
+html.dark-mode .top-right .wx-d > span{color:#C6CCF0}
+html.dark-mode .top-right .wx-d > b{color:#F0F2FF}
+html.dark-mode .top-right .wx-sun{color:#C8CDF0}
+
+/* 卡片里 2×3 那几行只有 8.5px，实机上偏糊：整体提半号，标签与数值的粗细再拉开 */
+.top-right .wx-d{gap:4px}
+.top-right .wx-d > span{font-size:9px;font-weight:700;letter-spacing:0}
+.top-right .wx-d > b{font-size:10px;font-weight:800;letter-spacing:-.1px}
+.top-right .wx-uvlv{font-size:8.5px;font-weight:800;margin-left:2px}
+/* 紫外线等级：卡片里也按档上色（JS 已把 data-lv 挂在 #wxUvLv 上） */
+.top-right .wx-uvlv[data-lv="low"]{color:#1E9E63}
+.top-right .wx-uvlv[data-lv="mid"]{color:#A87200}
+.top-right .wx-uvlv[data-lv="high"]{color:#C25A12}
+.top-right .wx-uvlv[data-lv="vh"]{color:#C92E45}
+.top-right .wx-uvlv[data-lv="ex"]{color:#7B3FBF}
+html.dark-mode .top-right .wx-uvlv[data-lv="low"]{color:#4FD48D}
+html.dark-mode .top-right .wx-uvlv[data-lv="mid"]{color:#F0C24D}
+html.dark-mode .top-right .wx-uvlv[data-lv="high"]{color:#FFA860}
+html.dark-mode .top-right .wx-uvlv[data-lv="vh"]{color:#FF7A93}
+html.dark-mode .top-right .wx-uvlv[data-lv="ex"]{color:#C79BFF}
+
+/* 最高 / 最低温统一到同一支暖红冷蓝，中间的斜杠退成灰，别和数字抢 */
+.top-right .weather-minmax{gap:3px;align-items:baseline}
+.top-right .weather-minmax .max-temp{color:var(--wxc-hi)}
+.top-right .weather-minmax .min-temp{color:var(--wxc-lo)}
+.top-right .weather-minmax > span:nth-child(2){color:#B4BBD6;font-weight:400;font-size:11px}
+html.dark-mode .top-right .weather-minmax > span:nth-child(2){color:#6E76A0}
+
+/* 分段控件：选中的那一侧文字实一档，未选中的退成灰蓝 */
+.wx-tab{color:#66709C}
+.wx-tab.on{color:#1B2148}
+html.dark-mode .wx-tab{color:#9CA4CE}
+html.dark-mode .wx-tab.on{color:#FFFFFF}
+
+/* ============================================================================
+   32 空气质量 AQI
+   ----------------------------------------------------------------------------
+   数据来自 Open-Meteo 的 air-quality 接口（和主天气同一个源，不用另配 key），
+   取 us_aqi 作为分档依据 —— 它的 0~500 分档和国内熟悉的「优/良/轻度…」一一对应。
+   配色只做一件事：整条里唯一带色相的是左侧圆点和等级词，数值保持正文深色，
+   这样它在六宫格下面不会变成第二块「彩色板」。
+   ========================================================================== */
+:root{
+  --aqi-1:#12B886;   /* 优 */
+  --aqi-2:#C99A0E;   /* 良 */
+  --aqi-3:#DE7A22;   /* 轻度污染 */
+  --aqi-4:#D93A47;   /* 中度污染 */
+  --aqi-5:#8C4FC4;   /* 重度污染 */
+  --aqi-6:#7A3B33;   /* 严重污染 */
+  --aqi-key:#5A628C;
+  --aqi-pm:#6E76A0;
+  --aqi-bg:linear-gradient(118deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.30) 100%);
+}
+html.dark-mode{
+  --aqi-1:#3ED598;
+  --aqi-2:#E8C24E;
+  --aqi-3:#FFA351;
+  --aqi-4:#FF6B78;
+  --aqi-5:#B87BEE;
+  --aqi-6:#C97A6E;
+  --aqi-key:#AAB2D8;
+  --aqi-pm:#9AA2CC;
+  --aqi-bg:linear-gradient(118deg,rgba(255,255,255,.09) 0%,rgba(255,255,255,.03) 100%);
+}
+
+.wx-aqi{
+  display:flex;align-items:center;gap:7px;min-width:0;
+  margin-top:10px;padding:10px 12px;border-radius:13px;
+  background:var(--aqi-bg);
+  box-shadow:inset 0 0 0 1px var(--card-ring),inset 0 0 0 .5px var(--card-line);
+}
+/* 分档只写一处：容器带 data-lv，圆点和等级词都吃 --aqi-c */
+.wx-aqi[data-lv="1"]{--aqi-c:var(--aqi-1)}
+.wx-aqi[data-lv="2"]{--aqi-c:var(--aqi-2)}
+.wx-aqi[data-lv="3"]{--aqi-c:var(--aqi-3)}
+.wx-aqi[data-lv="4"]{--aqi-c:var(--aqi-4)}
+.wx-aqi[data-lv="5"]{--aqi-c:var(--aqi-5)}
+.wx-aqi[data-lv="6"]{--aqi-c:var(--aqi-6)}
+.wx-aqi[data-lv="0"]{--aqi-c:var(--wxc-unit)}
+
+.aqi-dot{
+  flex:0 0 auto;width:8px;height:8px;border-radius:50%;
+  background:var(--aqi-c,var(--wxc-unit));
+  box-shadow:0 0 6px -.5px var(--aqi-c,transparent);
+}
+.aqi-key{font-size:12px;font-weight:600;color:var(--aqi-key);letter-spacing:.1px;flex:0 0 auto}
+.aqi-val{
+  font-size:17px;font-weight:800;line-height:1;color:var(--wxc-value);
+  font-variant-numeric:tabular-nums;letter-spacing:-.3px;flex:0 0 auto;
+}
+.aqi-lv{font-size:12px;font-weight:700;color:var(--aqi-c,var(--wxc-unit));flex:0 0 auto}
+.aqi-pm{
+  margin-left:auto;font-size:10.5px;font-weight:600;color:var(--aqi-pm);
+  white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:-.1px;
+}
+/* 拿不到数据时退成一行轻提示，不占位 */
+.wx-aqi.off{display:none}
+
+@media (max-width:352px){
+  .aqi-key{font-size:11px}
+  .aqi-val{font-size:16px}
+  .aqi-pm{font-size:9.5px}
+}
 
 </style>
     <script>
@@ -3005,7 +3190,7 @@ html.dark-mode .top-right .weather-widget::before{
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v12';
+var VERSION = 'su-fa36165-v13';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -3055,9 +3240,14 @@ self.addEventListener('fetch', function (e) {
         return;
     }
 
-    if (req.destination === 'image' || req.destination === 'video' || req.destination === 'font' ||
+    /* 视频不进缓存（v13 起）：
+       手机播 mp4 走 Range 请求，返回 206，被下面的 200 判断挡掉，所以这条分支
+       对视频其实一次都不会命中 —— 等于死逻辑。而万一某次响应正好是整文件 200，
+       整个 mp4 会被塞进 Cache Storage 且永不淘汰（activate 只删旧版本名，同版本内无上限），
+       19 个视频攒下来足以把手机存储吃掉几百 MB。视频改由页面侧「下一条预取」处理。 */
+    if (req.destination === 'image' || req.destination === 'font' ||
         req.destination === 'style' || req.destination === 'script' ||
-        /\.(jpg|jpeg|png|webp|gif|svg|mp4|webm|css|js|woff2?|ttf|otf)$/i.test(url.pathname)) {
+        /\.(jpg|jpeg|png|webp|gif|svg|css|js|woff2?|ttf|otf)$/i.test(url.pathname)) {
         e.respondWith(
             caches.open(VERSION).then(function (cache) {
                 return cache.match(req).then(function (cached) {
@@ -3119,7 +3309,7 @@ self.addEventListener('fetch', function (e) {
     <div class="weather-sheet-overlay" id="weatherSheetOverlay">
         <div class="weather-sheet-panel">
             <div class="wx7-head">
-                <div class="wx7-title" id="wxSheetTitle">未来 7 天</div>
+                <div class="wx7-title" id="wxSheetTitle">实时天气</div>
                 <div class="wx7-actions">
                     <button class="wx7-city-btn" id="wxSheetCity">
                         <i class="fa-solid fa-location-dot"></i><span id="wxSheetCityName">当前</span>
@@ -3127,10 +3317,10 @@ self.addEventListener('fetch', function (e) {
                     <button class="wx7-close" id="wxSheetClose"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
-            <!-- 实时 / 7 天 分段控件（样式见 pro-theme.css 25 节） -->
+            <!-- 实时 / 7 天 分段控件（样式见 25 节）——默认停在「实时」 -->
             <div class="wx-tabs" id="wxTabs">
-                <button class="wx-tab" data-tab="now" type="button">实时</button>
-                <button class="wx-tab on" data-tab="week" type="button">未来 7 天</button>
+                <button class="wx-tab on" data-tab="now" type="button">实时</button>
+                <button class="wx-tab" data-tab="week" type="button">未来 7 天</button>
             </div>
             <div class="wx7-hero" id="wxHero"></div>
             <div class="wx-now" id="wxNow"></div>
@@ -4215,10 +4405,58 @@ self.addEventListener('fetch', function (e) {
             // ================================================================
             //  切换视频
             // ================================================================
+            /* 视频首帧封面：走腾讯云数据万象的视频截帧（vframe），
+               取第 1 秒画面缩到 640 宽、转 webp，通常只有十几 KB。
+               以前 19 条视频都没有 poster，每切一条就是先黑一块再出画面。
+
+               ⚠️ 关键前提：数据万象必须已开通。实测本账号**未开通** —— 带 vframe
+               参数的 URL 依然返回整段 mp4（content-type: video/mp4，22MB）。
+               若直接把它塞给 poster，浏览器会为了一个封面白拉 22MB，比黑屏糟得多。
+               所以这里先用一次 HEAD 探 content-type：返回 image/* 才启用，否则永久关闭，
+               一个字节的封面都不会去请求。开通数据万象后本段代码自动生效，无需再改。 */
+            var POSTER_OK = false, POSTER_TESTED = false;
+
+            function posterOf(url) {
+                if (!POSTER_OK) return '';
+                if (!url || url.indexOf(THUMB_HOST) === -1) return '';
+                if (url.indexOf('vframe') !== -1) return url;
+                return url + '?vframe/jpg/offset/1|imageMogr2/thumbnail/640x/format/webp/quality/78';
+            }
+
+            function applyPoster(el, src) {
+                if (!el) return;
+                var p = posterOf(src);
+                // 不能写 el.poster = ''：Chrome 会把空 URL 反射成「当前文档地址」，
+                // 浏览器随后会拿这个 HTML 当图片去解一次。属性不存在才是真的空。
+                if (p) el.setAttribute('poster', p);
+                else el.removeAttribute('poster');
+            }
+
+            function probePoster(sampleUrl) {
+                if (POSTER_TESTED || !sampleUrl) return;
+                POSTER_TESTED = true;
+                try {
+                    fetch(sampleUrl + '?vframe/jpg/offset/1', {
+                        method: 'HEAD', signal: AbortSignal.timeout(4000)
+                    }).then(function (r) {
+                        var ct = (r.headers.get('content-type') || '').toLowerCase();
+                        POSTER_OK = ct.indexOf('image/') === 0;
+                        // 探测比首帧渲染慢时，补挂一次当前这条
+                        if (POSTER_OK && videoList.length) {
+                            applyPoster(mainVideo, videoList[currentVideoIndex]);
+                        }
+                    }).catch(function () { POSTER_OK = false; });
+                } catch (e) { POSTER_OK = false; }
+            }
+
             function switchVideo(index) {
                 if (videoList.length === 0) return;
                 currentVideoIndex = (index + videoList.length) % videoList.length;
                 const src = videoList[currentVideoIndex];
+
+                // 先挂封面再换 src：解码新视频的那几百毫秒里不会露出纯黑
+                applyPoster(mainVideo, src);
+                applyPoster(popupVideo, src);
 
                 mainVideo.src = src;
                 curTime.textContent = '00:00';
@@ -4243,7 +4481,69 @@ self.addEventListener('fetch', function (e) {
                 updateAllMuteIcons();
                 showControls();
                 saveCarouselState();
+                preloadNextVideo();
             }
+
+            /* 下一条视频预取：切到第 N 条时顺手把第 N+1 条拉下来，下次点「下一条」几乎立刻出画面。
+               但单条视频实测 22MB —— 在移动网络下预取一条就是二十多 MB 流量，
+               所以这里只允许 Wi-Fi，宁可慢一点也不能偷偷烧流量。
+               约束：① 仅 Wi-Fi  ② 后台不拉  ③ 省流量模式不拉  ④ 低端机不拉  ⑤ 延迟 3.5s 不抢当前带宽 */
+            var __preVideo = null, __preTimer = null, __preFor = -1;
+            function preloadNextVideo() {
+                if (!videoList.length) return;
+                try {
+                    var nc = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                    if (!nc || nc.type !== 'wifi') return;   // 拿不到网络类型就当作非 Wi-Fi
+                    if (nc.saveData) return;
+                    if (document.hidden) return;
+                    // 低端机不预取：解码额外一路视频会明显拖慢当前这条
+                    if (document.documentElement.classList.contains('low-perf')) return;
+
+                    var nextIdx = (currentVideoIndex + 1) % videoList.length;
+                    if (nextIdx === __preFor) return;      // 已经拉过这条了
+                    clearTimeout(__preTimer);
+                    __preTimer = setTimeout(function () {
+                        if (document.hidden) return;
+                        var url = videoList[nextIdx];
+                        if (!url) return;
+                        if (!__preVideo) {
+                            __preVideo = document.createElement('video');
+                            __preVideo.muted = true;
+                            __preVideo.playsInline = true;
+                            __preVideo.preload = 'auto';
+                            __preVideo.setAttribute('aria-hidden', 'true');
+                            __preVideo.style.cssText =
+                                'position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+                            document.body.appendChild(__preVideo);
+                        }
+                        if (__preVideo.src !== url) __preVideo.src = url;
+                        __preFor = nextIdx;
+                    }, 3500);
+                } catch (e) {}
+            }
+
+            /* 切到后台就停视频（v13）。手机浏览器不保证自动暂停，
+               后台继续解码既费电又跑流量。回到前台再接着播 —— 用户本来就是看着它切出去的。 */
+            var __bgWasPlaying = false;
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) {
+                    if (mainVideo && !mainVideo.paused) {
+                        __bgWasPlaying = true;
+                        mainVideo.pause();
+                        updatePlayBtnIcon();
+                    }
+                    if (popupVideo && !popupVideo.paused) {
+                        __bgWasPlaying = true;
+                        popupVideo.pause();
+                        if (isPopupMode) togglePopupControls();
+                    }
+                } else if (__bgWasPlaying) {
+                    __bgWasPlaying = false;
+                    if (isPopupMode && popupVideo) playWithSound(popupVideo);
+                    else if (mainVideo) playWithSound(mainVideo);
+                    updatePlayBtnIcon();
+                }
+            });
 
             function toggleVideo() {
                 if (mainVideo.paused) {
@@ -4273,6 +4573,10 @@ self.addEventListener('fetch', function (e) {
             if (slideIndex >= slideImages.length) slideIndex = 0;
 
             if (videoList.length > 0) {
+                // 首条也要挂封面：这是唯一一条不走 switchVideo 的路径，
+                // 之前漏了这里，导致刚打开页面时视频区还是先黑一下
+                probePoster(videoList[0]);          // 先探数据万象是否可用（一次 HEAD）
+                applyPoster(mainVideo, videoList[currentVideoIndex]);
                 mainVideo.src = videoList[currentVideoIndex];
                 mainVideo.currentTime = 0;
                 mainVideo.muted = globalMuted;
@@ -4282,6 +4586,7 @@ self.addEventListener('fetch', function (e) {
                 // 懒设：初始化时不设置 popupVideo.src
                 updatePlayBtnIcon();
                 updateAllMuteIcons();
+                preloadNextVideo();     // 首条起播后顺手拉第二条
             }
             if (avatarImages.length > 0) {
                 avatarImg.src = thumbOf(avatarImages[avatarIndex % avatarImages.length], 240);
@@ -5680,8 +5985,67 @@ self.addEventListener('fetch', function (e) {
                     else if (!isManualCity) startGeoFollow();
                 });
 
+                /* ------------------------------------------------------------------
+                   空气质量｜Open-Meteo air-quality（与主天气同源，不用另配 key）
+                   独立请求、独立失败：拿不到就整条隐藏，绝不拖累天气本身。
+                   us_aqi 的 0~500 分档正好对应国内习惯的六档，直接用。
+                   ------------------------------------------------------------------ */
+                function aqiLevel(aqi) {
+                    if (!(aqi >= 0)) return { lv: 0, text: '' };
+                    if (aqi <= 50) return { lv: 1, text: '优' };
+                    if (aqi <= 100) return { lv: 2, text: '良' };
+                    if (aqi <= 150) return { lv: 3, text: '轻度污染' };
+                    if (aqi <= 200) return { lv: 4, text: '中度污染' };
+                    if (aqi <= 300) return { lv: 5, text: '重度污染' };
+                    return { lv: 6, text: '严重污染' };
+                }
+
+                async function fetchAqi(lat, lon) {
+                    try {
+                        var u = 'https://air-quality-api.open-meteo.com/v1/air-quality' +
+                            '?latitude=' + lat + '&longitude=' + lon +
+                            '&current=us_aqi,pm2_5,pm10&timezone=auto';
+                        var r = await fetch(u, { signal: AbortSignal.timeout(6000) });
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        var j = await r.json();
+                        var c = (j && j.current) || {};
+                        var v = c.us_aqi;
+                        if (v === undefined || v === null || isNaN(v)) return;
+                        window.__aqi = {
+                            aqi: Math.round(v),
+                            pm25: (c.pm2_5 === undefined || c.pm2_5 === null) ? null : Math.round(c.pm2_5),
+                            pm10: (c.pm10 === undefined || c.pm10 === null) ? null : Math.round(c.pm10),
+                            at: Date.now()
+                        };
+                        paintAqi();
+                    } catch (e) {
+                        // 静默失败：空气质量是加分项，不该在页面上留一条错误
+                    }
+                }
+
+                function paintAqi() {
+                    var slot = document.getElementById('wxAqiSlot');
+                    var a = window.__aqi;
+                    if (!slot) return;              // 面板还没渲染过，等 renderWxNow 补画
+                    if (!a || !(a.aqi >= 0)) { slot.classList.add('off'); return; }
+                    var lv = aqiLevel(a.aqi);
+                    var pm = [];
+                    if (a.pm25 !== null) pm.push('PM2.5 ' + a.pm25);
+                    if (a.pm10 !== null) pm.push('PM10 ' + a.pm10);
+                    slot.classList.remove('off');
+                    slot.setAttribute('data-lv', String(lv.lv));
+                    slot.innerHTML =
+                        '<span class="aqi-dot"></span>' +
+                        '<span class="aqi-key">空气质量</span>' +
+                        '<b class="aqi-val">' + a.aqi + '</b>' +
+                        '<span class="aqi-lv">' + lv.text + '</span>' +
+                        (pm.length ? '<span class="aqi-pm">' + pm.join(' · ') + '</span>' : '');
+                }
+
                 async function fetchWeather(lat, lon, cityName) {
                     try {
+                        // 空气质量走另一个域名，和主天气并行拉，不 await：天气该多快还是多快
+                        fetchAqi(lat, lon);
                         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7&forecast_hours=26`;
                         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -5764,6 +6128,14 @@ self.addEventListener('fetch', function (e) {
                         wxSet('wxHumidity', (hum === undefined || hum === null) ? '--' : Math.round(hum) + '%');
                         wxSet('wxUv', (uv === undefined || uv === null) ? '--' : (Math.round(uv * 10) / 10));
                         wxSet('wxUvLv', uvLevel(uv));
+                        // 紫外线等级分档挂 data-lv，卡片和弹层的等级字都能上语义色
+                        var uvLvEl = document.getElementById('wxUvLv');
+                        if (uvLvEl) {
+                            var uvn = (uv === undefined || uv === null || isNaN(uv)) ? NaN : Number(uv);
+                            uvLvEl.setAttribute('data-lv', isNaN(uvn) ? '' :
+                                (uvn < 3 ? 'low' : uvn < 6 ? 'mid' : uvn < 8 ? 'high' :
+                                 uvn < 11 ? 'vh' : 'ex'));
+                        }
                         // 能见度（接口给米）：<10km 保留 1 位小数，≥10km 取整
                         var visText = '--';
                         if (vis !== undefined && vis !== null && !isNaN(vis)) {
@@ -6168,7 +6540,7 @@ self.addEventListener('fetch', function (e) {
                 var wxSheetTitle = document.getElementById('wxSheetTitle');
                 var wxSheetCityName = document.getElementById('wxSheetCityName');
                 var WX7_WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-                var wxSheetTab = 'week';
+                var wxSheetTab = 'now';
 
                 // 天气码 → 图标，夜间换月亮系（与天气卡同一套规则）
                 function wxIconFor(code, isDay) {
@@ -6195,14 +6567,20 @@ self.addEventListener('fetch', function (e) {
                         return;
                     }
                     var n = d.now;
-                    // 每格挂一个 data-k：CSS 按类别给标签圆点和单位上色（pro-theme.css 29 节）
+                    // 紫外线等级按数值分档挂 data-lv，CSS 才能给「中等/很强」上语义色
+                    var uvNum = parseFloat(n.uv);
+                    var uvKey = isNaN(uvNum) ? '' :
+                        (uvNum < 3 ? 'low' : uvNum < 6 ? 'mid' : uvNum < 8 ? 'high' :
+                         uvNum < 11 ? 'vh' : 'ex');
+                    // 每格挂一个 data-k：CSS 按类别给标签圆点上色（29 节）
                     var cells = [
                         ['feels', '体感温度', n.feels],
                         ['hum', '相对湿度', n.hum],
                         ['wind', '风', n.wind],
                         ['press', '气压', n.press],
                         ['vis', '能见度', n.vis],
-                        ['uv', '紫外线', n.uv + (n.uvLv && n.uv !== '--' ? '<i>' + n.uvLv + '</i>' : '')]
+                        ['uv', '紫外线', n.uv + (n.uvLv && n.uv !== '--' ?
+                            '<i class="uv-lv" data-lv="' + uvKey + '">' + n.uvLv + '</i>' : '')]
                     ];
                     // ---- 未来 24 小时：哪几个小时下雨，一句话 + 横滑带 ----
                     // 起点取接口返回的 current.time（timezone=auto，已是当地整点），
@@ -6259,6 +6637,10 @@ self.addEventListener('fetch', function (e) {
                     }
                     html += '</div>';
 
+                    // 空气质量：另一个接口并行拉的，可能还没到 —— 先留占位，到了再补画。
+                    // 默认带 off（display:none），拿不到数据时不会留一条空白的横条。
+                    html += '<div class="wx-aqi off" id="wxAqiSlot"></div>';
+
                     var pct = (n.sunPct === null || n.sunPct === undefined) ? 0 : n.sunPct * 100;
                     html += '<div class="wx-now-sun">' +
                         '<span class="rise"><svg class="wns-ico" viewBox="0 0 24 24" aria-hidden="true">' +
@@ -6279,6 +6661,8 @@ self.addEventListener('fetch', function (e) {
                         '<button class="wx-now-refresh" id="wxNowRefresh" type="button">刷新一下</button></div>';
 
                     box.innerHTML = html;
+                    // 若 AQI 比天气先到，补画一次
+                    if (window.__aqi) paintAqi();
                 }
 
                 function wxSheetShowTab(tab) {
@@ -6362,6 +6746,9 @@ self.addEventListener('fetch', function (e) {
                     // 「实时」页最怕看到一小时前的数据：超过 10 分钟就先静默刷一版
                     var stale = !window.__wxData || !window.__wxData.at ||
                         (Date.now() - window.__wxData.at > 600000);
+                    // 每次打开都先落在「实时」：7 天页是二级信息，不该是默认着陆页
+                    wxSheetTab = 'now';
+                    wxSheetShowTab('now');
                     renderWeatherSheet();
                     weatherSheetOverlay.classList.add('show');
                     if (stale) {
@@ -6974,7 +7361,9 @@ self.addEventListener('fetch', function (e) {
     if (conn && conn.addEventListener) conn.addEventListener('change', paintNet);
     window.addEventListener('online', paintNet);
     window.addEventListener('offline', paintNet);
-    setInterval(paintNet, 30000);
+    /* 原来这里还有个 setInterval(paintNet, 30000)。
+       但上面三个事件已经把「网络变化」全覆盖了，30 秒轮询只是把同样的
+       opacity 反复设一遍，纯空转。删掉，省一次常驻定时器。 */
 })();
 </script>
 <script type="application/json" id="areaIndex">
