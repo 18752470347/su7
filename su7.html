@@ -75,7 +75,6 @@
   --material-border:rgba(255,255,255,.55);
   --status-color:var(--label);
   --toast-bg:rgba(28,28,30,.88);
-  --viewer-bg:#000;
   --island-bg:#000; --island-text:#FFF;
   --text-main:var(--label); --text-sub:var(--label-2); --text-muted:var(--label-2);
   --glass-bg:var(--bg-elevated); --glass-border:rgba(60,60,67,.08);
@@ -467,21 +466,47 @@ html.dark-mode .app-icon-wrap{box-shadow:0 0 0 .5px rgba(255,255,255,.12),0 6px 
 .toast{
   position:fixed;z-index:10001;left:50%;bottom:calc(24px + var(--safe-bottom));
   transform:translate(-50%,16px) scale(.96);padding:12px 20px;border-radius:14px;
-  color:#fff;background:var(--toast-bg);backdrop-filter:blur(20px) saturate(180%);
+  color:#fff;background:var(--toast-bg);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.22) 0,rgba(255,255,255,.06) 1px,rgba(255,255,255,0) 12px);
+  -webkit-backdrop-filter:blur(22px) saturate(185%);
+  backdrop-filter:blur(22px) saturate(185%);
   font-size:15px;font-weight:500;letter-spacing:-.2px;opacity:0;pointer-events:none;
   max-width:80vw;text-align:center;
   transition:opacity .3s var(--ease),transform .3s var(--spring);
-  box-shadow:var(--shadow-strong)
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    0 0 0 .5px rgba(120,130,190,.20),
+    var(--shadow-strong)
 }
 .toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
 
-/* ---------- photo viewer ---------- */
+/* ---------- photo viewer ----------
+   原来是纯黑 full-screen（#000），一打开就把整页的人像底纹全遮掉，
+   跟页面其它玻璃面完全两个语言。现在做成「烟熏玻璃」：
+     · 底色只压到 .46，backdrop 再 blur(36px) + saturate：背后的照片被糊成一片
+       有颜色的光斑透上来，既压得住白色字，又不是一块死黑
+     · brightness(.9) 把透上来的光压一档，保证白色图标和图片边缘的对比
+     · 顶棱镜 / 内白环 / 外冷边照抄 §30 的配方，一打开就知道是同一套玻璃
+   为什么不做成浅色玻璃：这层要托住任意照片（深色夜景也有），浅底会让白字和
+   图片的高光糊在一起，深色烟熏玻璃是唯一能兼顾两头的做法 */
 .viewer{
   position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
-  background:var(--viewer-bg);backdrop-filter:blur(24px);
+  background-color:rgba(16,18,32,.46);
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.16) 0,rgba(255,255,255,.05) 1px,rgba(255,255,255,0) 28px),
+    radial-gradient(78% 54% at 10% -6%,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 60%),
+    radial-gradient(72% 52% at 98% 106%,rgba(150,170,255,.18) 0%,rgba(150,170,255,0) 66%);
+  -webkit-backdrop-filter:blur(36px) saturate(178%) brightness(.90);
+  backdrop-filter:blur(36px) saturate(178%) brightness(.90);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.08);
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .34s var(--ease),visibility .34s var(--ease)
 }
 .viewer.show{opacity:1;visibility:visible;pointer-events:auto}
+html.dark-mode .viewer{
+  background-color:rgba(8,9,18,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 0 0 0 1px rgba(255,255,255,.06);
+}
 .viewer-content{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:20px}
 .viewer-img{
   max-width:94vw;max-height:72vh;object-fit:contain;border-radius:10px;
@@ -491,17 +516,37 @@ html.dark-mode .app-icon-wrap{box-shadow:0 0 0 .5px rgba(255,255,255,.12),0 6px 
 .viewer.show .viewer-img{opacity:1;transform:scale(1)}
 .viewer-close,.viewer-share{
   position:fixed;top:calc(14px + var(--safe-top));width:38px;height:38px;border-radius:50%;
-  background:rgba(120,120,128,.32);backdrop-filter:blur(20px) saturate(180%);
+  background-color:rgba(148,152,170,.26);
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.30) 0,rgba(255,255,255,.06) 1px,rgba(255,255,255,0) 14px),
+    radial-gradient(80% 70% at 24% 4%,rgba(255,255,255,.26) 0%,rgba(255,255,255,0) 58%);
+  -webkit-backdrop-filter:blur(22px) saturate(190%);
+  backdrop-filter:blur(22px) saturate(190%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.60),
+    inset 0 0 0 1px rgba(255,255,255,.26),
+    0 0 0 .5px rgba(120,130,190,.24),
+    0 6px 16px -8px rgba(10,14,40,.55);
   color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;
   z-index:10003;transition:transform .25s var(--ease),opacity .25s var(--ease)
 }
 .viewer-close{right:calc(16px + env(safe-area-inset-right,0px))}
 .viewer-share{left:calc(16px + env(safe-area-inset-left,0px))}
 .viewer-close:active,.viewer-share:active{transform:scale(.9);opacity:.7}
-.viewer-hint{color:rgba(255,255,255,.4);font-size:13px;margin-top:16px;letter-spacing:-.1px}
+/* 底衬从纯黑换成玻璃后，40% 白字在浅色区域会直接消失，
+   提到 .66 并加一层暗投影 —— 投影是给"玻璃后面正好是亮照片"那一侧兜底的 */
+.viewer-hint{
+  color:rgba(255,255,255,.66);font-size:13px;margin-top:16px;letter-spacing:-.1px;
+  text-shadow:0 1px 4px rgba(8,10,24,.55)
+}
 .viewer-counter{
   position:fixed;bottom:calc(30px + var(--safe-bottom));left:50%;transform:translateX(-50%);
-  background:rgba(120,120,128,.32);backdrop-filter:blur(20px);border-radius:14px;padding:6px 14px;
+  background-color:rgba(148,152,170,.24);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.28) 0,rgba(255,255,255,.05) 1px,rgba(255,255,255,0) 12px);
+  -webkit-backdrop-filter:blur(22px) saturate(190%);
+  backdrop-filter:blur(22px) saturate(190%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.22),0 0 0 .5px rgba(120,130,190,.22);
+  border-radius:14px;padding:6px 14px;
   color:#fff;font-size:13px;font-weight:500;z-index:10004;
   opacity:0;transition:opacity .3s var(--ease);pointer-events:none
 }
@@ -510,20 +555,42 @@ html.dark-mode .app-icon-wrap{box-shadow:0 0 0 .5px rgba(255,255,255,.12),0 6px 
 /* ---------- video popup ---------- */
 .video-popup{
   position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.94);backdrop-filter:blur(24px);padding:12px;
+  /* 和查看器同一套烟熏玻璃：视频本身不透明，遮罩只要负责"把周围压下去"，
+     没必要压到 94% 黑 —— 那样从视频卡打开时像跳进了另一个 App */
+  /* 比查看器再暗一档：视频本身是纯黑底，周围太亮会把它衬成一块贴纸 */
+  background-color:rgba(8,10,22,.72);
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.03) 1px,rgba(255,255,255,0) 26px),
+    radial-gradient(76% 52% at 8% -6%,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 58%),
+    radial-gradient(70% 50% at 98% 106%,rgba(150,170,255,.14) 0%,rgba(150,170,255,0) 64%);
+  -webkit-backdrop-filter:blur(32px) saturate(170%) brightness(.84);
+  backdrop-filter:blur(32px) saturate(170%) brightness(.84);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.07);
+  padding:12px;
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s var(--ease),visibility .35s var(--ease)
 }
 .video-popup.active{opacity:1;visibility:visible;pointer-events:auto}
 .popup-inner{
   position:relative;display:inline-block;max-width:min(92vw,900px);max-height:86vh;background:#000;
-  border-radius:14px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.6);
+  border-radius:18px;overflow:hidden;
+  /* 视频框本身是玻璃外壳：顶棱高光 + 内白环 + 外冷细边，和卡片同一套 */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 0 0 1px rgba(255,255,255,.14),
+    0 0 0 .5px rgba(120,130,190,.30),
+    0 40px 80px rgba(0,0,0,.55);
   transform:scale(.94);transition:transform .38s var(--spring)
 }
 .video-popup.active .popup-inner{transform:scale(1)}
 .popup-inner video{display:block;width:auto;height:auto;max-width:min(92vw,900px);max-height:86vh;object-fit:contain;background:#000}
 .popup-close{
   position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;
-  background:rgba(120,120,128,.4);backdrop-filter:blur(20px);color:#fff;font-size:14px;
+  background-color:rgba(148,152,170,.30);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.30) 0,rgba(255,255,255,.06) 1px,rgba(255,255,255,0) 12px);
+  -webkit-backdrop-filter:blur(20px) saturate(190%);
+  backdrop-filter:blur(20px) saturate(190%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.22);
+  color:#fff;font-size:14px;
   display:flex;align-items:center;justify-content:center;z-index:10;
   transition:transform .25s var(--ease),opacity .25s var(--ease)
 }
@@ -642,6 +709,20 @@ html.dark-mode .app-icon-wrap{box-shadow:0 0 0 .5px rgba(255,255,255,.12),0 6px 
   font-size:7px;color:var(--pink);line-height:1;white-space:nowrap;overflow:hidden;max-width:100%
 }
 .month-calendar-day.selected .day-festival{color:rgba(255,255,255,.9)}
+/* 日期下面那一行法定节假日。字重 700 是为了在 7.5px 上还认得出来，
+   红色沿用 .holiday 的语义色；调休用橙色，和右上角的"班"标签呼应 */
+.month-calendar-day .day-holiday{
+  font-size:7.5px;font-weight:700;line-height:1;letter-spacing:-.2px;
+  margin-top:1px;white-space:nowrap;overflow:hidden;max-width:100%;
+  color:var(--red)
+}
+.month-calendar-day .day-holiday.work{color:var(--orange);font-weight:600;opacity:.92}
+.month-calendar-day.selected .day-holiday{color:#FFF;opacity:.95}
+html.dark-mode .month-calendar-day .day-holiday{color:#FF6B60}
+html.dark-mode .month-calendar-day .day-holiday.work{color:#FFA94D}
+html.dark-mode .month-calendar-day.selected .day-holiday{color:#FFF}
+/* 有节假日的那天不再显示农历（一行只放得下一个标签，见 renderMonthCalendar 注释） */
+.month-calendar-day.has-holiday .day-lunar{display:none}
 .month-calendar-nav .month-today-btn{
   width:auto;height:30px;padding:0 12px;border-radius:15px;background:var(--fill-2);
   color:var(--tint);font-size:13px;font-weight:600;letter-spacing:-.08px;
@@ -2850,6 +2931,10 @@ html.dark-mode .city-search-input{
   -webkit-backdrop-filter:none;backdrop-filter:none;
   background-color:var(--lg-solid);
 }
+/* 查看器 / 视频弹窗也是玻璃，但没有可降级的实色底：一旦 blur 去掉，
+   背后的人像照片会直接糊在白色图标后面，必须换成不透明烟熏底 */
+.low-perf .viewer{background-color:rgba(12,14,26,.90)}
+.low-perf .video-popup{background-color:rgba(8,10,20,.94)}
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .profile-row,.top-right .weather-widget,.top-right .calendar-widget,.apps-scroll-wrapper{
     background-color:var(--lg-solid);
@@ -2864,6 +2949,9 @@ html.dark-mode .city-search-input{
   .weather-sheet-overlay .weather-sheet-panel,.city-picker-panel,.month-calendar-panel{
     background-color:rgba(252,253,255,.98);
   }
+  .viewer{background-color:rgba(12,14,26,.92)}
+  .video-popup{background-color:rgba(8,10,20,.96)}
+  .viewer-close,.viewer-share,.viewer-counter,.popup-close{background-color:rgba(96,100,118,.62)}
   html.dark-mode .weather-sheet-overlay .weather-sheet-panel,
   html.dark-mode .city-picker-panel,html.dark-mode .month-calendar-panel{
     background-color:rgba(20,21,36,.98);
@@ -3161,19 +3249,21 @@ html.dark-mode{
   position:absolute;inset:-6px;
   background-repeat:no-repeat;
   background-size:cover;
-  background-position:center 18%;
+  background-position:center 22%;
   opacity:0;
   transition:opacity 1.6s var(--ease);
   will-change:opacity;
-  /* 轻模糊：原图是街景 + 人像，细节（地面砖、街道招牌）在 40% 透明度下
-     会显脏，糊掉之后只剩轮廓和色块，才像"底纹"而不是"贴了张照片" */
-  filter:blur(2px);
-  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 13%,#000 74%,transparent 100%);
-  mask-image:linear-gradient(180deg,transparent 0%,#000 13%,#000 74%,transparent 100%);
+  /* 1.6px 是"人像看得清 / 街景细节不刺眼"的分界：
+     0 太实，原图的地砖和招牌会跟日历数字抢注意力；2px 以上五官就开始糊 */
+  filter:blur(1.6px);
+  /* 遮罩只在最上和最下各留 8% / 12% 的过渡，中间整段全亮 ——
+     原来 13%~74% 的窗口太窄，人只剩腰部那一截能看见 */
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 8%,#000 88%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 8%,#000 88%,transparent 100%);
 }
-.lyn-bg-frame.on{opacity:var(--lyn-op,.40)}
-html.dark-mode .lyn-bg-frame{filter:blur(2px) brightness(.68) saturate(.9)}
-html.dark-mode .lyn-bg-frame.on{opacity:var(--lyn-op,.30)}
+.lyn-bg-frame.on{opacity:var(--lyn-op,.58)}
+html.dark-mode .lyn-bg-frame{filter:blur(1.6px) brightness(.72) saturate(.92)}
+html.dark-mode .lyn-bg-frame.on{opacity:var(--lyn-op,.42)}
 
 /* ---- 弹层底纹：与页面同款，但换一张图、再淡一点 ---- */
 .month-calendar-panel,
@@ -3189,7 +3279,7 @@ html.dark-mode .lyn-bg-frame.on{opacity:var(--lyn-op,.30)}
   background-size:cover;
   background-position:center 14%;
   background-repeat:no-repeat;
-  opacity:var(--lyn-sheet-op,.22);
+  opacity:var(--lyn-sheet-op,.32);
   border-radius:inherit;
   /* 弹层里是密排的数字，底纹必须比页面更"糊"：7px 之后只剩明暗渐变，
      日历的 16px 数字不会和背景纹理抢注意力 */
@@ -3200,8 +3290,8 @@ html.dark-mode .lyn-bg-frame.on{opacity:var(--lyn-op,.30)}
 html.dark-mode .month-calendar-panel::after,
 html.dark-mode .weather-sheet-overlay .weather-sheet-panel::after,
 html.dark-mode .city-picker-panel::after{
-  filter:blur(4px) brightness(.7) saturate(.9);
-  opacity:var(--lyn-sheet-op,.16);
+  filter:blur(4px) brightness(.74) saturate(.92);
+  opacity:var(--lyn-sheet-op,.24);
 }
 
 /* ---- 月历：本月法定节假日 ---- */
@@ -3495,7 +3585,7 @@ html.low-perf .wxfx-smog i{animation:none}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v14';
+var VERSION = 'su-fa36165-v15';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -4350,6 +4440,22 @@ self.addEventListener('fetch', function (e) {
             }
 
             var lynPage = null;
+            var lynAutoOn = false, lynSlow = false, lynPaused = false;
+
+            /* 查看器 / 视频弹窗打开时暂停轮换：
+               这两层是全屏 backdrop-filter，底下每 5s 换一张 800 宽大图，每换一次就要
+               重算整屏 36px 模糊（1.6s 淡入里逐帧算），中低端机直接掉帧。
+               停掉轮换 → 模糊结果变成一张静态图，可以复用 */
+            function lynPause() {
+                if (!lynPage || lynPaused) return;
+                lynPaused = true;
+                lynPage.stop();
+            }
+            function lynResume() {
+                if (!lynPage || !lynPaused) return;
+                lynPaused = false;
+                if (lynAutoOn) lynPage.start(lynSlow ? 15000 : LYN_STEP);
+            }
 
             function initLynBgs() {
                 if (!LYN_POOL.length) return;
@@ -4368,6 +4474,8 @@ self.addEventListener('fetch', function (e) {
                 // 低端机把轮换放慢到 15s：每 5s 换一张 800 宽大图 + 全屏 blur，
                 // 对中低端安卓是一次持续的重绘压力，放慢比直接关掉观感损失更小
                 var slowPerf = document.documentElement.classList.contains('low-perf');
+                lynAutoOn = !still;
+                lynSlow = slowPerf;
                 if (!still) lynPage.start(slowPerf ? 15000 : LYN_STEP);
 
                 // 弹层那两张延后 6s 预载，避开首屏带宽
@@ -5745,6 +5853,7 @@ self.addEventListener('fetch', function (e) {
                 if (!globalMuted && popupVideo.volume <= 0) popupVideo.volume = 1;
 
                 videoPopup.classList.add('active');
+                lynPause();
 
                 updateAllMuteIcons();
                 popupTotTime.textContent = formatTime(popupVideo.duration);
@@ -5774,6 +5883,7 @@ self.addEventListener('fetch', function (e) {
                 popupVideo.pause();
 
                 videoPopup.classList.remove('active');
+                lynResume();
 
                 mainVideo.muted = globalMuted;
                 if (!globalMuted && mainVideo.volume <= 0) mainVideo.volume = 1;
@@ -5954,6 +6064,7 @@ self.addEventListener('fetch', function (e) {
                 viewerImg.src = viewerGallery[viewerGalleryIndex];
                 viewerImg.alt = alt || "原图";
                 viewer.classList.add("show");
+                lynPause();
                 viewerHint.textContent = '左右滑动切换 · 长按保存';
                 updateViewerCounter();
                 if (viewerGallery.length > 1) setTimeout(() => { if (viewer.classList.contains('show'))
@@ -5963,6 +6074,7 @@ self.addEventListener('fetch', function (e) {
 
             function closeViewer() { stopViewerAutoPlay();
                 viewer.classList.remove("show");
+                lynResume();
                 isViewerInteracting = false;
                 setTimeout(() => { if (!viewer.classList.contains("show")) viewerImg.src = ""; }, 250); }
 
@@ -7804,15 +7916,45 @@ self.addEventListener('fetch', function (e) {
                             tagHtml = '<span class="day-tag work">班</span>';
                         }
 
+                        /* 日期下面只有一行位置，按重要性取一个：
+                           法定节假日 > 节气 / 传统节日 > 农历日
+                           原来农历永远占着这行，节假日只能靠右上角那个"休"字，
+                           等于没写名字 —— 用户要的就是把名字放上来 */
+                        var holText = '';
+                        var holClass = '';
+                        if (holidayInfo.type === 1) {
+                            holText = holidayInfo.name;
+                            holClass = '';
+                            // 连续假期只在第一天写全名，之后写「国庆」「清明」这种字头，
+                            // 否则 10-01~10-07 会排出一整列一模一样的「国庆节」
+                            if (d > 1) {
+                                var prevInfo = getHolidayInfo(new Date(monthCalendarYear, monthCalendarMonth, d - 1));
+                                if (prevInfo.name === holidayInfo.name && holText.length > 2) {
+                                    holText = holText.slice(0, -1);
+                                }
+                            }
+                        } else if (holidayInfo.type === 3) {
+                            holText = '调休';
+                            holClass = ' work';
+                        }
+
+                        var subHtml;
+                        if (holText) {
+                            classes += ' has-holiday';
+                            subHtml = '<span class="day-holiday' + holClass + '">' + holText + '</span>';
+                        } else {
+                            subHtml = '<span class="day-lunar">' + lunarText + '</span>';
+                        }
+
                         var festivalHtml = '';
-                        if (festivalName) {
+                        if (festivalName && !holText) {
                             festivalHtml = '<span class="day-festival">' + festivalName + '</span>';
                         }
 
                         html += '<div class="' + classes + '" data-date="' + date.getTime() + '">' +
                             tagHtml +
                             '<span>' + d + '</span>' +
-                            '<span class="day-lunar">' + lunarText + '</span>' +
+                            subHtml +
                             festivalHtml +
                         '</div>';
                     }
