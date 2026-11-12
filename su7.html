@@ -3251,11 +3251,7 @@ html.dark-mode{
   background-size:cover;
   background-position:center 22%;
   opacity:0;
-  /* 【性能】1.6s → .5s。底图在四张玻璃卡下面，交叉淡化的每一帧都要让
-     4 个 backdrop-filter 重新采样一次背景。1.6s 淡化 + 5s 一张 = 每 5 秒里有
-     32% 的时间在逐帧重算整屏模糊，这是"放着不动也烫"的第一大项。
-     缩到 .5s 后占空比降到 7%，肉眼只是"快一点的淡入"，没有跳变。 */
-  transition:opacity .5s var(--ease);
+  transition:opacity 1.6s var(--ease);
   will-change:opacity;
   /* 1.6px 是"人像看得清 / 街景细节不刺眼"的分界：
      0 太实，原图的地砖和招牌会跟日历数字抢注意力；2px 以上五官就开始糊 */
@@ -3532,254 +3528,6 @@ html.low-perf .wxfx-smog i{animation:none}
   .wxfx-flash.on,.wxfx-bolt.on{animation:none!important;opacity:0!important}
 }
 
-/* ============================================================================
-   35 文字可读性总修：二级/三级文字 2.2~3.5:1 → 6~10:1
-   ----------------------------------------------------------------------------
-   为什么要动：卡片是 40% 白的玻璃，底下就是人像照片。实测卡片内部背景亮度
-   ≈ rgb(180,168,172)，在这个底子上——
-       #575E85 只剩 3.5:1（体感/湿度那排标签）
-       #646C9B 只剩 2.2:1（农历、星期四）
-       #FF5C93 只剩 2.4:1（周末表头、节日）
-   而 8~10px 的字在这个尺寸下本来就难认，颜色再淡就等于没写。
-
-   三条改动，版式一行没动：
-     ① 二级 / 三级文字统一压深到 6.5~8:1，数值再压到 10:1 —— 靠「更黑」拉开层次，
-        而不是靠「更灰」；字重同步提一档（700→800），小字号上比放大更有效。
-     ② 渐变文字（年月 / 星期）在浅色玻璃上色相会被背景吃掉，换一支更深的墨蓝渐变
-        --grad-ink；不用 filter 而是直接换色停，避免 drop-shadow 把边缘糊软。
-     ③ 8~10px 的小字加一层极淡的白色光晕：不改字色，只把笔画从照片纹理里"托"出来，
-        等于给文字自带一块看得见的底。深色模式换成同强度的暗光晕。
-   —— 整节只覆盖，不改上面任何原规则，想回退删掉即可。
-   ============================================================================ */
-:root{
-  /* 实时天气 / 弹层的统一色阶（§31 的同一组令牌，整体再压深一档） */
-  --wxc-label:#232948;    /* 指标标签   玻璃上 7.9:1 */
-  --wxc-value:#0B102A;    /* 数值最深   玻璃上 10.8:1 */
-  --wxc-unit:#3E4569;     /* 单位       玻璃上 5.2:1 */
-  --wxc-meta:#2B3150;     /* 城市/更新时间 7.2:1 */
-  --wxc-time:#2B3150;
-  --aqi-key:#2B3150;
-  --aqi-pm:#3E4569;
-
-  /* 小字号渐变文字的"墨版"：同一支蓝→紫→洋红，整体压到深水里 */
-  --grad-ink:linear-gradient(118deg,#123A9E 0%,#3A22B4 52%,#8A1C86 100%);
-
-  /* 小字光晕：白的一层把字托出来，不改变字色 */
-  --txt-halo:0 0 2px rgba(255,255,255,.44),0 0 1px rgba(255,255,255,.52);
-}
-html.dark-mode{
-  --wxc-label:#C6CCF0;
-  --wxc-value:#F7F8FF;
-  --wxc-unit:#A9B0D8;
-  --wxc-meta:#BAC0E4;
-  --wxc-time:#BAC0E4;
-  --aqi-key:#BAC0E4;
-  --aqi-pm:#A9B0D8;
-  --grad-ink:linear-gradient(118deg,#8FB6FF 0%,#BDA3FF 52%,#FFA2CD 100%);
-  /* 深色底下「压深」等于消失，这里换回亮一档的同色相（原 --grad-cool 的深色版） */
-  --grad-cool-deep:linear-gradient(118deg,#6FBEFF 0%,#9B9CFF 54%,#CFA4FF 100%);
-  --txt-halo:0 0 3px rgba(6,8,20,.62),0 0 1px rgba(6,8,20,.55);
-}
-
-/* --- 顶栏天气卡：天气现象 / 街道 / 2×3 指标 / 日出日落 --- */
-.top-right .weather-desc{color:#1B2142;font-weight:800}
-.top-right .weather-location{color:#242B4E;font-weight:800}
-.top-right .wx-dot{color:#4A5178}
-.top-right .wx-d > span{color:var(--wxc-label)}
-.top-right .wx-d > b{color:var(--wxc-value)}
-.top-right .wx-sun{color:var(--wxc-meta);font-weight:700}
-.top-right .wx-sun-item b{color:var(--wxc-value)}
-html.dark-mode .top-right .weather-desc{color:#E4E8FF}
-html.dark-mode .top-right .weather-location{color:#D2D8F6}
-html.dark-mode .top-right .wx-dot{color:#9BA3CC}
-html.dark-mode .top-right .wx-d > span{color:var(--wxc-label)}
-html.dark-mode .top-right .wx-d > b{color:var(--wxc-value)}
-html.dark-mode .top-right .wx-sun{color:var(--wxc-meta)}
-
-/* --- 顶栏日历卡：年月 / 星期 / 农历 / 节假日标签 / 宜忌 --- */
-.top-right .calendar-year-month{background-image:var(--grad-ink)}
-.top-right .calendar-weekday{background-image:var(--grad-ink);opacity:1}
-.top-right .calendar-lunar{color:var(--wxc-meta);font-weight:700}
-.top-right .calendar-day-label{color:#3F4669;font-weight:800}
-.calendar-holiday-tag.normal{
-  color:#2A3080;
-  background:linear-gradient(120deg,rgba(122,140,255,.26),rgba(168,85,247,.20));
-}
-.calendar-holiday-tag.holiday{color:#0E7444;background:linear-gradient(120deg,rgba(52,199,89,.26),rgba(18,194,194,.20))}
-.calendar-holiday-tag.workday{color:#9E4C10;background:linear-gradient(120deg,rgba(255,149,0,.28),rgba(255,92,147,.18))}
-.yj-text{color:var(--wxc-meta);font-weight:700}
-html.dark-mode .top-right .calendar-lunar{color:var(--wxc-meta)}
-html.dark-mode .top-right .calendar-day-label{color:#B4BCE0}
-html.dark-mode .calendar-holiday-tag.normal{color:#C9D0FF}
-html.dark-mode .calendar-holiday-tag.holiday{color:#6FF0A8}
-html.dark-mode .calendar-holiday-tag.workday{color:#FFC27A}
-html.dark-mode .yj-text{color:#DDE2FA}
-
-/* --- 小字光晕：只给不带渐变填充的文字，避免把 background-clip:text 冲淡 --- */
-.top-right .weather-desc,
-.top-right .weather-location,
-.top-right .wx-d > span,
-.top-right .wx-d > b,
-.top-right .wx-sun,
-.top-right .calendar-lunar,
-.top-right .calendar-day-label,
-.top-right .yj-text,
-.calendar-holiday-tag,
-.app-label{text-shadow:var(--txt-halo)}
-/* 标签文字加深加粗后原 7px 内边距贴边了，放宽 1px 让「工作日」三个字有呼吸 */
-.top-right .calendar-holiday-tag{padding:2px 8px}
-
-/* --- 底部 App 跳转按钮下方那行名字 --- */
-.app-label{color:#0A0D22;font-weight:800;letter-spacing:-.1px}
-html.dark-mode .app-label{color:#F4F6FF;text-shadow:0 0 3px rgba(6,8,20,.7)}
-
-/* --- 月历弹层：表头 / 农历 / 非本月 / 节日 / 节假日小字 / 图例 --- */
-.month-calendar-title span{background-image:var(--grad-ink)}
-.month-calendar-weekdays span{color:#2B3150;font-weight:700}
-.month-calendar-weekdays span.weekend{color:#D2214F;font-weight:800}
-.month-calendar-day{color:#12162E}
-.month-calendar-day.other-month{color:#666D93}
-.month-calendar-day .day-lunar{color:#414868;font-weight:600}
-.month-calendar-day .day-festival{color:#C81E4C;font-weight:700}
-.month-calendar-day.today,
-.month-calendar-day.holiday{color:#C4213F}
-.month-calendar-day .day-holiday{color:#C4213F}
-.month-calendar-day .day-holiday.work{color:#A4530E;opacity:1}
-.month-calendar-legend{color:#2B3150;font-weight:600}
-html.dark-mode .month-calendar-weekdays span{color:#C6CCF0}
-html.dark-mode .month-calendar-weekdays span.weekend{color:#FF8AAE}
-html.dark-mode .month-calendar-day{color:#EEF0FF}
-html.dark-mode .month-calendar-day.other-month{color:#8E96BC}
-html.dark-mode .month-calendar-day .day-lunar{color:#C2C9ED}
-html.dark-mode .month-calendar-day .day-festival{color:#FF9BC0}
-html.dark-mode .month-calendar-day.today,
-html.dark-mode .month-calendar-day.holiday{color:#FF7A93}
-html.dark-mode .month-calendar-day .day-holiday{color:#FF7A8C}
-html.dark-mode .month-calendar-day .day-holiday.work{color:#FFB86B}
-html.dark-mode .month-calendar-legend{color:#C6CCF0}
-
-/* --- 天气弹层：分段控件 / 未来 7 天 / 页脚说明 --- */
-.wx-tab{color:#333A60;font-weight:700}
-.wx-tab.on{color:#0E1330}
-.wx7-day span{color:#414868}
-.wx7-temp .lo{color:#414868}
-.wx7-foot{color:#3E4569;font-weight:600}
-.wx7-empty{color:#4A5178}
-html.dark-mode .wx-tab{color:#C2C8EA}
-html.dark-mode .wx-tab.on{color:#FFFFFF}
-html.dark-mode .wx7-day span{color:#AEB6E0}
-html.dark-mode .wx7-temp .lo{color:#AEB6E0}
-html.dark-mode .wx7-foot{color:#AEB6E0}
-html.dark-mode .wx7-empty{color:#A9B0D8}
-
-/* --- 城市选择弹层 --- */
-.city-item{color:#12162E}
-.city-item .city-province{color:#2B3150;font-weight:600}
-.city-sub{color:#2B3150;font-weight:700}
-.city-hint{color:#3E4569}
-.city-search-input::placeholder{color:#5A6186}
-html.dark-mode .city-item{color:#F7F8FF}
-html.dark-mode .city-item .city-province{color:#C6CCF0}
-html.dark-mode .city-sub{color:#C6CCF0}
-html.dark-mode .city-hint{color:#A9B0D8}
-html.dark-mode .city-search-input::placeholder{color:#8E96BC}
-
-/* --- 大温度：字重 300 / 200 的细笔画，原 --grad-cool 在玻璃上只有 1.9:1，
-       够大也发虚。换成同色相、压深一档的 --grad-cool-deep（3.3~4.6:1），
-       仍然是清澈的蓝→紫，不会脏。日历里那枚 12 是 700 粗体，不动。 --- */
-:root{
-  --grad-cool-deep:linear-gradient(118deg,#1A5FD0 0%,#3F2CD8 55%,#7E28C4 100%);
-}
-.top-right .weather-temp{background-image:var(--grad-cool-deep)}
-.wx7-hero .ws-temp{background-image:var(--grad-cool-deep)}
-
-/* --- 弹层标题：原 --grad-name 的粉端在浅色玻璃上只剩 2.5:1，换墨版 --- */
-.wx7-title{background-image:var(--grad-ink)}
-.ws-title,.city-picker-title{background-image:var(--grad-ink)}
-
-/* --- 查看器提示 / 视频弹层时间 --- */
-.viewer-hint{color:rgba(255,255,255,.90);text-shadow:0 1px 3px rgba(6,8,22,.72),0 0 14px rgba(6,8,22,.45)}
-.popup-time{font-weight:600;color:#FFF}
-
-
-/* ============================================================================
-   37 性能：把「每帧重算」的东西挪出每一帧
-   ----------------------------------------------------------------------------
-   这一节不加任何新功能，只砍掉三笔"看不见但在持续烧 CPU/GPU"的开销。
-   判断依据：只要某个属性的变化会让整层重新栅格化（blur / 重绘），
-   就不能放在 transform 的位置上 —— 合成器能免费搬运的只有 transform 和 opacity。
-
-   ① 雾 / 霾的漂移：原来 keyframes 里带 scale(1 → 1.08)。
-      这两个图层挂着 filter:blur(22px/26px)，宽度 170%，
-      **缩放一个带模糊的图层 = 每一帧都按新尺寸重新算一次 22px 高斯模糊**，
-      1 秒 60 次、图层还是满屏宽。改成只做 translate3d：
-      模糊结果被缓存成一张纹理，之后每帧只是把它整体平移，走合成器，几乎零成本。
-      "雾在呼吸"的观感本来就来自浓淡变化，位移已经够了，去掉缩放肉眼看不出。
-   ② 视频卡上那层柔光：mix-blend-mode:screen 挂在视频上方。
-      视频每帧都在变，混合组每帧都要把整块卡的像素读出来重算一遍。
-      这层本来就是几段极淡的径向渐变，改成普通混合 + 更低的 alpha，
-      观感几乎一致，但省掉每帧一次整卡混合。
-   ③ 只在"切换那一瞬"用到的两个动画层（照片扫光 / 头像光环扫光）不需要
-      常驻 will-change —— 那等于让浏览器永久保留两张几十万像素的合成纹理，
-      Android 上显存紧张时会挤掉别的图层，反而更卡。
-   ============================================================================ */
-
-/* ① 雾 / 霾：只平移，不缩放（同名 keyframes 后写的覆盖前面那份） */
-@keyframes fxfFog{
-  0%{transform:translate3d(-7%,0,0)}
-  50%{transform:translate3d(7%,1.4%,0)}
-  100%{transform:translate3d(-7%,0,0)}
-}
-
-/* ② 视频柔光：普通混合，alpha 同步降一档补回亮度 */
-.video-player-container::after{
-  mix-blend-mode:normal;
-  background:
-    radial-gradient(118% 76% at 50% -10%,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 60%),
-    radial-gradient(90% 58% at 50% 110%,rgba(255,190,235,.05) 0%,rgba(255,190,235,0) 58%);
-}
-
-/* ③ 只在切换瞬间用的图层，不常驻合成 */
-.top-card .plate-photo-inner::after,
-html body .avatar-center.swapping::after{will-change:auto}
-
-/* ----------------------------------------------------------------------------
-   37.1 自适应中档（html.perf-mid）
-   ----------------------------------------------------------------------------
-   实测帧率不足时由 JS 挂上（见"帧率采样"），比 .low-perf 温和得多：
-   不动配色、不把玻璃变实底，只做三件"几乎看不出"的减法 ——
-     · 毛玻璃半径 12 → 8px（模糊半径对开销是平方级的，8px 约为 12px 的 45%）
-     · 停掉四段渐变文字的流动（background-position 每帧重绘 + 每帧重算
-       7px 的 drop-shadow，是纯装饰里最贵的一笔）
-     · 停掉扫光/缩放这类一次性动画，只留淡入
-   -------------------------------------------------------------------------- */
-html.perf-mid{
-  --lg-blur:8px;
-  --lg-sat:145%;
-  /* 必须连 --lg-filter 一起写：§33 的手机档把整条滤镜写死成 blur(12px) 了，
-     只改 --lg-blur 不会影响它（var() 是在声明处 :root 上就替换掉的） */
-  --lg-filter:blur(8px) saturate(145%);
-}
-html.perf-mid .weather-sheet-overlay .weather-sheet-panel,
-html.perf-mid .city-picker-panel,
-html.perf-mid .month-calendar-panel{
-  -webkit-backdrop-filter:blur(13px) saturate(155%);
-  backdrop-filter:blur(13px) saturate(155%);
-}
-html.perf-mid .island-grad,
-html.perf-mid .profile-row .name,
-html.perf-mid .profile-row .subtitle .line-1,
-html.perf-mid .profile-row .subtitle .line-2{
-  animation:none;
-  filter:none;
-}
-html.perf-mid .stack-img.active{animation:stackFadeOnly .5s ease 1}
-html.perf-mid .top-card .plate-photo.swapping .plate-photo-inner::after,
-html.perf-mid .avatar-center.swapping::after,
-html.perf-mid .wxfx-fog i,
-html.perf-mid .wxfx-smog i{animation:none}
-html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
-
 </style>
     <script>
         (function () {
@@ -3796,11 +3544,6 @@ html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
                 else dark = !!sys;
                 var h = document.documentElement;
                 if (dark) h.classList.add('dark-mode');
-                /* 【性能】上一次访问被判定为"跑不动"，这次在首帧前就打上中档：
-                   免得又经历一遍加载即掉帧。判定逻辑见主脚本末尾的帧率采样。 */
-                try {
-                    if (localStorage.getItem('plate_perf_mode') === 'mid') h.classList.add('perf-mid');
-                } catch (e2) {}
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', dark ? '#07070E' : '#EEF2FF');
                 var cs = document.querySelector('meta[name="color-scheme"]');
@@ -3809,13 +3552,19 @@ html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
         })();
 
         (function() {
-            /* 【性能】这里原来在每帧 resize / visualViewport resize 时往 <html> 写 --vh。
-               两个问题：
-                 ① 全站已经没有任何规则引用 var(--vh)（改用 svh），这段是纯死代码；
-                 ② 往根元素写自定义属性 = 整棵树的自定义属性继承失效 —— 浏览器要做一次
-                    全文档样式重算。手机上地址栏收起/展开、橡皮筋回弹都会连续触发
-                    visualViewport.resize，等于「滑动一次 = 几十次全文档 style recalc」，
-                    这是滚动时掉帧的直接原因之一。直接删掉。 */
+            function setVH() {
+                var vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', vh + 'px');
+            }
+            setVH();
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', function() {
+                setTimeout(setVH, 100);
+                setTimeout(setVH, 300);
+            });
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', setVH);
+            }
             if (window.matchMedia) {
                 var mq = window.matchMedia('(prefers-color-scheme: dark)');
                 var handler = function() {
@@ -3836,7 +3585,7 @@ html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v18';
+var VERSION = 'su-fa36165-v15';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -4605,25 +4354,13 @@ self.addEventListener('fetch', function (e) {
                主背景当前那张，撞上就顺延，保证"打开的面板里一定是另一张照片"。
                ================================================================== */
             var LYN_POOL = (typeof slideImages !== 'undefined' ? slideImages : []).filter(Boolean);
+            var LYN_STEP = 5000;
 
-            /* 【省电参数】背景轮换的三档节奏，集中在这里改，别散到各处
-               ------------------------------------------------------------------
-               每次换图都是一次「解码 + 上纹理 + 0.5s 交叉淡化」：淡化期间底图在四张
-               玻璃卡下面逐帧变，每帧都要让 4 个 backdrop-filter 重新采样。
-               所以间隔越长，占空比越低 —— 7s→9s 把占空比从 7% 压到 5.5%。
-               9s 是折中：人眼在这个节奏下仍觉得背景是「活的」，再长就像静态图了。 */
-            var LYN_STEP      = 9000;    // 满血：9s
-            var LYN_STEP_MID  = 14000;   // 中档（实测掉帧）：14s
-            var LYN_STEP_SLOW = 18000;   // 低端机 / 省流量：18s
-
-            /* 底图宽度 700（原 820）：像素量 -27%，解码、上纹理、模糊采样同步减少。
-               屏宽 390 时满屏也只需 ~800 物理像素，但底图本身挂着 blur(1.6px) + 压暗
-               遮罩 + 上面盖四张卡，700 宽放大后完全看不出软。 */
             function lynUrl(i, w) {
                 if (!LYN_POOL.length) return '';
                 var n = LYN_POOL.length;
                 var k = ((i % n) + n) % n;
-                return thumbOf(LYN_POOL[k], w || 700);
+                return thumbOf(LYN_POOL[k], w || 820);
             }
 
             function createLynRotator(el, startIdx, opts) {
@@ -4666,21 +4403,8 @@ self.addEventListener('fetch', function (e) {
                     var slot = first ? 0 : 1 - cur;
                     paint(slot, i, function (ok) {
                         if (!ok) return;
-                        var el = frames[slot];
-                        el.style.visibility = 'visible';
-                        el.classList.add('on');
-                        if (!first) {
-                            var old = frames[cur];
-                            old.classList.remove('on');
-                            /* 【性能】淡出结束后把旧帧彻底藏起来：
-                               两帧都是"满屏 + blur(1.6px) + mask"，常驻的话
-                               等于一直占着两张 ~1200×2500 的合成纹理。
-                               visibility:hidden 后浏览器会释放这张纹理，
-                               内存和合成开销都少一半；下次轮到它时再打开。 */
-                            setTimeout(function () {
-                                if (!old.classList.contains('on')) old.style.visibility = 'hidden';
-                            }, 640);
-                        }
+                        frames[slot].classList.add('on');
+                        if (!first) frames[cur].classList.remove('on');
                         cur = slot;
                     });
                 }
@@ -4712,36 +4436,30 @@ self.addEventListener('fetch', function (e) {
             function setLynSheet(el, offset) {
                 if (!el || !LYN_POOL.length) return;
                 var base = lynPage ? lynPage.current() : 0;
-                el.style.setProperty('--lyn-sheet-bg', 'url("' + lynUrl(base + offset, 680) + '")');
+                el.style.setProperty('--lyn-sheet-bg', 'url("' + lynUrl(base + offset, 760) + '")');
             }
 
             var lynPage = null;
-            var lynAutoOn = false, lynSlow = false;
+            var lynAutoOn = false, lynSlow = false, lynPaused = false;
 
-            /* 只要屏幕被任何一层全屏浮层盖住（查看器 / 视频 / 三个弹层），
-               底下的一切"会变的东西"就都该停 —— 因为浮层是全屏 backdrop-filter，
-               背后每变一次，整屏模糊就得重算一次。
-               原来只处理了查看器和视频弹窗，弹层打开时底图照转、图集照切、
-               头像照换：三种变化叠在一起，每 3.5 秒就让整屏 9px + 20px 两层模糊
-               各重算一整轮，这就是"打开日历就发烫"的来源。
-               用计数而不是布尔值：弹层里再点开城市选择时，两层都在，先关的那层
-               不能把轮换提前放出来。 */
-            var uiBusy = 0;
+            /* 查看器 / 视频弹窗打开时暂停轮换：
+               这两层是全屏 backdrop-filter，底下每 5s 换一张 800 宽大图，每换一次就要
+               重算整屏 36px 模糊（1.6s 淡入里逐帧算），中低端机直接掉帧。
+               停掉轮换 → 模糊结果变成一张静态图，可以复用 */
             function lynPause() {
-                uiBusy++;
-                if (lynPage) lynPage.stop();
-                if (wxFx && wxFx.pause) wxFx.pause();      // 雨/雪/雷一起停，见下面 wxFx
+                if (!lynPage || lynPaused) return;
+                lynPaused = true;
+                lynPage.stop();
             }
             function lynResume() {
-                if (uiBusy > 0) uiBusy--;
-                if (uiBusy) return;
-                if (lynPage && lynAutoOn) lynPage.start(lynSlow ? LYN_STEP_SLOW : LYN_STEP);
-                if (wxFx && wxFx.resume) wxFx.resume();
+                if (!lynPage || !lynPaused) return;
+                lynPaused = false;
+                if (lynAutoOn) lynPage.start(lynSlow ? 15000 : LYN_STEP);
             }
 
             function initLynBgs() {
                 if (!LYN_POOL.length) return;
-                lynPage = createLynRotator(document.getElementById('lynBgPage'), 0, { w: 700 });
+                lynPage = createLynRotator(document.getElementById('lynBgPage'), 0, { w: 820 });
                 if (!lynPage) return;
 
                 // 省流量模式 / 系统要求减少动效时不轮换，只留一张静态底纹：
@@ -4753,92 +4471,23 @@ self.addEventListener('fetch', function (e) {
                 } catch (e) {}
                 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) still = true;
 
-                // 低端机把轮换放慢：每换一张大图 + 全屏 blur 对中低端安卓是持续重绘压力，
-                // 放慢比直接关掉观感损失更小
+                // 低端机把轮换放慢到 15s：每 5s 换一张 800 宽大图 + 全屏 blur，
+                // 对中低端安卓是一次持续的重绘压力，放慢比直接关掉观感损失更小
                 var slowPerf = document.documentElement.classList.contains('low-perf');
                 lynAutoOn = !still;
                 lynSlow = slowPerf;
-                if (!still) lynPage.start(slowPerf ? LYN_STEP_SLOW : LYN_STEP);
+                if (!still) lynPage.start(slowPerf ? 15000 : LYN_STEP);
 
                 // 弹层那两张延后 6s 预载，避开首屏带宽
                 setTimeout(function () {
                     try {
-                        var a = new Image(); a.src = lynUrl(11, 680);
-                        var b = new Image(); b.src = lynUrl(29, 680);
+                        var a = new Image(); a.src = lynUrl(11, 760);
+                        var b = new Image(); b.src = lynUrl(29, 760);
                     } catch (e) {}
                 }, 6000);
             }
 
             initLynBgs();
-
-            /* ==================================================================
-               帧率采样 → 自动切「中档」（html.perf-mid，样式见 §37.1）
-               ------------------------------------------------------------------
-               为什么需要：卡不卡跟机型强相关，写死设备名单必然漏（这台小米 18 Pro
-               有 8 核，`hardwareConcurrency<=4` 那套判断永远命中不了，所以
-               .low-perf 一次都没生效过，重效果全开着跑）。
-               这里不猜设备，直接量：连续取 120 帧，超过 22ms（<45fps）的帧
-               占比过半 → 判定为跑不动，挂 perf-mid。
-               两个细节：
-                 · 只在「没有全屏弹层、页面可见」时采样 —— 打开查看器时的掉帧
-                   是正常的，不能算到设备头上；
-                 · 判完不写死：30 秒后再量一次，如果其实很流畅就把中档撤掉，
-                   避免一次偶发卡顿永久降级。结果同步进 localStorage，
-                   下次进来首帧前就生效。
-               ================================================================== */
-            (function () {
-                var root = document.documentElement;
-                if (root.classList.contains('low-perf')) return;   // 已经是更狠的那档，不用管
-                var KEY = 'plate_perf_mode';
-                var frames = 0, slow = 0, prev = 0, round = 0, done = false, appliedHere = false;
-
-                function overlaysOpen() {
-                    return !!document.querySelector(
-                        '.viewer.show,.video-popup.active,.month-calendar-overlay.show,' +
-                        '.weather-sheet-overlay.show,.city-picker-overlay.show');
-                }
-                function busiest() {
-                    return document.hidden || overlaysOpen();
-                }
-                function apply(mid) {
-                    if (mid) root.classList.add('perf-mid');
-                    else root.classList.remove('perf-mid');
-                    try { localStorage.setItem(KEY, mid ? 'mid' : 'full'); } catch (e) {}
-                    if (lynPage && lynAutoOn) lynPage.start(mid ? LYN_STEP_MID : LYN_STEP);
-                }
-                function judge() {
-                    var ratio = frames ? slow / frames : 0;
-                    if (round === 0) {
-                        if (ratio >= 0.55) { apply(true); appliedHere = true; }
-                        round = 1; frames = 0; slow = 0; prev = 0;
-                        setTimeout(function () { requestAnimationFrame(tick); }, 24000);
-                        return;
-                    }
-                    done = true;
-                    /* 第二轮只用来「治疗上一次访问留下的降级」：
-                       如果这次是刚判出来的中档，就不能拿"开着中档跑得很好"当证据把它撤掉，
-                       否则会来回横跳。只有「中档是上次存的、这次全程流畅」才还原。 */
-                    if (!appliedHere && ratio <= 0.18 && root.classList.contains('perf-mid')) apply(false);
-                }
-                var t0 = 0;
-                function tick(t) {
-                    if (done) return;
-                    if (!t0) t0 = performance.now();
-                    if (busiest()) { prev = 0; requestAnimationFrame(tick); return; }
-                    /* 每帧都计数，不设"太快的帧不算"的门槛：
-                       一是为了统计口径简单，二是万一某些内核给的 rAF 时间戳不推进
-                       （d 恒为 0），frames 会永远停在 0、采样永不结束。
-                       另外加一道 8 秒硬上限，任何情况下都能收敛。 */
-                    if (prev) {
-                        var d = t - prev;
-                        if (d > 0) { frames++; if (d > 22) slow++; }
-                    }
-                    prev = t;
-                    if (frames >= 120 || performance.now() - t0 > 8000) { judge(); return; }
-                    requestAnimationFrame(tick);
-                }
-                setTimeout(function () { requestAnimationFrame(tick); }, 5200);
-            })();
 
             /* ==================================================================
                天气氛围层（样式见 §34）
@@ -4910,10 +4559,7 @@ self.addEventListener('fetch', function (e) {
                 function isDark() { return document.documentElement.classList.contains('dark-mode'); }
 
                 function resize() {
-                    /* 1.8 而不是 2：雨丝线宽只有 1~1.5px，2 倍和 1.8 倍肉眼分不出来，
-                       但整块画布面积少 19%、每帧填充的像素少 19% —— 满屏 canvas 的成本
-                       几乎全在填充率上 */
-                    dpr = Math.min(1.8, window.devicePixelRatio || 1);
+                    dpr = Math.min(2, window.devicePixelRatio || 1);
                     W = canvas.clientWidth || window.innerWidth;
                     H = canvas.clientHeight || window.innerHeight;
                     canvas.width = Math.max(1, Math.round(W * dpr));
@@ -4956,11 +4602,6 @@ self.addEventListener('fetch', function (e) {
 
                 function frame(t) {
                     raf = requestAnimationFrame(frame);
-                    /* 中档下粒子压到 ~30fps：这块画布的成本全在「每帧重画 N 条线/圆」，
-                       少画一半帧，雨看着只是稍微慢一点，CPU 直接砍一半。
-                       用 lastT 做节拍基准，所以跳过帧时 dt 会自动累积，雨速不变。 */
-                    if (lastT && t - lastT < 30 &&
-                        document.documentElement.classList.contains('perf-mid')) return;
                     var dt = lastT ? Math.min(64, t - lastT) / 1000 : 0.016;
                     lastT = t;
                     ctx.clearRect(0, 0, W, H);
@@ -5190,7 +4831,13 @@ self.addEventListener('fetch', function (e) {
                 }
 
                 document.addEventListener('visibilitychange', function () {
-                    if (document.hidden) pauseFx(); else resumeFx();
+                    if (document.hidden) {
+                        stop();
+                        if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
+                    } else {
+                        if (kind !== 'none') start();
+                        if (lastInput) scheduleBolts(Number(lastInput.code) >= 95);
+                    }
                 });
 
                 var rzT = 0;
@@ -5202,20 +4849,8 @@ self.addEventListener('fetch', function (e) {
                     setTimeout(resize, 320);
                 });
 
-                /* 被全屏浮层盖住时彻底停：雨丝每帧重画 = 浮层那层 9px 全屏模糊
-                   每帧都要跟着重算，这是"下雨时打开日历特别烫"的根因 */
-                function pauseFx() {
-                    stop();
-                    if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
-                }
-                function resumeFx() {
-                    if (document.hidden) return;
-                    if (kind !== 'none') start();
-                    if (lastInput) scheduleBolts(Number(lastInput.code) >= 95);
-                }
-
                 resize();
-                return { apply: apply, refresh: refresh, pause: pauseFx, resume: resumeFx };
+                return { apply: apply, refresh: refresh };
             })();
 
             const slideFocus = "50,50 50,0 50,0 50,100 50,50 50,50 50,0 50,56 50,0 50,0 50,50 50,50 50,56 50,3 50,50 50,50 50,0 50,100 50,66 50,50 50,0 50,0 50,50 50,0 50,50 50,100 50,0 50,100 50,0 50,50 50,50 50,43 50,26 50,0 50,66 50,100 50,0 0,50 50,0 50,0 50,81 50,50 50,34 50,23 50,57 50,0 50,3 50,0 50,0 50,59 50,0 50,45 50,0 50,0 50,2 50,13 50,4 50,50 50,0 100,50 50,100 50,0 50,0 50,33 50,50 50,77 50,9 50,50 50,9 50,0 50,8 50,0 50,100 50,0 50,0 50,0 50,23 50,0 50,0 50,0 50,100 50,0 50,0 50,0 50,0 50,100 50,50 50,50 14,50 50,50 50,0 50,50 50,0 50,0 50,0 50,50 50,100 50,50 50,0 50,0 50,0 50,0 50,0 50,50 50,0 53,50 50,11 50,0 50,0 68,50 50,50 50,50 50,0 50,0 100,50 50,50 50,100 50,0 50,0 50,0 50,50 50,0 50,0 50,0 50,0 50,0 50,0 50,0 50,55 50,0 50,0 50,0 50,50 50,50 50,0 50,0 50,42 50,0 50,0 50,0 50,64 50,0 50,50 50,0 50,0 50,0 50,16 50,0 50,15".split(' ');
@@ -5286,24 +4921,7 @@ self.addEventListener('fetch', function (e) {
                     el.style.fontSize = fs + 'px';
                 }
             }
-            /* 【性能】resize 必须去抖 + 只在「宽度真的变了」时重算。
-               fitGreetLine 内部是 while 循环，每次迭代都 getBoundingClientRect()
-               并改一次 font-size —— 一次就是十几次强制同步布局。
-               手机上地址栏收起/展开会连发 resize（高度变了、宽度没变），
-               原来的直连写法等于每滑一下页面就量 10 遍字宽。 */
-            var greetW = window.innerWidth, greetT = 0;
-            function onResizeGreet() {
-                if (window.innerWidth === greetW) return;   // 只是地址栏高度变化，宽度没变，跳过
-                greetW = window.innerWidth;
-                clearTimeout(greetT);
-                greetT = setTimeout(fitGreetLine, 160);
-            }
-            window.addEventListener('resize', onResizeGreet, { passive: true });
-            window.addEventListener('orientationchange', function () {
-                greetW = -1;                                 // 强制下次重算
-                clearTimeout(greetT);
-                greetT = setTimeout(fitGreetLine, 260);
-            });
+            window.addEventListener('resize', fitGreetLine, { passive: true });
             // 首帧时父级还在布局、字体也可能没就位，量出来的宽度不准，补三次重算
             window.addEventListener('load', fitGreetLine);
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitGreetLine);
@@ -5505,8 +5123,7 @@ self.addEventListener('fetch', function (e) {
             }
 
             function nextSlide() {
-                /* 浮层打开时不动：图片卡在弹层下面，换一张图 = 整屏 backdrop-filter 重算一轮 */
-                if (slideImages.length < 2 || uiBusy) return;
+                if (slideImages.length < 2) return;
                 updateStack((slideIndex + 1) % slideImages.length);
                 flashPhotoShine();
             }
@@ -6066,7 +5683,7 @@ self.addEventListener('fetch', function (e) {
             }
 
             function nextAvatar() {
-                if (avatarImages.length < 2 || document.hidden || uiBusy) return;
+                if (avatarImages.length < 2 || document.hidden) return;
                 avatarIndex = (avatarIndex + 1) % avatarImages.length;
                 swapAvatar(avatarImages[avatarIndex]);
             }
@@ -6599,7 +6216,7 @@ self.addEventListener('fetch', function (e) {
             TimerManager.add('avatar', nextAvatar, 4000, true);
             TimerManager.add('slide', nextSlide, 3500, true);
             TimerManager.add('island', function() {
-                if (document.hidden || uiBusy) return;
+                if (document.hidden) return;
                 tidx = (tidx + 1) % textPool.length;
                 setIslandText(textPool[tidx]);
             }, 3500, true);
@@ -7952,7 +7569,6 @@ self.addEventListener('fetch', function (e) {
                     if (cityRemoteTimer) { clearTimeout(cityRemoteTimer); cityRemoteTimer = null; }
                     citySearchInput.value = '';
                     renderCityList('');
-                    lynPause();                           // 浮层盖住时冻住底图/图集，别让整屏模糊一直重算
                     cityPickerOverlay.classList.add('show');
                     setTimeout(function() { citySearchInput.focus(); }, 300);
                 }
@@ -7960,7 +7576,6 @@ self.addEventListener('fetch', function (e) {
                 function closeCityPicker() {
                     cityPickerOverlay.classList.remove('show');
                     citySearchInput.blur();
-                    lynResume();
                 }
 
                 // ---- 天气面板：实时 / 未来 7 天 ----
@@ -8181,7 +7796,6 @@ self.addEventListener('fetch', function (e) {
                     renderWeatherSheet();
                     // 与日历错开不同的偏移，保证两个面板打开时照片也互不相同
                     setLynSheet(weatherSheetPanel, 33);
-                    lynPause();
                     weatherSheetOverlay.classList.add('show');
                     if (stale) {
                         try {
@@ -8194,7 +7808,6 @@ self.addEventListener('fetch', function (e) {
 
                 function closeWeatherSheet() {
                     weatherSheetOverlay.classList.remove('show');
-                    lynResume();
                 }
 
                 document.getElementById('wxSheetClose').addEventListener('click', closeWeatherSheet);
@@ -8443,13 +8056,11 @@ self.addEventListener('fetch', function (e) {
                     renderMonthCalendar();
                     // 每次打开换一张与主背景不同的照片（索引错开 17）
                     setLynSheet(monthCalendarOverlay.querySelector('.month-calendar-panel'), 17);
-                    lynPause();
                     monthCalendarOverlay.classList.add('show');
                 }
 
                 function closeMonthCalendar() {
                     monthCalendarOverlay.classList.remove('show');
-                    lynResume();
                 }
 
                 document.getElementById('monthCalendarClose').addEventListener('click', closeMonthCalendar);
