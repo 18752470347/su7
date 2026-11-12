@@ -4150,6 +4150,257 @@ html.dark-mode .dynamic-island.charging{
 html.perf-mid .ic-bolt::after{animation:none;filter:blur(2px)}
 .low-perf .dynamic-island.charging{animation:none}
 
+/* ============================================================================
+   47 雨天：卡片玻璃上的水珠 + 顶部乌云
+   ----------------------------------------------------------------------------
+   以前雨天只有一整屏往下跑的雨丝 —— 那是「窗外在下雨」。
+   可玻璃本身是干的：雨丝从屏幕顶上直线落到屏底，穿过卡片、穿过文字，
+   看起来像一层罩在界面上的纱，而不是一扇被雨打湿的窗。
+
+   这一节补两件事，让「下雨」从一张贴图变成一扇窗：
+     · 顶部乌云  .wxfx-storm  几团深灰云在状态栏那一带慢慢横移，
+                              压在卡片后面（z-index 仍是 back 层）——
+                              云在远处，卡片是玻璃，所以云会透出来。
+     · 玻璃水珠  .glass-rain  卡片表面（不是屏底）的水珠：小珠静置、
+                              大珠拖着水痕往下滑、滑到卡底淡出重来。
+                              由 wxFx 里的 glassRain 模块绘制（canvas）。
+
+   为什么水珠用 canvas 而不是 CSS：
+     一颗水珠要有「亮心 + 折射暗边 + 底部聚光 + 一颗高光点」，还要和上一层
+     留下的水痕连续。CSS 拼四层伪元素最多做出「一个半透明圆」，且每颗都要
+     独立 keyframes 才能各自滑落 —— 十几颗就是十几套动画，比 canvas 贵得多。
+     更重要：卡片本体带 backdrop-filter，在它上面再挂 filter:blur 的元素，
+     两个离屏 pass 会互相踩（§45 问候行闪烁就是这么来的），canvas 不新建 pass。
+
+   性能：
+     · 只在 kind==='rain' 时创建 canvas 并跑 rAF，雨停立刻清除并移除；
+     · 32fps 封顶（雨丝那边是 60，水珠肉眼 32 就够，省一半重绘）；
+     · 每张卡按面积定珠数 4~26，日历那种小卡只有 5~6 颗；
+     · 尺寸变化用 getBoundingClientRect 比对，没变就不重建位图。
+   ========================================================================== */
+:root{
+  /* 白天的雨云：偏冷的灰，压在亮天上就是乌云 */
+  --storm-1:rgba(42,52,70,.98);
+  --storm-2:rgba(64,76,97,.96);
+  --storm-hl:rgba(214,224,240,.62);
+  /* §51 底子压薄：原来那层 60% 的整片灰把云全糊在里面，云和"阴天顶"同色，
+     轮廓自然读不出来。现在底子只到 34%，天空是"偏灰的亮"，云是"实心的暗"，
+     两者的明暗差就是云的形。 */
+  --storm-base:linear-gradient(180deg,rgba(48,60,82,.34) 0%,rgba(48,60,82,.22) 30%,rgba(48,60,82,.06) 56%,transparent 76%);
+}
+html.dark-mode{
+  /* 夜里没有「亮云」，云比天更暗，只能靠一圈冷灰的受光边把轮廓托出来 */
+  --storm-1:rgba(158,174,206,.86);
+  --storm-2:rgba(186,202,230,.66);
+  --storm-hl:rgba(234,244,255,.70);
+  /* 深色下不能靠"整片压亮"制造阴天：背景本来就暗，一片均匀提亮只会把
+     云团的轮廓抹平。底子给薄一点，让云自己靠明暗差立起来 */
+  --storm-base:linear-gradient(180deg,rgba(104,120,154,.20) 0%,rgba(104,120,154,.09) 30%,transparent 64%);
+}
+
+/* ---- 47.1 顶部乌云 ----
+   用四个模糊的椭圆团叠出云的轮廓。不用 clip-path / 图片：
+   云要「慢慢变形又慢慢移动」，位图缩放会露出边缘，而多重径向渐变
+   本身就没有硬边，模糊后是连续的。 */
+.wxfx-storm{
+  position:absolute;left:-30%;right:-30%;top:-7%;height:44vh;
+  opacity:0;transition:opacity 2.6s var(--ease);
+  pointer-events:none;
+  /* 整体先压一层「阴天顶」：只有几团云、天顶却是亮的，读不出「压顶」 */
+  background:var(--storm-base);
+  /* 往下渐隐：云压在天顶，越往下越薄。没有这层遮罩，云会像一条灰带横在
+     卡片中间；有了它，云是"从上面压下来"的，透过玻璃还能看到它往下淡 */
+  -webkit-mask:linear-gradient(180deg,#000 0%,#000 46%,rgba(0,0,0,.55) 72%,transparent 92%);
+  mask:linear-gradient(180deg,#000 0%,#000 46%,rgba(0,0,0,.55) 72%,transparent 92%);
+}
+/* ---- 47.1b 云的两级动效（乌云 / 白云共用） ----
+   §50：原来的云是"一个元素同时走位移和呼吸"，两条曲线频率一样，看久了像呼吸的贴图，
+   而且周期 60~108 秒 —— 一分钟才挪几像素，肉眼就是"一动不动"。
+   拆成两层：
+     i   只管横漂（translate），周期 17~30 秒，一屏内能看出在走
+     i>b 只管形变（非等比 scale + 微旋转），周期 10~19 秒，且和漂移不同频
+   两级周期不同步，云的轮廓就会一直缓慢地"改样"，不是一块布在滑。 */
+.wxfx-storm i,.wxfx-sky i{
+  position:absolute;
+  width:var(--cw,40%);height:var(--ch,22%);left:var(--cl,20%);top:var(--ct,5%);
+  animation:fxfDriftA var(--dur,24s) ease-in-out infinite;
+  animation-delay:var(--dl,0s);
+  will-change:transform;
+}
+.wxfx-storm i>b,.wxfx-sky i>b{
+  display:block;width:100%;height:100%;border-radius:50%;
+  animation:fxfMorphA var(--mdur,15s) ease-in-out infinite;
+  animation-delay:var(--mdl,0s);
+  will-change:transform;
+}
+.wxfx-storm i{animation-name:fxfDriftA}
+.wxfx-storm i:nth-child(2n){animation-name:fxfDriftB}
+.wxfx-sky i{animation-name:fxfDriftB}
+.wxfx-sky i:nth-child(2n){animation-name:fxfDriftA}
+.wxfx-storm i>b{animation-name:fxfMorphA}
+.wxfx-storm i:nth-child(2n)>b{animation-name:fxfMorphB}
+.wxfx-storm i:nth-child(3n)>b{animation-name:fxfMorphC}
+.wxfx-sky i>b{animation-name:fxfMorphC}
+.wxfx-sky i:nth-child(2n)>b{animation-name:fxfMorphA}
+.wxfx-sky i:nth-child(3n)>b{animation-name:fxfMorphB}
+
+@keyframes fxfDriftA{
+  0%,100%{transform:translate3d(-9%,1%,0)}
+  50%{transform:translate3d(9%,-1.4%,0)}
+}
+@keyframes fxfDriftB{
+  0%,100%{transform:translate3d(9%,-.8%,0)}
+  50%{transform:translate3d(-9%,1.6%,0)}
+}
+/* 形变只用非等比 scale：横向拉胖、纵向压扁，云的团块就会相对错位，
+   轮廓自然"变形"；rotate 一点点是为了让边缘不那么像椭圆在呼吸 */
+@keyframes fxfMorphA{
+  0%,100%{transform:scale(1,1) rotate(0deg)}
+  33%{transform:scale(1.13,.92) rotate(-1.4deg)}
+  66%{transform:scale(.92,1.1) rotate(1.2deg)}
+}
+@keyframes fxfMorphB{
+  0%,100%{transform:scale(1.06,.96) rotate(.6deg)}
+  40%{transform:scale(.93,1.09) rotate(-1.1deg)}
+  70%{transform:scale(1.1,.95) rotate(.9deg)}
+}
+@keyframes fxfMorphC{
+  0%,100%{transform:scale(.97,1.04) rotate(-.5deg)}
+  45%{transform:scale(1.12,1.06) rotate(1.3deg)}
+  75%{transform:scale(.95,.94) rotate(-1deg)}
+}
+
+.wxfx-storm i>b{
+  /* 一朵云 = 三块不同大小的浓团 + 一处受光边。
+     渐变半径收到 34~46% 才对：铺到 70% 以上会连成一片均匀的灰幕，
+     远看只是一块脏滤镜，读不出"云"。
+     §48 收尾：每颗浓团前面加一段「平台」（0→46% 都是满色），只把外圈留给渐隐。
+     纯线性渐隐的圆 + blur(9px) 出来是一个高斯光斑，云没有边界；
+     有了平台，模糊后才留下"有体积的一团"，轮廓才看得出是云。
+     §50：四颗浓团的位置抽成 --p1~--p4，每团云各写一套，JS 再在载入时抖一次 ——
+     六团云不再是同一个模子印出来的。 */
+  background:
+    radial-gradient(50% 46% at var(--p1,34% 62%),var(--storm-1) 0%,var(--storm-1) 46%,transparent 84%),
+    radial-gradient(46% 42% at var(--p2,58% 40%),var(--storm-2) 0%,var(--storm-2) 44%,transparent 82%),
+    radial-gradient(40% 36% at var(--p3,78% 62%),var(--storm-1) 0%,var(--storm-1) 40%,transparent 80%),
+    /* §51 受光边放在最底层、卡在云的左上外沿：它不盖住深色团块，
+       只在轮廓外那一圈透出来，看起来才像"边被天光擦亮"，而不是贴了个亮斑 */
+    radial-gradient(34% 30% at var(--p4,26% 34%),var(--storm-hl) 0%,var(--storm-hl) 34%,transparent 78%);
+  filter:blur(6px);
+}
+/* 六个团错落摆，彼此只交叠一点 —— 交叠太多又会糊成一条灰带 */
+.wxfx-storm i:nth-child(1){--cw:46%;--ch:26%;--cl:-3%;--ct:4%;
+  --p1:36% 64%;--p2:60% 38%;--p3:80% 62%;--p4:24% 34%}
+.wxfx-storm i:nth-child(2){--cw:38%;--ch:22%;--cl:24%;--ct:-4%;
+  --p1:44% 56%;--p2:30% 40%;--p3:66% 66%;--p4:74% 30%}
+.wxfx-storm i:nth-child(3){--cw:42%;--ch:24%;--cl:53%;--ct:6%;
+  --p1:30% 60%;--p2:56% 44%;--p3:76% 58%;--p4:44% 28%}
+.wxfx-storm i:nth-child(4){--cw:32%;--ch:18%;--cl:10%;--ct:30%;
+  --p1:40% 58%;--p2:64% 38%;--p3:82% 66%;--p4:22% 42%}
+.wxfx-storm i:nth-child(5){--cw:36%;--ch:20%;--cl:38%;--ct:27%;
+  --p1:32% 66%;--p2:52% 36%;--p3:74% 60%;--p4:66% 24%}
+.wxfx-storm i:nth-child(6){--cw:30%;--ch:16%;--cl:66%;--ct:40%;
+  --p1:38% 54%;--p2:60% 42%;--p3:80% 64%;--p4:20% 30%}
+
+/* ---- 47.2 卡片玻璃上的水珠 ----
+   canvas 由 JS 插入到 .profile-row / .weather-widget / .calendar-widget 内。
+   z-index 压在卡片内容之上 —— 水珠在玻璃外表面，本来就该盖住文字；
+   靠低透明度和小直径保证不影响读数。 */
+.glass-rain,.profile-row>.glass-rain{
+  position:absolute;inset:0;z-index:11;
+  width:100%;height:100%;display:block;pointer-events:none;
+  border-radius:inherit;opacity:0;
+  transition:opacity 1.3s var(--ease);
+}
+.glass-rain.on{opacity:1}
+
+/* ---- 47.3 弹层玻璃上的水珠 ----
+   天气弹层和月历弹层也是同一块玻璃，打开时理应一样是湿的。
+   难点在滚动：面板是 overflow-y:auto 的，canvas 用 absolute 会跟着内容一起滚，
+   一滑就整片珠子飘走。这里改用 fixed —— 面板本身带 transform（translateY 进场），
+   fixed 的包含块就变成面板的 padding box：既严丝合缝贴在面板上，又不随内容滚动。
+   珠子的坐标也就等于"面板可视区域"的坐标，和卡片那套逻辑完全一致。 */
+.glass-rain-sheet{position:fixed;inset:0;width:auto;height:auto}
+
+/* 兜底：§15.1 的四卡玻璃规则已经带 position:relative，这里再写一次，
+   是为了万一那条规则被改动时，canvas 不会退到 .main-card-container 上定位 */
+.profile-row,.calendar-widget{position:relative}
+
+/* 低端机：云保留但不飘（静态），水珠降到 24fps + 六折珠数 —— 在 JS 里按 isLowEnd 走。
+   降级规则统一写在下文 §50 的云动效段末尾（要同时关掉 i 和 i>b 两层动画） */
+
+/* ============================================================================
+   48 晴天：蓝天白云
+   ----------------------------------------------------------------------------
+   晴天原来只有「暖光 + 光斑」—— 那是"有太阳"，不是"天晴"。
+   抬头看天，晴天最直接的两件事是：天是蓝的、云是白的。
+
+   做法：
+     .wxfx-sky 一整层蓝色天幕，顶部饱和、往下渐淡到透明（底部还原本来的极光底），
+               再叠五团白云慢慢横移。不参与 mix-blend-mode —— 直接压色最可控；
+               用 color/hue 混合在浅底上会把卡片边缘染出诡异的紫边。
+
+   只在晴 / 少云时出现（强度来自 JS 的 sun，多云、下雨、夜里都是 0）。
+   云的位置固定是刻意的：晴天的云本来就该"在那一片天上慢慢飘"，
+   每次刷新都换位置反而像随机贴图。
+   ========================================================================== */
+.wxfx-sky{
+  position:absolute;inset:0;opacity:0;transition:opacity 2.2s var(--ease);
+  /* §48 收尾：天顶要"真的蓝"。原来从 #4A90DC 起步，压到 0.9 透明度后
+     和浅色底一混就变成淡紫白，看不出是蓝天 —— 顶段直接压到 #2C79D2 */
+  background:
+    linear-gradient(180deg,
+      #2C79D2 0%,#3D89DC 12%,#5C9FE4 26%,#82B7EC 40%,
+      #A9D0F4 54%,#CFE6FA 68%,#E8F4FE 80%,rgba(244,250,255,.40) 90%,rgba(246,251,255,0) 97%);
+}
+html.dark-mode .wxfx-sky{
+  background:
+    linear-gradient(180deg,
+      #123C63 0%,#17486F 14%,#1E5580 30%,#266392 46%,
+      #2F72A4 62%,#3A80B2 76%,rgba(58,128,178,.36) 90%,rgba(58,128,178,0) 98%);
+}
+.wxfx-sky i>b{
+  /* 一朵白云 = 三块浓团，和乌云同一套画法，只是换成纯白。
+     §48 收尾：同样加"平台"（浓团内部满色到 44%），否则只是一团白雾。
+     §50：位置同样抽成 --p1~--p4，五团云各一套 */
+  background:
+    radial-gradient(52% 50% at var(--p1,34% 58%),rgba(255,255,255,.99) 0%,rgba(255,255,255,.99) 44%,rgba(255,255,255,0) 82%),
+    radial-gradient(46% 44% at var(--p2,60% 40%),rgba(255,255,255,.97) 0%,rgba(255,255,255,.97) 42%,rgba(255,255,255,0) 80%),
+    radial-gradient(40% 38% at var(--p3,80% 60%),rgba(252,254,255,.94) 0%,rgba(252,254,255,.94) 40%,rgba(252,254,255,0) 78%),
+    /* §51 云底暗面：真云的上半截白、下半截偏青灰。补这层之前，
+       白云就是一团"白雾"，没有体积；有了它，云底压得住，才有棉花的样子 */
+    radial-gradient(44% 34% at var(--p4,52% 86%),rgba(146,170,206,.34) 0%,rgba(146,170,206,.34) 40%,rgba(146,170,206,0) 82%);
+  filter:blur(4px);
+}
+html.dark-mode .wxfx-sky i>b{
+  background:
+    radial-gradient(52% 50% at var(--p1,34% 58%),rgba(214,230,250,.58) 0%,rgba(214,230,250,.58) 44%,rgba(214,230,250,0) 82%),
+    radial-gradient(46% 44% at var(--p2,60% 40%),rgba(194,214,240,.50) 0%,rgba(194,214,240,.50) 42%,rgba(194,214,240,0) 80%),
+    radial-gradient(40% 38% at var(--p3,80% 60%),rgba(174,198,230,.44) 0%,rgba(174,198,230,.44) 40%,rgba(174,198,230,0) 78%),
+    radial-gradient(44% 34% at var(--p4,52% 86%),rgba(96,124,168,.30) 0%,rgba(96,124,168,.30) 40%,rgba(96,124,168,0) 82%);
+}
+/* §48 收尾 尺寸/位置都收小了：原来 5 团加起来铺满 186% 的宽度，
+   一层白云糊满整个天顶 —— 蓝看不见，云也看不成团。
+   现在两团各压一条边（左半出画、右半出画），中间留出蓝天，
+   下面两团藏在胶囊卡后面，透玻璃看是"云在后面飘" */
+.wxfx-sky i:nth-child(1){--cw:26%;--ch:13%;--cl:-8%;--ct:1%;
+  --p1:32% 60%;--p2:60% 38%;--p3:82% 62%;--p4:50% 84%}
+.wxfx-sky i:nth-child(2){--cw:17%;--ch:9%;--cl:21%;--ct:-4%;
+  --p1:40% 54%;--p2:28% 40%;--p3:68% 64%;--p4:44% 82%}
+.wxfx-sky i:nth-child(3){--cw:24%;--ch:12%;--cl:84%;--ct:3%;
+  --p1:36% 62%;--p2:62% 42%;--p3:80% 58%;--p4:54% 86%}
+.wxfx-sky i:nth-child(4){--cw:21%;--ch:11%;--cl:16%;--ct:24%;
+  --p1:30% 56%;--p2:58% 40%;--p3:78% 66%;--p4:48% 88%}
+.wxfx-sky i:nth-child(5){--cw:23%;--ch:12%;--cl:62%;--ct:22%;
+  --p1:38% 58%;--p2:64% 38%;--p3:84% 60%;--p4:56% 84%}
+/* 低端机 / 减少动效：云保留，但两层动画都停（漂移 + 形变） */
+html.low-perf .wxfx-storm i,html.low-perf .wxfx-storm i>b,
+html.low-perf .wxfx-sky i,html.low-perf .wxfx-sky i>b{animation:none}
+@media (prefers-reduced-motion:reduce){
+  .wxfx-storm i,.wxfx-storm i>b,
+  .wxfx-sky i,.wxfx-sky i>b{animation:none!important}
+}
+
 </style>
     <script>
         (function () {
@@ -4206,7 +4457,7 @@ html.perf-mid .ic-bolt::after{animation:none;filter:blur(2px)}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v36';
+var VERSION = 'su-fa36165-v39';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -4287,9 +4538,13 @@ self.addEventListener('fetch', function (e) {
     <!-- 天气氛围：日光 / 雨丝 / 雪 / 雷电 / 雾 / 霾（样式见 §34，JS 见 §34）
          两层分开：back 在卡片后（透玻璃显色），front 在卡片上（雨滴在"窗玻璃"上） -->
     <div class="wxfx wxfx-back" id="wxFxBack" aria-hidden="true">
+        <!-- 晴天蓝天白云（§48）：盖住原来的极光底，底部渐隐回原背景 -->
+        <div class="wxfx-sky" id="wxFxSky"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
         <div class="wxfx-sunwash" id="wxFxSunWash"></div>
         <div class="wxfx-glow" id="wxFxGlow"></div>
         <div class="wxfx-cloud" id="wxFxCloud"></div>
+        <!-- 顶部乌云（§47）：四团模糊椭圆各自慢慢横移，压在卡片后面当"远天的云" -->
+        <div class="wxfx-storm" id="wxFxStorm"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
         <div class="wxfx-fog" id="wxFxFog"><i></i><i></i><i></i></div>
         <div class="wxfx-fogmask" id="wxFxFogMask"></div>
         <div class="wxfx-wet" id="wxFxWet"></div>
@@ -5105,6 +5360,42 @@ self.addEventListener('fetch', function (e) {
                 var wetEl = document.getElementById('wxFxWet');
                 var fogMaskEl = document.getElementById('wxFxFogMask');
                 var fogFrontEl = document.getElementById('wxFxFogFront');
+                var stormEl = document.getElementById('wxFxStorm');
+                var skyEl = document.getElementById('wxFxSky');
+                /* §50 云的随机：几何和节奏都在载入时抽一次。
+                   CSS 里的 --p1~--p4 只是构图基准，这里各抖 ±6% —— 六团云就不再是
+                   同一个模子；时长和相位也各自错开，云不会集体同频呼吸。
+                   放在早退判断之前：就算这页没有雨雪 canvas，云照样该动。 */
+                (function seedClouds() {
+                    var els = document.querySelectorAll('.wxfx-storm i,.wxfx-sky i');
+                    var k, j, e, cs, raw, mm, vx, vy;
+                    for (k = 0; k < els.length; k++) {
+                        e = els[k];
+                        var drift = 15 + Math.random() * 11;      /* 15~26s 漂一趟 */
+                        var morph = 9 + Math.random() * 7;        /* 9~16s 改一次形 */
+                        /* 每团云的浓淡也不一样：六团一样黑的时候，它们互相压住的地方
+                           没有边界，横向漂起来就是"一块均匀的灰在挪"，看不出在动。
+                           拉开浓淡，谁在前谁在后一眼分明，位移才读得出来 */
+                        e.style.opacity = (0.62 + Math.random() * 0.36).toFixed(2);
+                        e.style.setProperty('--dur', drift.toFixed(1) + 's');
+                        e.style.setProperty('--dl', (-Math.random() * drift).toFixed(1) + 's');
+                        e.style.setProperty('--mdur', morph.toFixed(1) + 's');
+                        e.style.setProperty('--mdl', (-Math.random() * morph).toFixed(1) + 's');
+                        try { cs = window.getComputedStyle(e); } catch (eCs) { cs = null; }
+                        if (!cs) continue;
+                        for (j = 1; j <= 4; j++) {
+                            raw = (cs.getPropertyValue('--p' + j) || '').replace(/^\s+|\s+$/g, '');
+                            mm = raw.split(/\s+/);
+                            if (mm.length !== 2) continue;         /* 白云只有三团 */
+                            vx = parseFloat(mm[0]) + (Math.random() * 12 - 6);
+                            vy = parseFloat(mm[1]) + (Math.random() * 10 - 5);
+                            if (!(vx >= 0)) continue;
+                            if (vx < 14) vx = 14; else if (vx > 86) vx = 86;
+                            if (vy < 18) vy = 18; else if (vy > 82) vy = 82;
+                            e.style.setProperty('--p' + j, Math.round(vx) + '% ' + Math.round(vy) + '%');
+                        }
+                    }
+                })();
                 var noop = { apply: function () { }, refresh: function () { } };
                 if (!canvas || !canvas.getContext || !backEl || !sunEl) return noop;
 
@@ -5652,6 +5943,372 @@ self.addEventListener('fetch', function (e) {
                     }
                 }
 
+                /* ---- §47 卡片玻璃上的水珠 ----
+                   雨丝是「窗外在下雨」，这一层是「内侧玻璃被雨打湿了」。
+                   只有雨丝，玻璃是干的；只有水珠，又看不出外面在下。
+                   
+                   一颗水珠的一生：静置 → 重力拉它慢慢下滑 → 偶尔被一点灰粘住顿一下 →
+                   滑到卡底淡出 → 换个位置重新凝结。走过的地方留一道水痕，
+                   由两段线叠出来（外侧是折射掉的暗边，内侧是反射天光的亮芯）。
+                   全程只重绘 canvas 的位图，不动任何 DOM，也不新建 filter pass ——
+                   卡片本体带 backdrop-filter，再挂 filter 会互相踩（§45 就是这么闪的）。 */
+                var glassRain = (function () {
+                    var SEL = '.profile-row,.weather-widget,.calendar-widget,.apps-scroll-wrapper';
+                    /* 弹层：天气详情 + 月历。它们的 canvas 走 fixed 定位（见 §47.3），
+                       而且只在弹层真的打开时才布珠、才对表 —— 关着的时候一滴都不画 */
+                    var SHEET = '.weather-sheet-panel,.month-calendar-panel';
+                    var list = [], built = false;
+                    var raf2 = 0, lastT2 = 0, acc = 0, running = false;
+                    var on = false, inten = 1;
+                    var probe = document.createElement('canvas');
+                    var canDraw = !!(probe.getContext && probe.getContext('2d'));
+                    /* 低端机不给 60fps 也不砍掉：水珠是这轮的主角，砍掉等于白做。
+                       改成珠数打六折 + 24fps，重绘量掉到四成 */
+                    var fps = isLowEnd ? 24 : 32;
+
+                    function r2(a, b) { return a + Math.random() * (b - a); }
+
+                    function makeCard(card, isSheet) {
+                        var cv = document.createElement('canvas');
+                        cv.className = isSheet ? 'glass-rain glass-rain-sheet' : 'glass-rain';
+                        cv.setAttribute('aria-hidden', 'true');
+                        card.appendChild(cv);
+                        var ctx = cv.getContext('2d');
+                        if (!ctx) return null;
+                        return {
+                            card: card, cv: cv, ctx: ctx, w: 0, h: 0, dpr: 0, drops: [],
+                            sheet: !!isSheet, open: false,
+                            host: isSheet ? card.closest('.weather-sheet-overlay,.month-calendar-overlay,.city-picker-overlay') : null
+                        };
+                    }
+
+                    function ensure() {
+                        if (built) return;
+                        built = true;
+                        var cards = document.querySelectorAll(SEL), i, g, ss;
+                        for (i = 0; i < cards.length; i++) {
+                            g = makeCard(cards[i], false);
+                            if (g) list.push(g);
+                        }
+                        ss = document.querySelectorAll(SHEET);
+                        for (i = 0; i < ss.length; i++) {
+                            g = makeCard(ss[i], true);
+                            if (g) list.push(g);
+                        }
+                    }
+
+                    /* 弹层开关同步：开了才布珠、才参与每帧；关掉就地清空并复位尺寸，
+                       下次打开重新按当时的雨量布一次珠（不然会留着上一次的水痕） */
+                    function syncSheets() {
+                        for (var i = 0; i < list.length; i++) {
+                            var g = list[i];
+                            if (!g.sheet) continue;
+                            var open = !!(g.host && g.host.classList.contains('show'));
+                            g.open = open;
+                            if (open) {
+                                if (!g.w) {
+                                    sizeOf(g);
+                                    if (g.w) g.cv.classList.add('on');
+                                }
+                            } else if (g.w) {
+                                g.cv.classList.remove('on');
+                                g.ctx.clearRect(0, 0, g.w, g.h);
+                                g.w = 0; g.h = 0; g.dpr = 0;
+                                g.drops.length = 0;
+                            }
+                        }
+                    }
+
+                    function newDrop(g, first) {
+                        /* 参考图里真正值得抄的是"大小差很多、绝大多数不动"：
+                           凝结的小珠只有 1~4px，靠数量铺满玻璃；能滑的永远是少数大珠。
+                           所以六成珠固定不动（hold=Infinity），四成会在 2~8 秒后被重力拉走。
+                           半径用 pow(随机, 2) 压一把：小的多、大的少，才有疏密。 */
+                        var still = Math.random() < 0.6;
+                        var r = still
+                            ? 0.75 + 1.55 * Math.pow(Math.random(), 1.6)
+                            : 1.30 + 2.30 * Math.pow(Math.random(), 1.2);
+                        return {
+                            x: r2(g.w * 0.03, g.w * 0.97),
+                            y: first ? r2(-6, g.h * 0.9) : -r2(2, g.h * 0.12),
+                            r: r * (g.h < 96 ? 0.9 : 1),
+                            vy: 0,
+                            hold: still ? Infinity : r2(1.5, 7.5),
+                            still: still,
+                            /* 首帧让一部分珠子"已经滑过一段"，一出现就有水痕，不是一块干净玻璃 */
+                            y0: first ? r2(-g.h * 0.2, g.h * 0.5) : 0,
+                            moving: false,
+                            a: first ? 1 : 0
+                        };
+                    }
+
+                    function seed(g) {
+                        /* 密度按「每 700px² 一颗」算：参考图里玻璃上是密密麻麻的小凝珠，
+                           /1400 出来一张卡才二十来颗，看着像故意点上去的。
+                           上限一起抬到 64，底部那张大图标卡才有"起雾"的质感 */
+                        var n = Math.round(g.w * g.h / 700 * (0.55 + 0.45 * inten) * (isLowEnd ? 0.62 : 1));
+                        /* 弹层玻璃比卡片大三四倍，64 颗铺上去稀得像随手点的；
+                           大面积的玻璃（含底部图标卡）放到 108 颗，才有"起雾"的密度 */
+                        n = Math.max(10, Math.min(g.w * g.h > 60000 ? 108 : 64, n));
+                        g.drops.length = 0;
+
+                        /* 结露是"成簇"的，不是均匀撒一层：玻璃表面有疏水点，水汽先在
+                           那几个位置凝起来。纯随机撒会让画面很"平均"，一眼假；
+                           这里先取 2~4 个簇心，七成珠子围着簇心走，其余散落在全卡 */
+                        var cl = [], c;
+                        var cn = Math.max(2, Math.min(6, Math.round(Math.sqrt(g.w * g.h) / 62) + (Math.random() < 0.5 ? 0 : 1)));
+                        for (c = 0; c < cn; c++) {
+                            cl.push({
+                                x: r2(g.w * 0.06, g.w * 0.94),
+                                y: r2(g.h * 0.08, g.h * 0.92),
+                                s: r2(g.w * 0.10, g.w * 0.26)
+                            });
+                        }
+                        for (var i = 0; i < n; i++) {
+                            var d = newDrop(g, true);
+                            /* 三个均匀随机相加 ≈ 钟形分布，中心密、边缘散 */
+                            if (Math.random() < 0.72) {
+                                var k = cl[(Math.random() * cl.length) | 0];
+                                d.x = k.x + (Math.random() + Math.random() + Math.random() - 1.5) * k.s;
+                                d.y = k.y + (Math.random() + Math.random() + Math.random() - 1.5) * k.s * 0.75;
+                                d.x = d.x < 2 ? 2 : (d.x > g.w - 2 ? g.w - 2 : d.x);
+                                d.y = d.y < -4 ? -4 : (d.y > g.h - 4 ? g.h - 4 : d.y);
+                            }
+                            g.drops.push(d);
+                        }
+                    }
+
+                    function sizeOf(g) {
+                        var r = g.card.getBoundingClientRect();
+                        if (!(r.width > 24) || !(r.height > 24)) { g.w = 0; return false; }
+                        var dpr = Math.min(2, window.devicePixelRatio || 1);
+                        if (g.w === r.width && g.h === r.height && g.dpr === dpr) return true;
+                        g.w = r.width; g.h = r.height; g.dpr = dpr;
+                        g.cv.width = Math.round(r.width * dpr);
+                        g.cv.height = Math.round(r.height * dpr);
+                        g.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                        seed(g);
+                        return true;
+                    }
+
+                    function step(g, dt) {
+                        var i, d, maxV, tail = g.h * 0.45;
+                        for (i = 0; i < g.drops.length; i++) {
+                            d = g.drops[i];
+                            if (d.a < 1) d.a = Math.min(1, d.a + dt * 2.4);
+                            if (d.hold > 0) { d.hold -= dt; continue; }
+                            d.moving = true;
+                            /* 珠子越大越重、滑得越快；雨越大整体越快 */
+                            maxV = (22 + d.r * 22) * (0.55 + inten * 0.75);
+                            d.vy = Math.min(maxV, d.vy + dt * 52);
+                            d.y += d.vy * dt;
+                            /* 玻璃不是绝对光滑：偶尔被一点灰粘住，顿一下再继续 */
+                            if (Math.random() < dt * 0.7) { d.vy = 0; d.hold = r2(0.3, 1.5); }
+                            /* 极轻的横向游走，纯直线一眼就是动画 */
+                            d.x += Math.sin(d.y * 0.05 + d.r * 9) * dt * 2.4;
+                            if (d.x < 2) d.x = 2; else if (d.x > g.w - 2) d.x = g.w - 2;
+                            if (d.y - d.y0 > tail) d.y0 = d.y - tail;
+                            if (d.y > g.h - 1.5) {
+                                d.a -= dt * 1.8;
+                                if (d.a <= 0) {
+                                    var nd = newDrop(g, false);
+                                    nd.a = 0;
+                                    g.drops[i] = nd;
+                                }
+                            }
+                        }
+                    }
+
+                    function drawDrop(ctx, d, dark) {
+                        var x = d.x, y = d.y, r = d.r;
+                        var f = function (v) { return (v * d.a).toFixed(3); };
+
+                        /* 半径不到 1.3px 的凝结珠画不出高光和厚边（两条线会糊成一个球），
+                           就老老实实画一个柔点 + 一点芯亮 —— 参考图里那些小米粒就是这样 */
+                        if (r < 1.3) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, r, 0, 6.2832);
+                            ctx.fillStyle = dark ? 'rgba(212,228,252,' + f(0.48) + ')'
+                                                 : 'rgba(72,98,136,' + f(0.72) + ')';
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(x - r * 0.26, y - r * 0.28, Math.max(0.28, r * 0.46), 0, 6.2832);
+                            ctx.fillStyle = 'rgba(255,255,255,' + f(0.70) + ')';
+                            ctx.fill();
+                            return;
+                        }
+                        /* 下滑时纵向拉长成泪滴：静止是圆，越快越瘦长。
+                           一条正圆珠子以匀速下滑，怎么调色都像"珍珠项链"——
+                           形状变化才是水珠最像水的地方。 */
+                        var sp = Math.min(1, Math.abs(d.vy) / 70);
+                        var rx = r * (1 - 0.16 * sp), ry = r * (1 + 0.42 * sp);
+
+                        /* ① 珠体：内部要透。填成实心白，在深色卡上就是一颗珍珠 */
+                        var gr = ctx.createRadialGradient(x - rx * 0.28, y - ry * 0.32, rx * 0.05, x, y, rx);
+                        if (dark) {
+                            gr.addColorStop(0, 'rgba(255,255,255,' + f(0.11) + ')');
+                            gr.addColorStop(0.68, 'rgba(224,238,255,' + f(0.03) + ')');
+                            gr.addColorStop(1, 'rgba(255,255,255,' + f(0.16) + ')');
+                        } else {
+                            /* §48 收尾 浅色卡：白心在浅色玻璃上等于没画。
+                               反过来做 —— 外缘压暗（水膜的厚边把后面的光吃掉），
+                               中心只留一点透亮，靠"亮环 + 暗边"这对反差立起来 */
+                            gr.addColorStop(0, 'rgba(255,255,255,' + f(0.58) + ')');
+                            gr.addColorStop(0.46, 'rgba(150,176,210,' + f(0.26) + ')');
+                            gr.addColorStop(1, 'rgba(70,96,134,' + f(0.54) + ')');
+                        }
+                        ctx.beginPath();
+                        ctx.ellipse(x, y, rx, ry, 0, 0, 6.2832);
+                        ctx.fillStyle = gr;
+                        ctx.fill();
+
+                        /* ② 边缘亮环：全反射的那一圈，是"水滴"唯一的硬证据 */
+                        ctx.beginPath();
+                        ctx.ellipse(x, y, Math.max(0.7, rx - 0.55), Math.max(0.7, ry - 0.55), 0, 0, 6.2832);
+                        ctx.strokeStyle = dark ? 'rgba(255,255,255,' + f(0.42) + ')'
+                                               : 'rgba(255,255,255,' + f(0.95) + ')';
+                        ctx.lineWidth = Math.max(0.7, r * 0.24);
+                        ctx.stroke();
+
+                        /* ③ 右下暗弧：珠子的厚边。浅色卡上全靠它把水珠"压"出来 */
+                        if (r > 1.8) {
+                            ctx.beginPath();
+                            ctx.ellipse(x, y + ry * 0.12, rx * 0.78, ry * 0.78, 0, 0.5, 2.64);
+                            ctx.strokeStyle = dark ? 'rgba(0,0,0,' + f(0.26) + ')'
+                                                   : 'rgba(74,100,138,' + f(0.42) + ')';
+                            ctx.lineWidth = Math.max(0.5, r * 0.32);
+                            ctx.stroke();
+                        }
+
+                        /* ④ 高光点：固定在左上 11 点，偏移会像眼睛乱转 */
+                        ctx.beginPath();
+                        ctx.ellipse(x - rx * 0.32, y - ry * 0.36,
+                            Math.max(0.4, rx * 0.28), Math.max(0.4, ry * 0.26), 0, 0, 6.2832);
+                        ctx.fillStyle = 'rgba(255,255,255,' + f(0.95) + ')';
+                        ctx.fill();
+                    }
+
+                    function draw(g) {
+                        var ctx = g.ctx;
+                        if (!g.w || !g.h) return;
+                        ctx.clearRect(0, 0, g.w, g.h);
+                        var dark = isDark(), i, d, len, wide, core;
+
+                        /* 先铺水痕，珠子压在上面 —— 水痕是"走过的路"，必须在珠子之后被遮住头。
+                           关键：水痕必须沿长度渐隐。用一条等 alpha 的粗线画出来，
+                           在浅色卡上就是一根灰色棍子，一眼假。 */
+                        ctx.lineCap = 'round';
+                        for (i = 0; i < g.drops.length; i++) {
+                            d = g.drops[i];
+                            len = d.y - d.y0;
+                            if (len < 2 || d.a <= 0.02) continue;
+                            wide = Math.max(1.3, d.r * 1.2);
+                            var ya = Math.max(0, d.y0), yb = d.y;
+                            var g1 = ctx.createLinearGradient(0, ya, 0, yb);
+                            g1.addColorStop(0, dark ? 'rgba(214,232,255,0)' : 'rgba(116,138,170,0)');
+                            g1.addColorStop(0.55, dark ? 'rgba(214,232,255,.05)' : 'rgba(116,138,170,.045)');
+                            g1.addColorStop(1, dark ? 'rgba(214,232,255,.11)' : 'rgba(116,138,170,.10)');
+                            ctx.strokeStyle = g1;
+                            ctx.lineWidth = wide;
+                            ctx.beginPath();
+                            ctx.moveTo(d.x, ya);
+                            ctx.lineTo(d.x, yb);
+                            ctx.stroke();
+                            /* 亮芯只画最后一段：整条都亮就变成一根白线，反而假 */
+                            core = Math.min(len, Math.max(12, wide * 9));
+                            var g2 = ctx.createLinearGradient(0, yb - core, 0, yb);
+                            g2.addColorStop(0, 'rgba(255,255,255,0)');
+                            g2.addColorStop(1, dark ? 'rgba(255,255,255,.13)' : 'rgba(255,255,255,.34)');
+                            ctx.strokeStyle = g2;
+                            ctx.lineWidth = Math.max(0.5, wide * 0.28);
+                            ctx.beginPath();
+                            ctx.moveTo(d.x, yb - core);
+                            ctx.lineTo(d.x, yb);
+                            ctx.stroke();
+                        }
+
+                        for (i = 0; i < g.drops.length; i++) {
+                            d = g.drops[i];
+                            if (d.a > 0.02) drawDrop(ctx, d, dark);
+                        }
+                    }
+
+                    function frame(t) {
+                        raf2 = requestAnimationFrame(frame);
+                        if (!running) return;
+                        syncSheets();
+                        if (!lastT2) lastT2 = t;
+                        var dt = (t - lastT2) / 1000;
+                        lastT2 = t;
+                        if (!(dt > 0)) return;
+                        if (dt > 0.1) dt = 0.1;
+                        acc += dt;
+                        if (acc < 1 / fps) return;              /* 帧率封顶，省一半重绘 */
+                        var s = Math.min(acc, 0.08);
+                        acc = 0;
+                        for (var i = 0; i < list.length; i++) {
+                            if (!list[i].w) continue;
+                            step(list[i], s);
+                            draw(list[i]);
+                        }
+                    }
+
+                    function start() {
+                        ensure();
+                        var any = false, i;
+                        /* 弹层不在这里量尺寸：它关着的时候量出来是"看不见的整块"，
+                           白布一次珠。交给 syncSheets 按开关状态来 */
+                        for (i = 0; i < list.length; i++) if (!list[i].sheet && sizeOf(list[i])) any = true;
+                        if (!any || running) return;
+                        running = true; lastT2 = 0; acc = 0;
+                        raf2 = requestAnimationFrame(frame);
+                    }
+
+                    function stop() {
+                        running = false;
+                        if (raf2) { cancelAnimationFrame(raf2); raf2 = 0; }
+                        for (var i = 0; i < list.length; i++) {
+                            if (list[i].w) list[i].ctx.clearRect(0, 0, list[i].w, list[i].h);
+                        }
+                    }
+
+                    function set(isRain, level) {
+                        if (!canDraw) return;
+                        var changed = Math.abs(level - inten) > 0.22;
+                        if (isRain === on && !changed) return;
+                        on = isRain; inten = level;
+                        var i;
+                        if (isRain) {
+                            ensure();
+                            for (i = 0; i < list.length; i++) {
+                                if (list[i].sheet) continue;        /* 由 syncSheets 接管 */
+                                sizeOf(list[i]);
+                                /* 雨量跨档才重新布珠：每次都重建会让画面一跳 */
+                                if (changed && list[i].w) seed(list[i]);
+                                list[i].cv.classList.add('on');
+                            }
+                            start();
+                        } else {
+                            for (i = 0; i < list.length; i++) list[i].cv.classList.remove('on');
+                            stop();
+                        }
+                    }
+
+                    function pause() { if (running) stop(); }
+                    function resume() { if (on) start(); }
+
+                    var rzt = 0;
+                    window.addEventListener('resize', function () {
+                        if (!on) return;
+                        clearTimeout(rzt);
+                        rzt = setTimeout(function () {
+                            for (var i = 0; i < list.length; i++) sizeOf(list[i]);
+                        }, 200);
+                    });
+
+                    return { set: set, pause: pause, resume: resume, sync: syncSheets };
+                })();
+
                 function scheduleBolts(on) {
                     if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
                     if (!on) return;                                     // 雷闪是光效不是粒子，省电不该省它
@@ -5724,7 +6381,12 @@ self.addEventListener('fetch', function (e) {
                     sunEl.style.opacity = sun.toFixed(3);
                     glowEl.style.opacity = (sun * 0.96).toFixed(3);
                     // 斜射日光：整片暖光带，比单纯的光斑更像"太阳真的照进来"
-                    if (sunWashEl) sunWashEl.style.opacity = (sun * 0.92).toFixed(3);
+                    /* §48 收尾 有了蓝天，这层暖光就得让路：它是 screen 混合 + 顶部一整片
+                       近白的暖色，压 0.92 会把刚铺上的蓝整片洗成淡紫白 ——
+                       "蓝天白云"和"阳光暖罩"抢的是同一块地方，蓝天优先 */
+                    if (sunWashEl) sunWashEl.style.opacity = (sun * 0.52).toFixed(3);
+                    // 蓝天白云：和阳光同源，只有真的「晴」才露脸（夜里 sun=0，自动不出现）
+                    if (skyEl) skyEl.style.opacity = (sun * 0.94).toFixed(3);
 
                     // ---- 灰纱：阴天/雨天整体压暗，雷雨最暗 ----
                     var veil = 0;
@@ -5772,6 +6434,16 @@ self.addEventListener('fetch', function (e) {
 
                     backEl.setAttribute('data-fx', kind + (lv || ''));
                     scheduleBolts(isStorm);
+
+                    /* ---- §47 玻璃水珠 + 顶部乌云 ----
+                       和雨丝同一个开关：雨停即撤，不留一扇挂着水珠的干窗。
+                       云量按降水量走，小雨是一层薄灰，雷雨压到接近 1 */
+                    var raining = (kind === 'rain');
+                    try { glassRain.set(raining, raining ? Math.min(1, 0.42 + precip * 0.1) : 0); } catch (eGr) { }
+                    if (stormEl) {
+                        stormEl.style.opacity = raining
+                            ? (0.86 + Math.min(0.14, precip * 0.02)).toFixed(3) : '0';
+                    }
                 }
 
                 // AQI 是并行拉的，比天气晚到：拿到 PM2.5 后只重算霾那层
@@ -5799,11 +6471,13 @@ self.addEventListener('fetch', function (e) {
                    每帧都要跟着重算，这是"下雨时打开日历特别烫"的根因 */
                 function pauseFx() {
                     stop();
+                    if (glassRain && glassRain.pause) glassRain.pause();
                     if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
                 }
                 function resumeFx() {
                     if (document.hidden) return;
                     if (kind !== 'none') start();
+                    if (glassRain && glassRain.resume) glassRain.resume();
                     if (lastInput) scheduleBolts(Number(lastInput.code) >= 95);
                 }
 
