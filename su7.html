@@ -4067,6 +4067,89 @@ html.dark-mode .app-label{
   text-shadow:0 1px 3px rgba(0,0,0,.7);
 }
 
+/* ============================================================================
+   46 灵动岛：充电态（插上充电器 → 「快充中 91% ⚡」）
+   ----------------------------------------------------------------------------
+   还原的是插电那一下的胶囊：纯黑底、左侧「快充中」白粗字、
+   右侧电量数字亮绿、末尾一颗白色闪电，闪电背后一层绿色光斑
+   ＋ 一圈彩虹色散环（conic 渐变 + 高斯模糊 + 环形遮罩，慢速自转）。
+
+   显示时机由 JS 的 chargingchange 驱动：只认「插上」这一下，4.2s 后收回，
+   文字轮播在此期间让位（见 TimerManager 的 island 任务）。
+
+   几个必须写进来的约束：
+     · 岛本身 overflow:hidden，光环最外圈只有 28px，正好卡在 33px 高度里；
+     · 闪电要压在最上层，绿光斑 0 层、彩虹环 1 层、svg 3 层；
+     · 彩虹环用 mask 做成环带，中间镂空，否则会盖住闪电；
+     · 旋转的是整块 conic 底色，色带不对称才有"流过去"的感觉。
+   ========================================================================== */
+.island-charge{display:none;align-items:center;line-height:1;white-space:nowrap}
+.dynamic-island.charging{
+  background:#000;
+  padding:0 13px 0 17px;
+  min-width:0;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.14),0 6px 20px -10px rgba(0,0,0,.8);
+  /* 插上那一下的弹性放大；transform 不参与布局，撑不坏状态栏。
+     fill 用 backwards 而不是 both —— 动画结束后直接回到无动画的自然尺寸，
+     万一合成层把动画冻结在 0%（scale .74），岛不会一直小一圈。 */
+  animation:islandPop .46s cubic-bezier(.34,1.52,.64,1) backwards;
+}
+.dynamic-island.charging::before{opacity:0}    /* 关掉极光扫光，还原纯黑 */
+html.dark-mode .dynamic-island.charging{
+  /* 深色壁纸下纯黑胶囊容易和背景糊在一起，补一圈极淡的充电绿外光 */
+  box-shadow:0 0 0 .5px rgba(255,255,255,.16),0 6px 20px -10px rgba(0,0,0,.9),
+             0 0 14px -6px rgba(0,255,140,.45);
+}
+.dynamic-island.charging::after{opacity:0}     /* 右侧那粒假摄像头点让位给闪电 */
+.dynamic-island.charging #islandText{display:none}
+.dynamic-island.charging .island-charge{display:inline-flex}
+@keyframes islandPop{
+  0%{transform:scale(.74)}
+  62%{transform:scale(1.045)}
+  100%{transform:scale(1)}
+}
+.ic-txt{font-size:13px;font-weight:800;color:#fff;letter-spacing:.4px}
+.ic-num{
+  font-size:15px;font-weight:800;color:#1FF085;margin-left:11px;
+  font-variant-numeric:tabular-nums;
+  /* 绿色辉光：数字是这张卡里唯一的高饱和色，靠 glow 把它"点着" */
+  text-shadow:0 0 9px rgba(31,240,133,.6);
+}
+.ic-pct{font-size:13.5px;font-weight:800;color:#fff;margin-left:.5px}
+.ic-bolt{
+  position:relative;width:26px;height:26px;margin-left:7px;
+  display:grid;place-items:center;flex:0 0 auto;
+}
+/* 绿色光斑：中心近白绿，到 76% 处化进黑底 */
+.ic-bolt::before{
+  content:'';position:absolute;inset:0;border-radius:50%;z-index:0;
+  background:radial-gradient(circle at 50% 52%,
+    #1BF08C 0%,#00D676 26%,#00B860 46%,
+    rgba(0,180,95,.5) 62%,rgba(0,160,85,.16) 72%,transparent 82%);
+  filter:blur(1.1px);
+}
+/* 彩虹色散环：环带遮罩 + 高斯，慢转。压到 0.62 才像色散，不像霓虹圈 */
+.ic-bolt::after{
+  content:'';position:absolute;inset:-2px;border-radius:50%;z-index:1;pointer-events:none;
+  background:conic-gradient(from 200deg,
+    #8F5CFF,#4B7BFF,#00CFFF,#22E88A,#C6FF4D,#FFD54A,#FF5C93,#8F5CFF);
+  filter:blur(3px);opacity:.85;
+  -webkit-mask:radial-gradient(circle,transparent 54%,#000 66%,#000 84%,transparent 96%);
+  mask:radial-gradient(circle,transparent 54%,#000 66%,#000 84%,transparent 96%);
+  animation:icHaloSpin 7s linear infinite;
+}
+@keyframes icHaloSpin{to{transform:rotate(360deg)}}
+.ic-bolt svg{
+  position:relative;z-index:3;width:16px;height:16px;fill:#fff;
+  filter:drop-shadow(0 0 4px rgba(255,255,255,.95));
+}
+@media (prefers-reduced-motion:reduce){
+  .ic-bolt::after,.dynamic-island.charging{animation:none}
+}
+.low-perf .ic-bolt::after,
+html.perf-mid .ic-bolt::after{animation:none;filter:blur(2px)}
+.low-perf .dynamic-island.charging{animation:none}
+
 </style>
     <script>
         (function () {
@@ -4123,7 +4206,7 @@ html.dark-mode .app-label{
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v34';
+var VERSION = 'su-fa36165-v36';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -4365,6 +4448,15 @@ self.addEventListener('fetch', function (e) {
                 </span>
                 <div class="dynamic-island" id="dynamicIsland">
                     <span class="island-text-scroll" id="islandText">❤️ 刘亦菲</span>
+                    <div class="island-charge" id="islandCharge" aria-hidden="true">
+                        <span class="ic-txt">快充中</span>
+                        <span class="ic-num" id="icNum">0</span><span class="ic-pct">%</span>
+                        <span class="ic-bolt">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M13.4 1.7 5.2 13.2c-.28.4-.02.95.47.95h4.5l-1.4 7.5c-.11.6.64.94 1.02.46l7.9-11.5c.28-.4.02-.95-.47-.95h-4.5l1.4-7.4c.11-.6-.64-.94-1.02-.46Z"/>
+                            </svg>
+                        </span>
+                    </div>
                 </div>
                 <div class="ios-status-right">
                     <svg class="signal-icon" viewBox="0 0 18 12" aria-hidden="true">
@@ -5767,6 +5859,44 @@ self.addEventListener('fetch', function (e) {
                 }
             }
 
+            // 灵动岛：充电态。插上充电器的那一下弹出「快充中 XX% ⚡」，4.2s 后收回。
+            // Battery API 只给 charging / level / chargingTime，拿不到实际功率，
+            // 所以「快充中」是固定文案 —— 别在这儿猜瓦数。
+            (function initIslandCharge() {
+                var island = document.getElementById('dynamicIsland');
+                var numEl = document.getElementById('icNum');
+                if (!island || !numEl || !navigator.getBattery) return;
+                var hideT = 0, wasCharging = null;
+
+                function paint(level) {
+                    var pct = Math.round((level || 0) * 100);
+                    numEl.textContent = pct > 100 ? 100 : (pct < 0 ? 0 : pct);
+                }
+                function open() {
+                    clearTimeout(hideT);
+                    island.classList.add('charging');
+                    hideT = setTimeout(function () {
+                        island.classList.remove('charging');
+                    }, 4200);
+                }
+                function close() {
+                    clearTimeout(hideT);
+                    island.classList.remove('charging');
+                }
+
+                navigator.getBattery().then(function (b) {
+                    paint(b.level);
+                    wasCharging = b.charging;      // 首屏若本来就在充电，不主动弹
+                    b.addEventListener('chargingchange', function () {
+                        paint(b.level);
+                        if (b.charging && wasCharging === false) open();  // 只认「插上」这一下
+                        else if (!b.charging) close();                    // 拔掉立刻收起
+                        wasCharging = b.charging;
+                    });
+                    b.addEventListener('levelchange', function () { paint(b.level); });
+                }).catch(function () {});
+            })();
+
             // 标题行：「你好，我叫许红豆　永远相信美好的事情即将发生」，同一行不滚动。
             // 两句在同一个 span 里，字号必然一致，所以只能整体缩：
             // 从 14px 起每次 0.5px 往下试，一直试到 9.5px 为止。
@@ -7101,6 +7231,8 @@ self.addEventListener('fetch', function (e) {
             TimerManager.add('slide', nextSlide, 3500, true);
             TimerManager.add('island', function() {
                 if (document.hidden || uiBusy) return;
+                // 充电态占着岛的时候不要写文字，否则会被 setIslandText 顶掉内容
+                if (document.getElementById('dynamicIsland').classList.contains('charging')) return;
                 tidx = (tidx + 1) % textPool.length;
                 setIslandText(textPool[tidx]);
             }, 3500, true);
