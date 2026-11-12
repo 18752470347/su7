@@ -3290,9 +3290,10 @@ html.dark-mode .mc-hol-days.work{color:#FFB65C;background:rgba(255,159,10,.20)}
    ----------------------------------------------------------------------------
    目标：不看天气卡，也知道窗外什么天。
      · 晴      顶部一束斜射日光，光带位置跟着当日日照进度走
-     · 雨      全屏雨丝，降水量(mm/h)决定密度/速度/长度，风速决定倾角
+     · 雨      全屏雨丝，降水量(mm/h)决定密度/速度/长度，风速决定倾角；
+               雨点砸到屏底会溅起一圈扁水环 + 几颗小水珠
      · 雷雨    雨 + 随机闪电（整屏爆白 + 一道折线雷）
-     · 雪      慢速飘落的雪粒（和雨同一套粒子引擎）
+     · 雪      慢速飘落的雪粒（和雨同一套粒子引擎，按远近分三层粗细）
      · 雾/大雾 三层缓慢横移的雾团，能见度越低越浓
      · 霾      PM2.5 越高，下半屏多一层土黄薄纱
      · 阴/多云 一层灰纱，把晴天的"亮"整体退一档
@@ -3737,6 +3738,226 @@ html.perf-mid .wxfx-fog i,
 html.perf-mid .wxfx-smog i{animation:none}
 html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
 
+/* ============================================================================
+   38 天气弹层「一屏放下」—— 不用再上下滑动才能看全
+   ----------------------------------------------------------------------------
+   现象：点天气卡弹出面板后，「空气质量 / 日出日落 / 更新时间」被切在屏幕外，
+   得在面板里往上拖一截；「未来 7 天」页同理（大温度 + 7 行列表一起顶到边框）。
+
+   实测（390 宽）内容高度：实时页 684px、7 天页 612px，而面板上限是 86vh ——
+   只有 795px 以上的视口才放得下。两处成因：
+
+     ① 内容本身偏高：大温度 56px、温度下面还有一行「📍城市」（顶栏那个城市
+        按钮已经写了同一个名字，纯重复）、底部独立一行「数据来自 Open-Meteo」。
+     ② vh 量的是「大视口」：iOS Safari / 微信里地址栏和工具条占掉的那一条不算进
+        vh，86vh 比肉眼可见的高度还高，面板底边直接被裁到屏幕外。
+
+   所以这一节两件事一起做：
+     · 上限换成 svh（小视口）——可见区域多高就按多高算，不是按地址栏收起时算；
+     · 逐块收骨：重复的城市行去掉、大温度 56→50、24 小时条 / 六宫格 / 空气质量 /
+       日出日落 / 更新时间各收 2~8px，Open-Meteo 那句并进更新时间行不再单独占行。
+   收完实测：实时页 526px、7 天页 480px —— 620px 高的视口（86svh = 533）刚好放下；
+   更矮的屏幕交给 38.3 的两档 media 继续收，横屏等极端情况才回落成滚动。
+
+   只覆盖、不改上面的原规则，想回退删掉本节即可。
+   ========================================================================== */
+
+/* ---- 38.1 面板：高度对齐「可见视口」 ---- */
+.weather-sheet-overlay .weather-sheet-panel{
+  /* 先写 vh 给老内核兜底，再写 svh 覆盖：不支持的浏览器会忽略后面那条 */
+  max-height:86vh;
+  max-height:86svh;
+  padding:24px 18px calc(16px + var(--safe-bottom));
+  overscroll-behavior:contain;
+}
+
+/* ---- 38.2 逐块收骨 ---- */
+.wx7-head{margin-bottom:4px}
+.wx-tabs{margin:0 0 8px;padding:2px}
+.wx-tab{height:28px;font-size:12px}
+
+/* 大温度：50px 仍是一眼的主视觉；城市行删掉（顶栏已有城市按钮） */
+.wx7-hero{padding:2px 2px 8px}
+.wx7-hero .ws-temp{font-size:50px;letter-spacing:-2px}
+.wx7-hero .ws-city{display:none}
+
+/* 24 小时条 */
+.wx-hours{margin:10px 0 0}
+.wx-hours-head{margin-bottom:6px;font-size:11.5px}
+.wx-hr{padding:5px 0 4px;gap:4px}
+.wx-hr .h-ico{height:14px}
+.wx-hr .h-ico .fa-solid{font-size:13px}
+.wx-hr .h-temp{font-size:12.5px}
+.wx-hr.on .h-temp{font-size:13.5px}
+.wx-hr .h-rain{font-size:9px;height:9px}
+
+/* 六宫格 */
+.wx-now-grid{gap:6px}
+.wx-now-cell{padding:7px 10px;gap:3px;border-radius:12px}
+.wx-now-cell span{font-size:10.5px}
+.wx-now-cell b{font-size:15px}
+
+/* 空气质量：压成一条细带 */
+.wx-aqi{margin-top:8px;padding:6px 11px;border-radius:11px;gap:6px}
+.aqi-key,.aqi-lv{font-size:11.5px}
+.aqi-val{font-size:16px}
+.aqi-pm{font-size:10px}
+
+/* 日出日落 / 更新时间 */
+.wx-now-sun{margin-top:8px}
+.wx-now-meta{margin-top:8px;font-size:10.5px}
+.wx-now-refresh{height:24px;padding:0 11px;font-size:11px}
+
+/* 7 天列表：行高 49 → 44 */
+.wx7-row{padding:8px 13px}
+.wx7-day b{font-size:13px}
+.wx7-ico i{font-size:16px}
+
+/* 38.3 矮屏再收一档：700px 以下（多数安卓 + 微信内打开）再挤 30px 左右 */
+@media (max-height:700px){
+  .weather-sheet-overlay .weather-sheet-panel{padding-top:20px}
+  .wx7-hero{padding-bottom:4px}
+  .wx7-hero .ws-temp{font-size:44px}
+  .wx-hours-head{margin-bottom:4px}
+  .wx-hr{padding:4px 0 3px}
+  .wx-now-cell{padding:6px 9px}
+  .wx-aqi{padding:5px 10px}
+  .wx-now-sun,.wx-now-meta{margin-top:6px}
+}
+/* 640px 以下（iPhone SE 一代 / 分屏）：再把 24 小时条的标题行收掉 */
+@media (max-height:640px){
+  .weather-sheet-overlay .weather-sheet-panel{padding-top:18px}
+  .wx7-hero .ws-temp{font-size:40px}
+  .wx-hours-head{display:none}
+  .wx-hr .h-rain{height:8px}
+  .wx-now-cell b{font-size:14px}
+  .wx-now-grid{gap:5px}
+}
+
+/* ============================================================================
+   39 天气特效加强 + 一键回到当前位置
+   ----------------------------------------------------------------------------
+   第一版特效偏"礼貌"：雨落到屏底只是回收、雪只飘不落、雾只在卡片后面透一层、
+   晴天只有一点点暖光。这一节把四种天气都往"一眼能认出来"推一档，
+   但参数仍按物理走，不做整屏滤镜：
+
+     · 晴  .wxfx-sunwash —— 从太阳方向斜下来的一大片暖光（screen 混合），
+                         配原来的 soft-light 暖罩 + 镜头光斑，三层叠加
+     · 雨  .wxfx-wet     —— 屏底 30vh 一层湿地反光（soft-light），
+                         溅水环更大更亮、水珠更大更高（见 §34 的 wxFx）
+     · 雪  canvas 底部积雪 —— 落点附近的雪会堆起来（每列最多 ~5vh），
+                         还会留几片"停在雪面上"的雪粒，几秒后才化
+     · 雾  .wxfx-fogmask（卡片后）+ .wxfx-fogfront（卡片上）
+                         后面铺满整页的雾罩，前面再压一层缓慢横移的浓雾
+                         —— 玻璃卡也会被雾盖住，"大雾"才成立
+
+   动效只用 transform / opacity。雾团用 translate 关键帧（不带 scale）：
+   缩放会让 22px 的高斯模糊每帧重算，是以前"雾天特别烫"的原因。
+   ========================================================================== */
+:root{
+  --fx-fog-front:rgba(238,243,250,.58);
+  --fx-wet:rgba(170,198,238,.34);
+}
+html.dark-mode{
+  --fx-fog-front:rgba(150,168,196,.30);
+  --fx-wet:rgba(104,146,206,.30);
+}
+
+/* ---- 39.1 晴天：一整片斜射日光 ---- */
+.wxfx-sunwash{
+  position:absolute;left:-18%;right:-18%;top:-26%;height:118%;
+  opacity:0;transition:opacity 2.4s var(--ease);
+  /* screen 只提亮不改色相，正好补在暖罩（soft-light）上面：
+     暖罩负责"色温变暖"，这一层负责"亮起来" */
+  mix-blend-mode:screen;
+  background:
+    radial-gradient(40% 32% at calc(8% + var(--sun-pct,.62) * 84%) 0%,
+      rgba(255,247,220,.92) 0%,rgba(255,235,182,.40) 44%,rgba(255,235,182,0) 74%),
+    linear-gradient(202deg,rgba(255,246,220,.30) 0%,rgba(255,234,196,.11) 40%,rgba(255,234,196,0) 66%);
+  animation:fxfSunSweep 32s ease-in-out infinite;
+}
+html.dark-mode .wxfx-sunwash{
+  background:
+    radial-gradient(40% 32% at calc(8% + var(--sun-pct,.62) * 84%) 0%,
+      rgba(255,242,206,.55) 0%,rgba(255,226,168,.22) 44%,rgba(255,226,168,0) 74%),
+    linear-gradient(202deg,rgba(255,240,206,.16) 0%,rgba(255,226,168,.05) 40%,rgba(255,226,168,0) 66%);
+}
+@keyframes fxfSunSweep{
+  0%,100%{transform:translate3d(-1.4%,0,0)}
+  50%{transform:translate3d(1.4%,.8%,0)}
+}
+
+/* ---- 39.2 湿地反光（雨天） ---- */
+.wxfx-wet{
+  position:absolute;left:0;right:0;bottom:0;height:30vh;
+  opacity:0;transition:opacity 1.8s var(--ease);
+  mix-blend-mode:soft-light;
+  background:
+    /* 最底一道亮边：水面把天光反上来的一线，雨花才有"落在水上"的落点 */
+    linear-gradient(0deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 6%),
+    linear-gradient(180deg,
+      rgba(196,218,246,0) 0%,rgba(186,210,242,.16) 44%,var(--fx-wet) 100%);
+}
+
+/* ---- 39.3 雾：整页雾罩（卡片后）+ 浓雾层（卡片上） ---- */
+.wxfx-fogmask{
+  position:absolute;inset:0;opacity:0;transition:opacity 2.8s var(--ease);
+  background:
+    radial-gradient(78% 52% at 50% 46%,var(--fx-fog) 0%,rgba(232,238,246,0) 74%),
+    linear-gradient(180deg,var(--fx-fog) 0%,rgba(232,238,246,.10) 26%,
+      rgba(232,238,246,.10) 72%,var(--fx-fog) 100%);
+}
+html.dark-mode .wxfx-fogmask{
+  background:
+    radial-gradient(78% 52% at 50% 46%,rgba(176,192,214,.46) 0%,rgba(176,192,214,0) 74%),
+    linear-gradient(180deg,rgba(176,192,214,.34) 0%,rgba(176,192,214,.06) 26%,
+      rgba(176,192,214,.06) 72%,rgba(176,192,214,.34) 100%);
+}
+.wxfx-fogfront{position:absolute;inset:0;opacity:0;transition:opacity 3s var(--ease)}
+.wxfx-fogfront i{
+  position:absolute;left:-40%;width:180%;height:58vh;border-radius:50%;
+  background:radial-gradient(closest-side,var(--fx-fog-front) 0%,transparent 74%);
+  filter:blur(15px);will-change:transform;
+}
+.wxfx-fogfront i:nth-child(1){top:-14%;animation:fxfDrift 52s ease-in-out infinite}
+.wxfx-fogfront i:nth-child(2){top:26%;opacity:.86;animation:fxfDrift 71s ease-in-out infinite reverse}
+.wxfx-fogfront i:nth-child(3){top:62%;opacity:.7;animation:fxfDrift 88s ease-in-out infinite}
+/* 只平移不带 scale：缩放会让高斯模糊每帧重新光栅化 */
+@keyframes fxfDrift{
+  0%,100%{transform:translate3d(-6%,0,0)}
+  50%{transform:translate3d(6%,1.2%,0)}
+}
+html.low-perf .wxfx-fogfront i,
+html.perf-mid .wxfx-fogfront i,
+html.low-perf .wxfx-sunwash,
+html.perf-mid .wxfx-sunwash{animation:none}
+
+/* ---- 39.4 天气弹层：回到当前位置 ---- */
+.wx7-locate{
+  width:30px;height:30px;border-radius:50%;background:var(--fill-2);color:#4E58D6;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  transition:transform .18s var(--ease),opacity .18s var(--ease);
+}
+.wx7-locate:active{transform:scale(.92);opacity:.7}
+.wx7-locate.busy .loc-ico{animation:fxfSpin 1.1s linear infinite}
+.loc-ico{width:14px;height:14px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+html.dark-mode .wx7-locate{background:rgba(255,255,255,.09);color:#A9B4FF}
+@keyframes fxfSpin{to{transform:rotate(360deg)}}
+
+/* 城市选择器里的同款入口 */
+.city-locate-row{
+  display:flex;align-items:center;gap:8px;width:100%;margin:-4px 0 12px;
+  padding:11px 14px;border-radius:14px;background:var(--fill-2);
+  font-size:14px;font-weight:700;color:var(--tint);letter-spacing:-.2px;text-align:left;
+}
+.city-locate-row i{font-size:13px}
+.city-locate-row em{
+  margin-left:auto;font-style:normal;font-size:11px;font-weight:600;color:var(--label-3);
+}
+.city-locate-row:active{transform:scale(.985);opacity:.82}
+html.dark-mode .city-locate-row{background:rgba(255,255,255,.08);color:#A9B4FF}
+html.dark-mode .city-locate-row em{color:#9AA2CC}
+
 </style>
     <script>
         (function () {
@@ -3793,7 +4014,7 @@ html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v21';
+var VERSION = 'su-fa36165-v24';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -3874,15 +4095,19 @@ self.addEventListener('fetch', function (e) {
     <!-- 天气氛围：日光 / 雨丝 / 雪 / 雷电 / 雾 / 霾（样式见 §34，JS 见 §34）
          两层分开：back 在卡片后（透玻璃显色），front 在卡片上（雨滴在"窗玻璃"上） -->
     <div class="wxfx wxfx-back" id="wxFxBack" aria-hidden="true">
+        <div class="wxfx-sunwash" id="wxFxSunWash"></div>
         <div class="wxfx-glow" id="wxFxGlow"></div>
         <div class="wxfx-cloud" id="wxFxCloud"></div>
         <div class="wxfx-fog" id="wxFxFog"><i></i><i></i><i></i></div>
-
+        <div class="wxfx-fogmask" id="wxFxFogMask"></div>
+        <div class="wxfx-wet" id="wxFxWet"></div>
     </div>
     <div class="wxfx wxfx-front" id="wxFxFront" aria-hidden="true">
         <div class="wxfx-smog" id="wxFxSmog"><i></i><i></i></div>
         <div class="wxfx-haze" id="wxFxHaze"></div>
         <div class="wxfx-flare" id="wxFxSun"><i></i><i></i><i></i><i></i><i></i></div>
+        <!-- 雾罩：压在卡片之上，整页像隔着一层水汽（雾天才有值） -->
+        <div class="wxfx-fogfront" id="wxFxFogFront"><i></i><i></i><i></i></div>
         <canvas class="wxfx-canvas" id="wxFxCanvas"></canvas>
         <svg class="wxfx-bolt" id="wxFxBolt" viewBox="0 0 200 400" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
             <defs>
@@ -3934,6 +4159,11 @@ self.addEventListener('fetch', function (e) {
                 <div class="city-picker-close" id="cityPickerClose"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <input class="city-search-input" id="citySearchInput" type="text" placeholder="搜省 / 市 / 县 / 镇 / 村…" />
+            <button class="city-locate-row" id="cityLocateRow" type="button">
+                <svg class="loc-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 1v2.4M8 12.6V15M1 8h2.4M12.6 8H15"/></svg>
+                <span>回到当前位置</span>
+                <em id="cityLocateHint">按 GPS 自动定位</em>
+            </button>
             <div class="city-list" id="cityList"></div>
         </div>
     </div>
@@ -3943,6 +4173,9 @@ self.addEventListener('fetch', function (e) {
             <div class="wx7-head">
                 <div class="wx7-title" id="wxSheetTitle">实时天气</div>
                 <div class="wx7-actions">
+                    <button class="wx7-locate" id="wxSheetLocate" type="button" title="回到当前位置" aria-label="回到当前位置">
+                        <svg class="loc-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 1v2.4M8 12.6V15M1 8h2.4M12.6 8H15"/></svg>
+                    </button>
                     <button class="wx7-city-btn" id="wxSheetCity">
                         <i class="fa-solid fa-location-dot"></i><span id="wxSheetCityName">当前</span>
                     </button>
@@ -3957,7 +4190,6 @@ self.addEventListener('fetch', function (e) {
             <div class="wx7-hero" id="wxHero"></div>
             <div class="wx-now" id="wxNow"></div>
             <div class="wx7-list" id="wx7List"></div>
-            <div class="wx7-foot">数据来自 Open-Meteo · 点城市名可切换城市</div>
         </div>
     </div>
 
@@ -4644,6 +4876,11 @@ self.addEventListener('fetch', function (e) {
 
                粒子走 canvas 而不是 DOM：200 条雨丝做成 DOM 就是 200 个重绘层，
                中低端安卓会直接掉帧；canvas 一帧只清一次屏、一次 stroke 画完。
+
+               为什么"以前看着僵硬"：所有雨丝共用一套 alpha/线宽，且倾角是个常数，
+               整屏就是一张平行斜线在匀速平移。现在每颗粒子带 depth，
+               按远近分三层（粗细/浓淡/长短/快慢都不同），倾角再叠一层阵风摆动，
+               雨点落到屏底溅水花 —— 近处的水花大、远处的只留一个小环。
                ================================================================== */
             var wxFx = (function () {
                 var canvas = document.getElementById('wxFxCanvas');
@@ -4660,6 +4897,12 @@ self.addEventListener('fetch', function (e) {
                 var boltHaloEl = document.getElementById('wxFxBoltHalo');
                 var boltForkEl = document.getElementById('wxFxBoltFork');
                 var backEl = document.getElementById('wxFxBack');
+                /* §39 新增四层：晴天的斜射日光、雨天的湿地反光、
+                   雾的整页罩 + 卡片上的浓雾层 */
+                var sunWashEl = document.getElementById('wxFxSunWash');
+                var wetEl = document.getElementById('wxFxWet');
+                var fogMaskEl = document.getElementById('wxFxFogMask');
+                var fogFrontEl = document.getElementById('wxFxFogFront');
                 var noop = { apply: function () { }, refresh: function () { } };
                 if (!canvas || !canvas.getContext || !backEl || !sunEl) return noop;
 
@@ -4684,16 +4927,47 @@ self.addEventListener('fetch', function (e) {
                 ];
                 var SNOW = [
                     { n: 0, sp: [0, 0] },
-                    { n: 55, sp: [42, 78] },
-                    { n: 95, sp: [50, 92] },
-                    { n: 145, sp: [58, 105] },
-                    { n: 190, sp: [64, 118] }
+                    { n: 62, sp: [42, 78] },
+                    { n: 110, sp: [50, 92] },
+                    { n: 168, sp: [58, 105] },
+                    { n: 215, sp: [64, 118] }
                 ];
 
                 var kind = 'none', level = 0, slant = 0.12;
                 var drops = [], W = 0, H = 0, dpr = 1;
                 var raf = 0, lastT = 0, started = false;
                 var boltTimer = 0, lastInput = null;
+
+                /* 深度分段点（build 时按 dep 排完序算出）+ 溅水池。
+                   池子固定 40 个对象、循环复用，不每帧 new，省掉垃圾回收的抖动 */
+                var cut1 = 0, cut2 = 0;
+                var SPL_MAX = 40, splMax = 0, splCount = 0;
+                var spl = (function () {
+                    var a = [], i, j, drops3;
+                    for (i = 0; i < SPL_MAX; i++) {
+                        drops3 = [];
+                        for (j = 0; j < 4; j++) {
+                            drops3.push({ x: 0, y: 0, vx: 0, vy: 0, r: 1, live: false });
+                        }
+                        a.push({ life: 0, life0: 1, x: 0, y: 0, dep: 0, d: drops3 });
+                    }
+                    return a;
+                })();
+
+                /* ---- 积雪 ----
+                   雪不落地就没法"停下来"。这里把屏底切成 N 列，雪粒落点附近的几列
+                   长一点高度（邻居只长三分之一，堆出来才是坡不是柱子），
+                   每帧再按 dt 慢慢化掉一点 —— 下得越久堆得越高，雪停了自己退下去。
+                   另有一个固定池存"停在雪面上"的雪粒：几秒内保持可见再淡出，
+                   不然雪片一碰地就消失，看着像掉进了黑洞。 */
+                var pile = null, pileN = 0, pileStep = 1, pileCap = 28, pileGrad = null;
+                /* 每列自己的上限（0.55~1 × pileCap）：所有列都顶到同一个高度，
+                   雪面就会是一条直线 —— 每列给个不同的天花板，堆满了也是起伏的 */
+                var pileMax = null;
+                var STUCK_MAX = 44, stuck = [], stuckCount = 0;
+                (function () {
+                    for (var i = 0; i < STUCK_MAX; i++) stuck.push({ x: 0, y: 0, r: 1, life: 0, life0: 1 });
+                })();
 
                 function rnd(a, b) { return a + Math.random() * (b - a); }
                 function isDark() { return document.documentElement.classList.contains('dark-mode'); }
@@ -4709,21 +4983,54 @@ self.addEventListener('fetch', function (e) {
                     canvas.height = Math.max(1, Math.round(H * dpr));
                     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                     ctx.lineCap = 'round';
+                    // 积雪：约每 16px 一列，最高 4.5% 屏高（390×844 上约 38px）
+                    pileN = Math.max(12, Math.round(W / 16));
+                    pileStep = W / (pileN - 1);
+                    pileCap = Math.max(14, Math.min(20, H * 0.024));
+                    pile = new Float32Array(pileN);
+                    pileMax = new Float32Array(pileN);
+                    for (var pi = 0; pi < pileN; pi++) {
+                        pileMax[pi] = pileCap * (0.55 + Math.random() * 0.45);
+                    }
+                    pileGrad = ctx.createLinearGradient(0, H - pileCap, 0, H + 2);
+                    if (isDark()) {
+                        pileGrad.addColorStop(0, 'rgba(232,240,255,.90)');
+                        pileGrad.addColorStop(.55, 'rgba(206,222,248,.80)');
+                        pileGrad.addColorStop(1, 'rgba(186,204,238,.62)');
+                    } else {
+                        pileGrad.addColorStop(0, 'rgba(255,255,255,.96)');
+                        pileGrad.addColorStop(.55, 'rgba(240,247,255,.90)');
+                        pileGrad.addColorStop(1, 'rgba(226,238,252,.78)');
+                    }
                     build(true);
                 }
 
+                /* 每颗粒子带一个 depth（0=最远，1=最近）。
+                   远处更细更淡更慢更短，近处更粗更亮更快更长 —— 参数一分离，
+                   满屏雨丝立刻有前后层次，不再像"一张斜纹纸在平移"。
+                   粒子按 depth 排序存放，绘制时切成三段批量 stroke，
+                   两百条线只多两次 draw call。 */
                 function newDrop(anywhere) {
                     var d = {
-                        x: rnd(-40, W + 40),
-                        y: anywhere ? rnd(-H, H) : rnd(-70, -6),
-                        sp: 0, len: 0,
-                        r: rnd(0.9, 2.2),
+                        x: 0, y: 0, sp: 0, len: 0,
+                        dep: Math.random(),
+                        r: 1,
                         ph: rnd(0, Math.PI * 2)
                     };
-                    var tb = kind === 'rain' ? RAIN[level] : SNOW[level];
-                    d.sp = rnd(tb.sp[0], tb.sp[1]);
-                    if (kind === 'rain') d.len = rnd(RAIN[level].len[0], RAIN[level].len[1]);
+                    d.r = 0.85 + d.dep * 2.0;
+                    place(d, anywhere);
                     return d;
+                }
+
+                /* 落点与运动参数：depth 参与速度/线长，远近的速度差本身就是纵深感 */
+                function place(d, anywhere) {
+                    var tb = kind === 'rain' ? RAIN[level] : SNOW[level];
+                    d.sp = rnd(tb.sp[0], tb.sp[1]) * (0.78 + d.dep * 0.34);
+                    if (kind === 'rain') {
+                        d.len = rnd(RAIN[level].len[0], RAIN[level].len[1]) * (0.72 + d.dep * 0.52);
+                    }
+                    d.x = rnd(-40, W + 40);
+                    d.y = anywhere ? rnd(-H, H) : rnd(-90, -8);
                 }
 
                 function build(reseed) {
@@ -4735,11 +5042,261 @@ self.addEventListener('fetch', function (e) {
                     while (drops.length > n) drops.pop();
                     while (drops.length < n) drops.push(newDrop(true));
                     // 档位变了：已有粒子重新分配速度/线长，雨势变化才有连续感
+                    var tb = kind === 'rain' ? RAIN[level] : SNOW[level];
                     for (var i = 0; i < drops.length; i++) {
                         var d = drops[i];
-                        var tb = kind === 'rain' ? RAIN[level] : SNOW[level];
-                        d.sp = rnd(tb.sp[0], tb.sp[1]);
-                        if (kind === 'rain') d.len = rnd(RAIN[level].len[0], RAIN[level].len[1]);
+                        d.r = 0.85 + d.dep * 2.0;
+                        d.sp = rnd(tb.sp[0], tb.sp[1]) * (0.78 + d.dep * 0.34);
+                        if (kind === 'rain') {
+                            d.len = rnd(RAIN[level].len[0], RAIN[level].len[1]) * (0.72 + d.dep * 0.52);
+                        }
+                    }
+                    // 按远近排序，切出两个分界点，绘制时按段批量上色
+                    drops.sort(function (a, b) { return a.dep - b.dep; });
+                    cut1 = 0; cut2 = 0;
+                    for (i = 0; i < drops.length; i++) {
+                        if (drops[i].dep < 0.34) cut1 = i + 1;
+                        else if (drops[i].dep < 0.7) cut2 = i + 1;
+                    }
+                    if (cut2 < cut1) cut2 = cut1;
+                    splMax = noParticles ? 0 : (isLowEnd ? 15 : (level >= 3 ? 34 : 22));
+                    if (reseed) splCount = 0;
+                }
+
+                /* ---------------- 积雪 ---------------- */
+                function pileAt(x) {
+                    if (!pile || !pileN) return 0;
+                    var i = Math.round(x / pileStep);
+                    if (i < 0) i = 0; else if (i >= pileN) i = pileN - 1;
+                    return pile[i];
+                }
+
+                /* 落点抬高：主列 +1.4~2.6，左右邻居各 +0.5 —— 只有主列会堆成"柱子"。
+                   单次加得够多，雪才在十几秒里明显堆起来；融化率保持很低，
+                   一旦停雪，雪线会慢慢退（见 pileMelt） */
+                function pileAdd(x) {
+                    if (!pile || !pileN) return;
+                    var i = Math.round(x / pileStep);
+                    if (i < 0) i = 0; else if (i >= pileN) i = pileN - 1;
+                    pile[i] = Math.min(pileMax[i], pile[i] + rnd(2.4, 4));
+                    if (i > 0) pile[i - 1] = Math.min(pileMax[i - 1], pile[i - 1] + 0.8);
+                    if (i < pileN - 1) pile[i + 1] = Math.min(pileMax[i + 1], pile[i + 1] + 0.8);
+                }
+
+                function pileMelt(dt) {
+                    if (!pile) return;
+                    // 融化比堆积慢一个量级：雪一停，雪线会自己慢慢退回去
+                    var d = dt * 0.3;
+                    for (var i = 0; i < pileN; i++) {
+                        if (pile[i] > 0) { pile[i] -= d; if (pile[i] < 0) pile[i] = 0; }
+                    }
+                }
+
+                function pileClear() {
+                    if (pile) for (var i = 0; i < pileN; i++) pile[i] = 0;
+                    for (var k = 0; k < STUCK_MAX; k++) stuck[k].life = 0;
+                    stuckCount = 0;
+                }
+
+                /* 停在雪面上的雪粒：几秒内不动，最后 0.8s 淡出 */
+                function stuckAdd(x, y, r) {
+                    if (stuckCount >= STUCK_MAX) return;
+                    for (var i = 0; i < STUCK_MAX; i++) {
+                        var s = stuck[i];
+                        if (s.life > 0) continue;
+                        stuckCount++;
+                        s.life = s.life0 = rnd(3.5, 9);
+                        s.x = x; s.y = y; s.r = r;
+                        return;
+                    }
+                }
+
+                function drawPile(dt) {
+                    if (!pile || !pileN) return;
+                    for (var i = 0; i < STUCK_MAX; i++) {
+                        var s = stuck[i];
+                        if (s.life <= 0) continue;
+                        s.life -= dt;
+                        if (s.life <= 0) { s.life = 0; stuckCount--; continue; }
+                    }
+                    var any = false;
+                    for (i = 0; i < pileN; i++) if (pile[i] > 0.6) { any = true; break; }
+                    if (!any) return;
+                    /* 一条穿过每列顶点的二次曲线：雪面是圆滑的坡，
+                       逐列折线会在 3 倍屏上看出锯齿 */
+                    ctx.beginPath();
+                    ctx.moveTo(-2, H + 2);
+                    var px = 0, py = H - pile[0];
+                    ctx.lineTo(-2, py);
+                    for (var k = 1; k < pileN; k++) {
+                        var cx = k * pileStep, cy = H - pile[k];
+                        ctx.quadraticCurveTo(px, py, (px + cx) / 2, (py + cy) / 2);
+                        px = cx; py = cy;
+                    }
+                    ctx.lineTo(W + 2, py);
+                    ctx.lineTo(W + 2, H + 2);
+                    ctx.closePath();
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = pileGrad || 'rgba(255,255,255,.9)';
+                    ctx.fill();
+                    /* 雪面的一道高光：只描边、不加 shadowBlur（全宽阴影每帧都要重算），
+                       有这一笔，雪堆的顶边才不是一条硬切的白线 */
+                    ctx.globalAlpha = 0.5;
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = isDark() ? 'rgba(246,250,255,.75)' : 'rgba(255,255,255,.95)';
+                    ctx.stroke();
+                    /* 雪面上的雪粒：颜色比雪面深一点，才看得见"停住的雪花" */
+                    ctx.fillStyle = isDark() ? 'rgba(198,216,244,1)' : 'rgba(176,198,228,1)';
+                    for (i = 0; i < STUCK_MAX; i++) {
+                        var p = stuck[i];
+                        if (p.life <= 0) continue;
+                        ctx.globalAlpha = 0.85 * Math.min(1, p.life / 0.8);
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+                }
+
+                /* ---------------- 溅水 ----------------
+                   雨点砸到屏底的那一下：一个扁椭圆水环 + 四颗弹起的小水珠。
+                   椭圆横向宽、纵向只有 0.3（落在平面上是圆的投影，不是气泡），
+                   水珠走抛物线，落回地面就消失。池子固定大小，满了不再生，
+                   所以大雨时底部是"一片在溅"，而不是每滴都蹦一下。 */
+                function spawnSplash(x, y, dep) {
+                    if (splMax <= 0 || splCount >= splMax) return;
+                    var s = null, i;
+                    for (i = 0; i < SPL_MAX; i++) {
+                        if (spl[i].life <= 0) { s = spl[i]; break; }
+                    }
+                    if (!s) return;
+                    splCount++;
+                    s.life = s.life0 = rnd(0.34, 0.52) * (0.85 + dep * 0.3);
+                    s.x = x; s.y = y; s.dep = dep;
+                    for (i = 0; i < s.d.length; i++) {
+                        var p = s.d[i];
+                        // 0/2 往左、1/3 往右：两边都有，才不像"统一往一边弹"
+                        var dir = (i % 2 === 0) ? -1 : 1;
+                        p.x = x; p.y = y - 2;
+                        p.vx = dir * rnd(30, 132) * (0.5 + dep * 0.9);
+                        p.vy = -rnd(82, 248) * (0.5 + dep * 0.85);
+                        p.r = (0.8 + dep * 1.75) * rnd(0.85, 1.2);
+                        p.live = true;
+                    }
+                }
+
+                function drawSplash(dt) {
+                    if (!splCount) return;
+                    ctx.strokeStyle = isDark() ? 'rgba(214,234,255,1)' : 'rgba(38,78,126,1)';
+                    ctx.fillStyle = ctx.strokeStyle;
+                    for (var i = 0; i < splMax; i++) {
+                        var s = spl[i];
+                        if (s.life <= 0) continue;
+                        s.life -= dt;
+                        if (s.life <= 0) { s.life = 0; splCount--; continue; }
+                        var k = s.life / s.life0;                 // 1 → 0
+                        var age = 1 - k;
+                        /* 砸下去的第一下：一个亮点。只有 0.14 的寿命 ——
+                           缺了它，水环是从 1px 直接长出来的，看着像"凭空出现" */
+                        if (age < 0.14) {
+                            var ir = 2.2 + s.dep * 2.6;
+                            ctx.globalAlpha = 0.8 * (1 - age / 0.14);
+                            ctx.beginPath();
+                            ctx.ellipse(s.x, s.y - 3, ir, ir * 0.42, 0, 0, 6.2832);
+                            ctx.fill();
+                        }
+                        /* 冲击圈只活头 45%：画久了会变成一圈描边，看着像手绘的椭圆；
+                           真实的溅水是"一下"就散掉，留给人眼的只是水珠。
+                           两圈不同步：外圈扩得快而淡，内圈慢而实 —— 真水面上
+                           一次撞击本来就不止一道波纹 */
+                        if (age < 0.45) {
+                            ctx.lineWidth = 1.5;
+                            var rr = 2 + age * (15 + s.dep * 17);
+                            ctx.globalAlpha = 0.86 * (1 - age / 0.45);
+                            ctx.beginPath();
+                            ctx.ellipse(s.x, s.y - 3, rr, rr * 0.3, 0, 0, 6.2832);
+                            ctx.stroke();
+                        }
+                        if (age > 0.05 && age < 0.3) {
+                            ctx.lineWidth = 1.2;
+                            var r2 = 1.6 + (age - 0.05) * (10 + s.dep * 10);
+                            ctx.globalAlpha = 0.6 * (1 - (age - 0.05) / 0.25);
+                            ctx.beginPath();
+                            ctx.ellipse(s.x, s.y - 3, r2, r2 * 0.34, 0, 0, 6.2832);
+                            ctx.stroke();
+                        }
+                        /* 水珠：圆形 + 抛物线，落回地面就消失 */
+                        ctx.globalAlpha = k * (0.55 + s.dep * 0.45);
+                        ctx.beginPath();
+                        for (var j = 0; j < s.d.length; j++) {
+                            var p = s.d[j];
+                            if (!p.live) continue;
+                            p.vy += 1050 * dt;
+                            p.x += p.vx * dt;
+                            p.y += p.vy * dt;
+                            if (p.y > s.y - 2) { p.live = false; continue; }
+                            ctx.moveTo(p.x + p.r, p.y);
+                            ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+                        }
+                        ctx.fill();
+                    }
+                }
+
+                /* 一段雨丝：同一 depth 区间共用线宽/透明度，一次 stroke 画完 */
+                function rainPass(dt, sl, from, to, aMul, wMul) {
+                    if (to <= from) return;
+                    var cfg = RAIN[level];
+                    ctx.strokeStyle = isDark() ? 'rgba(198,224,253,1)' : 'rgba(42,82,130,1)';
+                    ctx.lineWidth = cfg.w * wMul;
+                    ctx.globalAlpha = cfg.a * aMul;
+                    ctx.beginPath();
+                    for (var i = from; i < to; i++) {
+                        var d = drops[i];
+                        var dy = d.sp * dt;
+                        d.y += dy;
+                        d.x += dy * sl;
+                        if (d.y >= H || d.x > W + 90 || d.x < -90) {
+                            /* 头碰到屏底就是砸在地上：溅一下，再从顶上重新落。
+                               概率 0.85：以前 0.55 时大雨也只有一半雨丝起水花，
+                               看上去像"雨水凭空消失" */
+                            if (d.y >= H && d.x > -8 && d.x < W + 8 && Math.random() < 0.85) {
+                                spawnSplash(d.x, H, d.dep);
+                            }
+                            place(d, false);
+                            continue;          // 这一帧不画，下一帧它已经在屏幕上方
+                        }
+                        ctx.moveTo(d.x, d.y);
+                        ctx.lineTo(d.x - sl * d.len, d.y - d.len);
+                    }
+                    ctx.stroke();
+                }
+
+                function snowPass(dt, t, sl, from, to, aMul) {
+                    if (to <= from) return;
+                    ctx.fillStyle = isDark() ? 'rgba(238,246,255,1)' : 'rgba(146,176,210,1)';
+                    ctx.globalAlpha = 0.9 * aMul;
+                    for (var i = from; i < to; i++) {
+                        var d = drops[i];
+                        /* 摆动按 depth 分频：近的摆得慢而大，远的几乎笔直下垂 */
+                        var sway = Math.sin(t / (900 + d.dep * 1100) + d.ph) * (0.3 + d.dep * 0.7);
+                        d.y += d.sp * dt;
+                        d.x += sway * dt * 60 + sl * d.sp * dt * 0.55;
+                        if (d.x > W + 34 || d.x < -34) {
+                            place(d, false);
+                            continue;
+                        }
+                        /* 碰到屏底 = 落在雪面上：就地堆一点高度，偶尔留一片停在上面 */
+                        if (d.y > H - d.r) {
+                            pileAdd(d.x);
+                            if (Math.random() < 0.5) {
+                                stuckAdd(d.x, H - pileAt(d.x) - d.r * 0.5, Math.max(1, d.r * 1.05));
+                            }
+                            place(d, false);
+                            continue;
+                        }
+                        ctx.beginPath();
+                        ctx.arc(d.x, d.y, d.r, 0, 6.2832);
+                        ctx.fill();
                     }
                 }
 
@@ -4753,46 +5310,23 @@ self.addEventListener('fetch', function (e) {
                     var dt = lastT ? Math.min(64, t - lastT) / 1000 : 0.016;
                     lastT = t;
                     ctx.clearRect(0, 0, W, H);
-                    if (!drops.length) return;
-                    var i, d, cfg;
+                    if (!drops.length && !splCount) return;
+                    /* 阵风：整体倾角在 ±20% 之间慢慢摆，再叠一层 7% 的短周期抖动。
+                       以前所有雨丝共用一个固定 slant，看着像整张斜纹纸被平移；
+                       有了起伏才有"一阵一阵"的风感。雪同理，只是吃得轻一些 */
+                    var sl = slant * (1 + 0.2 * Math.sin(t / 4300) + 0.07 * Math.sin(t / 1270));
                     if (kind === 'rain') {
-                        cfg = RAIN[level];
-                        ctx.strokeStyle = isDark() ? 'rgba(198,224,253,1)' : 'rgba(42,82,130,1)';
-                        ctx.lineWidth = cfg.w;
-                        ctx.globalAlpha = cfg.a;
-                        ctx.beginPath();
-                        for (i = 0; i < drops.length; i++) {
-                            d = drops[i];
-                            var dy = d.sp * dt;
-                            d.y += dy;
-                            d.x += dy * slant;
-                            // 落到底/被风吹出右边就回到顶部重新下落（不是立刻，错开高度避免整排齐动）
-                            if (d.y - d.len > H || d.x > W + 70) {
-                                d.y = rnd(-90, -8);
-                                d.x = slant > 0 ? rnd(-70, W * 0.92) : rnd(-30, W + 30);
-                                d.sp = rnd(cfg.sp[0], cfg.sp[1]);
-                                d.len = rnd(cfg.len[0], cfg.len[1]);
-                            }
-                            ctx.moveTo(d.x, d.y);
-                            ctx.lineTo(d.x - slant * d.len, d.y - d.len);
-                        }
-                        ctx.stroke();
-                    } else {
-                        ctx.fillStyle = isDark() ? 'rgba(238,246,255,1)' : 'rgba(146,176,210,1)';
-                        ctx.globalAlpha = 0.82;
-                        for (i = 0; i < drops.length; i++) {
-                            d = drops[i];
-                            d.y += d.sp * dt;
-                            d.x += Math.sin(t / 1100 + d.ph) * 0.4 + slant * d.sp * dt;
-                            if (d.y > H + 14 || d.x > W + 34) {
-                                d.y = rnd(-50, -6);
-                                d.x = rnd(-24, W + 24);
-                            }
-                            ctx.beginPath();
-                            ctx.arc(d.x, d.y, d.r, 0, 6.2832);
-                            ctx.fill();
-                        }
+                        rainPass(dt, sl, 0, cut1, 0.42, 0.72);
+                        rainPass(dt, sl, cut1, cut2, 0.74, 0.95);
+                        rainPass(dt, sl, cut2, drops.length, 1, 1.18);
+                    } else if (kind === 'snow') {
+                        snowPass(dt, t, sl, 0, cut1, 0.45);
+                        snowPass(dt, t, sl, cut1, cut2, 0.75);
+                        snowPass(dt, t, sl, cut2, drops.length, 1);
+                        pileMelt(dt);
                     }
+                    drawSplash(dt);
+                    drawPile(dt);
                     ctx.globalAlpha = 1;
                 }
 
@@ -4809,6 +5343,9 @@ self.addEventListener('fetch', function (e) {
                     if (raf) { cancelAnimationFrame(raf); raf = 0; }
                     ctx.clearRect(0, 0, W, H);
                     canvas.style.opacity = '0';
+                    // 画布已经擦干净，池子里的水花也必须归零，否则下次起画会凭空溅一片
+                    for (var i = 0; i < SPL_MAX; i++) spl[i].life = 0;
+                    splCount = 0;
                 }
 
                 /* 现画一条闪电：主干 + 两处短分叉。
@@ -4917,6 +5454,8 @@ self.addEventListener('fetch', function (e) {
 
                     build(false);
                     if (kind !== 'none') start(); else stop();
+                    // 不下了就把积雪清掉：雪线要跟着天气一起走，不能停在画面上
+                    if (kind !== 'snow') pileClear();
 
                     // ---- 日光：只给晴 / 少云，云量和紫外线再各退一档 ----
                     var sun = 0;
@@ -4931,8 +5470,10 @@ self.addEventListener('fetch', function (e) {
                     backEl.style.setProperty('--sun-pct', pct.toFixed(3));
                     if (frontEl) frontEl.style.setProperty('--sun-pct', pct.toFixed(3));
                     // 射线在前景，0.5 是"看得见但不压字"的折中；光晕在后面可以给足
-                    sunEl.style.opacity = (sun * 0.9).toFixed(3);
-                    glowEl.style.opacity = (sun * 0.88).toFixed(3);
+                    sunEl.style.opacity = sun.toFixed(3);
+                    glowEl.style.opacity = (sun * 0.96).toFixed(3);
+                    // 斜射日光：整片暖光带，比单纯的光斑更像"太阳真的照进来"
+                    if (sunWashEl) sunWashEl.style.opacity = (sun * 0.92).toFixed(3);
 
                     // ---- 灰纱：阴天/雨天整体压暗，雷雨最暗 ----
                     var veil = 0;
@@ -4944,16 +5485,28 @@ self.addEventListener('fetch', function (e) {
                     if (isStorm) veil = Math.min(0.34, veil + 0.08);
                     cloudEl.style.opacity = veil.toFixed(3);
 
+                    // ---- 湿地：屏底那层反光，让"雨落在有地面的地方"成立 ----
+                    var wet = 0;
+                    if (kind === 'rain') {
+                        wet = 0.42 + Math.min(0.46, precip * 0.045);
+                        if (isStorm) wet += 0.08;
+                        if (wet > 0.95) wet = 0.95;
+                    }
+                    if (wetEl) wetEl.style.opacity = wet.toFixed(3);
+
                     // ---- 雾：天气码直给，或能见度跌破 5km 顶上来 ----
                     var fog = 0;
-                    if (code === 45) fog = 0.52;
-                    else if (code === 48) fog = 0.68;
+                    if (code === 45) fog = 0.6;
+                    else if (code === 48) fog = 0.78;
                     if (vis < 5000) {
-                        var v = vis < 300 ? 0.95 : vis < 800 ? 0.8 : vis < 1500 ? 0.6 : vis < 2500 ? 0.42 : 0.24;
+                        var v = vis < 300 ? 0.98 : vis < 800 ? 0.86 : vis < 1500 ? 0.68 : vis < 2500 ? 0.48 : 0.28;
                         if (kind === 'rain') v *= 0.55;     // 雨天的低能见度是雨幕，不是雾
                         if (v > fog) fog = v;
                     }
                     fogEl.style.opacity = fog.toFixed(3);
+                    // 整页雾罩 + 卡片上那层浓雾：一前一后，玻璃卡才会被雾"糊住"
+                    if (fogMaskEl) fogMaskEl.style.opacity = (fog * 0.9).toFixed(3);
+                    if (fogFrontEl) fogFrontEl.style.opacity = (fog * 0.62).toFixed(3);
 
                     // ---- 霾：PM2.5 六档，大雨会洗掉大半 ----
                     var haze = 0;
@@ -7408,6 +7961,15 @@ self.addEventListener('fetch', function (e) {
                             });
                         } catch (eFx) { console.warn('天气氛围渲染失败:', eFx); }
 
+                        /* 面板开着的时候，数据一到就重画一次：
+                           自动刷新（10 分钟）、回到当前位置、切城市都会走到这里，
+                           不然面板上的城市名和温度会停在打开那一刻 */
+                        try {
+                            if (weatherSheetOverlay && weatherSheetOverlay.classList.contains('show')) {
+                                renderWeatherSheet();
+                            }
+                        } catch (eRs) { }
+
 
                     } catch (e) {
                         console.warn('天气获取失败:', e);
@@ -7466,6 +8028,62 @@ self.addEventListener('fetch', function (e) {
 
                     // 首帧定位之后开启实时跟随：人走动时路名跟着变（切后台自动暂停）
                     startGeoFollow();
+                }
+
+                /* ------------------------------------------------------------------
+                   一键回到当前位置
+                   ------------------------------------------------------------------
+                   点过城市列表之后 isManualCity 会一直为真：定位跟随停掉，天气、卡片、
+                   以及全页的雨雪雾日光全部锁在那个城市上 —— 这是"特效不跟着当前天气
+                   变"最主要的来源。这里补一个出口，把状态整个复位再重新定位。
+                   ------------------------------------------------------------------ */
+                function backToMyLocation(silent) {
+                    var wasManual = isManualCity;
+                    isManualCity = false;
+                    // 跟随器缓存的上一个点也要清：不清的话「移动不到阈值」就一直不刷新
+                    geoFollow.lat = null;
+                    geoFollow.lon = null;
+                    geoFollow.busy = false;
+                    geoFollow.at = 0;
+                    stopGeoFollow();
+
+                    var btn = document.getElementById('wxSheetLocate');
+                    if (btn) {
+                        btn.classList.add('busy');
+                        clearTimeout(btn._busyT);
+                        btn._busyT = setTimeout(function () { btn.classList.remove('busy'); }, 9000);
+                    }
+                    if (!silent) {
+                        showToastMsg(wasManual ? '回到当前位置 · 定位中…' : '正在重新定位…');
+                    }
+                    locateAndFetchWeather();
+                }
+
+                /* 天气自己会变：人没动、也没点刷新，十分钟也把当前点的天气重拉一次
+                   （全页特效是绑在天气码上的，数据不换，特效就不会换）。
+                   切后台不跑；回前台时如果数据已经旧了，立刻补一次。 */
+                function refreshWeatherNow() {
+                    var full = '';
+                    var el = document.getElementById('weatherLocation');
+                    if (el && el.title) full = String(el.title).replace(/\s*·\s*精度.*$/, '');
+                    fetchWeather(currentLat, currentLon, { short: currentCity, full: full });
+                }
+
+                var wxAutoTid = 0;
+                function startWxAutoRefresh() {
+                    if (wxAutoTid) return;
+                    wxAutoTid = setInterval(function () {
+                        if (document.hidden) return;
+                        refreshWeatherNow();
+                    }, 600000);
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.hidden) return;
+                        var at = (window.__wxData && window.__wxData.at) || 0;
+                        if (Date.now() - at > 240000) {
+                            if (isManualCity) refreshWeatherNow();
+                            else locateAndFetchWeather();
+                        }
+                    });
                 }
 
                 function updateCalendar() {
@@ -7875,7 +8493,9 @@ self.addEventListener('fetch', function (e) {
 
                     var at = d.at ? new Date(d.at) : null;
                     var hhmm = at ? ('0' + at.getHours()).slice(-2) + ':' + ('0' + at.getMinutes()).slice(-2) : '--:--';
-                    html += '<div class="wx-now-meta"><span>更新于 ' + hhmm + '</span>' +
+                    // 数据来源原来单独占底部一行（26px），并进这一行：面板要「一屏放下」，
+                    // 每省一行就多一行的余量，署名也不丢
+                    html += '<div class="wx-now-meta"><span>更新于 ' + hhmm + ' · Open-Meteo</span>' +
                         '<button class="wx-now-refresh" id="wxNowRefresh" type="button">刷新一下</button></div>';
 
                     box.innerHTML = html;
@@ -7913,8 +8533,7 @@ self.addEventListener('fetch', function (e) {
                     }
                     hero.innerHTML =
                         '<div class="ws-main"><span class="ws-temp">' + d.temp + '°</span>' +
-                        '<span class="ws-desc">' + d.desc + '</span>' + hl + '</div>' +
-                        '<div class="ws-city"><i class="fa-solid fa-location-dot"></i>' + (d.city || '') + '</div>';
+                        '<span class="ws-desc">' + d.desc + '</span>' + hl + '</div>';
 
                     renderWxNow();
                     wxSheetShowTab(wxSheetTab);
@@ -7990,6 +8609,15 @@ self.addEventListener('fetch', function (e) {
                     closeWeatherSheet();
                     setTimeout(openCityPicker, 160);
                 });
+                // 一键回到当前位置：丢掉手动选的城市，重新按 GPS 定位
+                document.getElementById('wxSheetLocate').addEventListener('click', function() {
+                    backToMyLocation(false);
+                    // 定位是异步的（高精度最长十几秒），这里先把面板上的城市名标成"定位中"
+                    wxSheetCityName.textContent = '定位中…';
+                    setTimeout(function () {
+                        if (weatherSheetOverlay.classList.contains('show')) renderWeatherSheet();
+                    }, 2200);
+                });
                 weatherSheetOverlay.addEventListener('click', function(e) {
                     if (e.target === weatherSheetOverlay) closeWeatherSheet();
                 });
@@ -8020,6 +8648,12 @@ self.addEventListener('fetch', function (e) {
                 });
 
                 document.getElementById('cityPickerClose').addEventListener('click', closeCityPicker);
+
+                // 城市列表里的同款入口：选了外地之后想回来，不用记得自己住哪
+                document.getElementById('cityLocateRow').addEventListener('click', function() {
+                    closeCityPicker();
+                    setTimeout(function () { backToMyLocation(false); }, 200);
+                });
 
                 cityPickerOverlay.addEventListener('click', function(e) {
                     if (e.target === cityPickerOverlay) closeCityPicker();
@@ -8359,6 +8993,7 @@ self.addEventListener('fetch', function (e) {
                 });
 
                 locateAndFetchWeather();
+                startWxAutoRefresh();
                 updateCalendar();
 
                 /* ------------------------------------------------------------------
