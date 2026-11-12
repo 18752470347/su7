@@ -3029,6 +3029,23 @@ html.dark-mode .top-right .weather-widget::before{
      流动效果只留给下面那行会轮播的座右铭（.line-2）。 */
   animation:none;
   background-position:50% 50%;
+  /* 去闪第二步（§45）：光停掉动画还不够。
+     这张卡是玻璃体（.profile-row 上有 backdrop-filter），
+     安卓 GPU 每帧都要重新抓背景做高斯；这一行又挂着 §06 的
+     filter:drop-shadow，等于每帧再跑一次离屏 filter pass。
+     两个 pass 叠在一起，字形边缘的 alpha 会周期性被重算掉一截，
+     肉眼就是「隔几秒闪几下」。
+     换成 text-shadow：它和文字在同一个绘制层里，不新建 filter pass；
+     再给一个 translateZ(0)，让这一行独占自己的合成层，
+     不再被卡片背景的重采样牵连。 */
+  filter:none;
+  transform:translateZ(0);
+  text-shadow:0 1px 5px rgba(150,100,255,.22);
+}
+html.dark-mode .profile-row .subtitle .line-1{
+  /* §06 的深色规则带 html.dark-mode 前缀，权重比上面高，必须显式压一层 */
+  filter:none;
+  text-shadow:0 0 6px rgba(190,140,255,.40);
 }
 
 /* ============================================================================
@@ -4106,7 +4123,7 @@ html.dark-mode .app-label{
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v33';
+var VERSION = 'su-fa36165-v34';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -7225,7 +7242,10 @@ self.addEventListener('fetch', function (e) {
                 const WEATHER_DESC_MAP = {
                     0: '晴朗', 1: '少云', 2: '多云', 3: '阴天',
                     45: '雾', 48: '霜雾',
-                    51: '小毛毛雨', 53: '毛毛雨', 55: '大毛毛雨',
+                    // WMO 的 51/53/55 是 drizzle 三档。直译「小毛毛雨 / 毛毛雨 / 大毛毛雨」
+                    // 中文里根本没有「大毛毛雨」这种说法，且 55 的雨量上限也只有
+                    // 1.5 mm/h 左右，按小雨报才不误导。并成两档：51/53 毛毛雨，55 小雨。
+                    51: '毛毛雨', 53: '毛毛雨', 55: '小雨',
                     56: '冻毛毛雨', 57: '冻毛毛雨',
                     61: '小雨', 63: '中雨', 65: '大雨',
                     66: '冻雨', 67: '冻雨',
