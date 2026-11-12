@@ -3856,11 +3856,11 @@ html.perf-mid .wxfx-flare i:nth-child(1){filter:blur(26px)}
    ========================================================================== */
 :root{
   --fx-fog-front:rgba(238,243,250,.58);
-  --fx-wet:rgba(170,198,238,.34);
+  --fx-wet:rgba(176,196,222,.30);
 }
 html.dark-mode{
   --fx-fog-front:rgba(150,168,196,.30);
-  --fx-wet:rgba(104,146,206,.30);
+  --fx-wet:rgba(112,140,182,.28);
 }
 
 /* ---- 39.1 晴天：一整片斜射日光 ---- */
@@ -3896,7 +3896,7 @@ html.dark-mode .wxfx-sunwash{
     /* 最底一道亮边：水面把天光反上来的一线，雨花才有"落在水上"的落点 */
     linear-gradient(0deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 6%),
     linear-gradient(180deg,
-      rgba(196,218,246,0) 0%,rgba(186,210,242,.16) 44%,var(--fx-wet) 100%);
+      rgba(198,212,230,0) 0%,rgba(190,208,232,.16) 44%,var(--fx-wet) 100%);
 }
 
 /* ---- 39.3 雾：整页雾罩（卡片后）+ 浓雾层（卡片上） ---- */
@@ -3958,6 +3958,26 @@ html.dark-mode .wx7-locate{background:rgba(255,255,255,.09);color:#A9B4FF}
 html.dark-mode .city-locate-row{background:rgba(255,255,255,.08);color:#A9B4FF}
 html.dark-mode .city-locate-row em{color:#9AA2CC}
 
+/* ==== §40 特效不再被省电模式清零 ====
+   reduce-motion 只是把「一直晃」的东西停下来（雾团漂移、日光扫动），
+   雨雪粒子由 JS 降量到四成继续画 —— 见 wxFx 里的 patScale。 */
+html.reduce-motion .wxfx-fogfront i,
+html.reduce-motion .wxfx-sunwash,
+html.reduce-motion .wxfx-fog i{animation:none}
+html.reduce-motion .wxfx-sunwash{opacity:.7!important}
+
+/* ==== §41 弹层打开时，雨雪要落在最前面 ====
+   天气弹层 / 日历 / 城市选择器都是 z-index:10100 的半透明玻璃，而前景特效层只有 3，
+   一开弹窗，整页的雨雪就被压在玻璃底下了 —— 看着像特效被收走。
+   这里只在弹层打开时把 .wxfx-front 抬到 10150：
+   物理上也说得通 —— 近处的雨打在这块玻璃上，远处的大雾和天光留在玻璃后面（back 层动都不动，
+   正好被 backdrop-filter 糊成一层雾玻璃）。
+   .wxfx 本来就是 pointer-events:none，抬高不会挡住弹层里的点击。
+   用 :has() 而不是给开关函数加类，是为了不碰弹层的现有逻辑。 */
+html:has(.weather-sheet-overlay.show) .wxfx-front,
+html:has(.month-calendar-overlay.show) .wxfx-front,
+html:has(.city-picker-overlay.show) .wxfx-front{z-index:10150}
+
 </style>
     <script>
         (function () {
@@ -4014,7 +4034,7 @@ html.dark-mode .city-locate-row em{color:#9AA2CC}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v24';
+var VERSION = 'su-fa36165-v26';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -4783,9 +4803,14 @@ self.addEventListener('fetch', function (e) {
                （页面照片底纹移除后，这里只剩「暂停/恢复」这一个职责。）
                ================================================================== */
             var uiBusy = 0;
-            function uiPause() {
+            function uiPause(keepFx) {
                 uiBusy++;
-                if (wxFx && wxFx.pause) wxFx.pause();      // 雨/雪/雷一起停，见下面 wxFx
+                /* §41 keepFx：天气弹层 / 日历 / 城市选择器打开时不再停粒子。
+                   这三层是 z-index 10100 的半透明玻璃，canvas 已经被抬到 10150 跑在它上面，
+                   而 backdrop-filter 只模糊自己下面的东西 —— 所以雨雪继续画，
+                   并不会多出一分「整屏模糊重算」的钱。
+                   图集查看器和视频弹窗照旧停（那两个是真的整屏盖住，且底图在变）。 */
+                if (!keepFx && wxFx && wxFx.pause) wxFx.pause();      // 雨/雪/雷一起停，见下面 wxFx
             }
             function uiResume() {
                 if (uiBusy > 0) uiBusy--;
@@ -4912,10 +4937,16 @@ self.addEventListener('fetch', function (e) {
                 try {
                     reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
                 } catch (eM) { }
-                var saveData = false;
-                try { saveData = !!(navigator.connection && navigator.connection.saveData); } catch (eS) { }
-                // 省流量 / 系统要求减少动效：只留静态的雾、霾、光晕，粒子完全不跑
-                var noParticles = reduce || saveData;
+                /* §40 以前这里是 noParticles = reduce || saveData，命中就一个粒子都不画。
+                   两个都不站得住：
+                   - 省流量模式：天气特效不下载任何字节，跟流量无关，却把雨雪全关了
+                   - 减少动态效果：本意是别晃，不是"天气不存在"，一根雨丝都没有会被当成坏了
+                   现在改成按比例减量：reduce 留四成，低端机再打七二折。
+                   安卓省电模式下 saveData 常为 true，这是"外面在下雨、页面却没雨"的头号元凶 */
+                var patScale = reduce ? 0.42 : 1;                       // 粒子数量系数
+                if (reduce) {
+                    try { document.documentElement.classList.add('reduce-motion'); } catch (eRm) { }
+                }
 
                 // 四档雨：数量 / 速度(px/s) / 线长 / 线宽 / 透明度
                 var RAIN = [
@@ -4971,6 +5002,20 @@ self.addEventListener('fetch', function (e) {
 
                 function rnd(a, b) { return a + Math.random() * (b - a); }
                 function isDark() { return document.documentElement.classList.contains('dark-mode'); }
+
+                /* §40 雨色。
+                   雨滴本身是透明的，人眼看到的其实是它折射出来的环境光 —— 所以雨丝不该带明显色相。
+                   以前浅色主题用 rgba(42,82,130) 深藏蓝：饱和度太高，在米白底面上像用蓝笔
+                   画上去的一排斜线；深色主题的 rgba(198,224,253) 又偏荧光蓝，像霓虹灯。
+                   现在收到低饱和的冷灰（浅色）/ 去蓝的冷白（深色）。
+                   水花在浅色底上比雨丝再深一档才看得见 —— 真实溅水就是「暗点 + 高光」，
+                   纯白反而糊在背景里 */
+                var INK_RAIN_L = 'rgba(107,121,140,1)';
+                var INK_RAIN_D = 'rgba(211,225,241,1)';
+                var INK_SPL_L = 'rgba(90,105,126,1)';
+                var INK_SPL_D = 'rgba(228,238,250,1)';
+                function rainInk() { return isDark() ? INK_RAIN_D : INK_RAIN_L; }
+                function splInk() { return isDark() ? INK_SPL_D : INK_SPL_L; }
 
                 function resize() {
                     /* 1.8 而不是 2：雨丝线宽只有 1~1.5px，2 倍和 1.8 倍肉眼分不出来，
@@ -5035,9 +5080,11 @@ self.addEventListener('fetch', function (e) {
 
                 function build(reseed) {
                     var n = 0;
-                    if (!noParticles && kind === 'rain') n = RAIN[level].n;
-                    if (!noParticles && kind === 'snow') n = SNOW[level].n;
+                    if (kind === 'rain') n = Math.round(RAIN[level].n * patScale);
+                    if (kind === 'snow') n = Math.round(SNOW[level].n * patScale);
                     if (isLowEnd) n = Math.round(n * 0.62);
+                    // 兜底：算下来太少就补到看得见的量，省电不等于"今天不下雨"
+                    if (kind !== 'none' && n < 8) n = level >= 3 ? 16 : 9;
                     if (reseed) drops.length = 0;
                     while (drops.length > n) drops.pop();
                     while (drops.length < n) drops.push(newDrop(true));
@@ -5059,7 +5106,8 @@ self.addEventListener('fetch', function (e) {
                         else if (drops[i].dep < 0.7) cut2 = i + 1;
                     }
                     if (cut2 < cut1) cut2 = cut1;
-                    splMax = noParticles ? 0 : (isLowEnd ? 15 : (level >= 3 ? 34 : 22));
+                    splMax = Math.round((isLowEnd ? 15 : (level >= 3 ? 34 : 22)) * patScale);
+                    if (kind === 'rain' && splMax < 6) splMax = 6;       // 溅水是雨天的灵魂，不能省掉
                     if (reseed) splCount = 0;
                 }
 
@@ -5187,14 +5235,15 @@ self.addEventListener('fetch', function (e) {
 
                 function drawSplash(dt) {
                     if (!splCount) return;
-                    ctx.strokeStyle = isDark() ? 'rgba(214,234,255,1)' : 'rgba(38,78,126,1)';
+                    ctx.strokeStyle = splInk();
                     ctx.fillStyle = ctx.strokeStyle;
                     for (var i = 0; i < splMax; i++) {
                         var s = spl[i];
                         if (s.life <= 0) continue;
                         s.life -= dt;
                         if (s.life <= 0) { s.life = 0; splCount--; continue; }
-                        var k = s.life / s.life0;                 // 1 → 0
+                        var k = s.life0 > 0 ? s.life / s.life0 : 0;   // 1 → 0
+                        if (k > 1) k = 1; else if (k < 0) k = 0;      // 双保险：半径不能算成负的
                         var age = 1 - k;
                         /* 砸下去的第一下：一个亮点。只有 0.14 的寿命 ——
                            缺了它，水环是从 1px 直接长出来的，看着像"凭空出现" */
@@ -5246,7 +5295,7 @@ self.addEventListener('fetch', function (e) {
                 function rainPass(dt, sl, from, to, aMul, wMul) {
                     if (to <= from) return;
                     var cfg = RAIN[level];
-                    ctx.strokeStyle = isDark() ? 'rgba(198,224,253,1)' : 'rgba(42,82,130,1)';
+                    ctx.strokeStyle = rainInk();
                     ctx.lineWidth = cfg.w * wMul;
                     ctx.globalAlpha = cfg.a * aMul;
                     ctx.beginPath();
@@ -5308,6 +5357,11 @@ self.addEventListener('fetch', function (e) {
                     if (lastT && t - lastT < 30 &&
                         document.documentElement.classList.contains('perf-mid')) return;
                     var dt = lastT ? Math.min(64, t - lastT) / 1000 : 0.016;
+                    /* §40 时间戳回退（从 bfcache 回来、调试器推帧、系统改时间）时
+                       t - lastT 会是负数，dt 跟着变负 —— 粒子倒着走，水花半径算成
+                       负数，ellipse 抛异常把整帧打断，后面的雨丝雪堆全都不画。
+                       一旦发生就是「雨突然没了」，所以这里必须垫一个下限 */
+                    if (!(dt > 0)) dt = 0.016;
                     lastT = t;
                     ctx.clearRect(0, 0, W, H);
                     if (!drops.length && !splCount) return;
@@ -5403,7 +5457,7 @@ self.addEventListener('fetch', function (e) {
 
                 function scheduleBolts(on) {
                     if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
-                    if (!on || noParticles) return;
+                    if (!on) return;                                     // 雷闪是光效不是粒子，省电不该省它
                     var loop = function () {
                         boltTimer = setTimeout(function () {
                             if (document.hidden) { loop(); return; }
@@ -7796,7 +7850,7 @@ self.addEventListener('fetch', function (e) {
                     try {
                         // 空气质量走另一个域名，和主天气并行拉，不 await：天气该多快还是多快
                         fetchAqi(lat, lon);
-                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code,precipitation,cloud_cover&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7&forecast_hours=26`;
+                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code,precipitation,cloud_cover&minutely_15=precipitation,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7&forecast_hours=26`;
                         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
@@ -7947,10 +8001,45 @@ self.addEventListener('fetch', function (e) {
 
                         // ---- 全页天气氛围：日光 / 雨 / 雪 / 雷电 / 雾 / 霾（§34）----
                         // 放最后：数据都解析完了再一次算完，避免图层先亮后改的闪烁
+                        /* §40 15 分钟粒度前瞻。
+                           current 的 weather_code 是按刻给的，雨已经飘起来了它还写着「阴」；
+                           Open-Meteo 的 current 常比实况慢 15~45 分钟，所以往后看 4 格（1 小时），
+                           命中雨/雪就先把特效开起来。越远的窗雨势按比例收，
+                           观感是「雨正在到」而不是「突然下大」。
+                           没这一步的话，雨得等 current 自己更新，最快也要到下一个整刻 */
+                        let fxCode = code, fxPrecip = Number(cur.precipitation) || 0;
+                        try {
+                            const m15 = data.minutely_15;
+                            if (m15 && m15.time && m15.time.length && m15.weather_code) {
+                                const nowKey = (cur.time || '').slice(0, 16);
+                                let ix = m15.time.indexOf(nowKey);
+                                if (ix < 0) {                       // current 落在网格外：取最后一个不晚于它的窗
+                                    for (let mi = 0; mi < m15.time.length; mi++) {
+                                        if (m15.time[mi].slice(0, 16) <= nowKey) ix = mi; else break;
+                                    }
+                                }
+                                const isWetCode = (c) =>
+                                    (c >= 51 && c <= 67) || (c >= 71 && c <= 77) || (c >= 80 && c <= 86) || c >= 95;
+                                // 提前量 vs 雨势：0 格满额，往后逐格收
+                                const AHEAD = [1, 0.8, 0.55, 0.35];
+                                for (let k = 0; k < AHEAD.length && ix >= 0; k++) {
+                                    const j = ix + k;
+                                    if (j >= m15.time.length) break;
+                                    const c15 = m15.weather_code[j];
+                                    const p15 = Number(m15.precipitation[j]) || 0;
+                                    if (isWetCode(c15) && p15 >= 0.05) {
+                                        // 相邻两格雨只会越来越近，取最靠前的那次命中
+                                        fxCode = c15;
+                                        fxPrecip = p15 * AHEAD[k];
+                                        break;
+                                    }
+                                }
+                            }
+                        } catch (eM15) { }
                         try {
                             wxFx.apply({
-                                code: code,
-                                precip: cur.precipitation,
+                                code: fxCode,
+                                precip: fxPrecip,
                                 isDay: cur.is_day,
                                 vis: vis,
                                 cloud: cur.cloud_cover,
@@ -8359,7 +8448,7 @@ self.addEventListener('fetch', function (e) {
                     if (cityRemoteTimer) { clearTimeout(cityRemoteTimer); cityRemoteTimer = null; }
                     citySearchInput.value = '';
                     renderCityList('');
-                    uiPause();                           // 浮层盖住时冻住图集/头像/天气粒子，别让整屏模糊一直重算
+                    uiPause(true);                       // §41 城市选择器上要留着雨雪（canvas 在玻璃之上，不吃 backdrop 成本）
                     cityPickerOverlay.classList.add('show');
                     setTimeout(function() { citySearchInput.focus(); }, 300);
                 }
@@ -8588,7 +8677,7 @@ self.addEventListener('fetch', function (e) {
                     wxSheetShowTab('now');
                     renderWeatherSheet();
                     // 与日历错开不同的偏移，保证两个面板打开时照片也互不相同
-                    uiPause();
+                    uiPause(true);                       // §41 弹层里也要下雨下雪
                     weatherSheetOverlay.classList.add('show');
                     if (stale) {
                         try {
@@ -8863,7 +8952,7 @@ self.addEventListener('fetch', function (e) {
                     monthCalendarMonth = selectedDate.getMonth();
                     setMcPicking(false);
                     renderMonthCalendar();
-                    uiPause();
+                    uiPause(true);                       // §41 日历弹层里也要下雨下雪
                     monthCalendarOverlay.classList.add('show');
                 }
 
