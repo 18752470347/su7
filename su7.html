@@ -3140,6 +3140,304 @@ html.dark-mode{
   .aqi-pm{font-size:9.5px}
 }
 
+/* ============================================================================
+   33 刘亦菲透明照片背景
+   ----------------------------------------------------------------------------
+   三层各自独立取图：
+     · 页面底图 .lyn-bg      —— 每 5s 换一张，双层交叉淡化
+     · 日历弹层 / 天气弹层   —— 读 --lyn-sheet-bg 变量，索引与主背景错开，
+                                保证打开面板时看到的是另一张照片
+   观感原则：照片只当「底纹」，不当主角。
+     ① 不透明度压到 12% 上下，上下边缘用 mask 淡出，不会在状态栏和底部留硬边
+     ② 深色模式再压一档并降亮度，避免人脸在纯黑底上泛白刺眼
+     ③ 卡片本身是半透明玻璃，照片透过 blur 只剩色块，不干扰读数
+   ========================================================================== */
+.lyn-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  overflow:hidden;contain:strict;
+}
+.lyn-bg-frame{
+  /* 外扩 6px：blur 会在边缘把像素往外吃，不扩的话四周会透出一圈底色 */
+  position:absolute;inset:-6px;
+  background-repeat:no-repeat;
+  background-size:cover;
+  background-position:center 18%;
+  opacity:0;
+  transition:opacity 1.6s var(--ease);
+  will-change:opacity;
+  /* 轻模糊：原图是街景 + 人像，细节（地面砖、街道招牌）在 40% 透明度下
+     会显脏，糊掉之后只剩轮廓和色块，才像"底纹"而不是"贴了张照片" */
+  filter:blur(2px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 13%,#000 74%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 13%,#000 74%,transparent 100%);
+}
+.lyn-bg-frame.on{opacity:var(--lyn-op,.40)}
+html.dark-mode .lyn-bg-frame{filter:blur(2px) brightness(.68) saturate(.9)}
+html.dark-mode .lyn-bg-frame.on{opacity:var(--lyn-op,.30)}
+
+/* ---- 弹层底纹：与页面同款，但换一张图、再淡一点 ---- */
+.month-calendar-panel,
+.weather-sheet-overlay .weather-sheet-panel,
+.city-picker-panel{
+  isolation:isolate;
+}
+.month-calendar-panel::after,
+.weather-sheet-overlay .weather-sheet-panel::after,
+.city-picker-panel::after{
+  content:'';position:absolute;inset:-12px;z-index:-1;pointer-events:none;
+  background-image:var(--lyn-sheet-bg,none);
+  background-size:cover;
+  background-position:center 14%;
+  background-repeat:no-repeat;
+  opacity:var(--lyn-sheet-op,.22);
+  border-radius:inherit;
+  /* 弹层里是密排的数字，底纹必须比页面更"糊"：7px 之后只剩明暗渐变，
+     日历的 16px 数字不会和背景纹理抢注意力 */
+  filter:blur(4px);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 68%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 0%,#000 68%,transparent 100%);
+}
+html.dark-mode .month-calendar-panel::after,
+html.dark-mode .weather-sheet-overlay .weather-sheet-panel::after,
+html.dark-mode .city-picker-panel::after{
+  filter:blur(4px) brightness(.7) saturate(.9);
+  opacity:var(--lyn-sheet-op,.16);
+}
+
+/* ---- 月历：本月法定节假日 ---- */
+.mc-holidays{
+  margin-top:14px;padding:10px 12px;border-radius:14px;
+  background:var(--aqi-bg);
+  box-shadow:inset 0 0 0 1px var(--card-ring),inset 0 0 0 .5px var(--card-line);
+}
+.mc-hol-title{
+  font-size:12px;font-weight:700;color:var(--wxc-label);
+  margin-bottom:6px;letter-spacing:.2px;
+}
+.mc-hol-row{
+  display:flex;align-items:center;gap:8px;padding:6px 0;min-width:0;
+}
+.mc-hol-row + .mc-hol-row{border-top:.5px solid var(--sep)}
+.mc-hol-name{font-size:13px;font-weight:700;color:var(--wxc-value);flex:0 0 auto}
+.mc-hol-range{
+  font-size:11.5px;font-weight:500;color:var(--wxc-meta);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;min-width:0;
+}
+.mc-hol-days{
+  margin-left:auto;flex:0 0 auto;
+  font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:7px;
+}
+.mc-hol-days.rest{color:#17915C;background:rgba(52,199,89,.14)}
+.mc-hol-days.work{color:#C2691F;background:rgba(255,149,0,.16)}
+html.dark-mode .mc-hol-days.rest{color:#4FE08D;background:rgba(48,209,88,.20)}
+html.dark-mode .mc-hol-days.work{color:#FFB65C;background:rgba(255,159,10,.20)}
+.mc-hol-empty{font-size:12px;font-weight:500;color:var(--wxc-unit);padding:2px 0}
+
+/* ============================================================================
+   34 天气氛围层（实时天气 → 整页观感）
+   ----------------------------------------------------------------------------
+   目标：不看天气卡，也知道窗外什么天。
+     · 晴      顶部一束斜射日光，光带位置跟着当日日照进度走
+     · 雨      全屏雨丝，降水量(mm/h)决定密度/速度/长度，风速决定倾角
+     · 雷雨    雨 + 随机闪电（整屏爆白 + 一道折线雷）
+     · 雪      慢速飘落的雪粒（和雨同一套粒子引擎）
+     · 雾/大雾 三层缓慢横移的雾团，能见度越低越浓
+     · 霾      PM2.5 越高，下半屏多一层土黄薄纱
+     · 阴/多云 一层灰纱，把晴天的"亮"整体退一档
+   分层（都 pointer-events:none，不影响任何点击）：
+     #wxFxBack  z-index:1 —— 光、雾、霾、灰纱，压在卡片后面，只透过玻璃显色
+     #wxFxFront z-index:3 —— 雨丝/雪粒/闪电，浮在卡片上面
+   雨丝放卡片之上是刻意的：整屏当一扇窗，"窗玻璃上有雨"比"卡片背后下雨"更成立；
+   线宽 1.2px、透明度 0.3 上下，读数不受影响。
+   ========================================================================== */
+:root{
+  /* 暖光罩的三段色 + 背光压暗色，都走 soft-light */
+  --fx-glow-1:rgba(255,178,74,.92);
+  --fx-glow-2:rgba(255,202,134,.42);
+  --fx-glow-3:rgba(255,206,150,.30);
+  --fx-shade:rgba(46,34,66,.17);
+  --fx-rain:rgba(46,86,134,.85);
+  --fx-fog:rgba(232,238,246,.62);
+  --fx-smog:rgba(206,186,144,.46);
+  --fx-haze:rgba(198,172,116,.32);
+  --fx-haze-2:rgba(206,176,112,.52);
+  --fx-cloud:rgba(96,112,138,.16);
+  --fx-bolt:#EAF2FF;
+}
+html.dark-mode{
+  --fx-glow-1:rgba(255,188,98,.62);
+  --fx-glow-2:rgba(255,204,148,.24);
+  --fx-glow-3:rgba(255,200,148,.14);
+  --fx-shade:rgba(6,4,14,.26);
+  --fx-rain:rgba(192,218,250,.90);
+  --fx-fog:rgba(158,176,200,.34);
+  --fx-smog:rgba(138,118,80,.34);
+  --fx-haze:rgba(148,118,58,.34);
+  --fx-haze-2:rgba(156,124,54,.58);
+  --fx-cloud:rgba(6,10,18,.24);
+  --fx-bolt:#DDE9FF;
+}
+
+.wxfx{position:fixed;inset:0;pointer-events:none;overflow:hidden;contain:strict}
+.wxfx-back{z-index:1}
+.wxfx-front{z-index:3}
+
+/* ---- 日光 ----
+   .wxfx-glow （back） 暖色天光：压在卡片后面，透过玻璃把整块屏焐热
+   .wxfx-flare（front）镜头进光：一圈柔光 + 几个错落的鬼影光斑
+
+   为什么不是"射线/光柱"：这页的背景是一张明亮、粉紫、虚化的照片，光柱在亮底上
+   要么看不见（screen 把金色冲成近白），要么调亮到可见就变成等宽直条贴纸。
+   光柱成立的前提是空气里有雾或尘，这里没有。而"对着太阳时镜头进光"是人眼最熟悉
+   的强光语言：一圈弥散光 + 沿光轴排列的几个虚化光斑，边缘全糊，永远不像贴图。
+   光斑位置跟着 --sun-pct（日出→日落进度）走，正午在中间，傍晚偏到一侧 */
+.wxfx-flare{
+  position:absolute;inset:0;
+  opacity:0;transition:opacity 1.9s var(--ease);
+  /* overlay 而不是 screen：屏幕底色已经接近 220，screen 提亮到 255 只差 35 级，
+     肉眼几乎看不出；overlay 是把亮部再往上推、暗部往下压，才有"光打下来"的对比。
+     深色模式要换回 screen —— overlay 在暗底上是压暗，暖光会变成一团脏灰 */
+  mix-blend-mode:overlay;
+}
+html.dark-mode .wxfx-flare{mix-blend-mode:screen}
+.wxfx-flare i{
+  position:absolute;border-radius:50%;
+  width:var(--d);height:var(--d);
+  left:var(--lx);top:var(--ly);
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 50% 50%,
+      var(--c1) 0%,var(--c2) 42%,transparent 74%);
+  filter:blur(var(--b,8px));
+  opacity:var(--o,.5);
+}
+/* 只留两个光斑。冷色鬼影在粉底上会翻出青紫边，像一颗肥皂泡，
+   试过直接删掉 —— 镜头眩光里最不起眼的那种才最真 */
+.wxfx-flare i:nth-child(1){
+  --d:118vw;--b:34px;--o:.85;
+  --lx:calc(6% + var(--sun-pct,.62) * 86%);
+  --ly:-19%;
+  --c1:rgba(255,248,228,.85);--c2:rgba(255,224,172,.24)}
+.wxfx-flare i:nth-child(2){
+  --d:16vw;--b:7px;--o:.34;
+  --lx:calc(2% + var(--sun-pct,.62) * 86%);
+  --ly:27%;
+  --c1:rgba(255,240,208,.62);--c2:rgba(255,206,140,.18)}
+.wxfx-flare i:nth-child(3),
+.wxfx-flare i:nth-child(4),
+.wxfx-flare i:nth-child(5){display:none}
+
+/* 暖光罩：压在照片上做色温变化。
+   这是"晴天"真正能被看见的部分 —— 加白光在亮底上等于没加（255 封顶），
+   但把色温往暖推，人眼立刻读到"阳光"。所以这一层走 soft-light 保色相，
+   而不是 screen 的纯提亮 */
+.wxfx-glow{
+  position:absolute;inset:0;
+  opacity:0;transition:opacity 1.9s var(--ease);
+  mix-blend-mode:soft-light;
+  background:
+    /* 受光区：上面那团暖光，越靠光源越浓 */
+    radial-gradient(58% 46% at calc(4% + var(--sun-pct,.62) * 90%) -10%,
+      var(--fx-glow-1) 0%,var(--fx-glow-2) 46%,transparent 78%),
+    /* 背光区：底部沉一点。光必须有对比才成立，全屏一样亮只会像加了个滤镜 */
+    linear-gradient(180deg,transparent 34%,var(--fx-shade) 74%,var(--fx-shade) 100%),
+    linear-gradient(168deg,var(--fx-glow-3) 0%,transparent 66%);
+}
+
+/* ---- 灰纱（阴天/雨天压暗） ---- */
+.wxfx-cloud{
+  position:absolute;inset:0;opacity:0;transition:opacity 1.8s var(--ease);
+  background:var(--fx-cloud);
+}
+
+/* ---- 雾：三层不同速度的横向漂移 ---- */
+.wxfx-fog{position:absolute;inset:0;opacity:0;transition:opacity 2.2s var(--ease)}
+.wxfx-fog i{
+  position:absolute;left:-35%;width:170%;height:46vh;border-radius:50%;
+  background:radial-gradient(closest-side,var(--fx-fog) 0%,transparent 78%);
+  filter:blur(22px);will-change:transform;
+}
+.wxfx-fog i:nth-child(1){top:-2%;animation:fxfFog 46s ease-in-out infinite}
+.wxfx-fog i:nth-child(2){top:28%;opacity:.82;animation:fxfFog 64s ease-in-out infinite reverse}
+.wxfx-fog i:nth-child(3){top:58%;opacity:.6;animation:fxfFog 84s ease-in-out infinite}
+@keyframes fxfFog{
+  0%{transform:translate3d(-7%,0,0) scale(1)}
+  50%{transform:translate3d(7%,1.4%,0) scale(1.08)}
+  100%{transform:translate3d(-7%,0,0) scale(1)}
+}
+
+/* ---- 霾：下半屏土黄薄纱，越往底部越明显 ---- */
+.wxfx-haze{
+  position:absolute;inset:0;opacity:0;transition:opacity 2.4s var(--ease);
+  background:linear-gradient(180deg,transparent 10%,var(--fx-haze) 48%,var(--fx-haze-2) 100%);
+}
+
+/* ---- 霾团：两层低空飘的土黄尘雾，比单纯一层色纱更像"霾" ---- */
+.wxfx-smog{position:absolute;inset:0;opacity:0;transition:opacity 2.4s var(--ease)}
+.wxfx-smog i{
+  position:absolute;left:-40%;width:180%;height:52vh;border-radius:50%;
+  background:radial-gradient(closest-side,var(--fx-smog) 0%,transparent 76%);
+  filter:blur(26px);will-change:transform;
+}
+.wxfx-smog i:nth-child(1){top:34%;animation:fxfFog 74s ease-in-out infinite}
+.wxfx-smog i:nth-child(2){top:64%;opacity:.85;animation:fxfFog 96s ease-in-out infinite reverse}
+
+/* ---- 雨/雪粒子 ---- */
+.wxfx-canvas{
+  position:absolute;inset:0;width:100%;height:100%;display:block;
+  opacity:0;transition:opacity .7s linear;
+}
+
+/* ---- 闪电 ----
+   早先用 clip-path 切一个固定多边形当雷，问题很明显：边缘像剪纸、宽度均匀、
+   每 4~11 秒重放同一道折线，看两眼就穿帮。改成 SVG 折线，每次由 JS 现画：
+   主干逐段随机偏折（越往下越直）+ 两处短分叉 + 一层模糊辉光。
+   闪白也不再是整屏纯白，而是从落雷位置放射的不均匀亮区 */
+.wxfx-flash{
+  position:absolute;inset:0;opacity:0;
+  background:radial-gradient(132% 82% at var(--flash-x,62%) -8%,
+      #FFF 0%,rgba(255,255,255,.80) 32%,rgba(255,255,255,.38) 62%,rgba(255,255,255,0) 88%);
+}
+html.dark-mode .wxfx-flash{
+  background:radial-gradient(132% 82% at var(--flash-x,62%) -8%,
+      #F2F7FF 0%,rgba(228,239,255,.72) 32%,rgba(198,218,255,.30) 62%,rgba(198,218,255,0) 88%);
+}
+.wxfx-flash.on{animation:fxfFlash .8s ease-out both}
+@keyframes fxfFlash{
+  0%{opacity:0}3%{opacity:.32}6%{opacity:.04}11%{opacity:.24}
+  18%{opacity:0}23%{opacity:.13}29%{opacity:0}100%{opacity:0}
+}
+
+.wxfx-bolt{
+  position:absolute;top:var(--bolt-top,2%);left:var(--bolt-left,58%);
+  width:var(--bolt-w,140px);height:var(--bolt-h,280px);
+  overflow:visible;opacity:0;
+  /* 三层光晕：近处白、中段淡蓝、远处一片蓝紫。只用 stroke+blur 试过，
+     边缘会糊成一团灰；drop-shadow 按轮廓扩散，才像"发光的线" */
+  filter:drop-shadow(0 0 5px rgba(238,246,255,.95))
+         drop-shadow(0 0 18px rgba(168,204,255,.75))
+         drop-shadow(0 0 44px rgba(120,168,255,.45));
+}
+.wxfx-bolt path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.bolt-halo{stroke:rgba(176,210,255,.42);stroke-width:15;filter:blur(10px)}
+.bolt-core{stroke:url(#boltGrad);stroke-width:3.8}
+.bolt-fork{stroke:url(#boltGrad);stroke-width:1.7;opacity:.85}
+.wxfx-bolt.on{animation:fxfBolt .52s ease-out both}
+@keyframes fxfBolt{
+  0%{opacity:0}3%{opacity:1}6%{opacity:.22}10%{opacity:.96}
+  19%{opacity:.12}25%{opacity:.72}40%{opacity:0}100%{opacity:0}
+}
+
+/* 低端机：光效保留但不动（位移动画会持续重绘大图层） */
+html.low-perf .wxfx-fog i,
+html.low-perf .wxfx-smog i{animation:none}
+
+/* 系统要求减少动效：只留静态的雾/霾/光罩，飘动和雷电全停 */
+@media (prefers-reduced-motion:reduce){
+  .wxfx-fog i{animation:none!important}
+  .wxfx-flash.on,.wxfx-bolt.on{animation:none!important;opacity:0!important}
+}
+
 </style>
     <script>
         (function () {
@@ -3147,7 +3445,13 @@ html.dark-mode{
                 var k = 'plate_theme_mode';
                 var saved = localStorage.getItem(k);
                 var sys = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var dark = saved ? (saved === 'dark') : !!sys;
+                // 三态：'light' / 'dark' / 'auto'（缺省即 auto）。
+                // auto 在这里只能先按系统偏好上色 —— 日出日落数据是异步来的，
+                // 主脚本拿到 window.__wxData.now.sunrise 后会立刻校正一次，不会久等。
+                var dark;
+                if (saved === 'dark') dark = true;
+                else if (saved === 'light') dark = false;
+                else dark = !!sys;
                 var h = document.documentElement;
                 if (dark) h.classList.add('dark-mode');
                 var m = document.querySelector('meta[name="theme-color"]');
@@ -3176,7 +3480,8 @@ html.dark-mode{
                 var handler = function() {
                     try {
                         var saved = localStorage.getItem('plate_theme_mode');
-                        if (saved) return;
+                        // 手动锁定过 light/dark 就不再跟随系统；auto 时可以跟，作为没有日出日落数据时的兜底
+                        if (saved === 'light' || saved === 'dark') return;
                         var h = document.documentElement;
                         if (mq.matches) h.classList.add('dark-mode');
                         else h.classList.remove('dark-mode');
@@ -3190,7 +3495,7 @@ html.dark-mode{
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v13';
+var VERSION = 'su-fa36165-v14';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -3267,6 +3572,41 @@ self.addEventListener('fetch', function (e) {
 </script>
 </head>
 <body>
+
+    <!-- 页面底纹：刘亦菲照片，双层交替交叉淡化，每 5s 换一张（JS 见 §33） -->
+    <div class="lyn-bg" id="lynBgPage" aria-hidden="true">
+        <div class="lyn-bg-frame"></div>
+        <div class="lyn-bg-frame"></div>
+    </div>
+
+    <!-- 天气氛围：日光 / 雨丝 / 雪 / 雷电 / 雾 / 霾（样式见 §34，JS 见 §34）
+         两层分开：back 在卡片后（透玻璃显色），front 在卡片上（雨滴在"窗玻璃"上） -->
+    <div class="wxfx wxfx-back" id="wxFxBack" aria-hidden="true">
+        <div class="wxfx-glow" id="wxFxGlow"></div>
+        <div class="wxfx-cloud" id="wxFxCloud"></div>
+        <div class="wxfx-fog" id="wxFxFog"><i></i><i></i><i></i></div>
+
+    </div>
+    <div class="wxfx wxfx-front" id="wxFxFront" aria-hidden="true">
+        <div class="wxfx-smog" id="wxFxSmog"><i></i><i></i></div>
+        <div class="wxfx-haze" id="wxFxHaze"></div>
+        <div class="wxfx-flare" id="wxFxSun"><i></i><i></i><i></i><i></i><i></i></div>
+        <canvas class="wxfx-canvas" id="wxFxCanvas"></canvas>
+        <svg class="wxfx-bolt" id="wxFxBolt" viewBox="0 0 200 400" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+            <defs>
+                <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+                    <stop offset=".38" stop-color="#F4F9FF" stop-opacity=".98"/>
+                    <stop offset=".7" stop-color="#CFE0FF" stop-opacity=".72"/>
+                    <stop offset="1" stop-color="#B9D0FF" stop-opacity=".12"/>
+                </linearGradient>
+            </defs>
+            <path class="bolt-halo" id="wxFxBoltHalo"></path>
+            <path class="bolt-core" id="wxFxBoltCore"></path>
+            <path class="bolt-fork" id="wxFxBoltFork"></path>
+        </svg>
+        <div class="wxfx-flash" id="wxFxFlash"></div>
+    </div>
 
 
     <div class="toast" id="toast">复制成功</div>
@@ -3362,6 +3702,8 @@ self.addEventListener('fetch', function (e) {
                 <span class="weekend">六</span>
             </div>
             <div class="month-calendar-days" id="monthCalendarDays"></div>
+            <!-- 本月法定节假日：合并连续日期显示区间，由 renderMcHolidays 填充 -->
+            <div class="mc-holidays" id="mcHolidays"></div>
             <div class="month-calendar-legend">
                 <span><i class="dot rest"></i>法定节假日</span>
                 <span><i class="dot work"></i>调休上班</span>
@@ -3907,6 +4249,502 @@ self.addEventListener('fetch', function (e) {
                格式 "x,y" = object-position 的百分比。新增图片时若不加项，
                会退回 CSS 里的默认焦点 50% 30%（人像常见构图）。
                ------------------------------------------------------------------ */
+            /* ==================================================================
+               刘亦菲照片底纹（样式见 §33）
+               ------------------------------------------------------------------
+               图片直接复用顶栏图片卡的 slideImages 池（51 张原图直链），
+               走 thumbOf 缩到 820 宽 webp —— 原图 2~4MB，一张 12% 透明度的
+               底纹没必要拉原图，缩略图 80~120KB 就够铺满 390×880。
+
+               轮换用两层 div 交替：下一张先 new Image 预加载，onload 之后才换
+               background 并加 .on，旧层同时淡出 —— 两段 transition 重叠，
+               中间不会出现白帧。
+
+               三个取图位（页面 / 日历 / 天气）各自独立索引：打开面板时反查
+               主背景当前那张，撞上就顺延，保证"打开的面板里一定是另一张照片"。
+               ================================================================== */
+            var LYN_POOL = (typeof slideImages !== 'undefined' ? slideImages : []).filter(Boolean);
+            var LYN_STEP = 5000;
+
+            function lynUrl(i, w) {
+                if (!LYN_POOL.length) return '';
+                var n = LYN_POOL.length;
+                var k = ((i % n) + n) % n;
+                return thumbOf(LYN_POOL[k], w || 820);
+            }
+
+            function createLynRotator(el, startIdx, opts) {
+                if (!el || !LYN_POOL.length) return null;
+                var frames = el.querySelectorAll('.lyn-bg-frame');
+                if (frames.length < 2) return null;
+                opts = opts || {};
+
+                var idx = startIdx || 0;
+                var cur = 0;          // 当前正在显示的那一层
+                var timer = null;
+
+                function paint(slot, i, cb) {
+                    var url = lynUrl(i, opts.w);
+                    if (!url) { cb(false); return; }
+                    var img = new Image();
+                    var settled = false;
+                    var guard = setTimeout(function () {
+                        if (settled) return;
+                        settled = true;
+                        cb(false);          // 8s 还没到，这一张放弃，等下一轮
+                    }, 8000);
+                    img.onload = function () {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(guard);
+                        frames[slot].style.backgroundImage = 'url("' + url + '")';
+                        cb(true);
+                    };
+                    img.onerror = function () {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(guard);
+                        cb(false);
+                    };
+                    img.src = url;
+                }
+
+                function show(i, first) {
+                    var slot = first ? 0 : 1 - cur;
+                    paint(slot, i, function (ok) {
+                        if (!ok) return;
+                        frames[slot].classList.add('on');
+                        if (!first) frames[cur].classList.remove('on');
+                        cur = slot;
+                    });
+                }
+
+                function tick() {
+                    if (document.hidden) return;
+                    idx = (idx + 1) % LYN_POOL.length;
+                    show(idx, false);
+                }
+
+                show(idx, true);
+                return {
+                    start: function (ms) {
+                        this.stop();
+                        timer = setInterval(tick, ms || LYN_STEP);
+                    },
+                    stop: function () {
+                        if (timer) { clearInterval(timer); timer = null; }
+                    },
+                    current: function () { return idx; },
+                    advance: function (d) {
+                        idx = (idx + (d || 1)) % LYN_POOL.length;
+                        show(idx, false);
+                    }
+                };
+            }
+
+            /* 弹层底纹：索引从主背景当前这张往后错开，避免"打开面板还是同一张脸" */
+            function setLynSheet(el, offset) {
+                if (!el || !LYN_POOL.length) return;
+                var base = lynPage ? lynPage.current() : 0;
+                el.style.setProperty('--lyn-sheet-bg', 'url("' + lynUrl(base + offset, 760) + '")');
+            }
+
+            var lynPage = null;
+
+            function initLynBgs() {
+                if (!LYN_POOL.length) return;
+                lynPage = createLynRotator(document.getElementById('lynBgPage'), 0, { w: 820 });
+                if (!lynPage) return;
+
+                // 省流量模式 / 系统要求减少动效时不轮换，只留一张静态底纹：
+                // 5s 一张 800 宽的图，一直开着一小时就是几十 MB
+                var still = false;
+                try {
+                    var nc = navigator.connection;
+                    if (nc && nc.saveData) still = true;
+                } catch (e) {}
+                if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) still = true;
+
+                // 低端机把轮换放慢到 15s：每 5s 换一张 800 宽大图 + 全屏 blur，
+                // 对中低端安卓是一次持续的重绘压力，放慢比直接关掉观感损失更小
+                var slowPerf = document.documentElement.classList.contains('low-perf');
+                if (!still) lynPage.start(slowPerf ? 15000 : LYN_STEP);
+
+                // 弹层那两张延后 6s 预载，避开首屏带宽
+                setTimeout(function () {
+                    try {
+                        var a = new Image(); a.src = lynUrl(11, 760);
+                        var b = new Image(); b.src = lynUrl(29, 760);
+                    } catch (e) {}
+                }, 6000);
+            }
+
+            initLynBgs();
+
+            /* ==================================================================
+               天气氛围层（样式见 §34）
+               ------------------------------------------------------------------
+               输入：weather_code / 当前降水量(mm/h) / 风速 / 能见度 / 云量 /
+                     是否白天 / 当日日照进度 / PM2.5
+               输出：整页日光、雨丝、雪粒、雾、霾、闪电
+
+               雨量 → 雨势：Open-Meteo 的 current.precipitation 是「过去一小时
+               的毫米数」，正好等于 mm/h，直接按国内雨量口径分四档：
+                 <0.6 毛毛雨 · <2.5 小雨 · <8 中雨 · ≥8 大雨
+               密度和下落速度必须一起涨 —— 只涨密度看起来像"贴图在动"，
+               雨速也涨才有"雨变大了"的重量感。
+
+               粒子走 canvas 而不是 DOM：200 条雨丝做成 DOM 就是 200 个重绘层，
+               中低端安卓会直接掉帧；canvas 一帧只清一次屏、一次 stroke 画完。
+               ================================================================== */
+            var wxFx = (function () {
+                var canvas = document.getElementById('wxFxCanvas');
+                var sunEl = document.getElementById('wxFxSun');
+                var glowEl = document.getElementById('wxFxGlow');
+                var frontEl = document.getElementById('wxFxFront');
+                var cloudEl = document.getElementById('wxFxCloud');
+                var fogEl = document.getElementById('wxFxFog');
+                var hazeEl = document.getElementById('wxFxHaze');
+                var smogEl = document.getElementById('wxFxSmog');
+                var flashEl = document.getElementById('wxFxFlash');
+                var boltEl = document.getElementById('wxFxBolt');
+                var boltCoreEl = document.getElementById('wxFxBoltCore');
+                var boltHaloEl = document.getElementById('wxFxBoltHalo');
+                var boltForkEl = document.getElementById('wxFxBoltFork');
+                var backEl = document.getElementById('wxFxBack');
+                var noop = { apply: function () { }, refresh: function () { } };
+                if (!canvas || !canvas.getContext || !backEl || !sunEl) return noop;
+
+                var ctx = canvas.getContext('2d');
+                var isLowEnd = document.documentElement.classList.contains('low-perf');
+                var reduce = false;
+                try {
+                    reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+                } catch (eM) { }
+                var saveData = false;
+                try { saveData = !!(navigator.connection && navigator.connection.saveData); } catch (eS) { }
+                // 省流量 / 系统要求减少动效：只留静态的雾、霾、光晕，粒子完全不跑
+                var noParticles = reduce || saveData;
+
+                // 四档雨：数量 / 速度(px/s) / 线长 / 线宽 / 透明度
+                var RAIN = [
+                    { n: 0, sp: [0, 0], len: [0, 0], w: 1, a: 0 },
+                    { n: 38, sp: [520, 700], len: [10, 15], w: 1, a: .26 },
+                    { n: 84, sp: [680, 900], len: [13, 19], w: 1.15, a: .34 },
+                    { n: 142, sp: [880, 1140], len: [17, 26], w: 1.3, a: .44 },
+                    { n: 205, sp: [1080, 1440], len: [22, 34], w: 1.45, a: .52 }
+                ];
+                var SNOW = [
+                    { n: 0, sp: [0, 0] },
+                    { n: 55, sp: [42, 78] },
+                    { n: 95, sp: [50, 92] },
+                    { n: 145, sp: [58, 105] },
+                    { n: 190, sp: [64, 118] }
+                ];
+
+                var kind = 'none', level = 0, slant = 0.12;
+                var drops = [], W = 0, H = 0, dpr = 1;
+                var raf = 0, lastT = 0, started = false;
+                var boltTimer = 0, lastInput = null;
+
+                function rnd(a, b) { return a + Math.random() * (b - a); }
+                function isDark() { return document.documentElement.classList.contains('dark-mode'); }
+
+                function resize() {
+                    dpr = Math.min(2, window.devicePixelRatio || 1);
+                    W = canvas.clientWidth || window.innerWidth;
+                    H = canvas.clientHeight || window.innerHeight;
+                    canvas.width = Math.max(1, Math.round(W * dpr));
+                    canvas.height = Math.max(1, Math.round(H * dpr));
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                    ctx.lineCap = 'round';
+                    build(true);
+                }
+
+                function newDrop(anywhere) {
+                    var d = {
+                        x: rnd(-40, W + 40),
+                        y: anywhere ? rnd(-H, H) : rnd(-70, -6),
+                        sp: 0, len: 0,
+                        r: rnd(0.9, 2.2),
+                        ph: rnd(0, Math.PI * 2)
+                    };
+                    var tb = kind === 'rain' ? RAIN[level] : SNOW[level];
+                    d.sp = rnd(tb.sp[0], tb.sp[1]);
+                    if (kind === 'rain') d.len = rnd(RAIN[level].len[0], RAIN[level].len[1]);
+                    return d;
+                }
+
+                function build(reseed) {
+                    var n = 0;
+                    if (!noParticles && kind === 'rain') n = RAIN[level].n;
+                    if (!noParticles && kind === 'snow') n = SNOW[level].n;
+                    if (isLowEnd) n = Math.round(n * 0.62);
+                    if (reseed) drops.length = 0;
+                    while (drops.length > n) drops.pop();
+                    while (drops.length < n) drops.push(newDrop(true));
+                    // 档位变了：已有粒子重新分配速度/线长，雨势变化才有连续感
+                    for (var i = 0; i < drops.length; i++) {
+                        var d = drops[i];
+                        var tb = kind === 'rain' ? RAIN[level] : SNOW[level];
+                        d.sp = rnd(tb.sp[0], tb.sp[1]);
+                        if (kind === 'rain') d.len = rnd(RAIN[level].len[0], RAIN[level].len[1]);
+                    }
+                }
+
+                function frame(t) {
+                    raf = requestAnimationFrame(frame);
+                    var dt = lastT ? Math.min(64, t - lastT) / 1000 : 0.016;
+                    lastT = t;
+                    ctx.clearRect(0, 0, W, H);
+                    if (!drops.length) return;
+                    var i, d, cfg;
+                    if (kind === 'rain') {
+                        cfg = RAIN[level];
+                        ctx.strokeStyle = isDark() ? 'rgba(198,224,253,1)' : 'rgba(42,82,130,1)';
+                        ctx.lineWidth = cfg.w;
+                        ctx.globalAlpha = cfg.a;
+                        ctx.beginPath();
+                        for (i = 0; i < drops.length; i++) {
+                            d = drops[i];
+                            var dy = d.sp * dt;
+                            d.y += dy;
+                            d.x += dy * slant;
+                            // 落到底/被风吹出右边就回到顶部重新下落（不是立刻，错开高度避免整排齐动）
+                            if (d.y - d.len > H || d.x > W + 70) {
+                                d.y = rnd(-90, -8);
+                                d.x = slant > 0 ? rnd(-70, W * 0.92) : rnd(-30, W + 30);
+                                d.sp = rnd(cfg.sp[0], cfg.sp[1]);
+                                d.len = rnd(cfg.len[0], cfg.len[1]);
+                            }
+                            ctx.moveTo(d.x, d.y);
+                            ctx.lineTo(d.x - slant * d.len, d.y - d.len);
+                        }
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = isDark() ? 'rgba(238,246,255,1)' : 'rgba(146,176,210,1)';
+                        ctx.globalAlpha = 0.82;
+                        for (i = 0; i < drops.length; i++) {
+                            d = drops[i];
+                            d.y += d.sp * dt;
+                            d.x += Math.sin(t / 1100 + d.ph) * 0.4 + slant * d.sp * dt;
+                            if (d.y > H + 14 || d.x > W + 34) {
+                                d.y = rnd(-50, -6);
+                                d.x = rnd(-24, W + 24);
+                            }
+                            ctx.beginPath();
+                            ctx.arc(d.x, d.y, d.r, 0, 6.2832);
+                            ctx.fill();
+                        }
+                    }
+                    ctx.globalAlpha = 1;
+                }
+
+                function start() {
+                    if (started || !drops.length || document.hidden) return;
+                    started = true;
+                    lastT = 0;
+                    canvas.style.opacity = '1';
+                    raf = requestAnimationFrame(frame);
+                }
+
+                function stop() {
+                    started = false;
+                    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+                    ctx.clearRect(0, 0, W, H);
+                    canvas.style.opacity = '0';
+                }
+
+                /* 现画一条闪电：主干 + 两处短分叉。
+                   形状绝不能固定 —— 每 4~11 秒重放同一道折线，看两遍就假了 */
+                function buildBoltPath() {
+                    var H = 400, segs = 11, x = rnd(80, 120);
+                    var pts = [[x, 0]], main = 'M' + x.toFixed(1) + ' 0';
+                    for (var i = 1; i <= segs; i++) {
+                        // 越往下偏折越小：落地前那道弧会收紧
+                        var amp = i <= 3 ? 24 : i <= 7 ? 16 : 8;
+                        x += rnd(-amp, amp);
+                        x = Math.max(22, Math.min(178, x));
+                        main += ' L' + x.toFixed(1) + ' ' + (H / segs * i).toFixed(1);
+                        pts.push([x, H / segs * i]);
+                    }
+                    var fork = '';
+                    [3, 6].forEach(function (idx) {
+                        var p = pts[idx], fx = p[0], fy = p[1];
+                        var dir = Math.random() < 0.5 ? -1 : 1;
+                        var fd = 'M' + fx.toFixed(1) + ' ' + fy.toFixed(1);
+                        for (var k = 1; k <= 3; k++) {
+                            fx += dir * rnd(9, 22);
+                            fy += rnd(14, 28);
+                            fd += ' L' + fx.toFixed(1) + ' ' + fy.toFixed(1);
+                        }
+                        fork += fd + ' ';
+                    });
+                    return { main: main, fork: fork };
+                }
+
+                /* 闪电：不均匀爆白 + 一道现画的折线雷。落点随机，
+                   两次闪之间隔 4~11s —— 太规律会像动画循环 */
+                function fireBolt() {
+                    var leftPct = rnd(8, 78);
+                    if (flashEl) {
+                        flashEl.style.setProperty('--flash-x', (leftPct + 6).toFixed(1) + '%');
+                        flashEl.classList.remove('on');
+                        void flashEl.offsetWidth;          // 强制回流，动画才能重放
+                        flashEl.classList.add('on');
+                    }
+                    if (boltEl && boltCoreEl) {
+                        var d = buildBoltPath(), h = Math.round(rnd(220, 340));
+                        boltCoreEl.setAttribute('d', d.main);
+                        boltHaloEl.setAttribute('d', d.main);
+                        boltForkEl.setAttribute('d', d.fork);
+                        boltEl.style.setProperty('--bolt-top', rnd(-6, 1).toFixed(1) + '%');
+                        boltEl.style.setProperty('--bolt-left', leftPct.toFixed(1) + '%');
+                        boltEl.style.setProperty('--bolt-h', h + 'px');
+                        boltEl.style.setProperty('--bolt-w', Math.round(h * 0.5) + 'px');
+                        boltEl.classList.remove('on');
+                        void boltEl.offsetWidth;
+                        boltEl.classList.add('on');
+                    }
+                }
+
+                function scheduleBolts(on) {
+                    if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
+                    if (!on || noParticles) return;
+                    var loop = function () {
+                        boltTimer = setTimeout(function () {
+                            if (document.hidden) { loop(); return; }
+                            fireBolt();
+                            // 三分之一的雷是"连闪两下"，单闪太干净
+                            if (Math.random() < 0.35) setTimeout(fireBolt, 280);
+                            loop();
+                        }, rnd(4000, 11000));
+                    };
+                    loop();
+                }
+
+                function apply(o) {
+                    if (!o) return;
+                    lastInput = o;
+
+                    var code = Number(o.code) || 0;
+                    var isDay = o.isDay !== 0;
+                    var precip = Number(o.precip); if (!(precip >= 0)) precip = 0;
+                    var wind = Number(o.wind); if (!(wind >= 0)) wind = 0;
+                    var vis = Number(o.vis); if (!(vis > 0)) vis = 30000;
+                    var cloud = Number(o.cloud);
+                    var pm = Number(o.pm25);
+                    var isStorm = code >= 95;
+                    var isSnowCode = (code >= 71 && code <= 77) || code === 85 || code === 86;
+                    var isRainCode = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || isStorm;
+
+                    // 天气码明明在下雨、但上一小时降水量是 0（刚开始下 / 落在整点空档），
+                    // 按码补一个典型雨量，否则「雷雨」看起来一滴雨都没有
+                    if (isRainCode && precip < 0.05) {
+                        if (isStorm) precip = 5.2;
+                        else if (code === 65 || code === 82) precip = 7;
+                        else if (code === 63 || code === 81) precip = 3;
+                        else if (code === 61 || code === 80) precip = 1.2;
+                        else if (code === 55) precip = 1;
+                        else if (code === 53) precip = 0.45;
+                        else precip = 0.25;
+                    }
+
+                    var lv = 0;
+                    if (isRainCode) lv = precip >= 8 ? 4 : precip >= 2.5 ? 3 : precip >= 0.6 ? 2 : 1;
+                    if (isSnowCode) lv = (code === 75 || code === 86) ? 4 : (code === 73) ? 3 : 2;
+
+                    kind = isRainCode ? 'rain' : (isSnowCode ? 'snow' : 'none');
+                    level = lv;
+                    // 风把雨吹斜：0.12 起，40km/h 到 0.34 封顶（再斜就不像雨了）
+                    slant = 0.12 + Math.min(40, wind) * 0.0055;
+
+                    build(false);
+                    if (kind !== 'none') start(); else stop();
+
+                    // ---- 日光：只给晴 / 少云，云量和紫外线再各退一档 ----
+                    var sun = 0;
+                    if (isDay && kind === 'none' && code <= 2) {
+                        sun = code === 0 ? 1 : (code === 1 ? 0.6 : 0.24);
+                    }
+                    if (sun && cloud >= 0) sun *= Math.max(0.2, 1 - cloud / 125);
+                    var uv = Number(o.uv);
+                    if (sun && uv > 0) sun *= Math.min(1, 0.58 + uv / 9);
+                    var pct = Number(o.sunPct);
+                    if (!(pct >= 0 && pct <= 1)) pct = 0.62;
+                    backEl.style.setProperty('--sun-pct', pct.toFixed(3));
+                    if (frontEl) frontEl.style.setProperty('--sun-pct', pct.toFixed(3));
+                    // 射线在前景，0.5 是"看得见但不压字"的折中；光晕在后面可以给足
+                    sunEl.style.opacity = (sun * 0.9).toFixed(3);
+                    glowEl.style.opacity = (sun * 0.88).toFixed(3);
+
+                    // ---- 灰纱：阴天/雨天整体压暗，雷雨最暗 ----
+                    var veil = 0;
+                    if (kind === 'rain') veil = 0.14 + Math.min(0.16, precip * 0.012);
+                    else if (kind === 'snow') veil = 0.16;
+                    else if (code === 3) veil = 0.13;
+                    else if (code === 2) veil = 0.06;
+                    else if (code === 1) veil = 0.025;
+                    if (isStorm) veil = Math.min(0.34, veil + 0.08);
+                    cloudEl.style.opacity = veil.toFixed(3);
+
+                    // ---- 雾：天气码直给，或能见度跌破 5km 顶上来 ----
+                    var fog = 0;
+                    if (code === 45) fog = 0.52;
+                    else if (code === 48) fog = 0.68;
+                    if (vis < 5000) {
+                        var v = vis < 300 ? 0.95 : vis < 800 ? 0.8 : vis < 1500 ? 0.6 : vis < 2500 ? 0.42 : 0.24;
+                        if (kind === 'rain') v *= 0.55;     // 雨天的低能见度是雨幕，不是雾
+                        if (v > fog) fog = v;
+                    }
+                    fogEl.style.opacity = fog.toFixed(3);
+
+                    // ---- 霾：PM2.5 六档，大雨会洗掉大半 ----
+                    var haze = 0;
+                    if (pm >= 0) {
+                        haze = pm < 15 ? 0 : pm < 35 ? 0.16 : pm < 75 ? 0.30 :
+                               pm < 115 ? 0.42 : pm < 150 ? 0.55 : 0.68;
+                    }
+                    if (haze && lv >= 3) haze *= 0.45;
+                    if (haze && fog > 0.5) haze *= 0.7;
+                    hazeEl.style.opacity = haze.toFixed(3);
+                    if (smogEl) smogEl.style.opacity = haze.toFixed(3);
+
+                    backEl.setAttribute('data-fx', kind + (lv || ''));
+                    scheduleBolts(isStorm);
+                }
+
+                // AQI 是并行拉的，比天气晚到：拿到 PM2.5 后只重算霾那层
+                function refresh() {
+                    if (!lastInput) return;
+                    var a = window.__aqi;
+                    if (a && a.pm25 !== null && a.pm25 !== undefined) lastInput.pm25 = a.pm25;
+                    apply(lastInput);
+                }
+
+                document.addEventListener('visibilitychange', function () {
+                    if (document.hidden) {
+                        stop();
+                        if (boltTimer) { clearTimeout(boltTimer); boltTimer = 0; }
+                    } else {
+                        if (kind !== 'none') start();
+                        if (lastInput) scheduleBolts(Number(lastInput.code) >= 95);
+                    }
+                });
+
+                var rzT = 0;
+                window.addEventListener('resize', function () {
+                    clearTimeout(rzT);
+                    rzT = setTimeout(resize, 180);
+                });
+                window.addEventListener('orientationchange', function () {
+                    setTimeout(resize, 320);
+                });
+
+                resize();
+                return { apply: apply, refresh: refresh };
+            })();
+
             const slideFocus = "50,50 50,0 50,0 50,100 50,50 50,50 50,0 50,56 50,0 50,0 50,50 50,50 50,56 50,3 50,50 50,50 50,0 50,100 50,66 50,50 50,0 50,0 50,50 50,0 50,50 50,100 50,0 50,100 50,0 50,50 50,50 50,43 50,26 50,0 50,66 50,100 50,0 0,50 50,0 50,0 50,81 50,50 50,34 50,23 50,57 50,0 50,3 50,0 50,0 50,59 50,0 50,45 50,0 50,0 50,2 50,13 50,4 50,50 50,0 100,50 50,100 50,0 50,0 50,33 50,50 50,77 50,9 50,50 50,9 50,0 50,8 50,0 50,100 50,0 50,0 50,0 50,23 50,0 50,0 50,0 50,100 50,0 50,0 50,0 50,0 50,100 50,50 50,50 14,50 50,50 50,0 50,50 50,0 50,0 50,0 50,50 50,100 50,50 50,0 50,0 50,0 50,0 50,0 50,50 50,0 53,50 50,11 50,0 50,0 68,50 50,50 50,50 50,0 50,0 100,50 50,50 50,100 50,0 50,0 50,0 50,50 50,0 50,0 50,0 50,0 50,0 50,0 50,0 50,55 50,0 50,0 50,0 50,50 50,50 50,0 50,0 50,42 50,0 50,0 50,0 50,64 50,0 50,50 50,0 50,0 50,0 50,16 50,0 50,15".split(' ');
 
             const APP_CONFIG = {
@@ -4350,28 +5188,101 @@ self.addEventListener('fetch', function (e) {
             } catch (e) {}
 
             // ===== 主题切换 =====
-            function toggleTheme() {
-                const html = document.documentElement;
-                const isDark = html.classList.contains('dark-mode');
-                html.classList.add('transitioning');
-                const metaTheme = document.querySelector('meta[name="theme-color"]');
-                const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
-                if (isDark) {
-                    html.classList.remove('dark-mode');
-                    if (metaTheme) metaTheme.setAttribute('content', '#EEF2FF');
-                    if (metaColorScheme) metaColorScheme.setAttribute('content', 'light dark');
-                    try { localStorage.setItem('plate_theme_mode', 'light'); } catch (e) {}
-                    showToastMsg('☀️ 已切换到浅色模式');
-                } else {
-                    html.classList.add('dark-mode');
-                    if (metaTheme) metaTheme.setAttribute('content', '#07070E');
-                    if (metaColorScheme) metaColorScheme.setAttribute('content', 'dark');
-                    try { localStorage.setItem('plate_theme_mode', 'dark'); } catch (e) {}
-                    showToastMsg('🌕 已切换到深色模式');
+            /* ==================================================================
+               主题：三态 auto / light / dark
+               ------------------------------------------------------------------
+               · auto（默认）：按当天日出日落切换 —— 日出后 15 分钟转浅色，
+                 日落后 15 分钟转深色。数据来自天气接口的 sunrise/sunset
+                 （timezone=auto，本身已是当地时刻），不用再算经纬度。
+               · 点一下状态栏按钮：手动锁定 light / dark，之后不再自动。
+               · 按住按钮 0.65 秒：回到 auto。
+               为什么留 15 分钟缓冲：不加缓冲时，太阳一过线就整页翻色，
+               而且每次 60s 校正都卡在边界上会来回跳。
+               ================================================================== */
+            var THEME_MODE = (function () {
+                try { return localStorage.getItem('plate_theme_mode') || 'auto'; } catch (e) { return 'auto'; }
+            })();
+            var __themeManualAt = 0;
+
+            function parseHM(s) {
+                if (!s || typeof s !== 'string') return null;
+                var m = s.match(/(\d{1,2}):(\d{2})/);
+                if (!m) return null;
+                return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+            }
+
+            function resolveAutoDark() {
+                var now = new Date();
+                var mins = now.getHours() * 60 + now.getMinutes();
+                var d = window.__wxData;
+                var sr = parseHM(d && d.now && d.now.sunrise);
+                var ss = parseHM(d && d.now && d.now.sunset);
+                if (sr !== null && ss !== null && ss > sr) {
+                    return (mins < sr - 15) || (mins >= ss + 15);
                 }
-                setTimeout(() => html.classList.remove('transitioning'), 600);
+                // 还没有日出日落：先跟系统，再不行按 6:00–19:00 粗判
+                if (window.matchMedia) {
+                    try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+                }
+                return mins < 360 || mins >= 1140;
+            }
+
+            function applyThemeMode(mode, announce) {
+                var html = document.documentElement;
+                THEME_MODE = mode;
+                var dark = (mode === 'auto') ? resolveAutoDark() : (mode === 'dark');
+                if (dark !== html.classList.contains('dark-mode')) {
+                    html.classList.add('transitioning');
+                    html.classList.toggle('dark-mode', dark);
+                    var mt = document.querySelector('meta[name="theme-color"]');
+                    if (mt) mt.setAttribute('content', dark ? '#07070E' : '#EEF2FF');
+                    var mc = document.querySelector('meta[name="color-scheme"]');
+                    if (mc) mc.setAttribute('content', dark ? 'dark' : 'light dark');
+                    setTimeout(function () { html.classList.remove('transitioning'); }, 600);
+                }
+                try {
+                    if (localStorage.getItem('plate_theme_mode') !== mode) {
+                        localStorage.setItem('plate_theme_mode', mode);
+                    }
+                } catch (e) {}
+                if (announce) {
+                    if (mode === 'auto') {
+                        showToastMsg(dark ? '🌓 自动模式 · 现在按夜间显示' : '🌓 自动模式 · 现在按日间显示');
+                    } else {
+                        showToastMsg(dark ? '🌕 已切换深色（长按可回自动）' : '☀️ 已切换浅色（长按可回自动）');
+                    }
+                }
+            }
+
+            function toggleTheme() {
+                // 长按刚触发过 auto，抬手带出的 click 要忽略，否则会被立刻又切走
+                if (Date.now() - __themeManualAt < 700) return;
+                var isDark = document.documentElement.classList.contains('dark-mode');
+                applyThemeMode(isDark ? 'light' : 'dark', true);
             }
             statusThemeToggle.addEventListener('click', toggleTheme);
+
+            // 长按按钮 → 回到自动
+            (function () {
+                var lp = null;
+                function cancel() { if (lp) { clearTimeout(lp); lp = null; } }
+                statusThemeToggle.addEventListener('pointerdown', function () {
+                    cancel();
+                    lp = setTimeout(function () {
+                        lp = null;
+                        __themeManualAt = Date.now();
+                        applyThemeMode('auto', true);
+                    }, 650);
+                });
+                statusThemeToggle.addEventListener('pointerup', cancel);
+                statusThemeToggle.addEventListener('pointerleave', cancel);
+                statusThemeToggle.addEventListener('pointercancel', cancel);
+            })();
+
+            // 每分钟校正一次：auto 模式下跨过日出/日落就自动翻色
+            setInterval(function () {
+                if (THEME_MODE === 'auto') applyThemeMode('auto', false);
+            }, 60000);
 
             // ===== 工具函数 =====
             function formatTime(s) {
@@ -6024,6 +6935,8 @@ self.addEventListener('fetch', function (e) {
                 }
 
                 function paintAqi() {
+                    // 霾那层吃 PM2.5：空气质量和天气是并行拉的，谁后到就由谁补算一次
+                    try { wxFx.refresh(); } catch (eR) { }
                     var slot = document.getElementById('wxAqiSlot');
                     var a = window.__aqi;
                     if (!slot) return;              // 面板还没渲染过，等 renderWxNow 补画
@@ -6046,7 +6959,7 @@ self.addEventListener('fetch', function (e) {
                     try {
                         // 空气质量走另一个域名，和主天气并行拉，不 await：天气该多快还是多快
                         fetchAqi(lat, lon);
-                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7&forecast_hours=26`;
+                        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,is_day,weather_code,precipitation,cloud_cover&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=7&forecast_hours=26`;
                         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
@@ -6190,7 +7103,26 @@ self.addEventListener('fetch', function (e) {
                             window.__wxData.max = maxTemp;
                             window.__wxData.min = minTemp;
                             window.__wxData.at = Date.now();
+                            // 日出日落刚拿到：auto 模式立刻校正一次
+                            // （首屏防闪那一步只能先按系统偏好上色，这里才是真正的"按日照"）
+                            if (THEME_MODE === 'auto') applyThemeMode('auto', false);
                         }
+
+                        // ---- 全页天气氛围：日光 / 雨 / 雪 / 雷电 / 雾 / 霾（§34）----
+                        // 放最后：数据都解析完了再一次算完，避免图层先亮后改的闪烁
+                        try {
+                            wxFx.apply({
+                                code: code,
+                                precip: cur.precipitation,
+                                isDay: cur.is_day,
+                                vis: vis,
+                                cloud: cur.cloud_cover,
+                                wind: wspd,
+                                uv: uv,
+                                sunPct: sunPct,
+                                pm25: window.__aqi ? window.__aqi.pm25 : null
+                            });
+                        } catch (eFx) { console.warn('天气氛围渲染失败:', eFx); }
 
 
                     } catch (e) {
@@ -6750,6 +7682,8 @@ self.addEventListener('fetch', function (e) {
                     wxSheetTab = 'now';
                     wxSheetShowTab('now');
                     renderWeatherSheet();
+                    // 与日历错开不同的偏移，保证两个面板打开时照片也互不相同
+                    setLynSheet(weatherSheetPanel, 33);
                     weatherSheetOverlay.classList.add('show');
                     if (stale) {
                         try {
@@ -6892,6 +7826,7 @@ self.addEventListener('fetch', function (e) {
                     }
 
                     monthCalendarDays.innerHTML = html;
+                    renderMcHolidays(monthCalendarYear, monthCalendarMonth);
 
                     monthCalendarDays.querySelectorAll('.month-calendar-day[data-date]').forEach(function(el) {
                         el.addEventListener('click', function() {
@@ -6905,11 +7840,80 @@ self.addEventListener('fetch', function (e) {
                     });
                 }
 
+                /* 把某月里同类型（1=法定假 / 3=调休上班）的连续同名日期合并成区间。
+                   例：10-01~10-07 全是「国庆节」→ 一条「国庆节 10月1日–7日 休 7 天」，
+                   而不是列成七行。 */
+                function collectHolRanges(year, month, type) {
+                    var last = new Date(year, month + 1, 0).getDate();
+                    var out = [], cur = null;
+                    for (var d = 1; d <= last; d++) {
+                        var info = getHolidayInfo(new Date(year, month, d));
+                        if (info.type === type) {
+                            if (cur && cur.name === info.name && cur.end === d - 1) {
+                                cur.end = d;
+                            } else {
+                                if (cur) out.push(cur);
+                                cur = { name: info.name, start: d, end: d };
+                            }
+                        } else if (cur) {
+                            out.push(cur);
+                            cur = null;
+                        }
+                    }
+                    if (cur) out.push(cur);
+                    return out;
+                }
+
+                function renderMcHolidays(year, month) {
+                    var box = document.getElementById('mcHolidays');
+                    if (!box) return;
+
+                    if (year < 2026 || year > 2027) {
+                        box.innerHTML = '<div class="mc-hol-title">法定节假日</div>' +
+                            '<div class="mc-hol-empty">' + year + ' 年暂未内置节假日数据</div>';
+                        return;
+                    }
+
+                    var rest = collectHolRanges(year, month, 1);
+                    var work = collectHolRanges(year, month, 3);
+
+                    if (!rest.length && !work.length) {
+                        box.innerHTML = '<div class="mc-hol-title">法定节假日</div>' +
+                            '<div class="mc-hol-empty">本月无法定节假日，按常规周末休息</div>';
+                        return;
+                    }
+
+                    function rangeText(r) {
+                        return (r.start === r.end)
+                            ? (month + 1) + '月' + r.start + '日'
+                            : (month + 1) + '月' + r.start + '日–' + r.end + '日';
+                    }
+
+                    var html = '<div class="mc-hol-title">法定节假日</div>';
+                    rest.forEach(function (r) {
+                        html += '<div class="mc-hol-row">' +
+                            '<span class="mc-hol-name">' + r.name + '</span>' +
+                            '<span class="mc-hol-range">' + rangeText(r) + '</span>' +
+                            '<span class="mc-hol-days rest">休 ' + (r.end - r.start + 1) + ' 天</span>' +
+                        '</div>';
+                    });
+                    work.forEach(function (r) {
+                        html += '<div class="mc-hol-row">' +
+                            '<span class="mc-hol-name">' + r.name + '</span>' +
+                            '<span class="mc-hol-range">' + rangeText(r) + '</span>' +
+                            '<span class="mc-hol-days work">上班</span>' +
+                        '</div>';
+                    });
+                    box.innerHTML = html;
+                }
+
                 function openMonthCalendar() {
                     monthCalendarYear = selectedDate.getFullYear();
                     monthCalendarMonth = selectedDate.getMonth();
                     setMcPicking(false);
                     renderMonthCalendar();
+                    // 每次打开换一张与主背景不同的照片（索引错开 17）
+                    setLynSheet(monthCalendarOverlay.querySelector('.month-calendar-panel'), 17);
                     monthCalendarOverlay.classList.add('show');
                 }
 
