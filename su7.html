@@ -3023,6 +3023,12 @@ html.dark-mode .top-right .weather-widget::before{
   display:block;width:100%;max-width:100%;
   height:var(--profile-line);line-height:var(--profile-line);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  /* 这一行的文字是固定的，只保留渐变本身。§06 给三行文字统一挂了
+     islandFlow 流动动画，颜色一直在跑，看着像「一闪一闪」。
+     这里把它单独摘掉，渐变定在 50% 的相位上（色彩分布最均衡，不偏绿也不偏粉）。
+     流动效果只留给下面那行会轮播的座右铭（.line-2）。 */
+  animation:none;
+  background-position:50% 50%;
 }
 
 /* ============================================================================
@@ -4100,7 +4106,7 @@ html.dark-mode .app-label{
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v32';
+var VERSION = 'su-fa36165-v33';
 var SHELL = './';
 var CORE = ['./'];
 
