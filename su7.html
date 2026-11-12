@@ -4034,7 +4034,7 @@ html:has(.city-picker-overlay.show) .wxfx-front{z-index:10150}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v26';
+var VERSION = 'su-fa36165-v27';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -4948,13 +4948,18 @@ self.addEventListener('fetch', function (e) {
                     try { document.documentElement.classList.add('reduce-motion'); } catch (eRm) { }
                 }
 
-                // 四档雨：数量 / 速度(px/s) / 线长 / 线宽 / 透明度
+                /* 四档雨：数量 / 速度(px/s) / 线长 / 线宽 / 透明度
+                   §42 整体加强：以前最短一档只有 10~15px 长、透明度 .26，
+                   在 390 宽的屏上就是一片几乎看不见的灰点，「在下雨」这件事要靠水花才看得出来。
+                   人眼判断「雨在落」主要靠两件事：线段够长（有方向）、条数够密（有层次）。
+                   所以线长拉长四成、透明度提三成、条数加三成、速度略提；
+                   颜色不动（§40 刚调成低饱和冷灰，再加深就又变成画上去的斜线了）。 */
                 var RAIN = [
                     { n: 0, sp: [0, 0], len: [0, 0], w: 1, a: 0 },
-                    { n: 38, sp: [520, 700], len: [10, 15], w: 1, a: .26 },
-                    { n: 84, sp: [680, 900], len: [13, 19], w: 1.15, a: .34 },
-                    { n: 142, sp: [880, 1140], len: [17, 26], w: 1.3, a: .44 },
-                    { n: 205, sp: [1080, 1440], len: [22, 34], w: 1.45, a: .52 }
+                    { n: 68, sp: [620, 830], len: [16, 23], w: 1.22, a: .38 },
+                    { n: 132, sp: [800, 1050], len: [21, 30], w: 1.38, a: .46 },
+                    { n: 200, sp: [1000, 1260], len: [27, 38], w: 1.55, a: .56 },
+                    { n: 272, sp: [1200, 1560], len: [33, 48], w: 1.7, a: .64 }
                 ];
                 var SNOW = [
                     { n: 0, sp: [0, 0] },
@@ -5318,6 +5323,21 @@ self.addEventListener('fetch', function (e) {
                         ctx.lineTo(d.x - sl * d.len, d.y - d.len);
                     }
                     ctx.stroke();
+                    /* §42 头部拖尾。一条从头到尾一个 alpha 的线，静态看是「斜线」，
+                       动起来还是「斜线在平移」。真实的高速雨滴在快门里是头亮尾淡的长条 ——
+                       把靠落点那头再压一道更实、更短的线，人眼立刻就读成「在往下落」。
+                       成本很低：同一批粒子，路径翻倍，stroke 次数 +1（不是 +N）。 */
+                    ctx.globalAlpha = Math.min(1, cfg.a * aMul * 1.55);
+                    ctx.lineWidth = cfg.w * wMul * 0.92;
+                    ctx.beginPath();
+                    for (i = from; i < to; i++) {
+                        var dh = drops[i];
+                        if (dh.y >= H || dh.x > W + 90 || dh.x < -90) continue;
+                        var hl = dh.len * 0.3;
+                        ctx.moveTo(dh.x, dh.y);
+                        ctx.lineTo(dh.x - sl * hl, dh.y - hl);
+                    }
+                    ctx.stroke();
                 }
 
                 function snowPass(dt, t, sl, from, to, aMul) {
@@ -5370,8 +5390,8 @@ self.addEventListener('fetch', function (e) {
                        有了起伏才有"一阵一阵"的风感。雪同理，只是吃得轻一些 */
                     var sl = slant * (1 + 0.2 * Math.sin(t / 4300) + 0.07 * Math.sin(t / 1270));
                     if (kind === 'rain') {
-                        rainPass(dt, sl, 0, cut1, 0.42, 0.72);
-                        rainPass(dt, sl, cut1, cut2, 0.74, 0.95);
+                        rainPass(dt, sl, 0, cut1, 0.52, 0.78);
+                        rainPass(dt, sl, cut1, cut2, 0.82, 0.98);
                         rainPass(dt, sl, cut2, drops.length, 1, 1.18);
                     } else if (kind === 'snow') {
                         snowPass(dt, t, sl, 0, cut1, 0.45);
@@ -8008,9 +8028,15 @@ self.addEventListener('fetch', function (e) {
                            观感是「雨正在到」而不是「突然下大」。
                            没这一步的话，雨得等 current 自己更新，最快也要到下一个整刻 */
                         let fxCode = code, fxPrecip = Number(cur.precipitation) || 0;
+                        const isWetCode = (c) =>
+                            (c >= 51 && c <= 67) || (c >= 71 && c <= 77) || (c >= 80 && c <= 86) || c >= 95;
+                        /* 只有 current 还不是雨雪时，前瞻才有意义。
+                           否则正在下的小雨会被未来的毛毛雨格「改小」——
+                           明明在下的是 61/1.2，前瞻命中 51/0.35 反而降到最淡一档，
+                           看起来就是「雨突然变没了」。 */
                         try {
                             const m15 = data.minutely_15;
-                            if (m15 && m15.time && m15.time.length && m15.weather_code) {
+                            if (!isWetCode(code) && m15 && m15.time && m15.time.length && m15.weather_code) {
                                 const nowKey = (cur.time || '').slice(0, 16);
                                 let ix = m15.time.indexOf(nowKey);
                                 if (ix < 0) {                       // current 落在网格外：取最后一个不晚于它的窗
@@ -8018,8 +8044,6 @@ self.addEventListener('fetch', function (e) {
                                         if (m15.time[mi].slice(0, 16) <= nowKey) ix = mi; else break;
                                     }
                                 }
-                                const isWetCode = (c) =>
-                                    (c >= 51 && c <= 67) || (c >= 71 && c <= 77) || (c >= 80 && c <= 86) || c >= 95;
                                 // 提前量 vs 雨势：0 格满额，往后逐格收
                                 const AHEAD = [1, 0.8, 0.55, 0.35];
                                 for (let k = 0; k < AHEAD.length && ix >= 0; k++) {
