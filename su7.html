@@ -4401,6 +4401,37 @@ html.low-perf .wxfx-sky i,html.low-perf .wxfx-sky i>b{animation:none}
   .wxfx-sky i,.wxfx-sky i>b{animation:none!important}
 }
 
+/* ============================================================================
+   52 弹层滚动收口（天气 / 日历 / 城市选择器）
+   ----------------------------------------------------------------------------
+   现象：这三张底部弹层打开后还能一直往下拉 —— 面板内容没超出时是 iOS 的
+        橡皮筋回弹（内容明明到底了，还能往下拽出一片空白）；内容超出时是
+        滚到边界后把滚动条传给背后文档（scroll chaining），页面跟着动，
+        手感上就是「没有底」。
+   做法：
+     · 任一弹层 .show → html.ui-locked：文档锁滚，手指怎么拉页面都不动；
+     · 面板统一 overscroll-behavior:contain：滚到边界就停，不往外传；
+     · 面板 touch-action 交给 §52 的 touchmove 守卫，内容没超出高度时
+       直接吞掉手势，不再有回弹。
+   ========================================================================== */
+html.ui-locked,
+html.ui-locked body{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  overscroll-behavior-y:none!important;
+}
+
+.weather-sheet-overlay,
+.city-picker-overlay,
+.month-calendar-overlay{overscroll-behavior:none}
+
+.weather-sheet-overlay .weather-sheet-panel,
+.city-picker-panel,
+.month-calendar-panel{
+  overscroll-behavior:contain;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+}
 </style>
     <script>
         (function () {
@@ -10732,6 +10763,94 @@ self.addEventListener('fetch', function (e) {
 香港特别行政区|114.173,22.32|中西区:114.154,22.282;湾仔区:114.183,22.276;东区:114.226,22.28;南区:114.16,22.246;油尖旺区:114.173,22.312;深水埗区:114.163,22.334;九龙城区:114.193,22.313;黄大仙区:114.204,22.336;观塘区:114.214,22.321;荃湾区:114.121,22.368;屯门区:113.977,22.394;元朗区:114.032,22.441;北区:114.147,22.496;大埔区:114.172,22.446;西贡区:114.265,22.314;沙田区:114.195,22.38;葵青区:114.139,22.364;离岛区:113.946,22.286
 #澳门特别行政区|113.549,22.199
 澳门特别行政区|113.549,22.199|花地玛堂区:113.553,22.208;花王堂区:113.549,22.199;望德堂区:113.55,22.194;大堂区:113.554,22.189;风顺堂区:113.542,22.187;嘉模堂区:113.559,22.154;路凼填海区:113.57,22.137;圣方济各堂区:113.56,22.123
+</script>
+<script>
+/* ============================================================================
+   §52 弹层滚动守卫（样式见 §52）
+   ----------------------------------------------------------------------------
+   只做两件事，不碰原有开合逻辑：
+     1) 三个弹层任一 .show → html.ui-locked，文档锁滚；
+     2) touchmove 兜底：在遮罩上滑一律 preventDefault；在面板里，内容没超出
+        高度时吞掉手势（消掉橡皮筋），超出时只在到达上/下边界后的那一下
+        吞掉（消掉 scroll chaining）。
+   用 MutationObserver 盯 class，而不是往 openWeatherSheet / openMonthCalendar /
+   openCityPicker 里插代码 —— 以后再加弹层也不用改。
+   ========================================================================== */
+(function () {
+    var IDS = ['weatherSheetOverlay', 'monthCalendarOverlay', 'cityPickerOverlay'];
+    var PANEL_SEL = '.weather-sheet-panel,.month-calendar-panel,.city-picker-panel';
+    var root = document.documentElement;
+
+    function anyOpen() {
+        var first = null;
+        for (var i = 0; i < IDS.length; i++) {
+            var el = document.getElementById(IDS[i]);
+            if (el && el.classList.contains('show')) { first = el; break; }
+        }
+        return first;
+    }
+    function syncLock() {
+        if (anyOpen()) root.classList.add('ui-locked');
+        else root.classList.remove('ui-locked');
+    }
+    IDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el || !window.MutationObserver) return;
+        new MutationObserver(syncLock).observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+    syncLock();
+
+    var tracking = false, startX = 0, startY = 0, lastY = 0;
+
+    document.addEventListener('touchstart', function (e) {
+        if (!anyOpen() || e.touches.length !== 1) { tracking = false; return; }
+        tracking = true;
+        startX = e.touches[0].clientX;
+        lastY = startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function (e) {
+        if (!tracking || e.touches.length !== 1) return;
+        var open = anyOpen();
+        if (!open) { tracking = false; return; }
+
+        var t = e.touches[0];
+        var panel = e.target && e.target.closest ? e.target.closest(PANEL_SEL) : null;
+
+        // 遮罩 / 弹层外的页面：一律不许滚（这里就是「无限下拉」的来源）
+        if (!panel) { e.preventDefault(); return; }
+
+        var adx = Math.abs(t.clientX - startX);
+        var ady = Math.abs(t.clientY - startY);
+        var dy = t.clientY - lastY;
+        lastY = t.clientY;
+
+        // 横向手势（24 小时条 / 小时带）原样交给内部滚动
+        if (adx > ady) return;
+
+        // 内容没超出面板高度：本来就没得滚，禁止橡皮筋回弹
+        if (panel.scrollHeight - panel.clientHeight <= 1) { e.preventDefault(); return; }
+
+        var atTop = panel.scrollTop <= 0;
+        var atEnd = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1;
+        if ((dy > 0 && atTop) || (dy < 0 && atEnd)) e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchend', function () { tracking = false; }, { passive: true });
+    document.addEventListener('touchcancel', function () { tracking = false; }, { passive: true });
+
+    // 桌面 / 微信 PC 端：滚轮同样不许漏到背后文档
+    document.addEventListener('wheel', function (e) {
+        if (!anyOpen()) return;
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;   // 横向滚（小时条）放行
+        var panel = e.target && e.target.closest ? e.target.closest(PANEL_SEL) : null;
+        if (!panel) { e.preventDefault(); return; }
+        if (panel.scrollHeight - panel.clientHeight <= 1) { e.preventDefault(); return; }
+        var atTop = panel.scrollTop <= 0;
+        var atEnd = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1;
+        if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atEnd)) e.preventDefault();
+    }, { passive: false });
+})();
 </script>
 </body>
 </html>
