@@ -4331,6 +4331,354 @@ html.lite .wxfx-storm i>b,
 html.lite .wxfx-sky i>b{animation:none}
 /* 雾 / 霾 / 雾罩的 blur 已在各自的规则里直接删掉（搜索 §53）*/
 </style>
+    <style id="wx-sky-v2">
+/* ============================================================================
+   60 天气天空 v2：蓝天白云 / 乌云 / 阳光
+   ----------------------------------------------------------------------------
+   为什么要重做（上一版的问题，实测截图确认）：
+     ① 云是「四团模糊径向渐变 + blur(6px)」叠出来的，远看只是一块白雾，
+        没有轮廓，"白云"读不出来；
+     ② 天幕只在 code<=2 且 sun 不为 0 时露脸，强度还要再乘 sun×0.94，
+        多云天只有 0.15 的不透明度 —— 等于看不见；阴天（code 3）干脆一层都没有；
+     ③ 顶层暖光（sunwash）压 0.5 走 screen 混合，把刚铺上的蓝整片洗成淡紫白；
+     ④ 云是来回摆（ping-pong），看久了像一块布在原地呼吸，不像在天上走。
+
+   这一版的原则：**静态位图 + 纯 transform 位移**。
+     · 云改成内联 SVG（几团椭圆并集 + 内置高斯模糊），有真的轮廓、有体积；
+       SVG 只栅格化一次，之后每帧只做 translate3d —— 走合成器，不重绘、不重算模糊；
+     · 云从右往左单向穿过屏幕（100vw + 自身宽度），每团速度/大小/浓淡/起始点
+       都在载入时抽一次随机，所以是"随机飘"而不是"一起呼吸"；
+     · 天幕按 data-wx 切四套（晴 / 多云 / 阴 / 雨雪），阴天也有乌云在飘；
+     · 太阳独立成两层：本体光晕（::before）+ 可以极慢自转的光芒（::after），
+       位置跟着 --sun-x（日出到日落的进度）走 —— 上午在左，傍晚在右。
+   ========================================================================== */
+
+/* ---- 60.1 天幕底色：按天气切，天顶最深、往下渐隐回极光底 ---- */
+#wxFxBack{--sun:0;--sun-x:.72}
+
+#wxFxBack .wxfx-sky{
+  background:linear-gradient(180deg,
+    #A9CBEC 0%,#5A9CDF 5%,#2E7BCE 12%,#2B74C6 21%,
+    #468FD8 31%,#7BB2E5 40%,#AFD5F2 48%,#D3E9FA 55%,
+    rgba(232,244,253,.46) 62%,rgba(238,247,255,0) 71%);
+}
+#wxFxBack[data-wx="cloudy"] .wxfx-sky{
+  background:linear-gradient(180deg,
+    #BAD3E8 0%,#93B7DA 7%,#6F9CC8 17%,#7FA9CF 28%,
+    #9DBFD9 39%,#BCD6E6 48%,#DAEAF5 56%,
+    rgba(240,248,253,.42) 64%,rgba(244,250,254,0) 73%);
+}
+#wxFxBack[data-wx="overcast"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(112,124,138,0) 42%,rgba(112,124,138,.24) 74%,rgba(112,124,138,.36) 100%),
+    linear-gradient(180deg,
+    #AFB9C4 0%,#A2AEB9 7%,#A8B3BE 18%,#B5C0CA 29%,
+    #C4CED7 40%,#D3DBE2 49%,#E2E9EE 57%,
+    rgba(238,244,248,.38) 65%,rgba(242,247,250,0) 74%);
+}
+#wxFxBack[data-wx="rain"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(74,86,102,0) 36%,rgba(74,86,102,.28) 72%,rgba(74,86,102,.40) 100%),
+    linear-gradient(180deg,
+    #5C6A7B 0%,#556372 7%,#637282 18%,#7B8A9A 29%,
+    #95A3B2 40%,#B2BFCA 49%,#D0DAE3 57%,
+    rgba(232,238,244,.34) 65%,rgba(238,243,247,0) 74%);
+}
+/* 雾：天不是"蓝的"，是被水汽糊白的一整片，云只剩一点点影子 */
+#wxFxBack[data-wx="fog"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(196,205,214,0) 30%,rgba(196,205,214,.34) 70%,rgba(196,205,214,.46) 100%),
+    linear-gradient(180deg,
+      #C6CFD8 0%,#C2CBD4 9%,#C8D0D9 20%,#D2D9E0 31%,
+      #DCE2E8 42%,#E6EBEF 52%,#EFF3F5 60%,
+      rgba(246,249,251,.50) 68%,rgba(249,252,253,0) 78%);
+}
+html.dark-mode #wxFxBack[data-wx="fog"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.24) 72%,rgba(0,0,0,.34) 100%),
+    linear-gradient(180deg,
+      #2C333B 0%,#313941 10%,#3A424A 22%,#454E57 34%,
+      #525B64 46%,#616B74 56%,#737D86 64%,
+      rgba(18,24,30,.45) 72%,rgba(14,20,26,0) 82%);
+}
+
+#wxFxBack[data-wx="snow"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(126,138,152,0) 46%,rgba(126,138,152,.18) 80%,rgba(126,138,152,.24) 100%),
+    linear-gradient(180deg,
+    #8D9AAC 0%,#8795A7 9%,#99A6B5 20%,#B1BDCA 31%,
+    #C8D3DD 42%,#DCE5EC 51%,#ECF1F5 59%,
+    rgba(245,249,252,.40) 67%,rgba(248,251,253,0) 76%);
+}
+/* 深色主题：不是"夜"，是一块暮色玻璃 —— 压亮度、保色相，别把卡片的透光衬死 */
+html.dark-mode #wxFxBack .wxfx-sky{
+  background:linear-gradient(180deg,
+    #10314F 0%,#123A5C 7%,#174969 17%,#1F5A80 28%,
+    #2A6B92 39%,#3C7FA4 48%,#5D9DBD 56%,
+    rgba(18,40,60,.42) 64%,rgba(16,34,52,0) 73%);
+}
+html.dark-mode #wxFxBack[data-wx="cloudy"] .wxfx-sky{
+  background:linear-gradient(180deg,
+    #24303D 0%,#283644 9%,#31404F 19%,#3E4E5E 30%,
+    #526274 41%,#6B7B8C 50%,#8B9AA8 58%,
+    rgba(20,30,42,.40) 66%,rgba(16,26,38,0) 75%);
+}
+html.dark-mode #wxFxBack[data-wx="overcast"] .wxfx-sky,
+html.dark-mode #wxFxBack[data-wx="rain"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(74,86,102,0) 36%,rgba(74,86,102,.28) 72%,rgba(74,86,102,.40) 100%),
+    linear-gradient(180deg,
+    #14181E 0%,#181D24 9%,#20262E 19%,#2A313A 30%,
+    #38414C 41%,#4B555F 50%,#66707E 58%,
+    rgba(12,16,22,.40) 66%,rgba(10,14,20,0) 75%);
+}
+html.dark-mode #wxFxBack[data-wx="snow"] .wxfx-sky{
+  background:
+    linear-gradient(180deg,rgba(126,138,152,0) 46%,rgba(126,138,152,.18) 80%,rgba(126,138,152,.24) 100%),
+    linear-gradient(180deg,
+    #2A323C 0%,#2F3842 9%,#3A444F 19%,#48525E 30%,
+    #5A6470 41%,#727C88 50%,#96A0AA 58%,
+    rgba(18,24,32,.40) 66%,rgba(14,20,28,0) 75%);
+}
+
+/* ---- 60.2 太阳：本体光晕 + 极慢自转的光芒 ----
+   两层都是静态渐变，只让 ::after 转 —— 转的是合成层，不重绘。
+   位置由 --sun-x（0~1，日出→日落）决定，所以上午的太阳偏左、傍晚偏右 */
+#wxFxBack .wxfx-sky::before{
+  content:'';position:absolute;z-index:0;
+  left:calc(26% + var(--sun-x,.72) * 54%);top:4.5%;
+  translate:-50% -50%;
+  width:50vmin;height:50vmin;border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(255,255,255,1) 0%,rgba(255,255,252,.99) 10%,
+    rgba(255,252,236,.96) 16%,rgba(255,246,214,.78) 24%,
+    rgba(255,240,196,.46) 34%,rgba(255,236,190,.20) 48%,
+    rgba(255,238,198,.06) 62%,rgba(255,240,200,0) 76%);
+  opacity:var(--sun,0);
+  transition:opacity 2.2s var(--ease);
+  pointer-events:none;
+}
+#wxFxBack .wxfx-sky::after{
+  content:'';position:absolute;z-index:0;
+  left:calc(26% + var(--sun-x,.72) * 54%);top:4.5%;
+  translate:-50% -50%;
+  width:150vmin;height:150vmin;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg at 50% 50%,
+    rgba(255,251,232,0) 0deg 5deg,
+    rgba(255,251,232,.165) 6.6deg 7.8deg,
+    rgba(255,251,232,0) 9.4deg 13deg);
+  -webkit-mask:radial-gradient(circle,
+    #000 0%,rgba(0,0,0,.92) 15%,rgba(0,0,0,.58) 34%,rgba(0,0,0,.22) 52%,transparent 70%);
+  mask:radial-gradient(circle,
+    #000 0%,rgba(0,0,0,.92) 15%,rgba(0,0,0,.58) 34%,rgba(0,0,0,.22) 52%,transparent 70%);
+  opacity:calc(var(--sun,0) * .82);
+  transition:opacity 2.2s var(--ease);
+  animation:wxRays 240s linear infinite;
+  pointer-events:none;
+}
+/* 自转用独立的 rotate 属性，不要碰 transform —— 那会和 translate 打架 */
+@keyframes wxRays{to{rotate:360deg}}
+html.dark-mode #wxFxBack .wxfx-sky::before{
+  background:radial-gradient(circle,
+    rgba(255,252,240,.92) 0%,rgba(255,240,205,.72) 7%,
+    rgba(255,226,170,.30) 18%,rgba(255,220,160,.10) 38%,
+    rgba(255,226,170,0) 66%);
+}
+html.dark-mode #wxFxBack .wxfx-sky::after{
+  background:repeating-conic-gradient(from 0deg at 50% 50%,
+    rgba(255,244,214,0) 0deg 5deg,
+    rgba(255,244,214,.12) 6.6deg 7.8deg,
+    rgba(255,244,214,0) 9.4deg 13deg);
+}
+
+/* ---- 60.3 云：一片 SVG 位图 + 单向穿越 ----
+   i 负责"走"，b 负责"长什么样"。b 里没有任何动画，所以那张位图只栅格化一次；
+   i 的位移是 translate3d，走合成器。两层都没有 scale / blur 变化，
+   安卓 GPU 不会每帧重算高斯（上一版 fxfMorph 的 scale 就是这个代价）。 */
+.wxfx-puff{
+  position:absolute;inset:0;overflow:hidden;
+  opacity:0;transition:opacity 2.2s var(--ease);
+  pointer-events:none;
+}
+.wxfx-puff i{
+  position:absolute;left:100%;top:var(--ct,10%);
+  width:var(--cw,60vw);height:calc(var(--cw,60vw) * var(--ar,.47));
+  animation:wxCloudCross var(--dur,110s) linear infinite;
+  animation-delay:var(--dl,0s);
+  will-change:transform;
+}
+.wxfx-puff i>b{
+  display:block;width:100%;height:100%;
+  background-repeat:no-repeat;background-size:100% 100%;
+  opacity:var(--op,.9);
+}
+@keyframes wxCloudCross{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(calc(-100vw - 100%),0,0)}
+}
+/* 四种云型轮着来：宽团云 / 高积云 / 碎云 / 层云。--ar 是该型的「高/宽」 */
+#wxFxPuff i:nth-child(5n+1)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20420%20170%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFFFFF%27%2F%3E%3Cstop%20offset%3D%27.30%27%20stop-color%3D%27%23FBFDFF%27%2F%3E%3Cstop%20offset%3D%27.66%27%20stop-color%3D%27%23EDF4FC%27%2F%3E%3Cstop%20offset%3D%27.88%27%20stop-color%3D%27%23DCE8F6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23CBDCEF%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2753%27%20cy%3D%27139%27%20r%3D%2734%27%2F%3E%3Ccircle%20cx%3D%2792%27%20cy%3D%27114%27%20r%3D%2751%27%2F%3E%3Ccircle%20cx%3D%27132%27%20cy%3D%2793%27%20r%3D%2771%27%2F%3E%3Ccircle%20cx%3D%27171%27%20cy%3D%2780%27%20r%3D%2759%27%2F%3E%3Ccircle%20cx%3D%27210%27%20cy%3D%2775%27%20r%3D%2773%27%2F%3E%3Ccircle%20cx%3D%27249%27%20cy%3D%2780%27%20r%3D%2754%27%2F%3E%3Ccircle%20cx%3D%27288%27%20cy%3D%2793%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27328%27%20cy%3D%27114%27%20r%3D%2761%27%2F%3E%3Ccircle%20cx%3D%27367%27%20cy%3D%27139%27%20r%3D%2737%27%2F%3E%3Cellipse%20cx%3D%27210%27%20cy%3D%27153%27%20rx%3D%27185%27%20ry%3D%2720%27%2F%3E%3Cellipse%20cx%3D%27134%27%20cy%3D%27146%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3Cellipse%20cx%3D%27294%27%20cy%3D%27148%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxPuff i:nth-child(5n+2)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20300%20200%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFFFFF%27%2F%3E%3Cstop%20offset%3D%27.30%27%20stop-color%3D%27%23FBFDFF%27%2F%3E%3Cstop%20offset%3D%27.66%27%20stop-color%3D%27%23EDF4FC%27%2F%3E%3Cstop%20offset%3D%27.88%27%20stop-color%3D%27%23DCE8F6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23CBDCEF%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2742%27%20cy%3D%27160%27%20r%3D%2725%27%2F%3E%3Ccircle%20cx%3D%2778%27%20cy%3D%27123%27%20r%3D%2740%27%2F%3E%3Ccircle%20cx%3D%27114%27%20cy%3D%2797%27%20r%3D%2754%27%2F%3E%3Ccircle%20cx%3D%27150%27%20cy%3D%2788%27%20r%3D%2744%27%2F%3E%3Ccircle%20cx%3D%27186%27%20cy%3D%2797%27%20r%3D%2750%27%2F%3E%3Ccircle%20cx%3D%27222%27%20cy%3D%27123%27%20r%3D%2732%27%2F%3E%3Ccircle%20cx%3D%27258%27%20cy%3D%27160%27%20r%3D%2731%27%2F%3E%3Cellipse%20cx%3D%27150%27%20cy%3D%27180%27%20rx%3D%27132%27%20ry%3D%2723%27%2F%3E%3Cellipse%20cx%3D%2796%27%20cy%3D%27172%27%20rx%3D%2790%27%20ry%3D%2720%27%2F%3E%3Cellipse%20cx%3D%27210%27%20cy%3D%27174%27%20rx%3D%2790%27%20ry%3D%2720%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxPuff i:nth-child(5n+3)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20240%20120%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFFFFF%27%2F%3E%3Cstop%20offset%3D%27.30%27%20stop-color%3D%27%23FBFDFF%27%2F%3E%3Cstop%20offset%3D%27.66%27%20stop-color%3D%27%23EDF4FC%27%2F%3E%3Cstop%20offset%3D%27.88%27%20stop-color%3D%27%23DCE8F6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23CBDCEF%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2739%27%20cy%3D%2791%27%20r%3D%2721%27%2F%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2763%27%20r%3D%2735%27%2F%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%2753%27%20r%3D%2745%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%2763%27%20r%3D%2732%27%2F%3E%3Ccircle%20cx%3D%27201%27%20cy%3D%2791%27%20r%3D%2728%27%2F%3E%3Cellipse%20cx%3D%27120%27%20cy%3D%27108%27%20rx%3D%27106%27%20ry%3D%2714%27%2F%3E%3Cellipse%20cx%3D%2777%27%20cy%3D%27103%27%20rx%3D%2772%27%20ry%3D%2712%27%2F%3E%3Cellipse%20cx%3D%27168%27%20cy%3D%27104%27%20rx%3D%2772%27%20ry%3D%2712%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxPuff i:nth-child(5n+4)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20460%20130%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFFFFF%27%2F%3E%3Cstop%20offset%3D%27.30%27%20stop-color%3D%27%23FBFDFF%27%2F%3E%3Cstop%20offset%3D%27.66%27%20stop-color%3D%27%23EDF4FC%27%2F%3E%3Cstop%20offset%3D%27.88%27%20stop-color%3D%27%23DCE8F6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23CBDCEF%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2754%27%20cy%3D%27108%27%20r%3D%2736%27%2F%3E%3Ccircle%20cx%3D%2789%27%20cy%3D%2792%27%20r%3D%2753%27%2F%3E%3Ccircle%20cx%3D%27125%27%20cy%3D%2778%27%20r%3D%2773%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%2767%27%20r%3D%2762%27%2F%3E%3Ccircle%20cx%3D%27195%27%20cy%3D%2760%27%20r%3D%2779%27%2F%3E%3Ccircle%20cx%3D%27230%27%20cy%3D%2757%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27265%27%20cy%3D%2760%27%20r%3D%2772%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%2767%27%20r%3D%2780%27%2F%3E%3Ccircle%20cx%3D%27335%27%20cy%3D%2778%27%20r%3D%2756%27%2F%3E%3Ccircle%20cx%3D%27371%27%20cy%3D%2792%27%20r%3D%2758%27%2F%3E%3Ccircle%20cx%3D%27406%27%20cy%3D%27108%27%20r%3D%2736%27%2F%3E%3Cellipse%20cx%3D%27230%27%20cy%3D%27117%27%20rx%3D%27202%27%20ry%3D%2715%27%2F%3E%3Cellipse%20cx%3D%27147%27%20cy%3D%27112%27%20rx%3D%27138%27%20ry%3D%2713%27%2F%3E%3Cellipse%20cx%3D%27322%27%20cy%3D%27113%27%20rx%3D%27138%27%20ry%3D%2713%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxPuff i:nth-child(5n+5)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20420%20170%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFFFFF%27%2F%3E%3Cstop%20offset%3D%27.30%27%20stop-color%3D%27%23FBFDFF%27%2F%3E%3Cstop%20offset%3D%27.66%27%20stop-color%3D%27%23EDF4FC%27%2F%3E%3Cstop%20offset%3D%27.88%27%20stop-color%3D%27%23DCE8F6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23CBDCEF%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2753%27%20cy%3D%27139%27%20r%3D%2734%27%2F%3E%3Ccircle%20cx%3D%2792%27%20cy%3D%27114%27%20r%3D%2751%27%2F%3E%3Ccircle%20cx%3D%27132%27%20cy%3D%2793%27%20r%3D%2771%27%2F%3E%3Ccircle%20cx%3D%27171%27%20cy%3D%2780%27%20r%3D%2759%27%2F%3E%3Ccircle%20cx%3D%27210%27%20cy%3D%2775%27%20r%3D%2773%27%2F%3E%3Ccircle%20cx%3D%27249%27%20cy%3D%2780%27%20r%3D%2754%27%2F%3E%3Ccircle%20cx%3D%27288%27%20cy%3D%2793%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27328%27%20cy%3D%27114%27%20r%3D%2761%27%2F%3E%3Ccircle%20cx%3D%27367%27%20cy%3D%27139%27%20r%3D%2737%27%2F%3E%3Cellipse%20cx%3D%27210%27%20cy%3D%27153%27%20rx%3D%27185%27%20ry%3D%2720%27%2F%3E%3Cellipse%20cx%3D%27134%27%20cy%3D%27146%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3Cellipse%20cx%3D%27294%27%20cy%3D%27148%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxPuff i:nth-child(5n+1){--ar:.405}
+#wxFxPuff i:nth-child(5n+2){--ar:.667}
+#wxFxPuff i:nth-child(5n+3){--ar:.500}
+#wxFxPuff i:nth-child(5n+4){--ar:.283}
+#wxFxPuff i:nth-child(5n+5){--ar:.405}
+
+/* ---- 60.4 乌云：同一套机制，换深色位图、更慢更大 ---- */
+#wxFxBack .wxfx-storm{
+  position:absolute;inset:0;overflow:hidden;
+  background:none;
+  -webkit-mask:none;mask:none;
+  opacity:0;transition:opacity 2.2s var(--ease);
+  pointer-events:none;
+}
+#wxFxBack .wxfx-storm i{
+  position:absolute;left:100%;top:var(--ct,4%);
+  width:var(--cw,70vw);height:calc(var(--cw,70vw) * var(--ar,.47));
+  animation:wxCloudCross var(--dur,170s) linear infinite;
+  animation-delay:var(--dl,0s);
+  will-change:transform;
+}
+#wxFxBack .wxfx-storm i>b{
+  display:block;width:100%;height:100%;
+  border-radius:0;
+  background-repeat:no-repeat;background-size:100% 100%;
+  filter:none;
+  opacity:var(--op,.8);
+  animation:none;
+}
+#wxFxStorm i:nth-child(4n+1)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20420%20170%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%2379848F%27%2F%3E%3Cstop%20offset%3D%27.34%27%20stop-color%3D%27%235A6570%27%2F%3E%3Cstop%20offset%3D%27.68%27%20stop-color%3D%27%23414B57%27%2F%3E%3Cstop%20offset%3D%27.9%27%20stop-color%3D%27%23313A45%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23262D36%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2753%27%20cy%3D%27139%27%20r%3D%2734%27%2F%3E%3Ccircle%20cx%3D%2792%27%20cy%3D%27114%27%20r%3D%2751%27%2F%3E%3Ccircle%20cx%3D%27132%27%20cy%3D%2793%27%20r%3D%2771%27%2F%3E%3Ccircle%20cx%3D%27171%27%20cy%3D%2780%27%20r%3D%2759%27%2F%3E%3Ccircle%20cx%3D%27210%27%20cy%3D%2775%27%20r%3D%2773%27%2F%3E%3Ccircle%20cx%3D%27249%27%20cy%3D%2780%27%20r%3D%2754%27%2F%3E%3Ccircle%20cx%3D%27288%27%20cy%3D%2793%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27328%27%20cy%3D%27114%27%20r%3D%2761%27%2F%3E%3Ccircle%20cx%3D%27367%27%20cy%3D%27139%27%20r%3D%2737%27%2F%3E%3Cellipse%20cx%3D%27210%27%20cy%3D%27153%27%20rx%3D%27185%27%20ry%3D%2720%27%2F%3E%3Cellipse%20cx%3D%27134%27%20cy%3D%27146%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3Cellipse%20cx%3D%27294%27%20cy%3D%27148%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxStorm i:nth-child(4n+2)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20300%20200%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%2379848F%27%2F%3E%3Cstop%20offset%3D%27.34%27%20stop-color%3D%27%235A6570%27%2F%3E%3Cstop%20offset%3D%27.68%27%20stop-color%3D%27%23414B57%27%2F%3E%3Cstop%20offset%3D%27.9%27%20stop-color%3D%27%23313A45%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23262D36%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2742%27%20cy%3D%27160%27%20r%3D%2725%27%2F%3E%3Ccircle%20cx%3D%2778%27%20cy%3D%27123%27%20r%3D%2740%27%2F%3E%3Ccircle%20cx%3D%27114%27%20cy%3D%2797%27%20r%3D%2754%27%2F%3E%3Ccircle%20cx%3D%27150%27%20cy%3D%2788%27%20r%3D%2744%27%2F%3E%3Ccircle%20cx%3D%27186%27%20cy%3D%2797%27%20r%3D%2750%27%2F%3E%3Ccircle%20cx%3D%27222%27%20cy%3D%27123%27%20r%3D%2732%27%2F%3E%3Ccircle%20cx%3D%27258%27%20cy%3D%27160%27%20r%3D%2731%27%2F%3E%3Cellipse%20cx%3D%27150%27%20cy%3D%27180%27%20rx%3D%27132%27%20ry%3D%2723%27%2F%3E%3Cellipse%20cx%3D%2796%27%20cy%3D%27172%27%20rx%3D%2790%27%20ry%3D%2720%27%2F%3E%3Cellipse%20cx%3D%27210%27%20cy%3D%27174%27%20rx%3D%2790%27%20ry%3D%2720%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxStorm i:nth-child(4n+3)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20460%20130%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%2379848F%27%2F%3E%3Cstop%20offset%3D%27.34%27%20stop-color%3D%27%235A6570%27%2F%3E%3Cstop%20offset%3D%27.68%27%20stop-color%3D%27%23414B57%27%2F%3E%3Cstop%20offset%3D%27.9%27%20stop-color%3D%27%23313A45%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23262D36%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2754%27%20cy%3D%27108%27%20r%3D%2736%27%2F%3E%3Ccircle%20cx%3D%2789%27%20cy%3D%2792%27%20r%3D%2753%27%2F%3E%3Ccircle%20cx%3D%27125%27%20cy%3D%2778%27%20r%3D%2773%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%2767%27%20r%3D%2762%27%2F%3E%3Ccircle%20cx%3D%27195%27%20cy%3D%2760%27%20r%3D%2779%27%2F%3E%3Ccircle%20cx%3D%27230%27%20cy%3D%2757%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27265%27%20cy%3D%2760%27%20r%3D%2772%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%2767%27%20r%3D%2780%27%2F%3E%3Ccircle%20cx%3D%27335%27%20cy%3D%2778%27%20r%3D%2756%27%2F%3E%3Ccircle%20cx%3D%27371%27%20cy%3D%2792%27%20r%3D%2758%27%2F%3E%3Ccircle%20cx%3D%27406%27%20cy%3D%27108%27%20r%3D%2736%27%2F%3E%3Cellipse%20cx%3D%27230%27%20cy%3D%27117%27%20rx%3D%27202%27%20ry%3D%2715%27%2F%3E%3Cellipse%20cx%3D%27147%27%20cy%3D%27112%27%20rx%3D%27138%27%20ry%3D%2713%27%2F%3E%3Cellipse%20cx%3D%27322%27%20cy%3D%27113%27%20rx%3D%27138%27%20ry%3D%2713%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxStorm i:nth-child(4n+4)>b{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20420%20170%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%2379848F%27%2F%3E%3Cstop%20offset%3D%27.34%27%20stop-color%3D%27%235A6570%27%2F%3E%3Cstop%20offset%3D%27.68%27%20stop-color%3D%27%23414B57%27%2F%3E%3Cstop%20offset%3D%27.9%27%20stop-color%3D%27%23313A45%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23262D36%27%2F%3E%3C%2FlinearGradient%3E%3Cfilter%20id%3D%27b%27%20x%3D%27-25%25%27%20y%3D%27-35%25%27%20width%3D%27150%25%27%20height%3D%27180%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%275.5%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23g%29%27%20filter%3D%27url%28%23b%29%27%3E%3Ccircle%20cx%3D%2753%27%20cy%3D%27139%27%20r%3D%2734%27%2F%3E%3Ccircle%20cx%3D%2792%27%20cy%3D%27114%27%20r%3D%2751%27%2F%3E%3Ccircle%20cx%3D%27132%27%20cy%3D%2793%27%20r%3D%2771%27%2F%3E%3Ccircle%20cx%3D%27171%27%20cy%3D%2780%27%20r%3D%2759%27%2F%3E%3Ccircle%20cx%3D%27210%27%20cy%3D%2775%27%20r%3D%2773%27%2F%3E%3Ccircle%20cx%3D%27249%27%20cy%3D%2780%27%20r%3D%2754%27%2F%3E%3Ccircle%20cx%3D%27288%27%20cy%3D%2793%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27328%27%20cy%3D%27114%27%20r%3D%2761%27%2F%3E%3Ccircle%20cx%3D%27367%27%20cy%3D%27139%27%20r%3D%2737%27%2F%3E%3Cellipse%20cx%3D%27210%27%20cy%3D%27153%27%20rx%3D%27185%27%20ry%3D%2720%27%2F%3E%3Cellipse%20cx%3D%27134%27%20cy%3D%27146%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3Cellipse%20cx%3D%27294%27%20cy%3D%27148%27%20rx%3D%27126%27%20ry%3D%2717%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#wxFxStorm i:nth-child(4n+1){--ar:.405}
+#wxFxStorm i:nth-child(4n+2){--ar:.667}
+#wxFxStorm i:nth-child(4n+3){--ar:.283}
+#wxFxStorm i:nth-child(4n+4){--ar:.405}
+
+/* 旧的 .wxfx-sky i / .wxfx-storm i 云规则已整体让位（HTML 里已经没有这些 i），
+   这里显式关掉，免得旧 keyframes / will-change 还在空转 */
+.wxfx-sky i,.wxfx-storm i{animation:none;will-change:auto}
+
+/* ---- 60.5 阳光：把"扫动"停掉 ----
+   32 秒平移一整层 560×1080 的渐变，等于每帧都要重算一次全屏混合，
+   而肉眼根本看不出那 2.8% 的位移。改成静态，只留淡入淡出 */
+#wxFxBack .wxfx-sunwash{animation:none!important}
+
+/* ---- 60.6 减少动效：云停住但仍在（不是"天气不存在"） ---- */
+@media (prefers-reduced-motion:reduce){
+  .wxfx-puff i,#wxFxBack .wxfx-storm i{animation:none!important;
+    transform:translate3d(-42vw,0,0)}
+  #wxFxBack .wxfx-sky::after{animation:none!important}
+}
+
+/* ============================================================================
+   61 安卓 / 手机端降温（小米 18 Pro · Chrome 重点）
+   ----------------------------------------------------------------------------
+   上一版特效之所以"烫"，成本几乎全在这一条链上：
+     天幕在动（云在走） → 卡片带 backdrop-filter → 卡片背后的画面每帧都变
+     → 每帧都要为 4 张卡各做一次 12px 高斯 + 色彩矩阵 → GPU 常态满载。
+   只要背后有东西在动，模糊结果就永远不能复用；这不是"优化模糊半径"能救的。
+
+   所以手机档改成**静态磨砂**：去掉 backdrop-filter，用一层更实的半透明白
+   （.34）承担"透光"，卡片的棱镜高光、内环、投影全部保留。
+   底色本来就是柔和渐变 + 柔边云，肉眼看和"真模糊"几乎一样，
+   而每帧的离屏高斯从此归零 —— 这是这一版最大的一笔省电。
+   ========================================================================== */
+html.lite .profile-row,
+html.lite .weather-widget,
+html.lite .calendar-widget,
+html.lite .apps-scroll-wrapper{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  background-color:rgba(255,255,255,.30);
+  background-image:
+    radial-gradient(78% 62% at 0% 0%,rgba(255,255,255,.40) 0%,rgba(255,255,255,0) 62%),
+    linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.14) 9%,rgba(255,255,255,0) 30%),
+    linear-gradient(152deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,0) 46%,rgba(255,255,255,.10) 100%);
+}
+html.lite.dark-mode .profile-row,
+html.lite.dark-mode .weather-widget,
+html.lite.dark-mode .calendar-widget,
+html.lite.dark-mode .apps-scroll-wrapper{
+  background-color:rgba(24,26,42,.60);
+}
+/* ---- 61.2 卡片跟着天气换"白" ----
+   去掉模糊之后，卡片就只是一层半透明白；天在卡片后面的颜色，全靠这层白的
+   冷暖来转述。四档各给一个很淡的色偏（差值 6~10 级），整页的氛围就跟着走：
+     晴 → 暖白（像阳光照过的纸）
+     多云 → 中性的白
+     阴 → 冷灰白（纸放在阴天里会发青）
+     雨 → 更冷的钢灰白
+   只改 background-color，不动 background-image，棱镜高光和渐变层次原样保留 */
+html.lite[data-wx="sunny"] .profile-row,
+html.lite[data-wx="sunny"] .weather-widget,
+html.lite[data-wx="sunny"] .calendar-widget,
+html.lite[data-wx="sunny"] .apps-scroll-wrapper{background-color:rgba(255,252,244,.30)}
+html.lite[data-wx="overcast"] .profile-row,
+html.lite[data-wx="overcast"] .weather-widget,
+html.lite[data-wx="overcast"] .calendar-widget,
+html.lite[data-wx="overcast"] .apps-scroll-wrapper{background-color:rgba(233,237,242,.40)}
+html.lite[data-wx="rain"] .profile-row,
+html.lite[data-wx="rain"] .weather-widget,
+html.lite[data-wx="rain"] .calendar-widget,
+html.lite[data-wx="rain"] .apps-scroll-wrapper{background-color:rgba(224,231,240,.42)}
+html.lite[data-wx="snow"] .profile-row,
+html.lite[data-wx="snow"] .weather-widget,
+html.lite[data-wx="snow"] .calendar-widget,
+html.lite[data-wx="snow"] .apps-scroll-wrapper{background-color:rgba(240,244,249,.40)}
+
+/* ---- 61.3 阴雨天的顶栏可读性 ----
+   时钟是 background-clip:text 的渐变字，天幕一压暗就和背景糊在一起（实测小雨 2.1:1）。
+   这里给字形外沿加一层极淡的白色辉光 —— 用的是 filter: drop-shadow，不是
+   text-shadow：后者在"填充透明"的字上会从字心透出来，看着像糊了一圈脏边。 */
+html[data-wx="overcast"] #statusClock,
+html[data-wx="rain"] #statusClock,
+html[data-wx="fog"] #statusClock,
+html[data-wx="snow"] #statusClock{
+  filter:drop-shadow(0 1px 3px rgba(255,255,255,.92)) drop-shadow(0 0 6px rgba(255,255,255,.55));
+}
+html[data-wx="overcast"] .status-theme-toggle,
+html[data-wx="rain"] .status-theme-toggle,
+html[data-wx="fog"] .status-theme-toggle,
+html[data-wx="snow"] .status-theme-toggle{color:rgba(46,54,96,.86)}
+
+/* 弹层是"打开才有"的短时开销，仍然保留真模糊，只把半径收到 16px */
+html.lite .weather-sheet-overlay .weather-sheet-panel,
+html.lite .city-picker-panel,
+html.lite .month-calendar-panel{
+  -webkit-backdrop-filter:blur(16px) saturate(160%);
+  backdrop-filter:blur(16px) saturate(160%);
+}
+
+/* 彩虹流光文字：每帧重排 gradient + 一次 drop-shadow 离屏 pass。
+   line-1 早已改成 text-shadow，另外三处漏了，这里补齐 */
+html.lite .profile-row .name,
+html.lite .profile-row .subtitle .line-2,
+html.lite .island-grad{
+  filter:none;
+  text-shadow:0 1px 5px rgba(150,100,255,.24);
+}
+html.lite.dark-mode .profile-row .name,
+html.lite.dark-mode .profile-row .subtitle .line-2,
+html.lite.dark-mode .island-grad{
+  text-shadow:0 0 6px rgba(190,140,255,.42);
+}
+/* 头像外圈：旋转 conic + blur(2px)、呼吸光晕 blur(10px)。
+   两者都在动，模糊层每帧跟着重新栅格化；手机档留"转"、去掉"糊" */
+html.lite .avatar-halo{filter:none;opacity:.55}
+html.lite .avatar-center::before{filter:saturate(150%)}
+
+/* 雾 / 霾 / 雾罩：宽度 170~180%、还在无限平移，图层纹理按 DPR3 算是几十 MB。
+   手机档收到 130% 宽、40vh 高，位移距离减半 —— 观感不变，带宽砍一半 */
+html.lite .wxfx-fog i{width:132%;left:-16%;height:40vh}
+html.lite .wxfx-smog i{width:140%;left:-20%;height:44vh}
+html.lite .wxfx-fogfront i{width:140%;left:-20%;height:46vh}
+</style>
     <script>
         (function () {
             try {
@@ -4466,14 +4814,16 @@ self.addEventListener('fetch', function (e) {
 
     <!-- 天气氛围：日光 / 雨丝 / 雪 / 雷电 / 雾 / 霾（样式见 §34，JS 见 §34）
          两层分开：back 在卡片后（透玻璃显色），front 在卡片上（雨滴在"窗玻璃"上） -->
-    <div class="wxfx wxfx-back" id="wxFxBack" aria-hidden="true">
-        <!-- 晴天蓝天白云（§48）：盖住原来的极光底，底部渐隐回原背景 -->
-        <div class="wxfx-sky fx-off" id="wxFxSky"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+    <div class="wxfx wxfx-back" id="wxFxBack" aria-hidden="true" data-wx="none">
+        <!-- 天幕（§60）：按 data-wx 换四套底色，太阳本体/光芒是它的两层伪元素 -->
+        <div class="wxfx-sky fx-off" id="wxFxSky"></div>
         <div class="wxfx-sunwash fx-off" id="wxFxSunWash"></div>
         <div class="wxfx-glow fx-off" id="wxFxGlow"></div>
         <div class="wxfx-cloud fx-off" id="wxFxCloud"></div>
-        <!-- 顶部乌云（§47）：四团模糊椭圆各自慢慢横移，压在卡片后面当"远天的云" -->
-        <div class="wxfx-storm fx-off" id="wxFxStorm"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+        <!-- 白云（§60.3）：九团，从右往左单向穿屏，速度和浓淡载入时随机 -->
+        <div class="wxfx-puff fx-off" id="wxFxPuff"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+        <!-- 乌云（§60.4）：八团，阴天 / 雨雪都靠它，不再是"只有下雨才有云" -->
+        <div class="wxfx-storm fx-off" id="wxFxStorm"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
         <div class="wxfx-fog fx-off" id="wxFxFog"><i></i><i></i><i></i></div>
         <div class="wxfx-fogmask fx-off" id="wxFxFogMask"></div>
         <div class="wxfx-wet fx-off" id="wxFxWet"></div>
@@ -5296,6 +5646,7 @@ self.addEventListener('fetch', function (e) {
                 var fogFrontEl = document.getElementById('wxFxFogFront');
                 var stormEl = document.getElementById('wxFxStorm');
                 var skyEl = document.getElementById('wxFxSky');
+                var puffEl = document.getElementById('wxFxPuff');
 
                 /* §53 只为"现在这种天气"保留图层。
                    opacity:0 不等于不渲染：雾 / 霾 / 雾罩那三层挂着 blur(22~26px)、
@@ -5329,35 +5680,27 @@ self.addEventListener('fetch', function (e) {
                    CSS 里的 --p1~--p4 只是构图基准，这里各抖 ±6% —— 六团云就不再是
                    同一个模子；时长和相位也各自错开，云不会集体同频呼吸。
                    放在早退判断之前：就算这页没有雨雪 canvas，云照样该动。 */
+                /* §60 云层的随机：每团云的「多大 / 多浓 / 飘多快 / 从哪个高度进场」
+                   都在载入时抽一次，并错开相位 —— 九团云不会排着队一起走。
+                   位移是单向穿越（见 wxCloudCross），所以延时必须是负的随机值：
+                   页面一打开天上就已经有几团云在各个位置，而不是等第一团慢慢飘进来。 */
                 (function seedClouds() {
-                    var els = document.querySelectorAll('.wxfx-storm i,.wxfx-sky i');
-                    var k, j, e, cs, raw, mm, vx, vy;
-                    for (k = 0; k < els.length; k++) {
-                        e = els[k];
-                        var drift = 15 + Math.random() * 11;      /* 15~26s 漂一趟 */
-                        var morph = 9 + Math.random() * 7;        /* 9~16s 改一次形 */
-                        /* 每团云的浓淡也不一样：六团一样黑的时候，它们互相压住的地方
-                           没有边界，横向漂起来就是"一块均匀的灰在挪"，看不出在动。
-                           拉开浓淡，谁在前谁在后一眼分明，位移才读得出来 */
-                        e.style.opacity = (0.62 + Math.random() * 0.36).toFixed(2);
-                        e.style.setProperty('--dur', drift.toFixed(1) + 's');
-                        e.style.setProperty('--dl', (-Math.random() * drift).toFixed(1) + 's');
-                        e.style.setProperty('--mdur', morph.toFixed(1) + 's');
-                        e.style.setProperty('--mdl', (-Math.random() * morph).toFixed(1) + 's');
-                        try { cs = window.getComputedStyle(e); } catch (eCs) { cs = null; }
-                        if (!cs) continue;
-                        for (j = 1; j <= 4; j++) {
-                            raw = (cs.getPropertyValue('--p' + j) || '').replace(/^\s+|\s+$/g, '');
-                            mm = raw.split(/\s+/);
-                            if (mm.length !== 2) continue;         /* 白云只有三团 */
-                            vx = parseFloat(mm[0]) + (Math.random() * 12 - 6);
-                            vy = parseFloat(mm[1]) + (Math.random() * 10 - 5);
-                            if (!(vx >= 0)) continue;
-                            if (vx < 14) vx = 14; else if (vx > 86) vx = 86;
-                            if (vy < 18) vy = 18; else if (vy > 82) vy = 82;
-                            e.style.setProperty('--p' + j, Math.round(vx) + '% ' + Math.round(vy) + '%');
+                    function seed(sel, cfg) {
+                        var els = document.querySelectorAll(sel), i, e;
+                        for (i = 0; i < els.length; i++) {
+                            e = els[i];
+                            var dur = cfg.dur[0] + Math.random() * (cfg.dur[1] - cfg.dur[0]);
+                            e.style.setProperty('--cw', (cfg.w[0] + Math.random() * (cfg.w[1] - cfg.w[0])).toFixed(1) + 'vw');
+                            e.style.setProperty('--ct', (cfg.top[0] + Math.random() * (cfg.top[1] - cfg.top[0])).toFixed(1) + '%');
+                            e.style.setProperty('--op', (cfg.op[0] + Math.random() * (cfg.op[1] - cfg.op[0])).toFixed(2));
+                            e.style.setProperty('--dur', dur.toFixed(1) + 's');
+                            e.style.setProperty('--dl', (-Math.random() * dur).toFixed(1) + 's');
                         }
                     }
+                    /* 白云：34~86vw，落在天顶 44% 以内；78~150 秒穿一趟 */
+                    seed('#wxFxPuff i', { w: [26, 58], top: [-8, 40], op: [.66, .98], dur: [80, 155] });
+                    /* 乌云：更大更慢、压得更低 —— 阴天不是"飘几朵云"，是"整片压顶" */
+                    seed('#wxFxStorm i', { w: [30, 62], top: [-18, 46], op: [.78, 1], dur: [150, 260] });
                 })();
                 var noop = { apply: function () { }, refresh: function () { } };
                 if (!canvas || !canvas.getContext || !backEl || !sunEl) return noop;
@@ -5465,7 +5808,9 @@ self.addEventListener('fetch', function (e) {
                     /* 1.8 而不是 2：雨丝线宽只有 1~1.5px，2 倍和 1.8 倍肉眼分不出来，
                        但整块画布面积少 19%、每帧填充的像素少 19% —— 满屏 canvas 的成本
                        几乎全在填充率上 */
-                    dpr = Math.min(lite ? 1.35 : 1.8, window.devicePixelRatio || 1);
+                    /* §61 手机档：雨丝只有 1~1.7px 宽，1.25 倍在 400+ppi 上依然看不出锯齿，
+                       但满屏画布的填充像素再少 15% —— 这一层的成本几乎全在填充率上 */
+                    dpr = Math.min(lite ? 1.25 : 1.8, window.devicePixelRatio || 1);
                     W = canvas.clientWidth || window.innerWidth;
                     H = canvas.clientHeight || window.innerHeight;
                     canvas.width = Math.max(1, Math.round(W * dpr));
@@ -5527,7 +5872,7 @@ self.addEventListener('fetch', function (e) {
                     if (kind === 'rain') n = Math.round(RAIN[level].n * patScale);
                     if (kind === 'snow') n = Math.round(SNOW[level].n * patScale);
                     if (isLowEnd) n = Math.round(n * 0.62);
-                    if (lite) n = Math.round(n * 0.78);
+                    if (lite) n = Math.round(n * 0.68);
                     // 兜底：算下来太少就补到看得见的量，省电不等于"今天不下雨"
                     if (kind !== 'none' && n < 8) n = level >= 3 ? 16 : 9;
                     if (reseed) drops.length = 0;
@@ -5942,7 +6287,9 @@ self.addEventListener('fetch', function (e) {
                     var canDraw = !!(probe.getContext && probe.getContext('2d'));
                     /* 低端机不给 60fps 也不砍掉：水珠是这轮的主角，砍掉等于白做。
                        改成珠数打六折 + 24fps，重绘量掉到四成 */
-                    var fps = (isLowEnd || lite) ? 24 : 32;
+                    /* 玻璃水珠：18fps 下「珠子在滑」完全成立（水珠本来就走得慢），
+                       4 块小画布加起来每帧少画四分之一 */
+                    var fps = (isLowEnd || lite) ? 18 : 32;
 
                     function r2(a, b) { return a + Math.random() * (b - a); }
 
@@ -6376,16 +6723,50 @@ self.addEventListener('fetch', function (e) {
                        近白的暖色，压 0.92 会把刚铺上的蓝整片洗成淡紫白 ——
                        "蓝天白云"和"阳光暖罩"抢的是同一块地方，蓝天优先 */
                     fxShow(sunWashEl, sun * 0.52);
-                    // 蓝天白云：和阳光同源，只有真的「晴」才露脸（夜里 sun=0，自动不出现）
-                    fxShow(skyEl, sun * 0.94);
+                    /* §60 天幕 / 白云 / 乌云 -------------------------------------------------
+                       天幕不再跟 sun 走（那样多云天就只剩 0.15，等于没有）。
+                       现在按天气码分四档，天幕本身用 data-wx 换色，opacity 只负责淡入淡出：
+                         晴   → 蓝天 + 白云飘
+                         多云 → 淡一点的天 + 满天的云
+                         阴   → 灰蓝天顶 + 乌云压顶（这一档以前是空的）
+                         雨雪 → 更暗的天顶 + 更厚的乌云
+                       夜里（isDay=0）整层退出，还原本来的深色底。 */
+                    var wxKind = 'none';
+                    if (code === 45 || code === 48) wxKind = 'fog';
+                    else if (isRainCode) wxKind = 'rain';
+                    else if (isSnowCode) wxKind = 'snow';
+                    else if (code === 3) wxKind = 'overcast';
+                    else if (code === 2) wxKind = 'cloudy';
+                    else if (isDay) wxKind = 'sunny';
+                    var skyOp = 0, puffOp = 0, stormOp = 0;
+                    if (isDay) {
+                        if (wxKind === 'sunny') { skyOp = 1; puffOp = 0.96; }
+                        else if (wxKind === 'cloudy') { skyOp = 0.92; puffOp = 1; }
+                        else if (wxKind === 'overcast') { skyOp = 0.86; stormOp = 0.74; }
+                        else if (wxKind === 'snow') { skyOp = 0.62; stormOp = 0.52; }
+                        else if (wxKind === 'rain') { skyOp = 0.56; stormOp = 0.92; }
+                        else if (wxKind === 'fog') { skyOp = 0.9; puffOp = 0.22; }
+                    }
+                    /* 深色主题：天幕只是"暮色"，白云要退成银灰 —— 纯白在深底上
+                       就是一块发光的海绵，卡片再透一下整页就白了 */
+                    if (isDark()) { skyOp *= 0.30; puffOp *= 0.10; stormOp *= 0.6; }
+                    if (backEl.getAttribute('data-wx') !== wxKind) {
+                        backEl.setAttribute('data-wx', wxKind);
+                        // 同一个值挂到 <html> 上：卡片的"天气色"要按它切（见 §61.2）
+                        document.documentElement.setAttribute('data-wx', wxKind);
+                    }
+                    backEl.style.setProperty('--sun', (isDay ? sun : 0).toFixed(3));
+                    backEl.style.setProperty('--sun-x', pct.toFixed(3));
+                    fxShow(skyEl, skyOp);
+                    fxShow(puffEl, puffOp);
 
                     // ---- 灰纱：阴天/雨天整体压暗，雷雨最暗 ----
                     var veil = 0;
                     if (kind === 'rain') veil = 0.14 + Math.min(0.16, precip * 0.012);
                     else if (kind === 'snow') veil = 0.16;
-                    else if (code === 3) veil = 0.13;
-                    else if (code === 2) veil = 0.06;
-                    else if (code === 1) veil = 0.025;
+                    else if (code === 3) veil = 0.05;
+                    else if (code === 2) veil = 0.03;
+                    else if (code === 1) veil = 0.02;
                     if (isStorm) veil = Math.min(0.34, veil + 0.08);
                     fxShow(cloudEl, veil);
 
@@ -6431,7 +6812,9 @@ self.addEventListener('fetch', function (e) {
                        云量按降水量走，小雨是一层薄灰，雷雨压到接近 1 */
                     var raining = (kind === 'rain');
                     try { glassRain.set(raining, raining ? Math.min(1, 0.42 + precip * 0.1) : 0); } catch (eGr) { }
-                    fxShow(stormEl, raining ? 0.86 + Math.min(0.14, precip * 0.02) : 0);
+                    // 乌云：阴天/雨/雪都在上面那一步算好了（stormOp），这里只补降雨的浓淡
+                    if (wxKind === 'rain') stormOp = 0.86 + Math.min(0.14, precip * 0.02);
+                    fxShow(stormEl, stormOp);
                 }
 
                 // AQI 是并行拉的，比天气晚到：拿到 PM2.5 后只重算霾那层
