@@ -1105,7 +1105,9 @@ html.dark-mode .avatar-center img{
   grid-template-rows:minmax(0,1fr);
   gap:12px;
   height:clamp(228px,64vw,254px);
-  min-height:0;
+  /* 正常情况 height 说了算；文字被浏览器放大时内容 min-content 会超过 height，
+     这行保证顶卡跟着长高、下面的卡整体下移，文字永远在玻璃里面 */
+  min-height:max-content;
   align-items:stretch;
 }
 /* 图片卡：撑满左列，图片按 cover 裁切 */
@@ -1145,9 +1147,10 @@ html.dark-mode .top-card .plate-photo::after{
 .top-right{
   height:100%;min-width:0;
   display:grid;
-  /* 天气行 min-content 保底：系统字体放大时宁可往下多占几px，也不把日出日落裁掉；
-     日历行不保底（小屏下它的 min-content 会把右列顶出顶卡） */
-  grid-template-rows:minmax(min-content,1.08fr) minmax(0,.92fr);
+  /* 天气 / 日历行都给 min-content 保底：小米等浏览器会放大网页文字（font boosting），
+     文字一膨胀行就撑破 fr 份额 —— 配合下面 top-card 的 min-height:max-content，
+     卡片盒子会跟着内容长高，宁可顶卡整体变高一点，也不让文字伸出玻璃外面 */
+  grid-template-rows:minmax(min-content,1.08fr) minmax(min-content,.92fr);
   gap:8px;
 }
 
