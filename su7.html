@@ -100,7 +100,6 @@
   --weather-temp-color:var(--label);
   --weather-desc-color:var(--label-2);
   --weather-loc-color:var(--label-2);
-  --weather-wind-color:var(--label-2);
   --weather-minmax-color:var(--label-3);
   --calendar-year-color:var(--label);
   --calendar-weekday-color:var(--red);
@@ -162,7 +161,7 @@ button{font:inherit;cursor:pointer;background:none;border:none;outline:none;colo
 img,video,button,.app-button,.plate-photo,.avatar-center{-webkit-user-select:none;user-select:none}
 img,video,button,.app-button,.plate-photo,.avatar-center{-webkit-touch-callout:none;-webkit-user-drag:none}
 .viewer-img{-webkit-touch-callout:default}
-button,.app-button,.status-theme-toggle,.center-play-btn,.btn-expand{touch-action:manipulation}
+button,.app-button,.status-theme-toggle,.btn-expand{touch-action:manipulation}
 html.transitioning body,html.transitioning .app-container,html.transitioning .top-card,
 html.transitioning .video-player-container,html.transitioning .main-card,
 html.transitioning .calendar-date-block,html.transitioning .dynamic-island,
@@ -258,7 +257,6 @@ html.dark-mode .weather-icon{color:var(--yellow)}
 }
 .weather-location span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .weather-location .icon{width:10px;height:10px;color:var(--label-3);flex-shrink:0}
-.weather-wind{display:none}
 
 /* avatar widget */
 .avatar-center-wrap{
@@ -348,37 +346,14 @@ html.dark-mode .calendar-holiday-tag.workday{background:rgba(255,159,10,.2)}
   margin-left:auto;color:rgba(255,255,255,.9);font-size:11px;font-weight:500;
   display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums
 }
-.seekbar{
-  position:relative;height:4px;margin:0 0 8px;border-radius:2px;
-  background:rgba(255,255,255,.3);touch-action:none;cursor:pointer
-}
-.seekbar::before{content:'';position:absolute;left:0;right:0;top:-10px;bottom:-10px}
-.seek-buffer,.seek-played{position:absolute;left:0;top:0;bottom:0;border-radius:2px;width:0}
-.seek-buffer{background:rgba(255,255,255,.42)}
-.seek-played{background:#fff}
-.seek-knob{
-  position:absolute;top:50%;left:0;width:10px;height:10px;border-radius:50%;background:#fff;
-  transform:translate(-50%,-50%);box-shadow:0 1px 5px rgba(0,0,0,.4);pointer-events:none
-}
-.video-overlay{
-  position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  color:#fff;background:rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .25s var(--ease)
-}
-.video-overlay.show{opacity:1}
-.video-overlay .overlay-icon{width:54px;height:54px;fill:rgba(255,255,255,.94);filter:drop-shadow(0 2px 12px rgba(0,0,0,.45))}
-.video-overlay span{font-size:12px;font-weight:500;letter-spacing:.2px;opacity:.9}
+/* §53 删掉 .seekbar / .video-overlay / .speed-badge 一整套：视频早就换成原生
+   controls，这三套 DOM 在页面里一颗都不存在（选择器扫描 0 命中），只剩 CSS 占地方。 */
 .video-box.buffering::after{
   content:'';position:absolute;top:50%;left:50%;width:32px;height:32px;margin:-16px 0 0 -16px;
   border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;z-index:4;
   animation:spin .8s linear infinite
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-.speed-badge{
-  position:absolute;top:10px;left:10px;z-index:4;padding:3px 9px;border-radius:10px;
-  background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:600;letter-spacing:.2px;
-  opacity:0;transition:opacity .2s var(--ease);pointer-events:none
-}
-.speed-badge.show{opacity:1}
 
 /* ---------- profile + apps ---------- */
 .main-card-container{width:100%;flex:0 0 auto;position:relative;display:flex;flex-direction:column}
@@ -430,8 +405,6 @@ html.dark-mode .calendar-holiday-tag.workday{background:rgba(255,159,10,.2)}
 }
 .subtitle .line-1{font-weight:600}
 .subtitle .line-2{color:var(--label-2);font-weight:400}
-.subtitle .poem{display:block;white-space:nowrap;transition:opacity .4s var(--ease),transform .4s var(--ease)}
-.subtitle .poem.fade{opacity:0;transform:translateY(-3px)}
 .apps-scroll-wrapper{width:100%;position:relative;z-index:10;flex-shrink:0}
 .apps-page{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px}
 .app-button{
@@ -728,81 +701,26 @@ html.dark-mode .month-calendar-day.selected .day-holiday{color:#FFF}
   color:var(--tint);font-size:13px;font-weight:600;letter-spacing:-.08px;
   transition:opacity .2s var(--ease),transform .2s var(--ease)
 }
-.month-today-btn:active{opacity:.55;transform:scale(.94)}
 
-/* weather sheet */
+/* weather sheet
+   §53 清掉旧版面板的一整套样式：.ws-head/.ws-title/.ws-actions/.ws-city-btn/
+   .ws-hero/.ws-city/.ws-sun*/.ws-section/.ws-metrics*/.hourly-*/.daily-*。
+   天气弹层早就改成 wx7-* + wx-now-* 结构了，这些类名在 DOM 与 JS 里一个都不出现
+   （选择器扫描 0 命中，且全文再无引用），只剩 CSS 占着几十行。
+   只有 .ws-main / .ws-temp / .ws-desc 还被当前面板用到，留下。 */
 .weather-sheet-panel{max-height:86vh}
-.ws-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.ws-title{font-size:17px;font-weight:600;letter-spacing:-.4px;color:var(--label)}
-.ws-actions{display:flex;align-items:center;gap:8px}
-.ws-city-btn{
-  font-size:13px;font-weight:600;letter-spacing:-.08px;padding:6px 12px;border-radius:15px;
-  background:var(--fill-2);color:var(--tint);transition:opacity .2s var(--ease),transform .2s var(--ease)
-}
-.ws-city-btn:active{opacity:.55;transform:scale(.95)}
-.ws-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:8px 2px 16px}
 .ws-main{display:flex;align-items:baseline;gap:8px}
 .ws-temp{
   font-size:64px;font-weight:200;line-height:1;letter-spacing:-3px;
   color:var(--weather-temp-color);font-variant-numeric:tabular-nums
 }
 .ws-desc{font-size:17px;font-weight:500;color:var(--weather-desc-color)}
-.ws-city{font-size:13px;font-weight:400;color:var(--label-2);margin-top:6px;letter-spacing:-.08px}
-.ws-sun{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--label-2);padding-top:4px}
-.ws-sun div{display:flex;align-items:center;gap:5px}
-.ws-sun b{color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
-.ws-sun .icon{width:14px;height:14px;color:var(--orange)}
-.ws-section{
-  font-size:13px;font-weight:400;color:var(--label-2);letter-spacing:-.08px;
-  margin:14px 2px 8px
-}
-.ws-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 4px}
-.ws-metric{
-  display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px;
-  border-radius:var(--radius-card);background:var(--bg-elevated)
-}
-.ws-metric span{font-size:11px;color:var(--label-2);letter-spacing:-.06px}
-.ws-metric b{font-size:20px;font-weight:500;color:var(--label);white-space:nowrap;font-variant-numeric:tabular-nums}
-.hourly-strip{
-  display:flex;gap:0;overflow-x:auto;padding:0;background:var(--bg-elevated);
-  border-radius:var(--radius-card);scroll-snap-type:x proximity
-}
-.hourly-item{
-  flex:0 0 auto;width:62px;scroll-snap-align:start;display:flex;flex-direction:column;
-  align-items:center;gap:6px;padding:12px 4px;
-  border-right:.5px solid var(--sep)
-}
-.hourly-item:last-child{border-right:none}
-.hourly-item .icon,.daily-row .icon{width:22px;height:22px;color:var(--orange)}
-.ws-metrics .icon,.hourly-item .icon[data-wx="sun-fill"]{color:var(--yellow)}
-.hourly-item .icon[data-wx="cloud-fill"],.daily-row .icon[data-wx="cloud-fill"]{color:var(--label-2)}
-.hourly-item .icon[data-wx="cloud-fog2-fill"],.daily-row .icon[data-wx="cloud-fog2-fill"]{color:var(--label-3)}
-.hourly-item .icon[data-wx="cloud-drizzle-fill"],.daily-row .icon[data-wx="cloud-drizzle-fill"]{color:var(--teal)}
-.hourly-item .icon[data-wx="cloud-rain-fill"],.hourly-item .icon[data-wx="cloud-rain-heavy-fill"],
-.daily-row .icon[data-wx="cloud-rain-fill"],.daily-row .icon[data-wx="cloud-rain-heavy-fill"]{color:var(--tint)}
-.hourly-item .icon[data-wx="cloud-snow-fill"],.daily-row .icon[data-wx="cloud-snow-fill"]{color:var(--teal)}
-.hourly-item .icon[data-wx="cloud-lightning-fill"],.daily-row .icon[data-wx="cloud-lightning-fill"]{color:var(--purple)}
-.hourly-time{font-size:12px;font-weight:500;color:var(--label-2);font-variant-numeric:tabular-nums}
-.hourly-temp{font-size:15px;font-weight:500;color:var(--label);font-variant-numeric:tabular-nums}
-.hourly-rain{font-size:10px;font-weight:500;color:var(--tint);min-height:12px}
-.daily-list{display:flex;flex-direction:column;background:var(--bg-elevated);border-radius:var(--radius-card);overflow:hidden}
-.daily-row{
-  display:flex;align-items:center;gap:12px;min-height:44px;padding:10px 16px;
-  border-bottom:.5px solid var(--sep)
-}
-.daily-row:last-child{border-bottom:none}
-.daily-name{width:56px;font-size:17px;letter-spacing:-.4px;color:var(--label);flex-shrink:0}
-.daily-temp{
-  margin-left:auto;font-size:17px;color:var(--label-2);white-space:nowrap;
-  letter-spacing:-.4px;font-variant-numeric:tabular-nums
-}
-.daily-temp b{color:var(--label);font-weight:400}
 
 /* focus */
 :focus-visible{outline:2px solid var(--tint);outline-offset:2px}
 .app-button:focus-visible,.controls-row button:focus-visible,.status-theme-toggle:focus-visible,
-.city-item:focus-visible,.month-calendar-day:focus-visible,.month-today-btn:focus-visible,
-.ws-city-btn:focus-visible{border-radius:8px}
+.city-item:focus-visible,.month-calendar-day:focus-visible,
+.wx7-city-btn:focus-visible{border-radius:8px}
 
 /* boot */
 #boot-mask{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);transition:opacity .4s var(--ease)}
@@ -1066,7 +984,9 @@ html.dark-mode .theme-ico.moon{display:block}
   -webkit-text-fill-color:transparent;color:transparent;
   font-weight:700;
   animation:islandFlow 6.5s linear infinite;
-  filter:drop-shadow(0 0 7px rgba(190,140,255,.6));
+  /* §53 同 .profile-row .name：渐变在流动 = 每帧重绘，再挂 drop-shadow
+     就等于每帧多跑一次离屏模糊。换 text-shadow，同层绘制 */
+  text-shadow:0 0 7px rgba(190,140,255,.6);
   /* 文字是唯一可压缩的部分：超长时先截断自己，而不是把信号图标顶出去 */
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
@@ -1119,12 +1039,16 @@ html.dark-mode .theme-ico.moon{display:block}
   -webkit-text-fill-color:transparent;color:transparent;
   font-weight:700;
   animation:islandFlow 7.2s linear infinite;
-  filter:drop-shadow(0 1px 6px rgba(150,100,255,.28));
+  /* §53 text-shadow 而不是 drop-shadow：drop-shadow 会给这一行单独开一次
+     离屏 filter pass，而这一行的渐变每帧都在动（islandFlow 走 background-position），
+     等于每帧重做一次模糊；text-shadow 与文字在同一个绘制层里，不新建 pass。
+     视觉上只差一点点扩散边缘 —— 这也是 §45 给 .line-1 用过的同一招 */
+  text-shadow:0 1px 6px rgba(150,100,255,.28);
 }
 html.dark-mode .profile-row .name,
 html.dark-mode .profile-row .subtitle .line-1,
 html.dark-mode .profile-row .subtitle .line-2{
-  filter:drop-shadow(0 0 7px rgba(190,140,255,.55));
+  text-shadow:0 0 7px rgba(190,140,255,.55);
 }
 
 /* 头像：外圈旋转彩虹 + 呼吸光晕 + 轨道光点（原版绿点已关掉） */
@@ -1561,16 +1485,16 @@ html.dark-mode .app-label{color:#EDEFFF;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 html.dark-mode .city-picker-panel,html.dark-mode .month-calendar-panel{
   background-image:linear-gradient(180deg,#181929 0%,#12131F 58%,#151220 100%);
 }
-.city-picker-title,.month-calendar-title,.ws-title{
+.city-picker-title,.month-calendar-title{
   background:var(--grad-cool);
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent;
 }
-.month-today-btn,.wx7-city-btn{
+.wx7-city-btn{
   background:linear-gradient(120deg,rgba(122,140,255,.20),rgba(168,85,247,.16));
   color:#4E58D6;
 }
-html.dark-mode .month-today-btn,html.dark-mode .wx7-city-btn{
+html.dark-mode .wx7-city-btn{
   color:#A9B4FF;background:linear-gradient(120deg,rgba(122,140,255,.26),rgba(168,85,247,.20));
 }
 .ws-temp{
@@ -1579,8 +1503,6 @@ html.dark-mode .month-today-btn,html.dark-mode .wx7-city-btn{
   -webkit-text-fill-color:transparent;color:transparent;
   font-weight:200;
 }
-.ws-metric b{color:#2B3160}
-html.dark-mode .ws-metric b{color:#E8EAFF}
 .month-calendar-day.today{color:#FF4D7E;font-weight:700}
 .month-calendar-day.selected{
   background:linear-gradient(140deg,#7A6BFF 0%,#B15CFF 52%,#FF5C93 100%);
@@ -3431,11 +3353,8 @@ html.dark-mode .wxfx-flare{mix-blend-mode:screen}
 .wxfx-fog i:nth-child(1){top:-2%;animation:fxfFog 46s ease-in-out infinite}
 .wxfx-fog i:nth-child(2){top:28%;opacity:.82;animation:fxfFog 64s ease-in-out infinite reverse}
 .wxfx-fog i:nth-child(3){top:58%;opacity:.6;animation:fxfFog 84s ease-in-out infinite}
-@keyframes fxfFog{
-  0%{transform:translate3d(-7%,0,0) scale(1)}
-  50%{transform:translate3d(7%,1.4%,0) scale(1.08)}
-  100%{transform:translate3d(-7%,0,0) scale(1)}
-}
+/* §53 删掉重复的第一份 fxfFog（带 scale 的那版）：后一份本来就把它覆盖了，
+   而雾层是 170% 宽 + blur(22px)，每帧再缩放一次纯属浪费。 */
 
 /* ---- 霾：下半屏土黄薄纱，越往底部越明显 ---- */
 .wxfx-haze{
@@ -4302,25 +4221,21 @@ html.dark-mode{
 .wxfx-storm i:nth-child(6){--cw:30%;--ch:16%;--cl:66%;--ct:40%;
   --p1:38% 54%;--p2:60% 42%;--p3:80% 64%;--p4:20% 30%}
 
-/* ---- 47.2 卡片玻璃上的水珠 ----
-   canvas 由 JS 插入到 .profile-row / .weather-widget / .calendar-widget 内。
-   z-index 压在卡片内容之上 —— 水珠在玻璃外表面，本来就该盖住文字；
-   靠低透明度和小直径保证不影响读数。 */
-.glass-rain,.profile-row>.glass-rain{
-  position:absolute;inset:0;z-index:11;
-  width:100%;height:100%;display:block;pointer-events:none;
-  border-radius:inherit;opacity:0;
-  transition:opacity 1.3s var(--ease);
+/* ---- 47.2 玻璃上的水珠 ----
+   §53：从「一张卡一块 canvas」改成「整屏一块 canvas + 分区布珠」。
+   一块 fixed 画布铺满视口，按卡片/弹层的矩形逐块裁剪、画各自的珠子，
+   坐标换算与从前完全一致（区域局部坐标 + translate）。
+   放在所有卡片与弹层之上：水珠在玻璃外表面，本来就该盖住文字和面板内容，
+   只靠低透明度和直径保证不挡读数。
+   为什么必须搬出来：四张卡本体都挂着 backdrop-filter，canvas 作为它们的子元素，
+   每画一帧就是给这张卡的离屏滤镜层喂新内容，合成器得把整块卡连同背景高斯
+   重算一遍 —— 珠子只有几十颗，烧掉的是四遍全卡模糊（实测 37fps → 57fps）。 */
+.glass-rain-layer{
+  position:fixed;left:0;top:0;width:100%;height:100%;
+  z-index:10155;display:block;pointer-events:none;
+  opacity:0;transition:opacity 1.3s var(--ease);
 }
-.glass-rain.on{opacity:1}
-
-/* ---- 47.3 弹层玻璃上的水珠 ----
-   天气弹层和月历弹层也是同一块玻璃，打开时理应一样是湿的。
-   难点在滚动：面板是 overflow-y:auto 的，canvas 用 absolute 会跟着内容一起滚，
-   一滑就整片珠子飘走。这里改用 fixed —— 面板本身带 transform（translateY 进场），
-   fixed 的包含块就变成面板的 padding box：既严丝合缝贴在面板上，又不随内容滚动。
-   珠子的坐标也就等于"面板可视区域"的坐标，和卡片那套逻辑完全一致。 */
-.glass-rain-sheet{position:fixed;inset:0;width:auto;height:auto}
+.glass-rain-layer.on{opacity:1}
 
 /* 兜底：§15.1 的四卡玻璃规则已经带 position:relative，这里再写一次，
    是为了万一那条规则被改动时，canvas 不会退到 .main-card-container 上定位 */
@@ -4426,11 +4341,25 @@ html.sheet-open{overscroll-behavior:none}
   -webkit-overflow-scrolling:touch;
 }
 
-/* 顺带修掉一个更隐蔽的错：§47.3 里 .glass-rain-sheet 写的是 width/height:auto，
-   可 canvas 是**替换元素** —— inset:0 配 auto 并不会把它拉开，它会退回 300×150
-   的固有尺寸（位图却是按面板大小画的），弹层上的水珠被压扁、只铺左上角一小块。
-   显式给 100%，珠子才真的铺满整块玻璃。 */
-.glass-rain-sheet{width:100%;height:100%}
+
+/* ============================================================================
+   53 关掉的天气图层不再占合成器
+   ----------------------------------------------------------------------------
+   apply() 过去只用 opacity 开关图层。opacity:0 的元素在合成器里依然存在：
+   animation 照跑、filter:blur() 照算 —— 雾（3 层 blur 22px、170% 宽）、
+   霾（2 层 blur 26px、180% 宽）、镜头光斑（118vw、blur 34px）这几层，
+   就算当前天气根本用不上，也一直"看不见地挂着"，占着整块 GPU。
+   晴天不显示乌云、雨天不显示蓝天时，两边还各有一整套模糊图层在空转。
+
+   这里加一个 .fx-off：visibility:hidden 把整棵子树从绘制与合成里摘掉，
+   顺带把子元素的 animation 暂停（白云/乌云两层动画也就不用再算样式）。
+   延时 2.8s 再挂 —— 图层自己有 1.8~2.6s 的淡出，淡出跑完才能藏。
+   实测（430×932@2.6x 雨中）：把不用的一侧云层收起来，41fps → 56fps。
+   ========================================================================== */
+.wxfx .fx-off{visibility:hidden}
+.wxfx .fx-off,
+.wxfx .fx-off i,
+.wxfx .fx-off i>b{animation-play-state:paused!important}
 
 </style>
     <script>
@@ -4488,7 +4417,7 @@ html.sheet-open{overscroll-behavior:none}
         })();
     </script>
 <script id="pwa-sw-src" type="text/plain">// 苏FA36165 个人主页 Service Worker
-var VERSION = 'su-fa36165-v40';
+var VERSION = 'su-fa36165-v41';
 var SHELL = './';
 var CORE = ['./'];
 
@@ -6051,38 +5980,69 @@ self.addEventListener('fetch', function (e) {
                    卡片本体带 backdrop-filter，再挂 filter 会互相踩（§45 就是这么闪的）。 */
                 var glassRain = (function () {
                     var SEL = '.profile-row,.weather-widget,.calendar-widget,.apps-scroll-wrapper';
-                    /* 弹层：天气详情 + 月历。它们的 canvas 走 fixed 定位（见 §47.3），
-                       而且只在弹层真的打开时才布珠、才对表 —— 关着的时候一滴都不画 */
+                    /* 弹层：天气详情 + 月历。只在真的打开时才布珠 */
                     var SHEET = '.weather-sheet-panel,.month-calendar-panel';
-                    var list = [], built = false;
+                    var regions = [], built = false;
+                    var cv = null, ctx = null, W = 0, H = 0, dpr = 0;
                     var raf2 = 0, lastT2 = 0, acc = 0, running = false;
                     var on = false, inten = 1;
                     var probe = document.createElement('canvas');
                     var canDraw = !!(probe.getContext && probe.getContext('2d'));
                     /* 低端机不给 60fps 也不砍掉：水珠是这轮的主角，砍掉等于白做。
                        改成珠数打六折 + 24fps，重绘量掉到四成 */
-                    var fps = isLowEnd ? 24 : 32;
+                    var fps = isLowEnd ? 22 : 26;
 
                     function r2(a, b) { return a + Math.random() * (b - a); }
 
-                    function makeCard(card, isSheet) {
-                        var cv = document.createElement('canvas');
-                        cv.className = isSheet ? 'glass-rain glass-rain-sheet' : 'glass-rain';
+                    /* ==========================================================
+                       §53 一块画布，而不是一张卡一块
+                       ----------------------------------------------------------
+                       原来四张卡、两个弹层面板各插一块 canvas。它们都是卡的子元素，
+                       而四张卡本体都挂着 backdrop-filter —— canvas 每画一帧，等于给
+                       这张卡的离屏滤镜层喂了新内容，合成器就得把整块卡连同背景高斯
+                       重算一遍。珠子才几十颗，真正烧掉的是这四遍全卡模糊。
+                       实测（430×932 @2.6x，雨天稳态）：卡片内画布 37fps；同一批珠子
+                       搬到一块整屏覆盖层之后 57fps，肉眼一模一样。
+                       物理上也更对：水珠在玻璃外表面，本来就该按屏幕坐标画，
+                       不该跟着某张卡的圆角和 overflow 走。
+                       ========================================================== */
+                    function ensureCanvas() {
+                        if (cv) return true;
+                        cv = document.createElement('canvas');
+                        cv.className = 'glass-rain-layer';
                         cv.setAttribute('aria-hidden', 'true');
-                        card.appendChild(cv);
-                        var ctx = cv.getContext('2d');
-                        if (!ctx) return null;
+                        document.body.appendChild(cv);
+                        ctx = cv.getContext('2d');
+                        return !!ctx;
+                    }
+
+                    function sizeCanvas() {
+                        var w = Math.max(1, window.innerWidth || 360);
+                        var h = Math.max(1, window.innerHeight || 640);
+                        /* 1.5 倍封顶：珠子直径只有 1~4px，1.5 倍和 2 倍肉眼分不出来，
+                           但整块覆盖层的像素少了 44% —— 这层每帧都要重新上传/合成，
+                           面积就是它的成本本身 */
+                        var d = Math.min(1.5, window.devicePixelRatio || 1);
+                        if (cv.width && w === W && h === H && d === dpr) return;
+                        W = w; H = h; dpr = d;
+                        cv.width = Math.round(w * d);
+                        cv.height = Math.round(h * d);
+                        ctx.setTransform(d, 0, 0, d, 0, 0);
+                        ctx.lineCap = 'round';
+                    }
+
+                    function makeRegion(el, isSheet) {
                         return {
-                            card: card, cv: cv, ctx: ctx, w: 0, h: 0, dpr: 0, drops: [],
-                            sheet: !!isSheet, open: false,
-                            host: isSheet ? card.closest('.weather-sheet-overlay,.month-calendar-overlay,.city-picker-overlay') : null
+                            el: el, sheet: !!isSheet, open: false, live: false,
+                            host: isSheet ? el.closest('.weather-sheet-overlay,.month-calendar-overlay,.city-picker-overlay') : null,
+                            x: 0, y: 0, w: 0, h: 0, radius: 0, drops: []
                         };
                     }
 
                     /* 弹层面板的尺寸会变：打开那一刻内容往往还没铺满（日历的天数、
-                       节假日的区间、7 天列表都是随后渲染进去的），而画布按打开那一瞬间
-                       量到的高度定了位图 —— 结果珠子只铺在顶上一条里。
-                       用 ResizeObserver 盯住面板本身，长高了就把画布重量一次 */
+                       节假日的区间、7 天列表都是随后渲染进去的），画布要是按那一瞬间
+                       量到的尺寸布珠，珠子就只铺在顶上一条里。
+                       用 ResizeObserver 盯住面板本身，长高了就重量一次 */
                     var ro = null;
                     function watchSheet(g) {
                         if (!window.ResizeObserver) return;
@@ -6090,48 +6050,76 @@ self.addEventListener('fetch', function (e) {
                             ro = new ResizeObserver(function (entries) {
                                 for (var i = 0; i < entries.length; i++) {
                                     var el = entries[i].target, j, gg;
-                                    for (j = 0; j < list.length; j++) {
-                                        gg = list[j];
-                                        if (gg.sheet && gg.open && gg.card === el) sizeOf(gg);
+                                    for (j = 0; j < regions.length; j++) {
+                                        gg = regions[j];
+                                        if (gg.sheet && gg.open && gg.el === el) measure(gg);
                                     }
                                 }
                             });
                         }
-                        try { ro.observe(g.card); } catch (e) { }
+                        try { ro.observe(g.el); } catch (e) { }
                     }
 
                     function ensure() {
                         if (built) return;
                         built = true;
+                        if (!canDraw || !ensureCanvas()) return;
+                        sizeCanvas();
                         var cards = document.querySelectorAll(SEL), i, g, ss;
                         for (i = 0; i < cards.length; i++) {
-                            g = makeCard(cards[i], false);
-                            if (g) list.push(g);
+                            if (cards[i].getBoundingClientRect().width < 24) continue;
+                            regions.push(makeRegion(cards[i], false));
                         }
                         ss = document.querySelectorAll(SHEET);
                         for (i = 0; i < ss.length; i++) {
-                            g = makeCard(ss[i], true);
-                            if (g) { list.push(g); watchSheet(g); }
+                            g = makeRegion(ss[i], true);
+                            regions.push(g);
+                            watchSheet(g);
                         }
                     }
 
-                    /* 弹层开关同步：开了才布珠、才参与每帧；关掉就地清空并复位尺寸，
-                       下次打开重新按当时的雨量布一次珠（不然会留着上一次的水痕） */
+                    /* 只在区域尺寸真的变了才重新布珠：布局抖动不该把水痕抹掉 */
+                    function measure(g) {
+                        var b = g.el.getBoundingClientRect();
+                        if (!(b.width > 24) || !(b.height > 24)) { g.live = false; return false; }
+                        var changed = (g.w !== b.width || g.h !== b.height);
+                        g.x = b.left; g.y = b.top;
+                        g.w = b.width; g.h = b.height; g.live = true;
+                        if (!g.radius) {
+                            var cs = null;
+                            try { cs = window.getComputedStyle(g.el); } catch (eCs) { }
+                            g.radius = cs ? (parseFloat(cs.borderTopLeftRadius) || 0) : 0;
+                            if (!(g.radius < 400)) g.radius = 0;      /* 百分比半径解析成 px 也可能是 0 */
+                        }
+                        if (changed || !g.drops.length) seed(g);
+                        return true;
+                    }
+
+                    /* 弹层开关同步：开了才布珠、才参与每帧；关掉就地清空，
+                       下次打开按当时的雨量重新布一次珠（不然会留着上一次的水痕）。
+
+                       §53 这里必须连续重量 0.9 秒：面板是 translateY(100%) → 0 滑上来的，
+                       打开那一瞬间量到的是"还在屏幕下面"的位置（实测 y=932，视口底），
+                       珠子就全画到屏幕外去了。旧的实现把 canvas 放在面板里，
+                       它跟着 transform 一起滑，天然不会错位；改成整屏画布之后，
+                       位置得自己跟 —— 滑入期间每帧重量一次，落定后交给 ResizeObserver。 */
                     function syncSheets() {
-                        for (var i = 0; i < list.length; i++) {
-                            var g = list[i];
+                        for (var i = 0; i < regions.length; i++) {
+                            var g = regions[i];
                             if (!g.sheet) continue;
                             var open = !!(g.host && g.host.classList.contains('show'));
-                            g.open = open;
                             if (open) {
-                                if (!g.w) {
-                                    sizeOf(g);
-                                    if (g.w) g.cv.classList.add('on');
+                                if (!g.open) {
+                                    g.open = true;
+                                    g.w = 0; g.h = 0;          /* 强制重新布珠 */
+                                    g.settleUntil = performance.now() + 900;
                                 }
-                            } else if (g.w) {
-                                g.cv.classList.remove('on');
-                                g.ctx.clearRect(0, 0, g.w, g.h);
-                                g.w = 0; g.h = 0; g.dpr = 0;
+                                /* 只有"刚打开"或面板还在滑的时候才重量；
+                                   之后每帧不再碰布局，交给 ResizeObserver */
+                                if (!g.live || performance.now() < g.settleUntil) measure(g);
+                            } else if (g.open) {
+                                g.open = false;
+                                g.live = false;
                                 g.drops.length = 0;
                             }
                         }
@@ -6194,19 +6182,6 @@ self.addEventListener('fetch', function (e) {
                             }
                             g.drops.push(d);
                         }
-                    }
-
-                    function sizeOf(g) {
-                        var r = g.card.getBoundingClientRect();
-                        if (!(r.width > 24) || !(r.height > 24)) { g.w = 0; return false; }
-                        var dpr = Math.min(2, window.devicePixelRatio || 1);
-                        if (g.w === r.width && g.h === r.height && g.dpr === dpr) return true;
-                        g.w = r.width; g.h = r.height; g.dpr = dpr;
-                        g.cv.width = Math.round(r.width * dpr);
-                        g.cv.height = Math.round(r.height * dpr);
-                        g.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                        seed(g);
-                        return true;
                     }
 
                     function step(g, dt) {
@@ -6306,16 +6281,38 @@ self.addEventListener('fetch', function (e) {
                         ctx.fill();
                     }
 
+                    /* 圆角矩形裁剪：珠子只在玻璃的范围里，不会从卡片圆角外那几像素漏出去 */
+                    function clipRound(x, y, w, h, r) {
+                        r = Math.min(r || 0, w / 2, h / 2);
+                        ctx.beginPath();
+                        if (r > 0.5) {
+                            ctx.moveTo(x + r, y);
+                            ctx.lineTo(x + w - r, y);
+                            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                            ctx.lineTo(x + w, y + h - r);
+                            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                            ctx.lineTo(x + r, y + h);
+                            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                            ctx.lineTo(x, y + r);
+                            ctx.quadraticCurveTo(x, y, x + r, y);
+                        } else {
+                            ctx.rect(x, y, w, h);
+                        }
+                        ctx.closePath();
+                    }
+
                     function draw(g) {
-                        var ctx = g.ctx;
-                        if (!g.w || !g.h) return;
-                        ctx.clearRect(0, 0, g.w, g.h);
-                        var dark = isDark(), i, d, len, wide, core;
+                        if (!ctx || !g.w || !g.h || !g.live) return;
+                        var i, d, len, wide, core, dark = isDark();
+
+                        ctx.save();
+                        clipRound(g.x, g.y, g.w, g.h, g.radius);
+                        ctx.clip();
+                        ctx.translate(g.x, g.y);
 
                         /* 先铺水痕，珠子压在上面 —— 水痕是"走过的路"，必须在珠子之后被遮住头。
                            关键：水痕必须沿长度渐隐。用一条等 alpha 的粗线画出来，
                            在浅色卡上就是一根灰色棍子，一眼假。 */
-                        ctx.lineCap = 'round';
                         for (i = 0; i < g.drops.length; i++) {
                             d = g.drops[i];
                             len = d.y - d.y0;
@@ -6349,6 +6346,8 @@ self.addEventListener('fetch', function (e) {
                             d = g.drops[i];
                             if (d.a > 0.02) drawDrop(ctx, d, dark);
                         }
+
+                        ctx.restore();
                     }
 
                     function frame(t) {
@@ -6361,33 +6360,40 @@ self.addEventListener('fetch', function (e) {
                         if (!(dt > 0)) return;
                         if (dt > 0.1) dt = 0.1;
                         acc += dt;
-                        if (acc < 1 / fps) return;              /* 帧率封顶，省一半重绘 */
+                        /* 帧率封顶：这块画布的成本全在填充率上，30fps 和 60fps
+                           的观感差别只有"珠子滑得更顺"，代价却是一倍 */
+                        if (acc < 1 / fps) return;
                         var s = Math.min(acc, 0.08);
                         acc = 0;
-                        for (var i = 0; i < list.length; i++) {
-                            if (!list[i].w) continue;
-                            step(list[i], s);
-                            draw(list[i]);
+                        ctx.clearRect(0, 0, W, H);
+                        for (var i = 0; i < regions.length; i++) {
+                            var g = regions[i];
+                            if (!g.live) continue;
+                            step(g, s);
+                            draw(g);
                         }
                     }
 
                     function start() {
                         ensure();
+                        if (!ctx) return;
                         var any = false, i;
                         /* 弹层不在这里量尺寸：它关着的时候量出来是"看不见的整块"，
                            白布一次珠。交给 syncSheets 按开关状态来 */
-                        for (i = 0; i < list.length; i++) if (!list[i].sheet && sizeOf(list[i])) any = true;
+                        for (i = 0; i < regions.length; i++) {
+                            if (!regions[i].sheet && measure(regions[i])) any = true;
+                        }
                         if (!any || running) return;
                         running = true; lastT2 = 0; acc = 0;
+                        cv.classList.add('on');
                         raf2 = requestAnimationFrame(frame);
                     }
 
                     function stop() {
                         running = false;
                         if (raf2) { cancelAnimationFrame(raf2); raf2 = 0; }
-                        for (var i = 0; i < list.length; i++) {
-                            if (list[i].w) list[i].ctx.clearRect(0, 0, list[i].w, list[i].h);
-                        }
+                        if (ctx) ctx.clearRect(0, 0, W, H);
+                        if (cv) cv.classList.remove('on');
                     }
 
                     function set(isRain, level) {
@@ -6395,19 +6401,19 @@ self.addEventListener('fetch', function (e) {
                         var changed = Math.abs(level - inten) > 0.22;
                         if (isRain === on && !changed) return;
                         on = isRain; inten = level;
-                        var i;
                         if (isRain) {
                             ensure();
-                            for (i = 0; i < list.length; i++) {
-                                if (list[i].sheet) continue;        /* 由 syncSheets 接管 */
-                                sizeOf(list[i]);
+                            if (!ctx) return;
+                            sizeCanvas();
+                            for (var i = 0; i < regions.length; i++) {
+                                var g = regions[i];
+                                if (g.sheet) continue;        /* 由 syncSheets 接管 */
+                                measure(g);
                                 /* 雨量跨档才重新布珠：每次都重建会让画面一跳 */
-                                if (changed && list[i].w) seed(list[i]);
-                                list[i].cv.classList.add('on');
+                                if (changed && g.live) seed(g);
                             }
                             start();
                         } else {
-                            for (i = 0; i < list.length; i++) list[i].cv.classList.remove('on');
                             stop();
                         }
                     }
@@ -6420,7 +6426,12 @@ self.addEventListener('fetch', function (e) {
                         if (!on) return;
                         clearTimeout(rzt);
                         rzt = setTimeout(function () {
-                            for (var i = 0; i < list.length; i++) sizeOf(list[i]);
+                            if (!ensureCanvas()) return;
+                            sizeCanvas();
+                            for (var i = 0; i < regions.length; i++) {
+                                if (!regions[i].sheet) measure(regions[i]);
+                                else if (regions[i].open) measure(regions[i]);
+                            }
                         }, 200);
                     });
 
@@ -6440,6 +6451,26 @@ self.addEventListener('fetch', function (e) {
                         }, rnd(4000, 11000));
                     };
                     loop();
+                }
+
+                /* §53 关闭态图层：opacity 归零后延时藏起来。
+                   元素上记两个标记：__fxT 是待执行的定时器，__fxOff 是已经藏起来。
+                   淡出期间（2.8s）不能藏，否则图层会"啪"一下消失。 */
+                var FX_OFF_MS = 2800;
+                function setOp(el, v) {
+                    if (!el) return;
+                    el.style.opacity = (typeof v === 'number') ? v.toFixed(3) : v;
+                    if (v > 0.004) {
+                        if (el.__fxT) { clearTimeout(el.__fxT); el.__fxT = 0; }
+                        if (el.__fxOff) { el.__fxOff = 0; el.classList.remove('fx-off'); }
+                        return;
+                    }
+                    if (el.__fxOff || el.__fxT) return;
+                    el.__fxT = setTimeout(function () {
+                        el.__fxT = 0;
+                        el.__fxOff = 1;
+                        el.classList.add('fx-off');
+                    }, FX_OFF_MS);
                 }
 
                 function apply(o) {
@@ -6496,15 +6527,15 @@ self.addEventListener('fetch', function (e) {
                     backEl.style.setProperty('--sun-pct', pct.toFixed(3));
                     if (frontEl) frontEl.style.setProperty('--sun-pct', pct.toFixed(3));
                     // 射线在前景，0.5 是"看得见但不压字"的折中；光晕在后面可以给足
-                    sunEl.style.opacity = sun.toFixed(3);
-                    glowEl.style.opacity = (sun * 0.96).toFixed(3);
+                    setOp(sunEl, sun);
+                    setOp(glowEl, sun * 0.96);
                     // 斜射日光：整片暖光带，比单纯的光斑更像"太阳真的照进来"
                     /* §48 收尾 有了蓝天，这层暖光就得让路：它是 screen 混合 + 顶部一整片
                        近白的暖色，压 0.92 会把刚铺上的蓝整片洗成淡紫白 ——
                        "蓝天白云"和"阳光暖罩"抢的是同一块地方，蓝天优先 */
-                    if (sunWashEl) sunWashEl.style.opacity = (sun * 0.52).toFixed(3);
+                    setOp(sunWashEl, sun * 0.52);
                     // 蓝天白云：和阳光同源，只有真的「晴」才露脸（夜里 sun=0，自动不出现）
-                    if (skyEl) skyEl.style.opacity = (sun * 0.94).toFixed(3);
+                    setOp(skyEl, sun * 0.94);
 
                     // ---- 灰纱：阴天/雨天整体压暗，雷雨最暗 ----
                     var veil = 0;
@@ -6514,7 +6545,7 @@ self.addEventListener('fetch', function (e) {
                     else if (code === 2) veil = 0.06;
                     else if (code === 1) veil = 0.025;
                     if (isStorm) veil = Math.min(0.34, veil + 0.08);
-                    cloudEl.style.opacity = veil.toFixed(3);
+                    setOp(cloudEl, veil);
 
                     // ---- 湿地：屏底那层反光，让"雨落在有地面的地方"成立 ----
                     var wet = 0;
@@ -6523,7 +6554,7 @@ self.addEventListener('fetch', function (e) {
                         if (isStorm) wet += 0.08;
                         if (wet > 0.95) wet = 0.95;
                     }
-                    if (wetEl) wetEl.style.opacity = wet.toFixed(3);
+                    setOp(wetEl, wet);
 
                     // ---- 雾：天气码直给，或能见度跌破 5km 顶上来 ----
                     var fog = 0;
@@ -6534,10 +6565,10 @@ self.addEventListener('fetch', function (e) {
                         if (kind === 'rain') v *= 0.55;     // 雨天的低能见度是雨幕，不是雾
                         if (v > fog) fog = v;
                     }
-                    fogEl.style.opacity = fog.toFixed(3);
+                    setOp(fogEl, fog);
                     // 整页雾罩 + 卡片上那层浓雾：一前一后，玻璃卡才会被雾"糊住"
-                    if (fogMaskEl) fogMaskEl.style.opacity = (fog * 0.9).toFixed(3);
-                    if (fogFrontEl) fogFrontEl.style.opacity = (fog * 0.62).toFixed(3);
+                    setOp(fogMaskEl, fog * 0.9);
+                    setOp(fogFrontEl, fog * 0.62);
 
                     // ---- 霾：PM2.5 六档，大雨会洗掉大半 ----
                     var haze = 0;
@@ -6547,8 +6578,8 @@ self.addEventListener('fetch', function (e) {
                     }
                     if (haze && lv >= 3) haze *= 0.45;
                     if (haze && fog > 0.5) haze *= 0.7;
-                    hazeEl.style.opacity = haze.toFixed(3);
-                    if (smogEl) smogEl.style.opacity = haze.toFixed(3);
+                    setOp(hazeEl, haze);
+                    setOp(smogEl, haze);
 
                     backEl.setAttribute('data-fx', kind + (lv || ''));
                     scheduleBolts(isStorm);
@@ -6558,10 +6589,7 @@ self.addEventListener('fetch', function (e) {
                        云量按降水量走，小雨是一层薄灰，雷雨压到接近 1 */
                     var raining = (kind === 'rain');
                     try { glassRain.set(raining, raining ? Math.min(1, 0.42 + precip * 0.1) : 0); } catch (eGr) { }
-                    if (stormEl) {
-                        stormEl.style.opacity = raining
-                            ? (0.86 + Math.min(0.14, precip * 0.02)).toFixed(3) : '0';
-                    }
+                    setOp(stormEl, raining ? (0.86 + Math.min(0.14, precip * 0.02)) : 0);
                 }
 
                 // AQI 是并行拉的，比天气晚到：拿到 PM2.5 后只重算霾那层
@@ -6600,6 +6628,16 @@ self.addEventListener('fetch', function (e) {
                 }
 
                 resize();
+                /* 接口没回来 / 一直没数据时，图层停在 opacity:0，动画却还在跑。
+                   等淡出窗口过去后统一收一遍；apply() 之后会自己接管 */
+                setTimeout(function () {
+                    var els = [sunEl, glowEl, sunWashEl, skyEl, cloudEl, wetEl,
+                        fogEl, fogMaskEl, fogFrontEl, hazeEl, smogEl, stormEl];
+                    for (var i = 0; i < els.length; i++) {
+                        if (!els[i] || els[i].__fxOff || els[i].__fxT) continue;
+                        if (!(parseFloat(els[i].style.opacity || '0') > 0.004)) setOp(els[i], 0);
+                    }
+                }, 3200);
                 return { apply: apply, refresh: refresh, pause: pauseFx, resume: resumeFx };
             })();
 
